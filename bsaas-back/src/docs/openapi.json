@@ -1,0 +1,187 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Beauty SaaS API",
+    "version": "1.0.0",
+    "description": "API documentation for the Beauty Salon SaaS application."
+  },
+  "servers": [{ "url": "http://localhost:3000" }],
+  "paths": {
+    "/api/portfolio": {
+      "get": {
+        "summary": "Get all portfolio items",
+        "tags": ["Portfolio"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of portfolio items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Portfolio" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a portfolio item",
+        "tags": ["Portfolio"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PortfolioCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Portfolio item created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Portfolio" }
+              }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/portfolio/{id}": {
+      "put": {
+        "summary": "Update a portfolio item",
+        "tags": ["Portfolio"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PortfolioUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Portfolio item updated" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a portfolio item",
+        "tags": ["Portfolio"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "204": { "description": "Portfolio item deleted" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/theme/{tenantId}": {
+      "get": {
+        "summary": "Get tenant theme",
+        "tags": ["Theme"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "tenantId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Theme colors",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Theme" }
+              }
+            }
+          },
+          "404": { "description": "Tenant not found" }
+        }
+      },
+      "put": {
+        "summary": "Update tenant theme",
+        "tags": ["Theme"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "tenantId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ThemeUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Theme updated" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Tenant not found" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Portfolio": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "tenant_id": { "type": "string" },
+          "user_id": { "type": "string" },
+          "image_url": { "type": "string", "format": "uri" },
+          "description": { "type": "string" }
+        }
+      },
+      "PortfolioCreate": {
+        "type": "object",
+        "required": ["tenant_id", "user_id", "image_url", "description"],
+        "properties": {
+          "tenant_id": { "type": "string" },
+          "user_id": { "type": "string" },
+          "image_url": { "type": "string", "format": "uri" },
+          "description": { "type": "string" }
+        }
+      },
+      "PortfolioUpdate": {
+        "type": "object",
+        "properties": {
+          "image_url": { "type": "string", "format": "uri" },
+          "description": { "type": "string" }
+        }
+      },
+      "Theme": {
+        "type": "object",
+        "properties": {
+          "primary_color": { "type": "string" },
+          "secondary_color": { "type": "string" },
+          "accent_color": { "type": "string" }
+        }
+      },
+      "ThemeUpdate": {
+        "type": "object",
+        "required": ["primary_color", "secondary_color", "accent_color"],
+        "properties": {
+          "primary_color": { "type": "string" },
+          "secondary_color": { "type": "string" },
+          "accent_color": { "type": "string" }
+        }
+      }
+    }
+  }
+}

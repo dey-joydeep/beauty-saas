@@ -1,0 +1,11 @@
+{
+  "error.general": "An error occurred.",
+  "error.not_found": "Resource not found.",
+  "error.unauthorized": "You are not authorized to perform this action.",
+  "error.validation": "Validation failed.",
+  "error.user_not_found": "User not found.",
+  "error.tenant_not_found": "Tenant not found.",
+  "error.invalid_credentials": "Invalid credentials.",
+  "success.portfolio_created": "Portfolio item created successfully.",
+  "success.theme_updated": "Theme updated successfully."
+}

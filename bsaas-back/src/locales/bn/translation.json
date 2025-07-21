@@ -1,0 +1,18 @@
+{
+  "error.general": "একটি ত্রুটি ঘটেছে।",
+  "error.not_found": "রিসোর্স পাওয়া যায়নি।",
+  "error.unauthorized": "আপনার এই কাজটি করার অনুমতি নেই।",
+  "error.validation": "যাচাইকরণ ব্যর্থ হয়েছে।",
+  "error.user_not_found": "ব্যবহারকারী পাওয়া যায়নি।",
+  "error.tenant_not_found": "টেন্যান্ট পাওয়া যায়নি।",
+  "error.invalid_credentials": "ভুল শংসাপত্র।",
+  "success.portfolio_created": "পোর্টফোলিও আইটেম সফলভাবে তৈরি হয়েছে।",
+  "success.theme_updated": "থিম সফলভাবে আপডেট হয়েছে।",
+  "validation.tenant_id_required": "টেন্যান্ট আইডি আবশ্যক।",
+  "validation.user_id_required": "ব্যবহারকারীর আইডি আবশ্যক।",
+  "validation.image_url_valid": "ছবির URL বৈধ হতে হবে।",
+  "validation.description_required": "বর্ণনা আবশ্যক।",
+  "validation.primary_color_valid": "প্রাথমিক রঙ একটি বৈধ হেক্স কোড হতে হবে।",
+  "validation.secondary_color_valid": "সেকেন্ডারি রঙ একটি বৈধ হেক্স কোড হতে হবে।",
+  "validation.accent_color_valid": "অ্যাকসেন্ট রঙ একটি বৈধ হেক্স কোড হতে হবে।"
+}

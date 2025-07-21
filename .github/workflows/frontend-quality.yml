@@ -1,0 +1,67 @@
+name: Frontend Quality Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 1'  # Weekly on Monday
+
+env:
+  NODE_VERSION: '18.x'
+  COVERAGE_THRESHOLD: 80
+
+jobs:
+  quality:
+    name: Frontend Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+        
+    - name: Run quality checks
+      run: npm run quality:ci
+      env:
+        CI: true
+
+    - name: Generate quality report
+      run: npm run quality:report
+
+    - name: Upload coverage report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: |
+          coverage/
+          reports/quality/
+        retention-days: 7
+
+    - name: Check coverage threshold
+      if: always()
+      run: |
+        if [ -f "coverage/coverage-summary.json" ]; then
+          COVERAGE=$(grep -oP '(?<="total":{"lines":{"pct":)[0-9.]+' coverage/coverage-summary.json)
+          if (( $(echo "$COVERAGE < ${{ env.COVERAGE_THRESHOLD }}" | bc -l) )); then
+            echo "❌ Coverage ($COVERAGE%) is below threshold (${{ env.COVERAGE_THRESHOLD }}%)"
+            exit 1
+          else
+            echo "✅ Coverage ($COVERAGE%) meets threshold (${{ env.COVERAGE_THRESHOLD }}%)"
+          fi
+        else
+          echo "⚠️ No coverage report found"
+        fi

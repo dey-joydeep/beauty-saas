@@ -1,0 +1,56 @@
+<div class="user-bookings-container">
+  <h2>Your Bookings</h2>
+  <div *ngIf="loading">Loading...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <table *ngIf="!loading && bookings.length > 0" class="responsive-table">
+    <thead>
+      <tr>
+        <th>Salon</th>
+        <th>Salon Name</th>
+        <th>Service</th>
+        <th>Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let booking of bookings">
+        <td>{{ booking.salonId }}</td>
+        <td>
+          <a *ngIf="booking.salonId" [routerLink]="['/salon', booking.salonId]">
+            {{ booking.salonName || booking.salonId }}
+          </a>
+        </td>
+        <td>{{ booking.service }}</td>
+        <td>{{ booking.date | date: 'medium' }}</td>
+        <td>{{ booking.status }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div *ngIf="!loading && bookings.length === 0">No bookings found.</div>
+  <style>
+    .responsive-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .responsive-table th,
+    .responsive-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: left;
+    }
+    .responsive-table th {
+      background: #f8f8f8;
+    }
+    @media (max-width: 600px) {
+      .responsive-table th,
+      .responsive-table td {
+        padding: 6px 4px;
+        font-size: 13px;
+      }
+      .responsive-table th:nth-child(1),
+      .responsive-table td:nth-child(1) {
+        display: none;
+      }
+    }
+  </style>
+</div>

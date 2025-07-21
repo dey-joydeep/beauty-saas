@@ -1,0 +1,50 @@
+@startuml registration_sequence
+
+title User Registration Sequence
+
+actor User
+participant "Frontend" as FE
+participant "API Gateway" as API
+participant "Auth Service" as Auth
+participant "User Service" as UserSvc
+participant "Email Service" as Email
+participant "Event Bus" as Events
+
+== Registration Flow ==
+User -> FE: Fills registration form
+FE -> API: POST /auth/register {userData}
+API -> Auth: registerUser(userData)
+
+Auth -> UserSvc: isEmailTaken(userData.email)
+UserSvc --> Auth: false
+
+Auth -> UserSvc: createUser(userData)
+UserSvc --> Auth: New user
+
+Auth -> Email: sendVerificationEmail(user.email, token)
+Email --> Auth: Email queued
+
+Auth -> Events: UserRegistered(user.id)
+Events --> Auth: Acknowledged
+
+Auth --> API: 201 Created
+API --> FE: 201 {message: 'Verification email sent'}
+FE -> User: Show success message
+
+== Email Verification ==
+User -> Email: Clicks verification link
+Email -> FE: GET /auth/verify-email?token=xyz
+FE -> API: GET /auth/verify-email?token=xyz
+API -> Auth: verifyEmail(token)
+
+Auth -> UserSvc: verifyUserEmail(token)
+UserSvc --> Auth: User verified
+
+Auth -> Events: EmailVerified(user.id)
+Events --> Auth: Acknowledged
+
+Auth --> API: 200 OK
+API --> FE: 200 {message: 'Email verified'}
+FE -> User: Show success message & redirect to login
+
+@enduml

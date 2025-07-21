@@ -1,0 +1,236 @@
+For salon
+	owner can-
+		1. register their salon
+			for registration of new business, owner will contact via contact us form. SaaS owner will discuss with them. An will allow them to register their salon via a portal.
+		2. update their salon
+		3. delete their salon
+		4. register their services
+		5. update their services
+		6. delete their services
+		7. register their products
+		8. update their products
+		9. delete their products
+		10. register their staffs
+		11. update their staffs
+		12. delete their staffs
+		13. Owner can also be a staff
+		14. Staff can be associated with one or more services
+		15. Can check their bookings.
+		16. Can reply to the reviews.
+		17. Highlight new services or products under services or products tab.
+		18. Announce new vacancies under vacancy tab
+		19. Approve new services or products
+		20. Approve staff leaves
+		21. Assign time to each services
+		22. Add new portfolio
+		23. Update portfolio
+		24. Delete portfolio
+
+
+	Staff can-
+		1. Check their bookings
+		2. Check their reviews
+		3. Apply for leaves
+		4. Apply for new services or products to approve
+		5. Set their nickname.
+		6. Change profile picture.
+		7. Change password.
+		8. Change contact number and email (subject to approval).
+
+	Customer can-
+		1. Check their bookings
+		2. Check their reviews
+		3. Reply to reviews
+		4. Book a salon
+		5. When booking services-
+			5.1. Check available services
+			5.2. Book a service
+			5.3. Check available products
+			5.4. Book a product
+			5.5. Check available staffs
+			5.6. Book a staff
+			5.7. Check available times
+			5.8. Book a time
+			5.9. Confirm booking
+			5.10. Rate and review a staff they used the service of
+			5.11. Cancel booking
+			5.12. Reschedule booking
+
+Booking- 
+	1. Available slot should be decided by the service time specified by the owner.
+	2. If multiple services are selected, the available slot should be calculated by sum of the total time.
+	3. Customer can leave additional notes based on their selected services
+	4. The staff will be show to the customer based on the selected services and availablity on the selected date time.
+	5. Customer can choose the staff or leave it to be decided by the owner
+	6. Upon confirming the booking, an email of the details will be sent to both customer and owner. If a staff is selected, the staff will be notified.
+
+
+Business registration portal-
+	1. SaaS owner will mail an unique id to the owner.
+	2. Owner will use this id to register their salon.
+	3. Owner will be able to register their salon via the portal.
+	4. Owner can use manually go to the portal and register their salon with entering the key.
+	5. Salon detail will contain typical information such as name, address, contact number, email, etc.
+
+Login Page-
+	1. Login page will be unified for everyone.
+	2. Owners and staffs will be able to login using their email and password along with an OTP sent to their emails.
+	3. Customers will be able to login using their email and password.
+	4. Type of the user will be decided by the system based on the registration information.
+
+Forgot Password Page-
+	1. User will be able to reset their password using their email.
+	2. Send otp or password reset link to the user's email.
+    3. Show message if the email is not registered.
+    4. Once reset successful, redirect to login page.
+
+Customer Profile/Settings page-
+	1. User will be able to update their profile information.
+	2. User will be able to update their password.
+	3. User will be able to update their contact number.
+	4. User will be able to update their email.
+	5. User will be able to update their profile picture.
+
+Dashboard-
+    SaaS Owner-
+        1. Can check their subscriptions (Charts).
+        2. Can check their revenue (Charts).
+        3. Can check their customers (Active and passive).
+        4. Can see upcoming renewals of any salon (up to 5)
+
+    Business Owner-
+        1. Can check their products sales (Charts).
+        2. Can check their revenue (Charts).
+        3. Can check service used (charts).
+        4. Can see upcoming renewals date of their salon
+        5. See top 5 customers
+        6. See top and bottom 5 reviews.
+
+Services and Products-
+	1. Initally their will be some basic services and products registered in the master.
+	2. When salon try to add theirs, registered items will be shown in suggestion. If new item is added, master wil
+    4. Each service/product should have:
+        - Name
+        - Description
+        - Duration (for services)
+        - Price
+        - Category
+        - Image
+        - Status (Active/Inactive)
+
+Reviews and Ratings-
+    1. Customers can rate and review:
+        - Services (1-5 stars)
+        - Products (1-5 stars)
+        - Staff (1-5 stars)
+    2. Business owners can respond to reviews
+    3. Reviews should include:
+        - Rating
+        - Comment
+        - Date
+        - Service/Product/Staff being reviewed
+        - Customer name (optional)
+
+Notifications-
+    1. Email notifications for:
+        - New bookings
+        - Booking confirmations
+        - Booking cancellations
+        - Upcoming appointments (24h reminder)
+        - New reviews
+        - Staff leave requests (for owners)
+    2. In-app notifications for:
+        - New messages
+        - Booking updates
+        - System announcements
+        - Staff assignments
+
+Reports-
+    SaaS Owner Reports:
+        1. Revenue reports (daily, weekly, monthly, yearly)
+        2. Active/Inactive salons
+        3. Subscription status
+        4. Customer acquisition
+    
+    Business Owner Reports:
+        1. Sales reports
+        2. Staff performance
+        3. Customer retention
+        4. Service popularity
+        5. Revenue by service/product
+
+Admin Panel-
+    1. User management
+    2. Salon management
+    3. Subscription management
+    4. Content management
+    5. System settings
+    6. Backup and restore
+    7. Audit logs
+
+Security Requirements-
+    1. Data encryption at rest and in transit
+    2. Regular security audits
+    3. Role-based access control
+    4. Two-factor authentication for admin users
+    5. Rate limiting on authentication endpoints
+    6. Password complexity requirements
+    7. Session management
+
+Performance Requirements-
+    1. Page load time < 2 seconds
+    2. Support for 1000+ concurrent users
+    3. 99.9% uptime
+    4. Database response time < 100ms
+    5. Image optimization
+
+Accessibility-
+    1. WCAG 2.1 AA compliance
+    2. Keyboard navigation
+    3. Screen reader support
+    4. Color contrast compliance
+    5. Responsive design for all screen sizes
+
+Future Enhancements-
+    1. Mobile app development
+    2. AI-powered recommendations
+    3. Integrated payment processing
+    4. Multi-language support
+    5. Advanced analytics dashboard
+    6. Customer loyalty programs
+    7. Gift card system
+    8. Membership/subscription plans
+
+Hotomer will select the services and products from their respective list (multi-select).
+
+Home Page-
+    1. This is the main page of this website.
+	2. It display a search bar to search for salons by any information
+	3. After the hit search, it will go to search salon page
+	4. Home page has a header containing-
+		when not logged in-
+			- login/signup
+		when logged in-
+			- signout
+			- notifications
+			- profile
+			- settings
+			- dashboard (for business owner)
+		always-
+			- language selector
+			- city selector
+    5. header will be hidden on scroll down
+	6. header will be sticky on scroll up
+	7. Business owner will always redirect to dashboard, post login
+	8. For others, the normal home page will be shown
+	9. Normal home page, with search bar, also contains top 1- 10 salons by-
+		- relevance (rating & review, if available)
+		- distance from user (if location is available)
+		- if location is not available, then by rating & review within the city selected
+	10. In header, default city will be selected based on IP address
+	11. On first load, for the first time, this default city will be selected and user will be shown a pop-up to choose the city by state/city (currently for India)
+	12. Like city, same for the language. Default is English, and user can change it to any other language.
+	13. city and language will be saved in the local storage and will be used for the next time.
+	14. Home page will be clean and simple.
+		
+    

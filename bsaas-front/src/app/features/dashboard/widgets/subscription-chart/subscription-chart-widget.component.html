@@ -1,0 +1,24 @@
+<mat-card class="subscription-chart">
+  <mat-card-header>
+    <mat-card-title>{{ 'DASHBOARD.SUBSCRIPTIONS.TITLE' | translate }}</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="loading-container" *ngIf="loading">
+      <mat-spinner diameter="24"></mat-spinner>
+      <p>{{ 'DASHBOARD.LOADING' | translate }}</p>
+    </div>
+
+    <div class="error-container" *ngIf="error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error }}</p>
+    </div>
+
+    <div class="chart-container" *ngIf="!loading && !error">
+      <canvas #chartCanvas></canvas>
+      <div class="no-data" *ngIf="!subscriptionData || subscriptionData.length === 0">
+        {{ 'DASHBOARD.SUBSCRIPTIONS.NO_DATA' | translate }}
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

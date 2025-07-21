@@ -1,0 +1,11 @@
+{
+  "error.general": "エラーが発生しました。",
+  "error.not_found": "リソースが見つかりません。",
+  "error.unauthorized": "この操作を実行する権限がありません。",
+  "error.validation": "バリデーションに失敗しました。",
+  "error.user_not_found": "ユーザーが見つかりません。",
+  "error.tenant_not_found": "テナントが見つかりません。",
+  "error.invalid_credentials": "無効な認証情報です。",
+  "success.portfolio_created": "ポートフォリオ項目が正常に作成されました。",
+  "success.theme_updated": "テーマが正常に更新されました。"
+}

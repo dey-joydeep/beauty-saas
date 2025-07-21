@@ -1,0 +1,57 @@
+@startuml otp_sequence
+
+title OTP Verification Sequence
+
+actor User
+participant "Frontend" as FE
+participant "Auth Service" as Auth
+participant "OTP Service" as OTPSvc
+participant "Session Store" as Session
+participant "Email/SMS Service" as Notifier
+
+== OTP Request ==
+User -> FE: Initiates OTP request
+FE -> Auth: POST /auth/otp/request {email, purpose}
+
+Auth -> OTPSvc: generateOTP(email, purpose)
+OTPSvc -> Session: storeOTP(email, otp, purpose, expiry)
+Session --> OTPSvc: otpId
+OTPSvc --> Auth: {otpId, expiresIn}
+
+Auth -> Notifier: sendOTP(email, otp, purpose)
+Notifier --> Auth: OTP sent
+
+Auth --> FE: 200 {otpId, expiresIn, maskedDestination}
+FE -> User: Show OTP input with countdown
+
+== OTP Verification ==
+User -> FE: Enters OTP code
+FE -> Auth: POST /auth/otp/verify {otpId, code}
+
+Auth -> OTPSvc: verifyOTP(otpId, code)
+OTPSvc -> Session: getOTP(otpId)
+Session --> OTPSvc: {email, otp, purpose, expiry}
+
+alt Valid OTP
+    OTPSvc -> Session: invalidateOTP(otpId)
+    OTPSvc --> Auth: {valid: true, email, purpose}
+    
+    Auth -> Session: markOTPVerified(otpId)
+    
+    alt Purpose == 'login'
+        Auth -> Session: createAuthSession(email)
+        Session --> Auth: {token, refreshToken}
+        Auth --> FE: 200 {token, refreshToken, user}
+        FE -> User: Authenticate & redirect
+    else Purpose == 'password_reset'
+        Auth --> FE: 200 {verified: true, resetToken}
+        FE -> User: Show password reset form
+    end
+else Invalid OTP
+    OTPSvc -> Session: recordFailedAttempt(otpId)
+    OTPSvc --> Auth: {valid: false, attemptsRemaining}
+    Auth --> FE: 400 {error: 'Invalid OTP', attemptsRemaining}
+    FE -> User: Show error message
+end
+
+@enduml

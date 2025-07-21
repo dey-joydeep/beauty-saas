@@ -1,0 +1,94 @@
+<div class="booking-detail-container">
+  <div class="back-button">
+    <button mat-button routerLink="/bookings">
+      <mat-icon>arrow_back</mat-icon>
+      {{ 'COMMON.BACK_TO_BOOKINGS' | translate }}
+    </button>
+  </div>
+
+  <div class="loading-shade" *ngIf="isLoading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div class="booking-content" *ngIf="!isLoading && booking">
+    <mat-card>
+      <mat-card-header>
+        <div mat-card-avatar class="booking-avatar">
+          <mat-icon>event</mat-icon>
+        </div>
+        <mat-card-title>{{ 'BOOKING.BOOKING_DETAILS' | translate }} #{{ booking.id }}</mat-card-title>
+        <mat-card-subtitle>
+          <span [ngClass]="getStatusClass(booking.status)">
+            {{ getStatusText(booking.status) }}
+          </span>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-divider></mat-divider>
+
+      <mat-card-content>
+        <div class="booking-section">
+          <h3>{{ 'BOOKING.SERVICE_DETAILS' | translate }}</h3>
+          <div class="detail-row">
+            <div class="detail-label">{{ 'BOOKING.SERVICE' | translate }}:</div>
+            <div class="detail-value">{{ getServiceName(booking.serviceId) }}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">{{ 'BOOKING.SALON' | translate }}:</div>
+            <div class="detail-value">{{ getSalonName(booking.salonId) }}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">{{ 'BOOKING.STAFF' | translate }}:</div>
+            <div class="detail-value">{{ getStaffName(booking.staffId || '') }}</div>
+          </div>
+        </div>
+
+        <div class="booking-section">
+          <h3>{{ 'BOOKING.APPOINTMENT' | translate }}</h3>
+          <div class="detail-row">
+            <div class="detail-label">{{ 'BOOKING.DATE' | translate }}:</div>
+            <div class="detail-value">
+              {{ booking.date | date: 'fullDate' }}
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">{{ 'BOOKING.TIME' | translate }}:</div>
+            <div class="detail-value">{{ booking.time }}</div>
+          </div>
+        </div>
+
+        <div class="booking-section" *ngIf="booking.notes">
+          <h3>{{ 'BOOKING.NOTES' | translate }}</h3>
+          <p class="booking-notes">{{ booking.notes }}</p>
+        </div>
+      </mat-card-content>
+
+      <mat-divider></mat-divider>
+
+      <mat-card-actions *ngIf="booking.status === 'BOOKED'">
+        <button mat-raised-button color="primary" (click)="onReschedule()" [disabled]="isUpdating">
+          {{ 'BOOKING.RESCHEDULE' | translate }}
+        </button>
+        <button mat-stroked-button color="warn" (click)="onCancelBooking()" [disabled]="isUpdating">
+          <span *ngIf="!isUpdating">{{ 'BOOKING.CANCEL_BOOKING' | translate }}</span>
+          <mat-spinner *ngIf="isUpdating" diameter="20"></mat-spinner>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div class="not-found" *ngIf="!isLoading && !booking">
+    <mat-card>
+      <mat-card-content>
+        <div class="not-found-content">
+          <mat-icon>event_busy</mat-icon>
+          <h3>{{ 'BOOKING.NOT_FOUND_TITLE' | translate }}</h3>
+          <p>{{ 'BOOKING.NOT_FOUND_MESSAGE' | translate }}</p>
+          <button mat-raised-button color="primary" routerLink="/bookings">
+            {{ 'BOOKING.VIEW_ALL_BOOKINGS' | translate }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

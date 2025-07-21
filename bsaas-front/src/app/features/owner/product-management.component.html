@@ -1,0 +1,28 @@
+<div class="product-management-container">
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+    <h1>Product Management</h1>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" required />
+      <mat-error *ngIf="productForm.get('name')?.invalid">Name required</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <input matInput formControlName="description" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Price</mat-label>
+      <input matInput formControlName="price" type="number" required />
+      <mat-error *ngIf="productForm.get('price')?.invalid">Price required</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Stock</mat-label>
+      <input matInput formControlName="stock" type="number" required />
+      <mat-error *ngIf="productForm.get('stock')?.invalid">Stock required</mat-error>
+    </mat-form-field>
+    <button mat-raised-button color="primary" class="full-width" [disabled]="loading">Save Product</button>
+    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+    <mat-error *ngIf="error">{{ error }}</mat-error>
+    <p class="success" *ngIf="success">{{ success }}</p>
+  </form>
+</div>

@@ -1,0 +1,48 @@
+# Node
+node_modules/
+# .env
+# .env.test
+dist/
+logs/
+# *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Angular
+bsaas-front/dist/
+bsaas-front/node_modules/
+bsaas-front/.angular/cache/
+bsaas-front/.angular/*
+bsaas-front/.env
+bsaas-front/.env.test
+
+# Backend
+bsaas-back/node_modules/
+bsaas-back/dist/
+# bsaas-back/.env
+# bsaas-back/.env.test
+# bsaas-back/logs/
+# bsaas-back/prisma/.env
+# bsaas-back/prisma/.env.test
+bsaas-back/prisma/migrations/*/README.md
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+
+# Misc
+*.swp
+*.bak
+*.tmp

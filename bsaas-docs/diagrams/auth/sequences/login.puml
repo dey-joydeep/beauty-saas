@@ -1,0 +1,45 @@
+@startuml login_sequence
+
+title User Login Sequence
+
+actor User
+participant "Frontend" as FE
+participant "Auth Service" as Auth
+participant "User Service" as UserSvc
+participant "Session Store" as Session
+participant "Email Service" as Email
+
+== Initial Login ==
+User -> FE: Enters email/password
+FE -> Auth: POST /auth/login {email, password}
+Auth -> UserSvc: findUserByEmail(email)
+UserSvc --> Auth: User details
+
+alt Valid Credentials
+    Auth -> Session: createSession(userId, deviceInfo)
+    Session --> Auth: sessionId
+    
+    alt Owner/Staff Account
+        Auth -> Email: sendOTP(user.email, 'login')
+        Email --> Auth: OTP sent
+        Auth --> FE: 200 {status: 'otp_required', otpId: '123'}
+        FE -> User: Show OTP input
+        
+        User -> FE: Enters OTP
+        FE -> Auth: POST /auth/otp/verify {otpId, code}
+        Auth -> Session: verifyOTP(otpId, code)
+        Session --> Auth: valid
+        Auth -> Session: markSessionVerified(sessionId)
+        Auth --> FE: 200 {token, user}
+        FE -> User: Redirect to dashboard
+    else Customer Account
+        Auth --> FE: 200 {token, user}
+        FE -> User: Redirect to dashboard
+    end
+else Invalid Credentials
+    Auth -> Session: recordFailedAttempt(email, ip)
+    Auth --> FE: 401 Unauthorized
+    FE -> User: Show error message
+end
+
+@enduml

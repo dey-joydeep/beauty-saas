@@ -1,0 +1,39 @@
+{
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "bsaas-back",
+    "bsaas-front"
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.0.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jest": "^27.6.0",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.5.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5",
+    "npm-check-updates": "^17.1.1"
+  },
+  "scripts": {
+    "lint": "npm run lint --workspace=bsaas-back && npm run lint --workspace=bsaas-front",
+    "format": "npm run format --workspace=bsaas-back && npm run format --workspace=bsaas-front",
+    "format:check": "npm run format:check --workspace=bsaas-back && npm run format:check --workspace=bsaas-front",
+    "test": "npm run test --workspace=bsaas-back && npm run test --workspace=bsaas-front",
+    "test:coverage": "npm run test:coverage --workspace=bsaas-back && npm run test:coverage --workspace=bsaas-front",
+    "check-updates": "npm-check-updates -u",
+    "check-updates:frontend": "npm-check-updates -u --workspace=bsaas-front",
+    "check-updates:backend": "npm-check-updates -u --workspace=bsaas-back",
+    "update-all": "npm run check-updates && npm install",
+    "update-frontend": "npm run check-updates:frontend && npm install --workspace=bsaas-front",
+    "update-backend": "npm run check-updates:backend && npm install --workspace=bsaas-back"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2"
+  }
+}
