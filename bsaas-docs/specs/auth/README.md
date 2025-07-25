@@ -47,7 +47,7 @@ sequenceDiagram
 
 | Role | Description | Access Level |
 |------|-------------|--------------|
-| **Customer** | End users booking salon services | Basic access |
+| **Customer** | End users making salon appointments | Basic access |
 | **Staff** | Salon employees providing services | Limited admin access |
 | **Owner** | Business owners managing salons | Business admin access |
 | **Admin** | System administrators | Full system access |

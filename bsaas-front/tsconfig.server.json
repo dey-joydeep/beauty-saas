@@ -7,7 +7,8 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "importHelpers": true,
-    "noEmit": false
+    "noEmit": false,
+    "forceConsistentCasingInFileNames": true
   },
   "files": ["src/main.server.ts", "src/server.ts"],
   "angularCompilerOptions": {

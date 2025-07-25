@@ -9,45 +9,81 @@ import {
   Min,
 } from 'class-validator';
 
+export class SalesByProductDto {
+  @ApiProperty({ description: 'Product ID' })
+  @IsUUID()
+  productId!: string;
+
+  @ApiProperty({ description: 'Product name' })
+  @IsString()
+  productName!: string;
+
+  @ApiProperty({ description: 'Number of items sold' })
+  @IsNumber()
+  quantity!: number;
+
+  @ApiProperty({ description: 'Total revenue from this product' })
+  @IsNumber()
+  revenue!: number;
+
+  @ApiProperty({ description: 'Percentage of total sales' })
+  @IsNumber()
+  percentage!: number;
+}
+
+export class SalesByDateDto {
+  @ApiProperty({ description: 'Date of sales' })
+  @IsString()
+  date!: string;
+
+  @ApiProperty({ description: 'Total sales for this date' })
+  @IsNumber()
+  sales!: number;
+
+  @ApiProperty({ description: 'Number of items sold' })
+  @IsNumber()
+  items!: number;
+}
+
 export class ProductSaleDto {
   @ApiProperty({ description: 'ID of the product sale' })
   @IsUUID()
-  id: string;
+  id!: string;
 
   @ApiProperty({ description: 'ID of the product' })
   @IsUUID()
-  productId: string;
+  productId!: string;
 
   @ApiProperty({ description: 'Name of the product' })
   @IsString()
-  productName: string;
+  productName!: string;
 
   @ApiProperty({ description: 'Quantity sold' })
   @IsNumber()
   @Min(1)
-  quantity: number;
+  quantity!: number;
 
   @ApiProperty({ description: 'Price per unit' })
   @IsNumber()
   @Min(0)
-  unitPrice: number;
+  unitPrice!: number;
 
   @ApiProperty({ description: 'Total amount of the sale' })
   @IsNumber()
   @Min(0)
-  totalAmount: number;
+  totalAmount!: number;
 
   @ApiProperty({ description: 'Date of the sale' })
   @IsDateString()
-  saleDate: Date;
+  saleDate!: Date;
 
   @ApiProperty({ description: 'ID of the staff who made the sale' })
   @IsUUID()
-  soldById: string;
+  soldById!: string;
 
   @ApiProperty({ description: 'Name of the staff who made the sale' })
   @IsString()
-  soldByName: string;
+  soldByName!: string;
 
   @ApiProperty({ description: 'ID of the customer (if any)', required: false })
   @IsUUID()
@@ -59,10 +95,10 @@ export class ProductSaleDto {
   @IsOptional()
   customerName?: string;
 
-  @ApiProperty({ description: 'ID of the related booking (if any)', required: false })
+  @ApiProperty({ description: 'ID of the related appointment (if any)', required: false })
   @IsUUID()
   @IsOptional()
-  bookingId?: string;
+  appointmentId?: string;
 
   @ApiProperty({ description: 'Additional notes about the sale', required: false })
   @IsString()
@@ -73,22 +109,22 @@ export class ProductSaleDto {
 export class CreateProductSaleDto {
   @ApiProperty({ description: 'ID of the product' })
   @IsUUID()
-  productId: string;
+  productId!: string;
 
   @ApiProperty({ description: 'Quantity sold' })
   @IsNumber()
   @Min(1)
-  quantity: number;
+  quantity!: number;
 
   @ApiProperty({ description: 'Price per unit' })
   @IsNumber()
   @Min(0)
-  unitPrice: number;
+  unitPrice!: number;
 
   @ApiProperty({ description: 'Total amount of the sale' })
   @IsNumber()
   @Min(0)
-  totalAmount: number;
+  totalAmount!: number;
 
   @ApiProperty({ description: 'Date of the sale', required: false })
   @IsDateString()
@@ -100,10 +136,10 @@ export class CreateProductSaleDto {
   @IsOptional()
   customerId?: string;
 
-  @ApiProperty({ description: 'ID of the related booking (if any)', required: false })
+  @ApiProperty({ description: 'ID of the related appointment (if any)', required: false })
   @IsUUID()
   @IsOptional()
-  bookingId?: string;
+  appointmentId?: string;
 
   @ApiProperty({ description: 'Additional notes about the sale', required: false })
   @IsString()
@@ -140,54 +176,27 @@ export class ProductSalesFilterDto {
 
 export class ProductSalesSummaryDto {
   @ApiProperty({ description: 'Total number of sales' })
-  totalSales: number;
+  totalSales!: number;
 
   @ApiProperty({ description: 'Total revenue from sales' })
-  totalRevenue: number;
+  totalRevenue!: number;
 
   @ApiProperty({ description: 'Total cost of goods sold' })
-  totalCost: number;
+  totalCost!: number;
 
   @ApiProperty({ description: 'Total profit (revenue - cost)' })
-  totalProfit: number;
+  totalProfit!: number;
 
   @ApiProperty({ description: 'Number of products sold' })
-  totalItemsSold: number;
+  totalItemsSold!: number;
 
   @ApiProperty({ description: 'Average sale value' })
-  averageSaleValue: number;
+  averageSaleValue!: number;
 
-  @ApiProperty({ description: 'Sales by product', type: [SalesByProductDto] })
-  salesByProduct: SalesByProductDto[];
+  @ApiProperty({ description: 'Sales by product', type: () => [SalesByProductDto] })
+  salesByProduct!: SalesByProductDto[];
 
-  @ApiProperty({ description: 'Sales by date', type: [SalesByDateDto] })
-  salesByDate: SalesByDateDto[];
+  @ApiProperty({ description: 'Sales by date', type: () => [SalesByDateDto] })
+  salesByDate!: SalesByDateDto[];
 }
 
-export class SalesByProductDto {
-  @ApiProperty({ description: 'Product ID' })
-  productId: string;
-
-  @ApiProperty({ description: 'Product name' })
-  productName: string;
-
-  @ApiProperty({ description: 'Number of items sold' })
-  quantity: number;
-
-  @ApiProperty({ description: 'Total revenue from this product' })
-  revenue: number;
-
-  @ApiProperty({ description: 'Percentage of total sales' })
-  percentage: number;
-}
-
-export class SalesByDateDto {
-  @ApiProperty({ description: 'Date of sales' })
-  date: string;
-
-  @ApiProperty({ description: 'Total sales for this date' })
-  sales: number;
-
-  @ApiProperty({ description: 'Number of items sold' })
-  items: number;
-}

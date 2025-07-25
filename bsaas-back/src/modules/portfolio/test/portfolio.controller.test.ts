@@ -42,12 +42,12 @@ describe('Portfolio Controller', () => {
         name: 'Test Tenant',
         email: 'test@tenant.com',
         phone: '1234567890',
-        address: '123 Test St',
-        created_at: new Date(),
-        updated_at: new Date(),
-        primary_color: null,
-        secondary_color: null,
-        accent_color: null,
+        // address: '123 Test St',
+        // created_at: new Date(),
+        // updated_at: new Date(),
+        // primary_color: null,
+        // secondary_color: null,
+        // accent_color: null,
       },
     });
   });

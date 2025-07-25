@@ -1,0 +1,93 @@
+<div class="appointment-management-container">
+  <h2>{{ 'APPOINTMENT.MANAGEMENT.TITLE' | translate }}</h2>
+  
+  <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="appointment-form">
+    <!-- Customer ID -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>{{ 'APPOINTMENT.FIELDS.CUSTOMER_ID' | translate }}</mat-label>
+      <input matInput formControlName="customerId" type="text" required>
+      <mat-error *ngIf="appointmentForm.get('customerId')?.hasError('required')">
+        {{ 'VALIDATION.REQUIRED' | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Service ID -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>{{ 'APPOINTMENT.FIELDS.SERVICE_ID' | translate }}</mat-label>
+      <input matInput formControlName="serviceId" type="text" required>
+      <mat-error *ngIf="appointmentForm.get('serviceId')?.hasError('required')">
+        {{ 'VALIDATION.REQUIRED' | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Staff ID -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>{{ 'APPOINTMENT.FIELDS.STAFF_ID' | translate }}</mat-label>
+      <input matInput formControlName="staffId" type="text" required>
+      <mat-error *ngIf="appointmentForm.get('staffId')?.hasError('required')">
+        {{ 'VALIDATION.REQUIRED' | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Start Time -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>{{ 'APPOINTMENT.FIELDS.START_TIME' | translate }}</mat-label>
+      <input matInput formControlName="startTime" type="datetime-local" required>
+      <mat-error *ngIf="appointmentForm.get('startTime')?.hasError('required')">
+        {{ 'VALIDATION.REQUIRED' | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- End Time -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>{{ 'APPOINTMENT.FIELDS.END_TIME' | translate }}</mat-label>
+      <input matInput formControlName="endTime" type="datetime-local" required>
+      <mat-error *ngIf="appointmentForm.get('endTime')?.hasError('required')">
+        {{ 'VALIDATION.REQUIRED' | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Status -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>{{ 'APPOINTMENT.FIELDS.STATUS' | translate }}</mat-label>
+      <mat-select formControlName="status" required>
+        <mat-option *ngFor="let status of statuses" [value]="status">
+          {{ 'APPOINTMENT.STATUS.' + status.toUpperCase() | translate }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="appointmentForm.get('status')?.hasError('required')">
+        {{ 'VALIDATION.REQUIRED' | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>{{ 'APPOINTMENT.FIELDS.NOTES' | translate }}</mat-label>
+      <textarea matInput formControlName="notes" rows="3"></textarea>
+    </mat-form-field>
+
+    <!-- Submit Button -->
+    <button 
+      mat-raised-button 
+      color="primary" 
+      type="submit" 
+      [disabled]="appointmentForm.invalid || loading"
+      class="submit-button"
+    >
+      <span *ngIf="!loading">{{ 'COMMON.SAVE' | translate }}</span>
+      <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+    </button>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="error-message">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="success" class="success-message">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ success }}</span>
+    </div>
+  </form>
+</div>

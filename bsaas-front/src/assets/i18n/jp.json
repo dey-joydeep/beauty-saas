@@ -43,6 +43,15 @@
     "loading": "読み込み中...",
     "error": "エラーが発生しました。"
   },
+  "DASHBOARD": {
+    "STATS": {
+      "TITLE": "統計",
+      "CUSTOMERS": "顧客数",
+      "APPOINTMENTS": "予約数",
+      "REVENUE": "収益",
+      "SUBSCRIPTIONS": "有効なサブスクリプション"
+    }
+  },
   "errors": {
     "network": "ネットワークエラー。接続を確認してください。",
     "badRequest": "不正なリクエスト。もう一度お試しください。",

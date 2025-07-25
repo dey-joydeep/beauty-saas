@@ -71,7 +71,7 @@ const mockReview: Review = {
   id: 'mockid',
   salonId: testSalonId,
   userId: testUserId,
-  bookingId: 'mockBookingId',
+  appointmentId: 'mockAppointmentId',
   rating: 5,
   comment: 'Great!',
   createdAt: new Date(),

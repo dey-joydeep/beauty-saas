@@ -9,7 +9,7 @@
 - Register, update, delete products
 - Register, update, delete staff (owner can also be staff)
 - Staff-service association (many-to-many)
-- Booking management (view bookings)
+- Appointment management (view appointments)
 - Reply to reviews
 - Highlight new services/products
 - Announce vacancies
@@ -20,7 +20,7 @@
 
 ### Staff
 
-- View bookings
+- View appointments
 - View reviews
 - Apply for leaves
 - Request new services/products
@@ -28,25 +28,25 @@
 
 ### Customer
 
-- View bookings, reviews
+- View appointments, reviews
 - Reply to reviews
-- Book salon/services/products/staff/time
-- Confirm, cancel, reschedule booking
+- Appointment salon/services/products/staff/time
+- Confirm, cancel, reschedule appointment
 - Rate/review staff
 - Rate/review salon (shop) they have bought the service from
 
 ### Review & Rating Logic
 
-- Customers who have completed a booking can rate and review both the salon (shop) and the staff they received the service from.
-- System must validate that only eligible users (with completed bookings) can leave reviews/ratings.
+- Customers who have completed a appointment can rate and review both the salon (shop) and the staff they received the service from.
+- System must validate that only eligible users (with completed appointments) can leave reviews/ratings.
 - Reviews and ratings are stored in the production database (PostgreSQL and/or MongoDB).
 - Salon and staff listings/search endpoints must return average rating and review count for each entity.
 - No demo or in-memory data for reviews/ratings in production code (only in tests/mocks).
 
-### Booking Logic
+### Appointment Logic
 
 - Slot availability based on service time
-- Multi-service booking: slot = sum of service times
+- Multi-service appointment: slot = sum of service times
 
 ### Home Page (User Facing)
 
@@ -67,7 +67,7 @@
 - Role-based authentication and authorization is required for all backend features.
 - Roles include at least: Customer, Staff, Salon Owner, Admin.
 - Access to CRUD and management endpoints must be restricted based on user role.
-- Only authorized users can perform actions (e.g., only salon owners can approve staff, only customers can leave reviews for bookings they completed, etc).
+- Only authorized users can perform actions (e.g., only salon owners can approve staff, only customers can leave reviews for appointments they completed, etc).
 - Secure endpoints and follow best practices for session/token management.
 
 ### Salon Search & Listing (UPDATED)
@@ -84,17 +84,17 @@
 
 ### Review & Rating Logic (UPDATED)
 
-- Only users with completed bookings can leave reviews/ratings for salons or staff
+- Only users with completed appointments can leave reviews/ratings for salons or staff
 - Reviews must have: salon_id, user_id, rating (1-5), review text (required)
 - Average rating and review count are aggregated from the DB
 - Review endpoints: add, list, get average/count
 - All validation and error handling as per requirements docs
 
-### Booking Logic (UPDATED)
+### Appointment Logic (UPDATED)
 
-- Bookings require: salonId, userId, serviceId(s), status, booking time/date
-- All booking logic uses production DBs
-- Only COMPLETED bookings make user eligible to review
+- Appointments require: salonId, userId, serviceId(s), status, appointment time/date
+- All appointment logic uses production DBs
+- Only COMPLETED appointments make user eligible to review
 - Endpoints: create, update, delete/cancel, view by user/salon/status
 
 ### Portfolio, User, Social, Theme, Auth (UPDATED)
@@ -118,26 +118,26 @@
 - **US2:** As a salon owner, I want to update/delete my salon details
 - **US3:** As a salon owner, I want to manage services/products/staff (CRUD)
 - **US4:** As a salon owner, I want to approve new services/products/staff leaves
-- **US5:** As a salon owner, I want to assign service times and manage bookings
+- **US5:** As a salon owner, I want to assign service times and manage appointments
 - **US6:** As a salon owner, I want to highlight new services/products and announce vacancies
 - **US7:** As a salon owner, I want to manage my portfolio
 
 ### Epic: Staff Experience
 
-- **US8:** As staff, I want to view my bookings and reviews
+- **US8:** As staff, I want to view my appointments and reviews
 - **US9:** As staff, I want to apply for leaves and request new services/products
 - **US10:** As staff, I want to update my profile, nickname, and contact info
 
 ### Epic: Customer Experience
 
-- **US11:** As a customer, I want to book services/products/staff/time
-- **US12:** As a customer, I want to manage my bookings (cancel/reschedule)
+- **US11:** As a customer, I want to appointment services/products/staff/time
+- **US12:** As a customer, I want to manage my appointments (cancel/reschedule)
 - **US13:** As a customer, I want to rate and review staff and salons
 
-### Epic: Booking Engine
+### Epic: Appointment Engine
 
 - **US14:** As a user, I want available slots calculated based on service times
-- **US15:** As a user, I want multi-service bookings to sum service times for slot calculation
+- **US15:** As a user, I want multi-service appointments to sum service times for slot calculation
 
 ---
 
@@ -145,10 +145,10 @@
 
 - **US1:** Owner can register via portal after contact approval; registration form validates required fields; owner receives confirmation email
 - **US3:** CRUD endpoints for services/products/staff exist and are covered by tests
-- **US5:** Booking calendar reflects real-time availability; cannot double-book a staff or slot
+- **US5:** Appointment calendar reflects real-time availability; cannot double-appointment a staff or slot
 - **US7:** Portfolio CRUD is available and covered by comprehensive API and controller tests
-- **US11:** Customer can select service(s), product(s), staff, and time, and confirm booking; receives confirmation
-- **US13:** Customer can leave a review/rating for both staff and salon only if they have completed a booking; reviews/ratings are visible in listings and profiles
+- **US11:** Customer can select service(s), product(s), staff, and time, and confirm appointment; receives confirmation
+- **US13:** Customer can leave a review/rating for both staff and salon only if they have completed a appointment; reviews/ratings are visible in listings and profiles
 
 ---
 
@@ -171,17 +171,17 @@
 | Salon Management    | US2        | Update/delete salon                       | Planned  |       |        |
 | Salon Management    | US3        | CRUD for services/products/staff          | Planned  |       |        |
 | Salon Management    | US4        | Approval flows (services/products/leaves) | Planned  |       |        |
-| Salon Management    | US5        | Booking calendar & logic                  | Planned  |       |        |
+| Salon Management    | US5        | Appointment calendar & logic              | Planned  |       |        |
 | Salon Management    | US6        | Highlight/announce features               | Planned  |       |        |
 | Salon Management    | US7        | Portfolio CRUD                            | Complete |       |        |
-| Staff Experience    | US8        | Staff bookings/reviews                    | Planned  |       |        |
+| Staff Experience    | US8        | Staff appointments/reviews                    | Planned  |       |        |
 | Staff Experience    | US9        | Staff leave/service/product requests      | Planned  |       |        |
 | Staff Experience    | US10       | Staff profile/nickname/contact mgmt       | Planned  |       |        |
-| Customer Experience | US11       | Customer booking flow                     | Planned  |       |        |
-| Customer Experience | US12       | Booking management (cancel/reschedule)    | Planned  |       |        |
+| Customer Experience | US11       | Customer appointment flow                     | Planned  |       |        |
+| Customer Experience | US12       | Appointment management (cancel/reschedule)| Planned  |       |        |
 | Customer Experience | US13       | Rate/review staff and salons              | Planned  |       |        |
-| Booking Engine      | US14       | Slot calculation logic                    | Planned  |       |        |
-| Booking Engine      | US15       | Multi-service slot calculation            | Planned  |       |        |
+| Appointment Engine  | US14       | Slot calculation logic                    | Planned  |       |        |
+| Appointment Engine  | US15       | Multi-service slot calculation            | Planned  |       |        |
 
 ---
 

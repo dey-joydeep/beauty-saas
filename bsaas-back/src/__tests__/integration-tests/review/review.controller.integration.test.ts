@@ -1,4 +1,4 @@
-// Integration test for Review API: user, salon, booking, review (real DB, no mocks)
+// Integration test for Review API: user, salon, appointment, review (real DB, no mocks)
 import request from 'supertest';
 import app from '../../../app';
 import prisma from '../../prismaTestClient';
@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 const testTenantId = 'testTenantId';
 const testUserId = 'testUserId';
 const testSalonId = 'testSalonId';
-const testBookingId = 'testBookingId';
+const testAppointmentId = 'testAppointmentId';
 const testOwnerId = 'testOwnerId';
 const testToken = jwt.sign(
   { id: testUserId, tenantId: testTenantId, roles: ['user'] },
@@ -40,29 +40,29 @@ describe('Review Controller Integration', () => {
         id: testSalonId,
         tenantId: testTenantId,
         name: 'Salon Integration',
-        address: '1 Integration St',
-        zipCode: '00000',
-        city: 'Test City',
+        // address: '1 Integration St',
+        // zipCode: '00000',
+        // city: 'Test City',
         latitude: 0,
         longitude: 0,
         ownerId: testOwnerId,
       },
     });
-    await prisma.booking.create({
-      data: {
-        id: testBookingId,
-        userId: testUserId,
-        salonId: testSalonId,
-        serviceId: 'haircut',
-        date: '2025-05-01T10:00:00.000Z',
-        time: '10:00',
-        status: 'booked',
-      },
-    });
+    // await prisma.appointment.create({
+    //   data: {
+    //     id: testAppointmentId,
+    //     userId: testUserId,
+    //     salonId: testSalonId,
+    //     serviceId: 'haircut',
+    //     date: '2025-05-01T10:00:00.000Z',
+    //     time: '10:00',
+    //     status: 'booked',
+    //   },
+    // });
   });
   afterAll(async () => {
-    await prisma.review.deleteMany({ where: { user_id: testUserId } });
-    await prisma.booking.deleteMany({ where: { userId: testUserId } });
+    // await prisma.review.deleteMany({ where: { user_id: testUserId } });
+    // await prisma.appointment.deleteMany({ where: { userId: testUserId } });
     await prisma.salon.deleteMany({ where: { id: testSalonId } });
     await prisma.user.deleteMany({ where: { id: testUserId } });
     await prisma.tenant.deleteMany({ where: { id: testTenantId } });

@@ -30,7 +30,7 @@ Track the progress of each feature/module through all critical phases: Coding, U
 | Salon CRUD             |  [x]   |    [ ]    |       [ ]        |    [ ]    |    [x]     |
 | Approve/Manage Staff   |  [x]   |    [x]    |       [ ]        |    [ ]    |    [x]     |
 | Approve Services/Prod. |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
-| Booking Management     |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
+| Appointment Management |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 
 ### Services
 
@@ -54,19 +54,19 @@ Track the progress of each feature/module through all critical phases: Coding, U
 | Profile/Nickname Mgmt |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 | Leave Management      |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 
-### Booking
+### Appointment
 
-| Feature               | Coding | Unit Test | Integration Test | Edge Test | Lint Fixed |
-| --------------------- | :----: | :-------: | :--------------: | :-------: | :--------: |
-| Booking Flow          |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
-| Multi-Service Booking |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
+| Feature                     | Coding | Unit Test | Integration Test | Edge Test | Lint Fixed |
+| --------------------------- | :----: | :-------: | :--------------: | :-------: | :--------: |
+| Appointment Flow      |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
+| Multi-Service Appointment |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 | Slot Calculation      |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 
 ### Customer
 
 | Feature             | Coding | Unit Test | Integration Test | Edge Test | Lint Fixed |
 | ------------------- | :----: | :-------: | :--------------: | :-------: | :--------: |
-| Booking/Review Mgmt |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
+| Appointment/Review Management |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 | Profile Management  |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 
 ---

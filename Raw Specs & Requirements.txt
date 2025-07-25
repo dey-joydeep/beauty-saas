@@ -15,7 +15,7 @@ For salon
 		12. delete their staffs
 		13. Owner can also be a staff
 		14. Staff can be associated with one or more services
-		15. Can check their bookings.
+		15. Can check their appointments.
 		16. Can reply to the reviews.
 		17. Highlight new services or products under services or products tab.
 		18. Announce new vacancies under vacancy tab
@@ -28,7 +28,7 @@ For salon
 
 
 	Staff can-
-		1. Check their bookings
+		1. Check their appointments
 		2. Check their reviews
 		3. Apply for leaves
 		4. Apply for new services or products to approve
@@ -38,11 +38,11 @@ For salon
 		8. Change contact number and email (subject to approval).
 
 	Customer can-
-		1. Check their bookings
+		1. Check their appointments
 		2. Check their reviews
 		3. Reply to reviews
 		4. Book a salon
-		5. When booking services-
+		5. When appointment services-
 			5.1. Check available services
 			5.2. Book a service
 			5.3. Check available products
@@ -51,18 +51,18 @@ For salon
 			5.6. Book a staff
 			5.7. Check available times
 			5.8. Book a time
-			5.9. Confirm booking
+			5.9. Confirm appointment
 			5.10. Rate and review a staff they used the service of
-			5.11. Cancel booking
-			5.12. Reschedule booking
+			5.11. Cancel appointment
+			5.12. Reschedule appointment
 
-Booking- 
+Appointment- 
 	1. Available slot should be decided by the service time specified by the owner.
 	2. If multiple services are selected, the available slot should be calculated by sum of the total time.
 	3. Customer can leave additional notes based on their selected services
 	4. The staff will be show to the customer based on the selected services and availablity on the selected date time.
 	5. Customer can choose the staff or leave it to be decided by the owner
-	6. Upon confirming the booking, an email of the details will be sent to both customer and owner. If a staff is selected, the staff will be notified.
+	6. Upon confirming the appointment, an email of the details will be sent to both customer and owner. If a staff is selected, the staff will be notified.
 
 
 Business registration portal-
@@ -133,15 +133,15 @@ Reviews and Ratings-
 
 Notifications-
     1. Email notifications for:
-        - New bookings
-        - Booking confirmations
-        - Booking cancellations
+        - New appointments
+        - Appointment confirmations
+        - Appointment cancellations
         - Upcoming appointments (24h reminder)
         - New reviews
         - Staff leave requests (for owners)
     2. In-app notifications for:
         - New messages
-        - Booking updates
+        - Appointment updates
         - System announcements
         - Staff assignments
 

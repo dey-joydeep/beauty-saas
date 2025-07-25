@@ -1,0 +1,91 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { TranslateModule } from '@ngx-translate/core';
+import { CurrentUserService } from '../../shared/current-user.service';
+import { Appointment, AppointmentStatus } from '../../models/appointment.model';
+
+interface AppointmentWithDetails extends Appointment {
+  salon?: {
+    id: string;
+    name: string;
+  };
+  service?: {
+    id: string;
+    name: string;
+  };
+  staff?: {
+    id: string;
+    name: string;
+  };
+}
+
+@Component({
+  selector: 'app-user-appointments',
+  standalone: true,
+  imports: [CommonModule, RouterModule, DatePipe, TranslateModule],
+  templateUrl: './user-appointments.component.html',
+  styleUrls: ['./user-appointments.component.scss'],
+})
+export class UserAppointmentsComponent implements OnInit {
+  appointments: AppointmentWithDetails[] = [];
+  loading = true;
+  error: string | null = null;
+  userId: string | null = null;
+
+  constructor(
+    private http: HttpClient,
+    private currentUserService: CurrentUserService,
+  ) {}
+
+  ngOnInit(): void {
+    this.currentUserService.loadCurrentUser();
+    const user = this.currentUserService.currentUser;
+    this.userId = user ? user.id : null;
+    if (!this.userId) {
+      this.error = 'You must be logged in.';
+      this.loading = false;
+      return;
+    }
+    this.loadAppointments();
+  }
+
+  loadAppointments(): void {
+    this.loading = true;
+    this.error = null;
+    this.http.get<AppointmentWithDetails[]>(`/api/user/${this.userId}/appointments`).subscribe({
+      next: (data) => {
+        this.appointments = data.map(appt => ({
+          ...appt,
+          startTime: new Date(appt.startTime),
+          endTime: new Date(appt.endTime)
+        }));
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to load appointments';
+        this.loading = false;
+      },
+    });
+  }
+
+  getDuration(appointment: AppointmentWithDetails): string {
+    if (!appointment.startTime || !appointment.endTime) return 'N/A';
+    
+    const start = new Date(appointment.startTime);
+    const end = new Date(appointment.endTime);
+    const diffMs = end.getTime() - start.getTime();
+    
+    if (isNaN(diffMs)) return 'N/A';
+    
+    const minutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${remainingMinutes}m`;
+    }
+    return `${minutes}m`;
+  }
+}

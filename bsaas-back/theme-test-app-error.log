@@ -1,7 +1,0 @@
-Error: Cannot find module '../middleware/validate' from 'src/modules/salon/salon.controller.ts'
-
-Require stack:
-  src/modules/salon/salon.controller.ts
-  src/routes/salon.routes.ts
-  src/app.ts
-  src/modules/theme/test/theme.test.ts

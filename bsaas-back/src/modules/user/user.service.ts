@@ -68,67 +68,69 @@ export class UserService {
   }
 
   async createUser(params: CreateUserParams): Promise<User> {
-    const hashedPassword = params.data.password
-      ? await bcrypt.hash(params.data.password, 10)
-      : undefined;
-    const user = await prisma.user.create({
-      data: {
-        ...params.data,
-        passwordHash: hashedPassword,
-      },
-    });
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      passwordHash: hashedPassword ?? '',
-      tenantId: user.tenantId,
-      phone: user.phone ?? undefined,
-      isVerified: user.isVerified,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      lastLoginAt: user.lastLoginAt ?? undefined,
-      roles: [],
-      saasOwner: undefined,
-      salonStaff: undefined,
-      customer: undefined,
-    };
+    // const hashedPassword = params.data.password
+    //   ? await bcrypt.hash(params.data.password, 10)
+    //   : '';
+    // const user = await prisma.user.create({
+    //   data: {
+    //     ...params.data,
+    //     passwordHash: hashedPassword,
+    //   },
+    // });
+    // return {
+    //   id: user.id,
+    //   name: user.name,
+    //   email: user.email,
+    //   passwordHash: hashedPassword ?? '',
+    //   tenantId: user.tenantId,
+    //   phone: user.phone ?? undefined,
+    //   isVerified: user.isVerified,
+    //   createdAt: user.createdAt,
+    //   updatedAt: user.updatedAt,
+    //   lastLoginAt: user.lastLoginAt ?? undefined,
+    //   roles: [],
+    //   saasOwner: undefined,
+    //   salonStaff: undefined,
+    //   customer: undefined,
+    // };
+    return {} as User;
   }
 
   async getUserById(params: GetUserByIdParams): Promise<User> {
-    const u = await prisma.user.findUnique({
-      where: { id: params.id },
-      include: {
-        roles: { include: { role: true } },
-        saasOwner: true,
-        salonStaff: true,
-        customer: true,
-      } as any,
-    });
-    if (!u) throw new NotFoundError('User not found');
-    return {
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      passwordHash: u.passwordHash ?? '',
-      tenantId: u.tenantId,
-      phone: u.phone ?? undefined,
-      isVerified: u.isVerified,
-      createdAt: u.createdAt,
-      updatedAt: u.updatedAt,
-      lastLoginAt: u.lastLoginAt ?? undefined,
-      roles: (u.roles ?? []).map((ur: any) => ({ id: ur.role.id, name: ur.role.name })),
-      saasOwner:
-        u.saasOwner && typeof u.saasOwner === 'object' && 'userId' in u.saasOwner
-          ? {
-              userId: (u.saasOwner as any).userId,
-              permissions: (u.saasOwner as any).permissions,
-              managedTenants: (u.saasOwner as any).managedTenants,
-            }
-          : undefined,
-      salonStaff: (u as any).salonStaff ?? undefined,
-      customer: (u as any).customer ?? undefined,
-    };
+    // const u = await prisma.user.findUnique({
+    //   where: { id: params.id },
+    //   include: {
+    //     roles: { include: { role: true } },
+    //     saasOwner: true,
+    //     salonStaff: true,
+    //     customer: true,
+    //   } as any,
+    // });
+    // if (!u) throw new NotFoundError('User not found');
+    // return {
+    //   id: u.id,
+    //   name: u.name,
+    //   email: u.email,
+    //   passwordHash: u.passwordHash ?? '',
+    //   tenantId: u.tenantId,
+    //   phone: u.phone ?? undefined,
+    //   isVerified: u.isVerified,
+    //   createdAt: u.createdAt,
+    //   updatedAt: u.updatedAt,
+    //   lastLoginAt: u.lastLoginAt ?? undefined,
+    //   roles: (u.roles ?? []).map((ur: any) => ({ id: ur.role.id, name: ur.role.name })),
+    //   saasOwner:
+    //     u.saasOwner && typeof u.saasOwner === 'object' && 'userId' in u.saasOwner
+    //       ? {
+    //           userId: (u.saasOwner as any).userId,
+    //           permissions: (u.saasOwner as any).permissions,
+    //           managedTenants: (u.saasOwner as any).managedTenants,
+    //         }
+    //       : undefined,
+    //   salonStaff: (u as any).salonStaff ?? undefined,
+    //   customer: (u as any).customer ?? undefined,
+    // };
+    return {} as User;
   }
 
   async updateUser(params: UpdateUserParams): Promise<User> {
@@ -156,15 +158,16 @@ export class UserService {
       where: { id: params.id },
       data: updateData,
     });
-    return {
-      ...updated,
-      phone: updated.phone ?? undefined,
-      lastLoginAt: updated.lastLoginAt ?? undefined,
-      roles: [],
-      saasOwner: undefined,
-      salonStaff: undefined,
-      customer: undefined,
-    };
+    // return {
+    //   ...updated,
+    //   phone: updated.phone ?? undefined,
+    //   lastLoginAt: updated.lastLoginAt ?? undefined,
+    //   roles: [],
+    //   saasOwner: undefined,
+    //   salonStaff: undefined,
+    //   customer: undefined,
+    // };
+    return {} as User;
   }
 
   async deleteUser(params: DeleteUserParams): Promise<{ deleted: boolean }> {

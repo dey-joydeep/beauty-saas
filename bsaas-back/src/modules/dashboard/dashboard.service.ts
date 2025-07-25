@@ -17,13 +17,13 @@ const formatDate = (date: Date): string => {
 export class DashboardService {
   async getStats() {
     // Fetch total counts with proper typing
-    const [userCount, salonCount, bookingCount, reviewCount, productCount, saleCount] =
+    const [userCount, salonCount, appointmentCount, reviewCount, /* productCount,*/ saleCount] =
       await Promise.all([
         prisma.user.count(),
         prisma.salon.count(),
-        prisma.booking.count(),
+        prisma.appointment.count(),
         prisma.review.count(),
-        prisma.product.count(),
+        // prisma.product.count(),
         prisma.productSale.count(),
       ]);
 
@@ -37,9 +37,9 @@ export class DashboardService {
     return {
       userCount,
       salonCount,
-      bookingCount,
+      appointmentCount,
       reviewCount,
-      productCount,
+      // productCount,
       saleCount,
       totalRevenue: revenueResult._sum.totalAmount || 0,
     };
@@ -49,28 +49,6 @@ export class DashboardService {
     // Since we don't have a Subscription model, we'll return an empty array
     // In a real app, you would query your subscription data here
     return [];
-  }
-
-  async getRenewals() {
-    // Example: list upcoming salon renewals (assume renewal_date on Salon)
-    const now = new Date();
-    const soon = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30); // next 30 days
-    const results = await prisma.salon.findMany({
-      where: {
-        renewalDate: {
-          gte: now,
-          lte: soon,
-        },
-      },
-      select: {
-        name: true,
-        renewalDate: true,
-      },
-      orderBy: {
-        renewalDate: 'asc',
-      },
-    });
-    return results.map((r) => ({ salonName: r.name, renewalDate: r.renewalDate }));
   }
 
   async getRevenue() {
@@ -113,9 +91,9 @@ export class DashboardService {
     const sales = await prisma.productSale.findMany({
       where,
       include: {
-        product: {
-          select: { name: true },
-        },
+        // product: {
+        //   select: { name: true },
+        // },
         soldBy: {
           select: { name: true },
         },
@@ -140,9 +118,14 @@ export class DashboardService {
       soldByName: sale.soldBy.name,
       customerId: sale.customerId || undefined,
       customerName: sale.customer?.name,
-      bookingId: sale.bookingId || undefined,
+      appointmentId: sale.appointmentId || undefined,
       notes: sale.notes || undefined,
     }));
+  }
+
+  // Format date to YYYY-MM-DD for UI display
+  private formatDateForUI(date: Date): string {
+    return date.toISOString().split('T')[0];
   }
 
   async getProductSalesSummary(filters?: ProductSalesFilterDto): Promise<ProductSalesSummaryDto> {

@@ -157,22 +157,22 @@ async function main() {
         }
       });
 
-      for (const cityData of cities) {
-        await prisma.city.upsert({
-          where: { 
-            name_countryId: { 
-              name: cityData.name, 
-              countryId: savedCountry.id 
-            } 
-          },
-          update: {},
-          create: {
-            ...cityData,
-            stateId: savedState.id,
-            countryId: savedCountry.id
-          }
-        });
-      }
+      // for (const cityData of cities) {
+      //   await prisma.city.upsert({
+      //     where: { 
+      //       name_countryId: { 
+      //         name: cityData.name, 
+      //         countryId: savedCountry.id 
+      //       } 
+      //     },
+      //     update: {},
+      //     create: {
+      //       ...cityData,
+      //       stateId: savedState.id,
+      //       countryId: savedCountry.id
+      //     }
+      //   });
+      // }
     }
   }
 
@@ -184,7 +184,7 @@ async function main() {
       name: 'Test Tenant',
       email: 'test-tenant@example.com',
       phone: '000-0000',
-      address: '123 Test St.'
+      // address: '123 Test St.'
     }
   });
 
@@ -257,13 +257,13 @@ async function main() {
       data: {
         name: salonName,
         tenantId: tenant.id,
-        address: `${faker.location.streetAddress()}, ${city.name}, ${city.state?.country.name}`,
-        zipCode: faker.location.zipCode(),
-        city: city.name,
-        latitude: lat,
-        longitude: lng,
+        // address: `${faker.location.streetAddress()}, ${city.name}, ${city.state?.country.name}`,
+        // zipCode: faker.location.zipCode(),
+        // city: city.name,
+        // latitude: lat,
+        // longitude: lng,
         ownerId: saasOwnerUser.id,
-        services: services,
+        // services: services,
         imageUrl: faker.image.urlLoremFlickr({ category: 'salon' }),
         translations: {
           create: [
@@ -293,15 +293,15 @@ async function main() {
     // Create some sample reviews
     const reviewCount = faker.number.int({ min: 5, max: 50 });
     for (let j = 0; j < reviewCount; j++) {
-      await prisma.review.create({
-        data: {
-          rating: faker.number.float({ min: 1, max: 5, multipleOf: 0.5 }),
-          comment: faker.lorem.sentences(2),
-          salonId: salon.id,
-          userId: customerUser.id,
-          createdAt: faker.date.past({ years: 1 })
-        }
-      });
+      // await prisma.review.create({
+      //   data: {
+      //     rating: faker.number.float({ min: 1, max: 5, multipleOf: 0.5 }),
+      //     comment: faker.lorem.sentences(2),
+      //     salonId: salon.id,
+      //     userId: customerUser.id,
+      //     createdAt: faker.date.past({ years: 1 })
+      //   }
+      // });
     }
   }
 
@@ -327,18 +327,13 @@ async function main() {
         passwordHash: 'hashedpassword',
         tenantId: tenant.id,
         isVerified: true,
-        roles: { create: [{ role: { connect: { name: 'salon_staff' } }] },
+        // roles: { create: [{ role: { connect: { name: 'salon_staff' } }] },
         salonStaff: { 
           create: { 
             salonId: salon.id, 
             position,
             isActive: true, 
-            hiredAt: faker.date.past({ years: 2 }),
-            bio: faker.person.bio(),
-            specialization: position === 'Stylist' ? faker.helpers.arrayElement(['Hair Coloring', 'Hair Cutting', 'Hair Styling']) : 
-                            position === 'Therapist' ? faker.helpers.arrayElement(['Massage', 'Facial', 'Body Treatment']) :
-                            position === 'Nail Technician' ? faker.helpers.arrayElement(['Gel Nails', 'Acrylics', 'Nail Art']) :
-                            null
+            // hiredAt: faker.date.past({ years: 2 }),
           } 
         }
       }
@@ -356,7 +351,7 @@ async function main() {
       tenantId: tenant.id,
       isVerified: true,
       roles: { create: [{ role: { connect: { name: 'salon_staff' } } }] },
-      salonStaff: { create: { salonId: salon.id, position: 'stylist', isActive: true, hiredAt: new Date() } }
+      salonStaff: { create: { salonId: salon.id, position: 'stylist', isActive: true} }
     }
   });
 
@@ -375,18 +370,18 @@ async function main() {
         passwordHash: 'hashedpassword',
         tenantId: tenant.id,
         isVerified: true,
-        roles: { create: [{ role: { connect: { name: 'customer' } }] },
+        // roles: { create: [{ role: { connect: { name: 'customer' } }] },
         customer: { 
           create: { 
             loyaltyPoints: faker.number.int({ min: 0, max: 1000 }),
             registeredAt: faker.date.past({ years: 2 }),
-            preferences: {
-              notifications: faker.datatype.boolean(),
-              marketingEmails: faker.datatype.boolean(),
-              preferredLanguage: faker.helpers.arrayElement(['en', 'ja', 'bn'])
-            },
-            address: faker.location.streetAddress(),
-            phone: faker.phone.number()
+            // preferences: {
+            //   notifications: faker.datatype.boolean(),
+            //   marketingEmails: faker.datatype.boolean(),
+            //   preferredLanguage: faker.helpers.arrayElement(['en', 'ja', 'bn'])
+            // },
+            // address: faker.location.streetAddress(),
+            // phone: faker.phone.number()
           } 
         }
       }

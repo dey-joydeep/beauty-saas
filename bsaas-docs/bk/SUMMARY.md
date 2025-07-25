@@ -14,14 +14,14 @@
 
 ## Component Health
 
-### Booking Module
+### Appointment Module
 
-| Component         | Status  | Issues |
-| ----------------- | ------- | ------ |
-| BookingReschedule | ⚠️ Fair | 5      |
-| BookingList       | ✅ Good | 0      |
-| BookingDetail     | ✅ Good | 0      |
-| BookingService    | ✅ Good | 3      |
+| Component              | Status  | Issues |
+| ---------------------- | ------- | ------ |
+| AppointmentReschedule | ⚠️ Fair | 5      |
+| AppointmentList       | ✅ Good | 0      |
+| AppointmentDetail     | ✅ Good | 0      |
+| AppointmentService    | ✅ Good | 3      |
 
 ### Salon Module
 
@@ -69,7 +69,7 @@
 
 ### Critical (P0)
 
-1. Memory leaks in BookingRescheduleComponent
+1. Memory leaks in AppointmentRescheduleComponent
 2. Missing error boundaries in async operations
 3. Inconsistent error handling
 

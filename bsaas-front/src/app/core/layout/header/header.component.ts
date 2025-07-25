@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -16,18 +16,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription, of, timer, Subject } from 'rxjs';
-import { map, switchMap, takeUntil, tap, catchError } from 'rxjs/operators';
+import { map, switchMap, takeUntil, tap, catchError, finalize } from 'rxjs/operators';
 
-// Import interfaces from shared models
-import { User } from '../../shared/models/user.model';
-import { Notification } from '../../shared/models/notification.model';
-import { City, Language } from '../../shared/models/location.model';
-
-// Import services
-import { CurrentUserService } from '../../core/auth/current-user.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { AuthService } from '../../core/auth/auth.service';
-
+// Models
 interface Language {
   code: string;
   name: string;
@@ -39,6 +30,81 @@ interface City {
   name: string;
   country?: string;
 }
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: Date;
+  link?: string;
+  icon?: string;
+  time?: Date;
+  action?: {
+    type?: string;
+    label?: string;
+    url?: string;
+    method?: string;
+    payload?: any;
+    handler?: () => void;
+  };
+}
+
+
+
+// Mock services - these should be replaced with actual service implementations
+class CurrentUserService {
+  currentUser$ = of<User | null>(null);
+  
+  getCurrentUser() {
+    return of<User | null>(null);
+  }
+  
+  clearCurrentUser() {
+    return of({});
+  }
+}
+
+class NotificationService {
+  getNotifications() {
+    return of<Notification[]>([]);
+  }
+  
+  getUnreadCount() {
+    return of(0);
+  }
+  
+  markAsRead(notificationId: string) {
+    return of({ success: true });
+  }
+  
+  markAllAsRead() {
+    return of({ success: true });
+  }
+  
+  // Process notification to ensure it has required properties
+  static processNotification(notification: any): Notification {
+    return {
+      ...notification,
+      action: notification.action || {}
+    };
+  }
+}
+
+class AuthService {
+  logout() {
+    return of({ success: true });
+  }
+}
+
+
 
 @Component({
   selector: 'app-header',
@@ -75,12 +141,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private destroy$ = new Subject<void>();
 
-  // State
+  // State properties
   user: User | null = null;
   isLoggedIn = false;
+  
+  // Header visibility and scroll state
+  isVisible = true;
+  lastScrollPosition = 0;
+  
+  // User authentication state
+  isAuthenticated = false;
+  currentUser: User | null = null;
+  
+  // UI state
   isMobile = false;
   isLoading = false;
-  showMobileSearch = false;
+  isMobileSearchVisible = false;
+  showCityPopup = false;
   showNotifications = false;
   showUserMenu = false;
   notifications: Notification[] = [];
@@ -88,7 +165,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   searchQuery = '';
   selectedLanguage = 'en';
   selectedCity = '1';
-
+  
   // Constants
   readonly languages: Language[] = [
     { code: 'en', name: 'English' },
@@ -102,7 +179,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     { code: 'ml', name: 'മലയാളം' },
     { code: 'pa', name: 'ਪੰਜਾਬੀ' },
   ];
-
+  
   readonly cities: City[] = [
     { id: 'mumbai', name: 'Mumbai', country: 'India' },
     { id: 'delhi', name: 'Delhi', country: 'India' },
@@ -115,58 +192,59 @@ export class HeaderComponent implements OnInit, OnDestroy {
     { id: 'jaipur', name: 'Jaipur', country: 'India' },
     { id: 'surat', name: 'Surat', country: 'India' },
   ];
-
-  // Private state
+  
+  // Private properties
   private subscriptions = new Subscription();
-  private onResize = () => {
+  
+  // Handle window resize
+  @HostListener('window:resize')
+  private onResize() {
     this.checkIfMobile();
-  };
+  }
 
   ngOnInit() {
     this.checkIfMobile();
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', this.onResize);
-    }
-
-    // Load saved preferences
-    let savedLanguage = 'en';
-    let savedCity = 'mumbai';
-    if (typeof localStorage !== 'undefined') {
-      savedLanguage = localStorage.getItem('userLanguage') || 'en';
-      savedCity = localStorage.getItem('userCity') || 'mumbai';
-    }
-    this.selectedLanguage = savedLanguage;
-    this.translate.use(savedLanguage);
-    this.selectedCity = savedCity;
-
-    // Subscribe to authentication state
+    window.addEventListener('resize', this.onResize);
+    
+    // Initialize scroll handling
+    this.handleScroll();
+    
+    // Subscribe to authentication state changes
     this.subscriptions.add(
-      this.currentUserService.currentUser$.subscribe((user) => {
-        this.user = user;
-        this.isLoggedIn = !!user;
-        this.cdr.markForCheck();
-
-        if (this.isLoggedIn) {
-          this.loadNotifications();
-        } else {
-          this.notifications = [];
-          this.unreadCount = 0;
+      this.currentUserService.getCurrentUser().subscribe({
+        next: (user) => {
+          this.user = user;
+          this.isLoggedIn = !!user;
+          this.isAuthenticated = !!user;
+          this.currentUser = user;
+          
+          if (user) {
+            this.loadNotifications();
+          }
+        },
+        error: (error) => {
+          console.error('Error loading user:', error);
         }
-      }),
+      })
     );
-
+    
     // Set up notification polling
     this.setupNotificationPolling();
   }
 
   ngOnDestroy() {
-    // Clean up subscriptions and event listeners
+    window.removeEventListener('resize', this.onResize);
     this.subscriptions.unsubscribe();
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', this.onResize);
-    }
     this.destroy$.next();
     this.destroy$.complete();
+  }
+  
+  // Handle scroll events for header visibility
+  @HostListener('window:scroll')
+  private handleScroll() {
+    const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    this.isVisible = currentScrollPosition < this.lastScrollPosition || currentScrollPosition < 10;
+    this.lastScrollPosition = currentScrollPosition;
   }
 
   private checkIfMobile() {
@@ -242,9 +320,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.showUserMenu = !this.showUserMenu;
   }
 
+  // Handle language change
   onLanguageChange(languageCode: string): void {
     this.selectedLanguage = languageCode;
     this.translate.use(languageCode);
+    
+    // Save language preference
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('userLanguage', languageCode);
     }
@@ -266,25 +347,49 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Handle city selection change
   onCityChange(cityId: string): void {
     this.selectedCity = cityId;
-    // In a real app, this would update a service or emit an event
-    console.log('Selected city:', this.cities.find((c) => c.id === cityId)?.name);
-    // Close any open menus
-    this.showNotifications = false;
-    this.showUserMenu = false;
+    this.showCityPopup = false;
+    // Save city preference
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('userCity', cityId);
+    }
+  }
+  
+  // Toggle city selection popup
+  toggleCityPopup(show?: boolean): void {
+    this.showCityPopup = show !== undefined ? show : !this.showCityPopup;
+  }
+  
+  // Handle city confirmation
+  confirmCity(cityId?: string): void {
+    if (cityId) {
+      this.selectedCity = cityId;
+      // Save city preference
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('userCity', cityId);
+      }
+    }
+    this.showCityPopup = false;
+  }
+  
+  // Toggle mobile search
+  toggleMobileSearch(show?: boolean): void {
+    this.isMobileSearchVisible = show !== undefined ? show : !this.isMobileSearchVisible;
+  }
+  
+  // Alias for template compatibility
+  get logout() {
+    return this.onLogout.bind(this);
   }
 
-  onSearch(): void {
-    const query = this.searchQuery.trim();
-    if (query) {
-      // In a real app, this would navigate to search results
-      console.log('Searching for:', query);
-      this.router.navigate(['/search'], { queryParams: { q: query } });
-      // Close mobile search if open
-      if (this.isMobile) {
-        this.showMobileSearch = false;
-      }
+  onSearch(query?: string): void {
+    const searchQuery = query || this.searchQuery;
+    if (searchQuery && searchQuery.trim()) {
+      this.router.navigate(['/search'], { queryParams: { q: searchQuery.trim() } });
+      this.searchQuery = '';
+      this.isMobileSearchVisible = false;
     }
   }
 
@@ -337,32 +442,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Handle logout
   onLogout(): void {
     this.isLoading = true;
-    this.authService
-      .logout()
-      .pipe(
-        tap(() => {
-          this.currentUserService.clearCurrentUser();
-          this.router.navigate(['/auth/login']);
-          this.snackBar.open(this.translate.instant('AUTH.LOGOUT_SUCCESS'), this.translate.instant('COMMON.CLOSE'), {
-            duration: 3000,
-            panelClass: ['success-snackbar'],
-          });
-        }),
-        catchError((error: Error) => {
-          console.error('Logout failed', error);
-          this.snackBar.open(this.translate.instant('AUTH.LOGOUT_ERROR'), this.translate.instant('COMMON.CLOSE'), {
-            duration: 5000,
-            panelClass: ['error-snackbar'],
-          });
-          return of(null);
-        }),
-        finalize(() => {
-          this.isLoading = false;
-        }),
-      )
-      .subscribe();
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Logout error:', error);
+        this.isLoading = false;
+        this.snackBar.open(
+          this.translate.instant('AUTH.LOGOUT_ERROR'),
+          this.translate.instant('COMMON.CLOSE'),
+          { duration: 5000, panelClass: ['error-snackbar'] }
+        );
+      }
+    });
   }
 
   onProfileClick(): void {

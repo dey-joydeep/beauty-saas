@@ -26,7 +26,7 @@
 
 ## Current Compliance (auto-updated)
 
-- [x] Backend DB implementation for all modules (salon, booking, portfolio, review, user, social)
+- [x] Backend DB implementation for all modules (salon, appointment, portfolio, review, user, social)
 - [x] All function object parameters (3+ props) use named type/interface
 - [x] Backend feature completeness for Approve/Manage Staff (add, activate, deactivate, remove endpoints)
 - [x] Backend feature completeness for Social module (all CRUD endpoints now use real DB logic, all naming conventions enforced, no dummy/stub logic remains)
@@ -46,11 +46,11 @@
 - [x] ThemeService.getThemeById: Real DB fetch, output uses DB field names
 - [x] ThemeService.getThemes: Real DB fetch, output uses DB field names
 - [x] ThemeService.updateTheme: Real DB update, validates hex colors, output uses DB field names
-- [x] BookingService.getBookings: Real DB fetch, output normalized (camelCase, null fallback)
-- [x] BookingService.getBookingById: Real DB fetch, output normalized (camelCase, null fallback)
-- [x] BookingService.createBooking: Real DB insert
-- [x] BookingService.updateBooking: Real DB update
-- [x] BookingService.deleteBooking: Real DB delete
+- [x] AppointmentService.getAppointments: Real DB fetch, output normalized (camelCase, null fallback)
+- [x] AppointmentService.getAppointmentById: Real DB fetch, output normalized (camelCase, null fallback)
+- [x] AppointmentService.createAppointment: Real DB insert
+- [x] AppointmentService.updateAppointment: Real DB update
+- [x] AppointmentService.deleteAppointment: Real DB delete
 - [x] SalonService.getAllSalons: Real DB fetch, camelCase output, null fallback
 - [x] SalonService.getSalonById: Real DB fetch, camelCase output, null fallback
 - [x] SalonService.searchSalons: Real DB search, supports query, filter, sort, pagination, and rating filters

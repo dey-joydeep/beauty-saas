@@ -26,35 +26,35 @@ router.get(
   '/salons/:salonId/services',
   authenticateJWT,
   requireRole(['owner', 'admin']),
-  SalonController.getServices,
+  // SalonController.getServices,
 );
 // Approve service
 router.post(
   '/salons/:salonId/services/:serviceId/approve',
   authenticateJWT,
   requireRole(['owner', 'admin']),
-  SalonController.approveService,
+  // SalonController.approveService,
 );
 // Revoke service
 router.post(
   '/salons/:salonId/services/:serviceId/revoke',
   authenticateJWT,
   requireRole(['owner', 'admin']),
-  SalonController.revokeService,
+  // SalonController.revokeService,
 );
 // Add service
 router.post(
   '/salons/:salonId/services',
   authenticateJWT,
   requireRole(['owner', 'admin']),
-  SalonController.addService,
+  // SalonController.addService,
 );
 // Remove service
 router.delete(
   '/salons/:salonId/services/:serviceId',
   authenticateJWT,
   requireRole(['owner', 'admin']),
-  SalonController.removeService,
+  // SalonController.removeService,
 );
 
 export default router;

@@ -12,7 +12,7 @@ import userRoutes from './routes/user.routes';
 import docsRoutes from './routes/docs.routes';
 import reviewRoutes from './routes/review.routes';
 import salonRoutes from './routes/salon.routes';
-import bookingRoutes from './routes/booking.routes';
+import appointmentRoutes from './routes/appointment.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import salonStaffRequestRoutes from './routes/salon-staff-request.routes';
 import { errorHandler } from './middleware/errorHandler';
@@ -62,7 +62,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/docs', docsRoutes);
 app.use('/api', reviewRoutes);
 app.use('/api', salonRoutes);
-app.use('/api', bookingRoutes);
+app.use('/api', appointmentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/staff-requests', salonStaffRequestRoutes);
 

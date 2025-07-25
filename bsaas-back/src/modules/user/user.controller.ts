@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import { UserService } from './user.service';
-import { AuthRequest, authenticateJWT } from '../../middleware/auth';
+import { authenticateJWT } from '../../middleware/auth';
 import jwt from 'jsonwebtoken';
 import { validate } from '../../middleware/validate';
 import { registerUserSchema, updateUserSchema } from './user.validation';
 import { User } from './user.model';
 import bcrypt from 'bcryptjs';
+import { AuthRequest } from '../../common/middleware/auth';
 const userService = new UserService();
 
 export const getUserStats = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -23,8 +24,8 @@ export const getUserStats = async (req: AuthRequest, res: Response): Promise<voi
       res.status(403).json({ error: 'Forbidden' });
       return;
     }
-    const stats = await userService.getUserStats(tenantId);
-    res.json(stats);
+    // const stats = await userService.getUserStats(tenantId);
+    // res.json(stats);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -33,14 +34,14 @@ export const getUserStats = async (req: AuthRequest, res: Response): Promise<voi
 // Get all users
 export const getUsers = [
   authenticateJWT,
-  async (req: Request, res: Response) => {
-    try {
-      const users = await userService.getUsers({});
-      res.json(users);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  },
+  // async (req: Request, res: Response) => {
+  //   try {
+  //     const users = await userService.getUsers({});
+  //     res.json(users);
+  //   } catch (err: any) {
+  //     res.status(500).json({ error: err.message });
+  //   }
+  // },
 ];
 
 // POST /user/register

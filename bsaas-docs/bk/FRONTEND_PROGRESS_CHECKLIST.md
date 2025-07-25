@@ -21,19 +21,19 @@ Track the progress of each frontend feature/module through all critical phases: 
 | Product Sales Chart     |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 | Staff Dashboard         |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 
-### Booking
+### Appointment
 
-| Feature          | Coding | Unit Test | Integration Test | Edge Test | Lint Fixed |
-| ---------------- | :----: | :-------: | :--------------: | :-------: | :--------: |
-| Booking Flow UI  |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
-| Booking Calendar |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
+| Feature               | Coding | Unit Test | Integration Test | Edge Test | Lint Fixed |
+| --------------------- | :----: | :-------: | :--------------: | :-------: | :--------: |
+| Appointment Flow UI   |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
+| Appointment Calendar  |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 
 ### Services
 
 | Feature                | Coding | Unit Test | Integration Test | Edge Test | Lint Fixed |
 | ---------------------- | :----: | :-------: | :--------------: | :-------: | :--------: |
 | Services List/CRUD UI  |  [x]   |    [x]    |       [ ]        |    [ ]    |    [x]     |
-| Service Booking Widget |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
+| Service Appointment Widget |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 | Approve Services/Prod. |  [ ]   |    [ ]    |       [ ]        |    [ ]    |    [ ]     |
 
 ### Products

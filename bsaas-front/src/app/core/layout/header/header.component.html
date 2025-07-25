@@ -64,9 +64,9 @@
             <span>{{ 'HEADER.MY_PROFILE' | translate }}</span>
           </button>
 
-          <button mat-menu-item routerLink="/bookings">
+          <button mat-menu-item routerLink="/appointments">
             <mat-icon>event</mat-icon>
-            <span>{{ 'HEADER.MY_BOOKINGS' | translate }}</span>
+            <span>{{ 'HEADER.MY_APPOINTMENTS' | translate }}</span>
           </button>
 
           <button mat-menu-item routerLink="/settings">
@@ -147,13 +147,13 @@
     (keyup.enter)="onSearch(mobileSearchInput.value)"
     #mobileSearchInput
   />
-  <button mat-icon-button class="close-search" (click)="toggleMobileSearch(false)">
+  <button mat-icon-button class="close-search" (click)="isMobileSearchVisible = false">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
 <!-- City Selection Popup -->
-<div class="city-popup-overlay" *ngIf="showCityPopup" (click)="confirmCity()">
+<div class="city-popup-overlay" *ngIf="showCityPopup" (click)="showCityPopup = false">
   <div class="city-popup" (click)="$event.stopPropagation()">
     <h2>{{ 'HEADER.SELECT_YOUR_CITY' | translate }}</h2>
     <p>{{ 'HEADER.WE_USE_THIS_TO_SHOW_RELEVANT_CONTENT' | translate }}</p>
@@ -167,7 +167,7 @@
       </mat-select>
     </mat-form-field>
 
-    <button mat-flat-button color="primary" class="confirm-city-button" (click)="confirmCity()">
+    <button mat-flat-button color="primary" class="confirm-city-button" (click)="confirmCity(selectedCity)">
       {{ 'COMMON.CONFIRM' | translate }}
     </button>
   </div>

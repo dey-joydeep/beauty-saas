@@ -26,7 +26,7 @@
 - **Next Steps**: Optimize queries
 - **Owner**: @bob
 
-### Booking Module
+### Appointment Module
 
 - **Progress**: 90%
 - **Blockers**: Timezone issues

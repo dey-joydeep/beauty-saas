@@ -89,12 +89,12 @@ export class SalonService {
     return {
       id: salon.id,
       name: salon.name,
-      address: salon.address,
-      zipCode: salon.zipCode,
-      city: salon.city,
+      // address: salon.address,
+      // zipCode: salon.zipCode,
+      // city: salon.city,
       latitude: salon.latitude,
       longitude: salon.longitude,
-      services: salon.services ?? [],
+      // services: salon.services ?? [],
       ownerId: salon.ownerId,
       imageUrl: salon.imageUrl,
     };
@@ -105,12 +105,12 @@ export class SalonService {
     return {
       id: created.id,
       name: created.name,
-      address: created.address,
-      zipCode: created.zipCode,
-      city: created.city,
+      // address: created.address,
+      // zipCode: created.zipCode,
+      // city: created.city,
       latitude: created.latitude,
       longitude: created.longitude,
-      services: created.services ?? [],
+      // services: created.services ?? [],
       ownerId: created.ownerId,
       imageUrl: created.imageUrl,
     };
@@ -122,12 +122,12 @@ export class SalonService {
     return {
       id: updated.id,
       name: updated.name,
-      address: updated.address,
-      zipCode: updated.zipCode,
-      city: updated.city,
+      // address: updated.address,
+      // zipCode: updated.zipCode,
+      // city: updated.city,
       latitude: updated.latitude,
       longitude: updated.longitude,
-      services: updated.services ?? [],
+      // services: updated.services ?? [],
       ownerId: updated.ownerId,
       imageUrl: updated.imageUrl,
     };
@@ -140,46 +140,47 @@ export class SalonService {
 
   async getStaff(params: { salonId: string }): Promise<any[]> {
     // Use camelCase fields for Prisma Client
-    const staffList = await prisma.salonStaff.findMany({
-      where: { salonId: params.salonId, isDeleted: false },
-    });
-    return staffList.map((staff: any) => ({
-      userId: staff.userId,
-      salonId: staff.salonId,
-      position: staff.position,
-      isActive: staff.isActive,
-      hiredAt: staff.hiredAt,
-      isOnLeave: staff.isOnLeave,
-      isDeleted: staff.isDeleted,
-    }));
+    // const staffList = await prisma.salonStaff.findMany({
+    //   where: { salonId: params.salonId, isDeleted: false },
+    // });
+    // return staffList.map((staff: any) => ({
+    //   userId: staff.userId,
+    //   salonId: staff.salonId,
+    //   position: staff.position,
+    //   isActive: staff.isActive,
+    //   hiredAt: staff.hiredAt,
+    //   isOnLeave: staff.isOnLeave,
+    //   isDeleted: staff.isDeleted,
+    // }));
+    return [];
   }
 
   async addStaff(params: { salonId: string; staff: any }): Promise<any> {
     // Use camelCase fields for Prisma Client
-    const created = await prisma.salonStaff.create({
-      data: {
-        userId: params.staff.userId,
-        salonId: params.salonId,
-        position: params.staff.position,
-        isActive: params.staff.isActive,
-        hiredAt: params.staff.hiredAt,
-        isOnLeave: params.staff.isOnLeave,
-        isDeleted: params.staff.isDeleted,
-      },
-    });
-    return {
-      userId: created.userId,
-      salonId: created.salonId,
-      position: created.position,
-      isActive: created.isActive,
-      hiredAt: created.hiredAt,
-      isOnLeave: created.isOnLeave,
-      isDeleted: created.isDeleted,
-    };
+    // const created = await prisma.salonStaff.create({
+    //   data: {
+    //     userId: params.staff.userId,
+    //     salonId: params.salonId,
+    //     position: params.staff.position,
+    //     isActive: params.staff.isActive,
+    //     hiredAt: params.staff.hiredAt,
+    //     isOnLeave: params.staff.isOnLeave,
+    //     isDeleted: params.staff.isDeleted,
+    //   },
+    // });
+    // return {
+    //   userId: created.userId,
+    //   salonId: created.salonId,
+    //   position: created.position,
+    //   isActive: created.isActive,
+    //   hiredAt: created.hiredAt,
+    //   isOnLeave: created.isOnLeave,
+    //   isDeleted: created.isDeleted,
+    // };
   }
 
   async removeStaff(params: { staffId: string; salonId: string }): Promise<boolean> {
-    await prisma.salonStaff.delete({ where: { userId: params.staffId, salonId: params.salonId } });
+    // await prisma.salonStaff.delete({ where: { userId: params.staffId, salonId: params.salonId } });
     return true;
   }
 }

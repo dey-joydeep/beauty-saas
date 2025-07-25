@@ -76,3 +76,20 @@ export const getSalonStaffRequests = [
     }
   },
 ];
+
+export const getPendingSalonStaffRequests = [
+  authenticateJWT,
+  requireRole(['owner', 'admin']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const results = await salonStaffRequestService.getRequests({ status: 'pending' });
+      res.json(results);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(400).json({ error: err.message });
+      } else {
+        res.status(400).json({ error: 'Unknown error' });
+      }
+    }
+  },
+];

@@ -21,18 +21,18 @@ Main dashboard component that aggregates various widgets and provides an overvie
 ### Widgets
 
 1. **Stats Overview**
-   - Total Bookings
+   - Total Appointments
    - Revenue
    - New Customers
    - Occupancy Rate
 
 2. **Recent Activity**
-   - Latest bookings
+   - Latest appointments
    - System notifications
    - Staff updates
 
 3. **Performance Metrics**
-   - Booking trends
+   - Appointment trends
    - Revenue chart
    - Customer satisfaction
 

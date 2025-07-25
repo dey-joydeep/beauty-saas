@@ -46,3 +46,4 @@ coverage/
 *.swp
 *.bak
 *.tmp
+.nx/

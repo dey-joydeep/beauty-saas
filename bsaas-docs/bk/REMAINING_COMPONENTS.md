@@ -23,12 +23,12 @@ This document provides a quick overview of components that need detailed quality
 
 ## Owner Module
 
-### BookingManagementComponent
+### AppointmentManagementComponent
 
-- **Location**: `owner/booking-management/`
+- **Location**: `owner/appointment-management/`
 - **Status**: ⚠️ Needs detailed report
 - **Key Features**:
-  - Manage all bookings
+  - Manage all appointments
   - Filtering and sorting
   - Bulk actions
 
@@ -43,12 +43,12 @@ This document provides a quick overview of components that need detailed quality
 
 ## Salon Module
 
-### SalonBookingsComponent
+### SalonAppointmentsComponent
 
-- **Location**: `salon/salon-bookings/`
+- **Location**: `salon/salon-appointments/`
 - **Status**: ⚠️ Needs detailed report
 - **Key Features**:
-  - View salon bookings
+  - View salon appointments
   - Calendar view
   - Staff assignment
 

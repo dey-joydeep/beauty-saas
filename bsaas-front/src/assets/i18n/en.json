@@ -43,6 +43,15 @@
     "loading": "Loading...",
     "error": "An error occurred."
   },
+  "DASHBOARD": {
+    "STATS": {
+      "TITLE": "Statistics",
+      "CUSTOMERS": "Customers",
+      "APPOINTMENTS": "Appointments",
+      "REVENUE": "Revenue",
+      "SUBSCRIPTIONS": "Active Subscriptions"
+    }
+  },
   "errors": {
     "network": "Network error. Please check your connection.",
     "badRequest": "Bad request. Please try again.",

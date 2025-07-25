@@ -2,14 +2,14 @@
 
 ## Functional Requirements
 
-- Users can add reviews for salons only if they have a completed booking for that salon.
+- Users can add reviews for salons only if they have a completed appointment for that salon.
 - Reviews must include:
   - salon_id
   - user_id
   - rating (integer, 1-5)
   - review text (non-empty string)
 - The system must validate:
-  - User is eligible (has completed booking)
+  - User is eligible (has completed appointment)
   - Rating is between 1 and 5
   - Review text is not empty
 - Anyone can view reviews for a salon, sorted by newest first.

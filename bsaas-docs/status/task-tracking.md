@@ -12,7 +12,7 @@ This document tracks the progress of development tasks across all modules.
 | --------- | ------------------------ | ----------- | -------- | ------ | -------- |
 | Auth      | Implement password reset | In Progress | @alice   | 5      | 60%      |
 | Dashboard | Add revenue chart        | In Progress | @bob     | 8      | 30%      |
-| Booking   | Fix timezone issues      | In Review   | @charlie | 3      | 90%      |
+| Appointment   | Fix timezone issues      | In Review   | @charlie | 3      | 90%      |
 | Profile   | Update user settings     | To Do       | @dave    | 5      | 0%       |
 
 ### Upcoming Sprints
@@ -49,7 +49,7 @@ This document tracks the progress of development tasks across all modules.
 | Issue               | Module    | Blocked By          | Status               |
 | ------------------- | --------- | ------------------- | -------------------- |
 | API rate limiting   | Auth      | Infrastructure team | Waiting for approval |
-| Payment integration | Booking   | Third-party API     | In progress          |
+| Payment integration | Appointment   | Third-party API     | In progress          |
 | File upload         | Portfolio | Security review     | Pending              |
 
 ## Completed Tasks

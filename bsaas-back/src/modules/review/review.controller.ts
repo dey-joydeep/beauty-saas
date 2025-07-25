@@ -1,21 +1,25 @@
 import { Request, Response } from 'express';
 import { ReviewService } from './review.service';
-import type {
-  GetReviewsParams,
-  CreateReviewParams,
-  UpdateReviewParams,
-  DeleteReviewParams,
-  GetReviewByIdParams,
-} from './review-params.model';
+import type { NextFunction } from 'express';
+import { AppointmentService } from '../appointment/appointment.service';
 import { authenticateJWT } from '../../middleware/auth';
 import { requireRole } from '../../middleware/requireRole';
 import { validate } from '../../middleware/validate';
 import { createReviewSchema, updateReviewSchema } from './review.validation';
-import type { NextFunction } from 'express';
-import { BookingService } from '../booking/booking.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
-const reviewService = new ReviewService();
-const bookingService = new BookingService();
+// Initialize services
+const prismaService = new PrismaService();
+
+// Configure logging for development (commented out to avoid TypeScript errors)
+// prismaService.$on('query' as never, (e: any) => {
+//   console.log('Query: ' + e.query);
+//   console.log('Params: ' + e.params);
+//   console.log('Duration: ' + e.duration + 'ms');
+// });
+
+// Initialize services with their required dependencies
+const reviewService = new ReviewService(); // ReviewService doesn't take any constructor arguments
 
 function withAuthAndRole(
   roles: string[],
@@ -28,10 +32,14 @@ export const getReviews = withAuthAndRole(
   ['admin', 'owner', 'staff', 'customer'],
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const params: GetReviewsParams = { filter: req.query };
-      res.json([]); // Not implemented in service
+      // TODO: Implement review listing with proper filtering
+      // For now, return an empty array as a placeholder
+      res.json([]);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      console.error('Error fetching reviews:', err);
+      res.status(500).json({ 
+        error: err.message || 'Failed to fetch reviews' 
+      });
     }
   },
 );
@@ -42,50 +50,150 @@ export const createReview = [
   validate(createReviewSchema),
   async (req: Request, res: Response) => {
     try {
-      const { userId, salonId, rating, comment, bookingId } = req.body;
-      // Eligibility check: must have completed booking for this salon
-      const eligible = await bookingService.isUserEligibleToReview(userId, salonId);
-      if (!eligible) {
-        return res.status(403).json({ error: 'You are not eligible to review this salon.' });
+      const { userId, salonId, rating, comment, appointmentId } = req.body;
+      
+      // Verify the appointment exists and is completed
+      const appointment = await prismaService.appointment.findFirst({
+        where: { 
+          id: appointmentId,
+          status: 'completed',
+          userId: userId,
+          salonId: salonId
+        },
+        include: {
+          user: true,
+          salon: true,
+          // Include service details if needed
+          service: true
+        }
+      });
+
+      if (!appointment) {
+        return res.status(403).json({ 
+          error: 'No completed appointment found for this user and salon' 
+        });
       }
+
+      // Check if review already exists for this appointment
+      const existingReview = await prismaService.review.findFirst({
+        where: { 
+          appointmentId: appointmentId,
+          userId: userId
+        }
+      });
+
+      if (existingReview) {
+        return res.status(400).json({
+          error: 'A review already exists for this appointment'
+        });
+      }
+
       const review = await reviewService.createReview({
         userId,
         salonId,
-        bookingId,
         rating,
         comment: comment ?? null,
+        appointmentId,
       });
+      
       res.status(201).json(review);
     } catch (err: any) {
-      res.status(400).json({ error: err.message });
+      console.error('Error creating review:', err);
+      res.status(400).json({ 
+        error: err.message || 'Failed to create review' 
+      });
     }
   },
 ];
 
 export const updateReview = [
   authenticateJWT,
-  requireRole(['admin', 'owner', 'staff']),
+  requireRole(['admin', 'owner', 'staff', 'customer']),
   validate(updateReviewSchema),
   async (req: Request, res: Response) => {
     try {
-      const params: UpdateReviewParams = { id: req.params.id, data: req.body };
-      const review = await reviewService.updateReview(params.id, params.data);
-      res.json(review);
+      const { id } = req.params;
+      const { rating, comment } = req.body;
+      
+      // Get the review to check ownership
+      const review = await prismaService.review.findUnique({
+        where: { id }
+      });
+
+      if (!review) {
+        return res.status(404).json({ error: 'Review not found' });
+      }
+
+      // Check if the current user is the owner of the review
+      // or has admin/owner/staff role
+      const isOwner = review.user_id === (req as any).user?.id;
+      const isAdmin = ['admin', 'owner', 'staff'].includes((req as any).user?.role);
+      
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({ 
+          error: 'You do not have permission to update this review' 
+        });
+      }
+
+      const updatedReview = await reviewService.updateReview(id, { 
+        rating, 
+        comment: comment ?? null 
+      });
+      
+      if (!updatedReview) {
+        return res.status(404).json({ error: 'Failed to update review' });
+      }
+      
+      res.json(updatedReview);
     } catch (err: any) {
-      res.status(400).json({ error: err.message });
+      console.error('Error updating review:', err);
+      res.status(400).json({ 
+        error: err.message || 'Failed to update review' 
+      });
     }
   },
 ];
 
 export const deleteReview = withAuthAndRole(
-  ['admin', 'owner'],
+  ['admin', 'owner', 'customer'],
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const params: DeleteReviewParams = { id: req.params.id };
-      await reviewService.deleteReview(params.id);
+      const { id } = req.params;
+      const userId = (req as any).user?.id;
+      const userRole = (req as any).user?.role;
+      
+      // Get the review to check ownership
+      const review = await prismaService.review.findUnique({
+        where: { id }
+      });
+
+      if (!review) {
+        return res.status(404).json({ error: 'Review not found' });
+      }
+
+      // Check if the current user is the owner of the review
+      // or has admin/owner role
+      const isOwner = review.user_id === userId;
+      const isAdmin = ['admin', 'owner'].includes(userRole);
+      
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({ 
+          error: 'You do not have permission to delete this review' 
+        });
+      }
+
+      const deleted = await reviewService.deleteReview(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: 'Failed to delete review' });
+      }
+      
       res.status(204).end();
     } catch (err: any) {
-      res.status(400).json({ error: err.message });
+      console.error('Error deleting review:', err);
+      res.status(400).json({ 
+        error: err.message || 'Failed to delete review' 
+      });
     }
   },
 );
@@ -94,12 +202,19 @@ export const getReviewById = withAuthAndRole(
   ['admin', 'owner', 'staff', 'customer'],
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const params: GetReviewByIdParams = { id: req.params.id };
-      const review = await reviewService.getReviewById(params.id);
-      if (!review) return res.status(404).json({ error: 'Review not found' });
+      const { id } = req.params;
+      const review = await reviewService.getReviewById(id);
+      
+      if (!review) {
+        return res.status(404).json({ error: 'Review not found' });
+      }
+      
       res.json(review);
     } catch (err: any) {
-      res.status(400).json({ error: err.message });
+      console.error('Error fetching review:', err);
+      res.status(400).json({ 
+        error: err.message || 'Failed to fetch review' 
+      });
     }
   },
 );

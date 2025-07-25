@@ -30,7 +30,7 @@ Manages salon profile information, services, and staff details.
 - [x] Service list
 - [x] Add/Edit service
 - [ ] Service categories
-- [ ] Online booking settings
+- [ ] Online appointment settings
 
 ### Staff
 
@@ -108,7 +108,7 @@ Manages salon profile information, services, and staff details.
 
 ## Related Components
 
-- [SalonBookingsComponent](./salon-bookings.md)
+- [SalonAppointmentsComponent](./salon-appointments.md)
 - [StaffRequestFormComponent](./staff-request-form.md)
 
 ---
