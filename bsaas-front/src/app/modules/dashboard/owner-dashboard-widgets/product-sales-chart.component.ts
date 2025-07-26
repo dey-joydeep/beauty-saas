@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChartData, ChartOptions } from 'chart.js';
 import { NgChartsModule } from 'ng2-charts';
@@ -24,12 +24,12 @@ export class ProductSalesChartComponent {
     if (!this.tenantId) return;
     this.loading.set(true);
     this.api.getProductSales(this.tenantId).subscribe({
-      next: (res) => {
+      next: (res: ProductSalesData) => {
         this.data.set(res);
         this.loading.set(false);
         this.error.set(null);
       },
-      error: (err) => {
+      error: (err: Error) => {
         this.error.set(err.message || 'Failed to load product sales');
         this.loading.set(false);
       },

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { UpdateUserProfileParams } from '../../models/user-params.model';
+import { UpdateProfileParams } from '../../models/user-params.model';
 import { catchError } from 'rxjs/operators';
 
 export interface UserStats {
@@ -22,7 +22,7 @@ export class UserService {
   }
 
   // Update user profile (customer/staff/owner)
-  updateProfile(data: UpdateUserProfileParams | FormData): Observable<{ success: boolean }> {
+  updateProfile(data: UpdateProfileParams | FormData): Observable<{ success: boolean }> {
     // If FormData is required for file uploads, keep support for it, otherwise prefer the typed object
     return this.http.post<{ success: boolean }>(`${this.apiUrl}/update-profile`, data).pipe(catchError((err) => this.handleError(err)));
   }

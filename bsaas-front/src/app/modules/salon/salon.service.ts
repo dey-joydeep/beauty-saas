@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Salon } from '../../models/salon.model';
-import { CreateSalonParams, UpdateSalonParams } from '../../models/salon-params.model';
+import { Salon } from './models/salon.model';
+import { CreateSalonParams, UpdateSalonParams } from './models/salon-params.model';
 
 @Injectable({ providedIn: 'root' })
 export class SalonService {

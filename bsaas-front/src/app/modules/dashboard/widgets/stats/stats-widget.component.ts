@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from '../../../../core/base.component';
 import { ErrorService } from '../../../../core/error.service';
-import { DashboardStats } from '../../../../models/dashboard.model';
+import { DashboardStats } from '../../models/dashboard.model';
 
 @Component({
   selector: 'app-stats-widget',

@@ -133,7 +133,6 @@ export class AppointmentCreateComponent implements OnInit {
       staffId: staffId as string,
       startTime: new Date(startTime).toISOString(),
       endTime: endTime,
-      status: status as AppointmentStatus,
       notes: notes as string | undefined,
     };
     this.http.post('/api/appointments', appointment).subscribe({

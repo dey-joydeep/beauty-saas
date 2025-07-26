@@ -4,11 +4,10 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { SafeUrlPipe } from './safe-url.pipe';
-import { Salon } from '../../models/salon.model';
-import { Staff } from '../../models/staff.model';
-import { SalonServiceItem } from '../../models/salon-service-item.model';
-import { Review } from '../../models/review.model';
-import { Appointment, AppointmentStatus } from '../../models/appointment.model';
+import { Salon } from './models/salon.model';
+import { Staff } from '../staff/models/staff.model';
+import { Review } from '../reviews/models/review.model';
+import { Appointment, AppointmentStatus } from '../appointment/models/appointment.model';
 import { FormsModule } from '@angular/forms';
 import { StaffRequestService } from './staff-request.service';
 import { StaffRequestFormComponent } from './staff-request-form.component';
@@ -35,7 +34,7 @@ export class SalonProfileComponent extends BaseComponent implements OnInit {
   selectedDate: string = '';
   selectedTime: string = '';
   staffList: Staff[] = [];
-  serviceList: SalonServiceItem[] = [];
+  // serviceList: SalonServiceItem[] = [];
   userId: string | null = null;
 
   constructor(
@@ -58,7 +57,7 @@ export class SalonProfileComponent extends BaseComponent implements OnInit {
         next: (salon) => {
           this.salon = salon;
           this.staffList = salon.staff || [];
-          this.serviceList = salon.services || [];
+          // this.serviceList = salon.services || [];
           this.fetchReviews(salonId);
         },
         error: (err) => {
@@ -148,8 +147,8 @@ export class SalonProfileComponent extends BaseComponent implements OnInit {
       customerId: this.userId,
       staffId: this.appointment.staffId,
       serviceId: this.appointment.serviceId,
-      startTime,
-      endTime,
+      // startTime,
+      // endTime,
       status: AppointmentStatus.PENDING,
       notes: this.appointment.notes || '',
     };

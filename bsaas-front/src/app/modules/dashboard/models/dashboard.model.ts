@@ -45,6 +45,53 @@ export interface ProductSales {
   revenue: number;
 }
 
+export interface ProductSale {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  totalAmount: number;
+  saleDate: string | Date;
+  soldBy: string;
+  customerId?: string;
+  customerName?: string;
+  invoiceNumber?: string;
+}
+
+export interface ProductSalesSummary {
+  totalSales: number;
+  totalRevenue: number;
+  totalItemsSold: number;
+  averageSaleValue: number;
+  salesByProduct: Array<{
+    productId: string;
+    productName: string;
+    quantity: number;
+    revenue: number;
+  }>;
+}
+
+export interface ProductSalesFilter {
+  startDate?: string | Date;
+  endDate?: string | Date;
+  productId?: string;
+  soldById?: string;
+  customerId?: string;
+  page?: number;
+  pageSize?: number;
+  sortField?: string;
+  sortDirection?: 'asc' | 'desc';
+}
+
+export interface ProductSalesResponse {
+  data: ProductSale[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface SubscriptionData {
   subscriptionId: string;
   customerId: string;

@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { environment } from '../../../../../environments/environment';
+import { environment } from '@env/environment';
 import { 
   DashboardStats, 
   ProductSale, 
@@ -118,10 +118,12 @@ export class DashboardService {
 
     // Add filter parameters
     if (filters?.startDate) {
-      params = params.set('startDate', filters.startDate);
+      const startDate = filters.startDate instanceof Date ? filters.startDate.toISOString() : filters.startDate;
+      params = params.set('startDate', startDate);
     }
     if (filters?.endDate) {
-      params = params.set('endDate', filters.endDate);
+      const endDate = filters.endDate instanceof Date ? filters.endDate.toISOString() : filters.endDate;
+      params = params.set('endDate', endDate);
     }
     if (filters?.productId) {
       params = params.set('productId', filters.productId);
@@ -137,9 +139,9 @@ export class DashboardService {
       .pipe(
         map(response => ({
           ...response,
-          items: response.items.map(sale => ({
+          data: response.data.map(sale => ({
             ...sale,
-            saleDate: new Date(sale.saleDate)
+            saleDate: new Date(sale.saleDate as string)
           }))
         }))
       );

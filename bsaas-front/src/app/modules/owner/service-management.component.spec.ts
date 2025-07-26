@@ -22,24 +22,55 @@ describe('ServiceManagementComponent', () => {
   });
 
   it('should display error on failed service save', fakeAsync(() => {
-    serviceServiceSpy.saveService.and.returnValue(throwError(() => ({ userMessage: 'Failed to save service.' })));
-    component.serviceForm.setValue({ name: 'Test', description: 'Desc', duration: 30, price: 50 });
+    const errorResponse = { userMessage: 'Failed to save service.' };
+    serviceServiceSpy.saveService.and.returnValue(throwError(() => errorResponse));
+    component.serviceForm.setValue({ name: 'Test', description: 'Desc', duration: '30', price: '50', salonId: 'test-salon-123' });
+    
+    // Mock the auth service or set the required properties directly
+    Object.defineProperty(component, 'currentUser', {
+      get: () => ({ id: 'user-123' })
+    });
+    
     component.onSubmit();
     tick();
+    
+    expect(serviceServiceSpy.saveService).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'Test',
+      description: 'Desc',
+      duration: 30,
+      price: 50,
+      createdBy: 'user-123',
+      salonId: jasmine.any(String)
+    }));
     expect(component.error).toBe('Failed to save service.');
   }));
 
   it('should display error if required fields missing', () => {
-    component.serviceForm.setValue({ name: '', description: '', duration: '', price: '' });
+    component.serviceForm.setValue({ name: '', description: '', duration: '', price: '', salonId: '' });
     component.onSubmit();
     expect(component.error).toBe('All fields are required.');
   });
 
   it('should call saveService on valid submit', fakeAsync(() => {
-    serviceServiceSpy.saveService.and.returnValue(of({ success: true }));
-    component.serviceForm.setValue({ name: 'Test', description: 'Desc', duration: 30, price: 50 });
+    const mockResponse = { success: true };
+    serviceServiceSpy.saveService.and.returnValue(of(mockResponse));
+    
+    // Mock the auth service or set the required properties directly
+    Object.defineProperty(component, 'currentUser', {
+      get: () => ({ id: 'user-123' })
+    });
+    
+    component.serviceForm.setValue({ name: 'Test', description: 'Desc', duration: '30', price: '50', salonId: 'test-salon-123' });
     component.onSubmit();
     tick();
-    expect(serviceServiceSpy.saveService).toHaveBeenCalled();
+    
+    expect(serviceServiceSpy.saveService).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'Test',
+      description: 'Desc',
+      duration: 30,
+      price: 50,
+      createdBy: 'user-123',
+      salonId: jasmine.any(String)
+    }));
   }));
 });

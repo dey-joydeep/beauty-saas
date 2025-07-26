@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AuthUser } from './auth.service';
 
 // Angular Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -189,20 +190,20 @@ export class LoginComponent extends AuthBaseComponent implements OnInit, OnDestr
     this.authSub = this.authService
       .verifyOtp({
         email: this.email,
-        password: this.password,
         otp,
+        type: 'login' // Specify the type of OTP verification
       })
       .subscribe({
-        next: (res: { token: string; user: any } | undefined) => {
-          if (!res) {
+        next: (user: AuthUser) => {
+          if (!user) {
             this.error = 'Login failed: No response from server.';
             this.loading = false;
             return;
           }
 
           // Store token if available
-          if (res.token) {
-            localStorage.setItem('authToken', res.token);
+          if (user.accessToken) {
+            localStorage.setItem('authToken', user.accessToken);
           }
 
           this.loading = false;
@@ -275,8 +276,11 @@ export class LoginComponent extends AuthBaseComponent implements OnInit, OnDestr
     }
 
     // In a real implementation, this would open a popup or redirect to the provider's OAuth page
-    // For now, we'll simulate the OAuth flow with a delay
-    this.authSub = this.authService.socialLogin(provider).subscribe({
+    // and return an OAuth token. For now, we'll simulate the OAuth flow with a delay
+    // In a real app, you would get the token from the OAuth provider's response
+    const oauthToken = 'simulated-oauth-token';
+    
+    this.authSub = this.authService.socialLogin(provider, oauthToken).subscribe({
       next: (res: any) => {
         if (res.token) {
           localStorage.setItem('authToken', res.token);

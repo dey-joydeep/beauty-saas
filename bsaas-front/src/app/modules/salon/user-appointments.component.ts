@@ -4,9 +4,11 @@ import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { CurrentUserService } from '../../shared/current-user.service';
-import { Appointment, AppointmentStatus } from '../../models/appointment.model';
+import { Appointment, AppointmentStatus } from '../appointment/models/appointment.model';
 
-interface AppointmentWithDetails extends Appointment {
+interface AppointmentWithDetails extends Omit<Appointment, 'startTime' | 'endTime'> {
+  startTime: string | Date;  // Allow both string and Date for flexibility
+  endTime: string | Date;    // Allow both string and Date for flexibility
   salon?: {
     id: string;
     name: string;
@@ -54,12 +56,27 @@ export class UserAppointmentsComponent implements OnInit {
   loadAppointments(): void {
     this.loading = true;
     this.error = null;
+    
     this.http.get<AppointmentWithDetails[]>(`/api/user/${this.userId}/appointments`).subscribe({
       next: (data) => {
         this.appointments = data.map(appt => ({
           ...appt,
-          startTime: new Date(appt.startTime),
-          endTime: new Date(appt.endTime)
+          // Convert string dates to Date objects if they're not already
+          startTime: typeof appt.startTime === 'string' ? new Date(appt.startTime) : appt.startTime,
+          endTime: typeof appt.endTime === 'string' ? new Date(appt.endTime) : appt.endTime,
+          // Ensure nested objects are properly typed
+          salon: appt.salon ? {
+            id: appt.salon.id,
+            name: appt.salon.name
+          } : undefined,
+          service: appt.service ? {
+            id: appt.service.id,
+            name: appt.service.name
+          } : undefined,
+          staff: appt.staff ? {
+            id: appt.staff.id,
+            name: appt.staff.name
+          } : undefined
         }));
         this.loading = false;
       },

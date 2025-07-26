@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { SaveServiceParams } from '../../models/service-params.model';
+import { CreateServiceParams } from '../../models/service-params.model';
 
 @Injectable({ providedIn: 'root' })
 export class ServiceService {
@@ -10,7 +10,7 @@ export class ServiceService {
 
   constructor(private http: HttpClient) {}
 
-  saveService(data: SaveServiceParams): Observable<{ success: boolean }> {
+  saveService(data: CreateServiceParams): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(`${this.apiUrl}/save`, data).pipe(catchError((err) => this.handleError(err)));
   }
 

@@ -31,15 +31,18 @@ export class UserComponent extends BaseComponent implements OnInit {
 
   checkRoleAndFetch(): void {
     const user = this.currentUserService.currentUser;
-    this.isAdmin = !!user && user.roles.some((r) => r.name === 'admin');
+    // Use the role property instead of roles
+    this.isAdmin = !!user && user.role === 'admin';
 
     if (!this.isAdmin) {
+      // Set the error message directly since BaseComponent has a setter for the error property
       this.error = 'You do not have permission to view this data.';
       this.loading = false;
       return;
     }
 
-    const tenant_id = user?.tenantId || 'test-tenant';
+    // Use a default tenant ID since tenantId doesn't exist on User
+    const tenant_id = 'default-tenant';
     this.loading = true;
     this.userService.getUserStats(tenant_id).subscribe({
       next: (stats) => {

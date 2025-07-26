@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardApiService, Renewal } from '../../../shared/dashboard-api.service';
 
@@ -21,12 +21,12 @@ export class RenewalsListComponent {
     if (!this.tenantId) return;
     this.loading.set(true);
     this.api.getRenewals(this.tenantId).subscribe({
-      next: (res) => {
+      next: (res: Renewal[]) => {
         this.renewals.set(res);
         this.loading.set(false);
         this.error.set(null);
       },
-      error: (err) => {
+      error: (err: Error) => {
         this.error.set(err.message || 'Failed to load renewals');
         this.loading.set(false);
       },

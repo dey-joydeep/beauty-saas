@@ -1,13 +1,14 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserComponent } from './user.component';
 import { UserService } from './user.service';
 import { of, throwError } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { sharedTestProviders } from '../../shared/test-setup';
+import { By } from '@angular/platform-browser';
 
 const adminToken = `
   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
@@ -23,77 +24,155 @@ const userToken = `
 
 describe('UserComponent', () => {
   let component: UserComponent;
-  let fixture: any;
-  let userServiceSpy: any;
+  let fixture: ComponentFixture<UserComponent>;
+  let userServiceSpy: jasmine.SpyObj<UserService>;
+  let translateService: TranslateService;
 
   beforeEach(async () => {
     userServiceSpy = jasmine.createSpyObj('UserService', ['getUserStats']);
+    
     await TestBed.configureTestingModule({
-      imports: [CommonModule, UserComponent, TranslateModule.forRoot()],
-      providers: [{ provide: UserService, useValue: userServiceSpy }, ...sharedTestProviders],
+      imports: [
+        CommonModule, 
+        UserComponent, 
+        TranslateModule.forRoot()
+      ],
+      providers: [
+        { provide: UserService, useValue: userServiceSpy }, 
+        ...sharedTestProviders
+      ],
     }).compileComponents();
+    
     fixture = TestBed.createComponent(UserComponent);
     component = fixture.componentInstance;
+    translateService = TestBed.inject(TranslateService);
+    
+    // Set up translations
+    translateService.setTranslation('en', {
+      'USER.ERRORS.PERMISSION_DENIED': 'You do not have permission to view this data.',
+      'USER.ERRORS.SESSION_EXPIRED': 'Your session has expired. Please log in again.',
+      'USER.ERRORS.FORBIDDEN': 'You do not have permission to access this resource.'
+    });
+    translateService.use('en');
   });
 
   it('should show stats for admin', () => {
+    // Setup test data
+    const mockStats = {
+      businessCount: 2,
+      customerCount: 5,
+      activeBusiness: 1,
+      activeCustomer: 3,
+    };
+
+    // Mock localStorage
     spyOn(localStorage, 'getItem').and.callFake((key: string) => {
       if (key === 'token') return adminToken;
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
-    userServiceSpy.getUserStats.and.returnValue(
-      of({
-        businessCount: 2,
-        customerCount: 5,
-        activeBusiness: 1,
-        activeCustomer: 3,
-      }),
-    );
+    
+    // Setup service response
+    userServiceSpy.getUserStats.and.returnValue(of(mockStats));
+    
+    // Trigger change detection
     fixture.detectChanges();
+    
+    // Test public property
     expect(component.isAdmin).toBeTrue();
-    expect(component.stats).toEqual({
-      businessCount: 2,
-      customerCount: 5,
-      activeBusiness: 1,
-      activeCustomer: 3,
-    });
-    expect(component.error).toBeNull();
+    
+    // Check if the stats are rendered in the DOM
+    const statElements = fixture.debugElement.queryAll(By.css('.stat-card'));
+    expect(statElements.length).toBe(4);
+    
+    // Check if the stats are displayed correctly
+    const statText = fixture.debugElement.nativeElement.textContent;
+    expect(statText).toContain('2'); // businessCount
+    expect(statText).toContain('5'); // customerCount
+    expect(statText).toContain('1'); // activeBusiness
+    expect(statText).toContain('3'); // activeCustomer
+    
+    // Verify no error message is shown
+    const errorElement = fixture.debugElement.query(By.css('.error-message'));
+    expect(errorElement).toBeNull();
   });
 
   it('should block stats for non-admin', () => {
+    // Mock localStorage for non-admin
     spyOn(localStorage, 'getItem').and.callFake((key: string) => {
       if (key === 'token') return userToken;
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
+    
+    // No need to set up getUserStats as it shouldn't be called for non-admin
+    userServiceSpy.getUserStats.and.throwError('getUserStats should not be called for non-admin');
+    
+    // Trigger change detection
     fixture.detectChanges();
+    
+    // Test public property
     expect(component.isAdmin).toBeFalse();
-    expect(component.stats).toBeNull();
-    expect(component.error).toContain('permission');
+    
+    // Check if the error message is displayed in the DOM
+    const errorElement = fixture.debugElement.query(By.css('.error-message'));
+    expect(errorElement).toBeTruthy();
+    expect(errorElement.nativeElement.textContent).toContain('permission');
+    
+    // Verify no stats are shown
+    const statElements = fixture.debugElement.queryAll(By.css('.stat-card'));
+    expect(statElements.length).toBe(0);
   });
 
   it('should show session expired for 401', () => {
+    // Mock localStorage
     spyOn(localStorage, 'getItem').and.callFake((key: string) => {
       if (key === 'token') return adminToken;
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
-    userServiceSpy.getUserStats.and.returnValue(throwError({ status: 401 }));
+    
+    // Setup error response
+    userServiceSpy.getUserStats.and.returnValue(throwError(() => ({
+      status: 401,
+      error: { message: 'Session expired' }
+    })));
+    
+    // Trigger change detection
     fixture.detectChanges();
+    
+    // Test public property
     expect(component.isAdmin).toBeTrue();
-    expect(component.error).toContain('session');
+    
+    // Check if the error message is displayed in the DOM
+    const errorElement = fixture.debugElement.query(By.css('.error-message'));
+    expect(errorElement).toBeTruthy();
+    expect(errorElement.nativeElement.textContent).toContain('session');
   });
 
   it('should show forbidden for 403', () => {
+    // Mock localStorage
     spyOn(localStorage, 'getItem').and.callFake((key: string) => {
       if (key === 'token') return adminToken;
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
-    userServiceSpy.getUserStats.and.returnValue(throwError({ status: 403 }));
+    
+    // Setup error response
+    userServiceSpy.getUserStats.and.returnValue(throwError(() => ({
+      status: 403,
+      error: { message: 'Forbidden' }
+    })));
+    
+    // Trigger change detection
     fixture.detectChanges();
+    
+    // Test public property
     expect(component.isAdmin).toBeTrue();
-    expect(component.error).toContain('permission');
+    
+    // Check if the error message is displayed in the DOM
+    const errorElement = fixture.debugElement.query(By.css('.error-message'));
+    expect(errorElement).toBeTruthy();
+    expect(errorElement.nativeElement.textContent).toContain('permission');
   });
 });

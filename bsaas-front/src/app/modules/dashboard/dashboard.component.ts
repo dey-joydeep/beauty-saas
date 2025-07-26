@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, HostListener, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -43,10 +43,31 @@ export class DashboardComponent extends BaseComponent {
   };
 
   // Breakpoint configuration for responsive design
-  breakpoint: number;
+  breakpoint: number = 1; // Default to 1 column
 
   constructor(@Inject(ErrorService) protected override errorService: ErrorService) {
     super(errorService);
     this.tenantId = localStorage.getItem('tenantId') || DashboardComponent.tenantId;
+    this.setBreakpoint(window.innerWidth);
+  }
+
+  /**
+   * Sets the number of columns based on screen width
+   * @param width The current window width in pixels
+   */
+  private setBreakpoint(width: number): void {
+    if (width <= 768) {
+      this.breakpoint = 1; // 1 column on mobile
+    } else if (width <= 1200) {
+      this.breakpoint = 2; // 2 columns on tablet
+    } else {
+      this.breakpoint = 3; // 3 columns on desktop
+    }
+  }
+
+  // Handle window resize events
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any): void {
+    this.setBreakpoint(event.target.innerWidth);
   }
 }

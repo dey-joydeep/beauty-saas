@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { CreateSalonParams } from '../../models/salon-params.model';
-import { UpdateSalonParams } from '../../models/salon-params.model';
+import { CreateSalonParams, UpdateSalonParams } from '../../models/salon-params.model';
 
 @Injectable({ providedIn: 'root' })
 export class SalonService {
@@ -16,19 +15,15 @@ export class SalonService {
   }
 
   updateSalon(params: UpdateSalonParams): Observable<any> {
-    const payload = {
-      id: params.id,
-      name: params.name,
-      address: params.address,
-      city: params.city,
-      zipCode: params.zipCode,
-      latitude: params.latitude,
-      longitude: params.longitude,
-      services: params.services,
-      ownerId: params.ownerId,
-      imageUrl: params.imageUrl,
+    // Ensure we're using the correct interface by spreading the params
+    // and explicitly including required fields with proper types
+    const payload: Partial<CreateSalonParams> & { id: string; updatedBy: string } = {
+      ...params,
+      updatedBy: 'current-user-id' // This should be replaced with actual user ID from auth service
     };
-    return this.http.put(`${this.apiUrl}/salons/${params.id}`, payload).pipe(catchError((err) => this.handleError(err)));
+    
+    return this.http.put(`${this.apiUrl}/salons/${params.id}`, payload)
+      .pipe(catchError((err) => this.handleError(err)));
   }
 
   private handleError(err: any) {

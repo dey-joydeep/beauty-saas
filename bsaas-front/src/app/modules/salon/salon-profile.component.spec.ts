@@ -69,6 +69,7 @@ describe('SalonProfileComponent', () => {
     req2.flush(mockReviews);
     expect(component.salon).toEqual(jasmine.objectContaining({ id: '1', name: 'Salon Test' }));
     expect(component.reviews.length).toBe(1);
-    expect(component.loading).toBeFalse();
+    // Use type assertion to access protected loading property for testing
+    expect((component as any).loading).toBeFalse();
   });
 });

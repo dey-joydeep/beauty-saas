@@ -18,7 +18,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
-import { Appointment, AppointmentStatus, TimeSlot } from '../../../models/appointment.model';
+import { Appointment, AppointmentStatus, TimeSlot } from '../models/appointment.model';
 import { LoadingService } from '../../../core/services/loading.service';
 import { AppointmentService } from '../services/appointment.service';
 
@@ -277,16 +277,12 @@ export class AppointmentRescheduleComponent implements OnInit, OnDestroy {
   }
 
   private loadAvailableTimeSlots(): void {
-    if (!this.appointment) {
-      return;
-    }
-
-    const selectedDate = this.dateTimeFormGroup.get('date')?.value;
-    if (!selectedDate) {
-      return;
-    }
-
+    if (!this.appointment || !this.selectedDate) return;
+    
+    this.isLoading = true;
     this.loadingService.show();
+    
+    const selectedDate = this.selectedDate;
     
     // Calculate duration in minutes
     const durationMinutes = this.calculateDurationInMinutes(this.appointment);
@@ -304,12 +300,20 @@ export class AppointmentRescheduleComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (timeSlots) => {
-          this.availableTimeSlots = timeSlots.map(slot => ({
-            ...slot,
-            time: slot.startTime || slot.time || new Date().toISOString(),
-            display: this.formatTime(slot.startTime || slot.time || new Date().toISOString()),
-            available: slot.available !== false
-          }));
+          // Map the time slots to the expected format
+          this.availableTimeSlots = timeSlots.map(slot => {
+            const slotStart = typeof slot.slotStart === 'string' ? new Date(slot.slotStart) : slot.slotStart;
+            const slotEnd = typeof slot.slotEnd === 'string' ? new Date(slot.slotEnd) : slot.slotEnd;
+            
+            return {
+              ...slot,
+              time: slotStart.toISOString(),
+              display: this.formatTime(slotStart),
+              available: slot.available !== false,
+              slotStart,
+              slotEnd
+            };
+          });
           
           // Auto-select first available time slot if none selected
           if (!this.dateTimeFormGroup.get('time')?.value && this.availableTimeSlots.length > 0) {

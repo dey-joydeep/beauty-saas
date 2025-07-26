@@ -52,7 +52,7 @@ export class ProfileSettingsComponent implements OnInit {
     const user = this.currentUserService.currentUser;
     if (user) {
       this.profileForm.patchValue({
-        name: user.name,
+        name: `${user.firstName} ${user.lastName}`.trim(), // Combine firstName and lastName
         email: user.email,
         contact: user.phone || '',
       });

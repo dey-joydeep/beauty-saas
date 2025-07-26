@@ -24,9 +24,8 @@ describe('AppointmentCreateComponent', () => {
       staffId: '', 
       startTime: '', 
       endTime: '', 
-      notes: '' 
+      notes: ''
     });
-    component.appointmentForm.patchValue({ customerId: 'user1' });
     component.submit();
     expect(component.error).toBe('Salon, service, and time are required.');
   });
@@ -39,10 +38,9 @@ describe('AppointmentCreateComponent', () => {
       staffId: 'staff1', 
       startTime: '2023-01-01T10:00:00', 
       endTime: '2023-01-01T11:00:00', 
-      notes: '',
-      status: 'PENDING'
+      notes: ''
     });
-    component.appointmentForm.patchValue({ customerId: 'user1' });
+    component['userId'] = 'user1';
     component.submit();
     tick();
     expect(component.error).toBe('Failed to create appointment.');
@@ -59,13 +57,12 @@ describe('AppointmentCreateComponent', () => {
       staffId: 'staff1', 
       startTime: '2023-01-01T10:00:00', 
       endTime: '2023-01-01T11:00:00', 
-      notes: '',
-      status: 'PENDING',
-      customerId: 'user1'
+      notes: ''
     });
+    component['userId'] = 'user1';
     component.submit();
     tick();
-    expect(component['router'].navigate).toHaveBeenCalledWith(['/appointments']);
+    expect(component['router'].navigate).toHaveBeenCalledWith(['/user/appointments']);
     expect(component.success).toBe('Appointment created!');
   }));
 });

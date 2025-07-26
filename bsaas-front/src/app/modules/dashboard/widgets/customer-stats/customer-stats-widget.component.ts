@@ -9,7 +9,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from '../../../../core/base.component';
 import { ErrorService } from '../../../../core/error.service';
 import { DashboardService } from '../../dashboard.service';
-import { DashboardStats } from '../../../../models/dashboard.model';
+import { DashboardStats } from '../../models/dashboard.model';
 import { Subscription } from 'rxjs';
 
 @Component({

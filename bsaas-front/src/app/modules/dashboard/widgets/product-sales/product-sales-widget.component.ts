@@ -7,7 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from '../../../../core/base.component';
 import { ErrorService } from '../../../../core/error.service';
-import { ProductSales } from '../../../../models/dashboard.model';
+import { ProductSales } from '../../models/dashboard.model';
 import { DashboardService } from '../../../dashboard/dashboard.service';
 import { map } from 'rxjs/operators';
 

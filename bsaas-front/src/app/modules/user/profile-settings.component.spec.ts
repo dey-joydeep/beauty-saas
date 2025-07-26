@@ -23,21 +23,39 @@ describe('ProfileSettingsComponent', () => {
 
   it('should display error on failed profile update', fakeAsync(() => {
     userServiceSpy.updateProfile.and.returnValue(throwError(() => ({ userMessage: 'Failed to update profile.' })));
-    component.profileForm.setValue({ name: 'Test', email: 'test@test.com', contact: '123', avatar: null });
+    component.profileForm.setValue({ 
+      name: 'Test', 
+      email: 'test@test.com', 
+      contact: '123', 
+      password: '',
+      profilePicture: null 
+    });
     component.onSubmit();
     tick();
     expect(component.error).toBe('Failed to update profile.');
   }));
 
   it('should display error if required fields missing', () => {
-    component.profileForm.setValue({ name: '', email: '', contact: '', avatar: null });
+    component.profileForm.setValue({ 
+      name: '', 
+      email: '', 
+      contact: '', 
+      password: '',
+      profilePicture: null 
+    });
     component.onSubmit();
     expect(component.error).toBe('All fields are required.');
   });
 
   it('should call updateProfile on valid submit', fakeAsync(() => {
     userServiceSpy.updateProfile.and.returnValue(of({ success: true }));
-    component.profileForm.setValue({ name: 'Test', email: 'test@test.com', contact: '123', avatar: null });
+    component.profileForm.setValue({ 
+      name: 'Test', 
+      email: 'test@test.com', 
+      contact: '123',
+      password: '',
+      profilePicture: null 
+    });
     component.onSubmit();
     tick();
     expect(userServiceSpy.updateProfile).toHaveBeenCalled();

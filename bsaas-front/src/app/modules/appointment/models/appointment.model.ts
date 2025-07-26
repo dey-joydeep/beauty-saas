@@ -29,12 +29,28 @@ export interface AppointmentRequest {
   serviceId?: string;
   staffId?: string;
   salonId?: string;
-  startTime: Date;
-  endTime: Date;
+  startTime: Date | string;
+  endTime: Date | string;
   notes?: string;
 }
 
 export interface AppointmentResponse extends Appointment {}
+
+export interface AppointmentWithDetails extends Appointment {
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  serviceName: string;
+  serviceDuration: number;
+  servicePrice: number;
+  staffName: string;
+  salonName: string;
+  paymentStatus?: string;
+  amountPaid?: number;
+  totalAmount?: number;
+  createdBy?: string;
+  metadata?: Record<string, any>;
+}
 
 export interface AppointmentListResponse {
   data: Appointment[];

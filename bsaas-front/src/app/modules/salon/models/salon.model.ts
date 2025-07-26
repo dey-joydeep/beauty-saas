@@ -20,5 +20,5 @@ export interface Salon {
 }
 
 import { SalonServiceItem } from './salon-service-item.model';
-import { Staff } from './staff.model';
-import { Review } from './review.model';
+import { Staff } from '../../staff/models/staff.model';
+import { Review } from '../../reviews/models/review.model';

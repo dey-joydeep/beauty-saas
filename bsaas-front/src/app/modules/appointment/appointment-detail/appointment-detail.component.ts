@@ -7,12 +7,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { first } from 'rxjs/operators';
 
-import { Appointment, AppointmentStatus } from '../../../models/appointment.model';
+import { Appointment, AppointmentStatus, AppointmentWithDetails } from '../models/appointment.model';
 import { AppointmentService } from '../services/appointment.service';
 import { AppointmentCancelDialogComponent } from '../appointment-cancel-dialog/appointment-cancel-dialog.component';
 
@@ -35,7 +35,8 @@ import { AppointmentCancelDialogComponent } from '../appointment-cancel-dialog/a
   styleUrls: ['./appointment-detail.component.scss'],
 })
 export class AppointmentDetailComponent implements OnInit, OnDestroy {
-  appointment: Appointment | null = null;
+  // The appointment to display with all details
+  appointment: AppointmentWithDetails | null = null;
   isLoading = true;
   isUpdating = false;
   // Make enum available in template
@@ -132,19 +133,9 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
     const subscription = this.appointmentService.getAppointment(id).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe({
-      next: (appointment: Appointment) => {
-        // Create a new object with the correct types
-        const formattedAppointment: Appointment = {
-          ...appointment,
-          // Ensure dates are properly formatted
-          appointmentDate: new Date(appointment.appointmentDate).toISOString().split('T')[0],
-          startTime: appointment.startTime,
-          endTime: appointment.endTime,
-          // Convert string dates to Date objects for the template
-          createdAt: new Date(appointment.createdAt).toISOString(),
-          updatedAt: new Date(appointment.updatedAt).toISOString()
-        };
-        this.appointment = formattedAppointment;
+      next: (appointment: AppointmentWithDetails) => {
+        // Use the appointment as is since the API should return it in the correct format
+        this.appointment = appointment;
       },
       error: (error: any) => {
         console.error('Error loading appointment:', error);
@@ -161,23 +152,39 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.push(subscription);
   }
 
-  private getMockAppointment(id: string): Appointment {
+  private getMockAppointment(id: string): AppointmentWithDetails {
     const now = new Date();
     const oneHourLater = new Date(now.getTime() + 3600000); // 1 hour later
+    const appointmentDate = now.toISOString().split('T')[0]; // Just the date part
     
     return {
       id,
       customerId: '1',
+      customerName: 'Test Customer',
+      customerEmail: 'test@example.com',
+      customerPhone: '123-456-7890',
       serviceId: '1',
+      serviceName: 'Test Service',
+      serviceDuration: 60,
+      servicePrice: 50,
       staffId: '1',
+      staffName: 'Test Staff',
       salonId: '1',
-      appointmentDate: now.toISOString().split('T')[0],
-      startTime: now.toTimeString().substring(0, 5), // HH:mm format
-      endTime: oneHourLater.toTimeString().substring(0, 5), // HH:mm format
+      salonName: 'Test Salon',
+      // Required by Appointment interface
+      appointmentDate: appointmentDate,
+      // Additional details for the view
+      startTime: now.toISOString(),
+      endTime: oneHourLater.toISOString(),
       status: AppointmentStatus.CONFIRMED,
       notes: 'Test appointment',
+      paymentStatus: 'paid',
+      amountPaid: 50,
+      totalAmount: 50,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
+      createdBy: 'system',
+      metadata: {}
     };
   }
 

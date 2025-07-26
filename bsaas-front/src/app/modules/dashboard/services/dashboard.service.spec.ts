@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { environment } from '../../../../../environments/environment';
+import { environment } from '@env/environment';
 
 import { DashboardService } from './dashboard.service';
 import { ProductSalesFilter } from '../models/dashboard.model';
@@ -30,7 +30,7 @@ describe('DashboardService', () => {
 
   describe('getProductSales', () => {
     const mockResponse = {
-      items: [
+      data: [
         {
           id: '1',
           productId: 'p1',
@@ -39,8 +39,8 @@ describe('DashboardService', () => {
           unitPrice: 25,
           totalAmount: 50,
           saleDate: '2023-01-01T00:00:00.000Z',
-          soldById: 'u1',
-          soldByName: 'Test User'
+          soldBy: 'u1',
+          customerName: 'Test User'
         }
       ],
       total: 1,
@@ -53,8 +53,8 @@ describe('DashboardService', () => {
       const filters: ProductSalesFilter = {};
       
       service.getProductSales(filters).subscribe(response => {
-        expect(response.items.length).toBe(1);
-        expect(response.items[0].productName).toBe('Test Product');
+        expect(response.data.length).toBe(1);
+        expect(response.data[0].productName).toBe('Test Product');
         expect(response.total).toBe(1);
       });
 

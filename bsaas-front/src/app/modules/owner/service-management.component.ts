@@ -30,35 +30,51 @@ export class ServiceManagementComponent {
   loading = false;
   error: string | null = null;
   success: string | null = null;
+  private currentUser: { id: string };
 
   constructor(
     private fb: FormBuilder,
     private serviceService: ServiceService,
   ) {
+    // In a real app, you would get this from your auth service
+    this.currentUser = { id: 'current-user-id' };
+    
     this.serviceForm = this.fb.group({
       name: ['', Validators.required],
       description: [''],
-      duration: ['', Validators.required],
-      price: ['', Validators.required],
+      duration: ['', [Validators.required, Validators.min(1)]],
+      price: ['', [Validators.required, Validators.min(0)]],
+      salonId: ['salon-123', Validators.required], // In a real app, this would come from the current context
     });
   }
 
   onSubmit() {
-    if (this.serviceForm.invalid) return;
-    this.loading = true;
-    this.error = null;
-    // Ensure all required fields are present and not null
-    const { name, description, duration, price } = this.serviceForm.value;
-    if (!name || !description || !duration || !price) {
-      this.loading = false;
-      this.error = 'All fields are required.';
+    if (this.serviceForm.invalid) {
+      // Mark all fields as touched to show validation messages
+      Object.values(this.serviceForm.controls).forEach(control => {
+        control.markAsTouched();
+      });
       return;
     }
+    
+    this.loading = true;
+    this.error = null;
+    
+    const { name, description, duration, price, salonId } = this.serviceForm.value;
+    
+    if (!name || duration === null || price === null || !salonId) {
+      this.loading = false;
+      this.error = 'All required fields must be filled out.';
+      return;
+    }
+    
     const service = {
       name: name as string,
-      description: description as string,
+      description: description as string || '',
       duration: Number(duration),
       price: Number(price),
+      salonId: salonId as string,
+      createdBy: this.currentUser.id
     };
     this.serviceService.saveService(service).subscribe({
       next: (res: { success: boolean }) => {

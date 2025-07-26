@@ -1,9 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject, timer } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, takeUntil } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import { StorageService } from '../services/storage.service';
-import { User } from '../../shared/models/user.model';
+import { User } from '../../models/user.model';
 
 const USER_STORAGE_KEY = 'current_user';
 
@@ -133,15 +133,38 @@ export class CurrentUserService implements OnDestroy {
    * Set up authentication state subscription
    */
   private setupAuthState(): void {
-    // Listen for authentication state changes
-    this.authService
-      .isAuthenticated()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((isAuthenticated) => {
-        if (!isAuthenticated) {
+    // Initial check
+    this.checkAuthState();
+    
+    // Set up polling for auth state changes
+    const POLLING_INTERVAL = 30000; // 30 seconds
+    
+    // Use timer to create a polling interval
+    timer(0, POLLING_INTERVAL)
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: () => this.checkAuthState(),
+        error: (error: any) => {
+          console.error('Error in auth state polling:', error);
           this.clearUser();
         }
       });
+  }
+  
+  /**
+   * Check the current authentication state and update the user accordingly
+   */
+  private checkAuthState(): void {
+    const isAuthenticated = this.authService.isAuthenticated();
+    
+    if (!isAuthenticated) {
+      this.clearUser();
+    } else if (!this.currentUser) {
+      // If authenticated but no user data, try to load from storage
+      this.loadUserFromStorage();
+    }
   }
 
   /**

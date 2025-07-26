@@ -8,7 +8,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { StaffService } from './staff.service';
-import { Staff } from '../../models/staff.model';
+import { Staff } from '../staff/models/staff.model';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({

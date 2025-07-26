@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UpdateThemeParams } from '../../models/theme-params.model';
+import { UpdateThemeParams } from './models/theme-params.model';
 import { map } from 'rxjs/operators';
 
 export interface Theme {

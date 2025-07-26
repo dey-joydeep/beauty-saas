@@ -1,15 +1,14 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { Router } from '@angular/router';
 
 // Models
-import { User } from '../../shared/models/user.model';
 
 // Services
-import { StorageService } from '../services/storage.service';
 import { NotificationService } from '../services/notification.service';
+import { StorageService } from '../services/storage.service';
 
 // Interfaces
 interface VerifyPasswordResetParams {

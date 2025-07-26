@@ -81,8 +81,8 @@ export class AppointmentCancelDialogComponent {
   }
 
   get appointmentDate(): string {
-    return this.data.appointment.appointmentDate
-      ? new Date(this.data.appointment.appointmentDate).toLocaleDateString()
+    return this.data.appointment.startTime
+      ? new Date(this.data.appointment.startTime).toLocaleDateString()
       : '';
   }
 

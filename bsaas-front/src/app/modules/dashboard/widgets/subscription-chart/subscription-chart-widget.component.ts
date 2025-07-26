@@ -7,7 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from '../../../../core/base.component';
 import { ErrorService } from '../../../../core/error.service';
-import { SubscriptionData } from '../../../../models/dashboard.model';
+import { SubscriptionData } from '../../models/dashboard.model';
 
 interface ChartData {
   month: string;

@@ -20,13 +20,23 @@ describe('PortfolioService', () => {
   });
 
   it('should handle error responses gracefully', () => {
-    service.savePortfolio({ title: 'Test', description: 'Desc', image: null }).subscribe({
+    const testError = { userMessage: 'Failed to save portfolio.' };
+    const testParams = {
+      salonId: 'test-salon',
+      createdBy: 'test-user',
+      title: 'Test Portfolio',
+      description: 'Test description',
+      imageUrl: 'test.jpg'
+    };
+
+    service.createPortfolioItem(testParams).subscribe({
       next: () => fail('should have errored'),
-      error: (err) => {
+      error: (err: any) => {
         expect(err.userMessage || err.error || err.message).toBeDefined();
       },
     });
+
     const req = httpMock.expectOne('/api/portfolio');
-    req.flush({ userMessage: 'Failed to save portfolio.' }, { status: 500, statusText: 'Server Error' });
+    req.flush(testError, { status: 500, statusText: 'Server Error' });
   });
 });

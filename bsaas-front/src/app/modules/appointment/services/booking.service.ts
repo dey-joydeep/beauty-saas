@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
-import { Appointment, AppointmentRequest, AppointmentResponse, AppointmentListResponse } from '../../../models/appointment.model';
+import { Appointment, AppointmentRequest, AppointmentResponse, AppointmentListResponse } from '../models/appointment.model';
 
 @Injectable({
   providedIn: 'root',
@@ -18,10 +18,11 @@ export class AppointmentService {
     return this.http.get<AppointmentResponse>(`${this.apiUrl}/${id}`).pipe(
       map((response) => ({
         ...response,
-        startTime: new Date(response.startTime),
-        endTime: new Date(response.endTime),
-        createdAt: new Date(response.createdAt),
-        updatedAt: new Date(response.updatedAt),
+        // Keep dates as strings to match the Appointment interface
+        startTime: response.startTime,
+        endTime: response.endTime,
+        createdAt: response.createdAt,
+        updatedAt: response.updatedAt,
       })),
     );
   }
@@ -35,18 +36,19 @@ export class AppointmentService {
     endTime.setHours(endTime.getHours() + 1); // Assuming 1 hour duration for now
 
     const request: AppointmentRequest = {
-      startTime,
-      endTime,
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
       notes,
     };
 
     return this.http.patch<AppointmentResponse>(`${this.apiUrl}/${id}/reschedule`, request).pipe(
       map((response) => ({
         ...response,
-        startTime: new Date(response.startTime),
-        endTime: new Date(response.endTime),
-        createdAt: new Date(response.createdAt),
-        updatedAt: new Date(response.updatedAt),
+        // Keep dates as strings to match the Appointment interface
+        startTime: response.startTime,
+        endTime: response.endTime,
+        createdAt: response.createdAt,
+        updatedAt: response.updatedAt,
       })),
     );
   }

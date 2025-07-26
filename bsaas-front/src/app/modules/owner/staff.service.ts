@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { SaveStaffParams } from '../../models/staff-params.model';
-import { Staff } from '../../models/staff.model';
+import { Staff } from '../staff/models/staff.model';
 
 @Injectable({ providedIn: 'root' })
 export class StaffService {

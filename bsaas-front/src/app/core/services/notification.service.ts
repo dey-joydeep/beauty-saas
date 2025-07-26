@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 
 // Models
-import { Notification, NotificationType } from '../../shared/models/notification.model';
+import { Notification, NotificationType } from '../notifications/models/notification.model';
 
 // Constants
 const NOTIFICATION_POLLING_INTERVAL = 5 * 60 * 1000; // 5 minutes

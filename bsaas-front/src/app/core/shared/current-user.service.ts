@@ -112,15 +112,17 @@ export class CurrentUserService {
     return this.authService.verifyOtp({
       email: this.currentUser.email,
       otp,
-      password: '' // Password should be handled securely in the backend
+      type: 'login' // Specify the type of OTP verification
     }).pipe(
       switchMap(response => {
-        if (!response.token) {
-          throw new Error('No token received in OTP verification response');
+        // The response should be an AuthUser object with token included in the response
+        if (!response.accessToken) {
+          throw new Error('No access token received in OTP verification response');
         }
         
-        localStorage.setItem('authToken', response.token);
-        return this.fetchUserProfile();
+        localStorage.setItem('authToken', response.accessToken);
+        // The response from verifyOtp is already the user object, no need to fetch profile
+        return of(response as unknown as User);
       }),
       tap(user => {
         this.currentUserSubject.next(user);

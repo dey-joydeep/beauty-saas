@@ -31,8 +31,8 @@ const mockProductSales: ProductSale[] = [
     unitPrice: 25,
     totalAmount: 50,
     saleDate: new Date('2023-01-01T00:00:00.000Z'),
-    soldById: 'u1',
-    soldByName: 'Test User 1',
+    soldBy: 'Test User 1',
+    customerName: 'Customer 1'
   },
   {
     id: '2',
@@ -42,8 +42,8 @@ const mockProductSales: ProductSale[] = [
     unitPrice: 100,
     totalAmount: 100,
     saleDate: new Date('2023-01-02T00:00:00.000Z'),
-    soldById: 'u2',
-    soldByName: 'Test User 2',
+    soldBy: 'Test User 2',
+    customerName: 'Customer 2'
   },
 ];
 
@@ -55,11 +55,7 @@ const mockSummary: ProductSalesSummary = {
   salesByProduct: [
     { productId: 'p1', productName: 'Test Product 1', quantity: 2, revenue: 50 },
     { productId: 'p2', productName: 'Test Product 2', quantity: 1, revenue: 100 },
-  ],
-  salesByDate: [
-    { date: '2023-01-01', sales: 50, items: 2 },
-    { date: '2023-01-02', sales: 100, items: 1 },
-  ],
+  ]
 };
 
 describe('ProductSalesWidgetComponent', () => {
@@ -189,8 +185,7 @@ describe('ProductSalesWidgetComponent', () => {
   it('should update table when sort changes', () => {
     const sortEvent: Sort = {
       active: 'productName',
-      direction: 'asc',
-      sortables: [],
+      direction: 'asc'
     };
 
     component.onSortChange(sortEvent);

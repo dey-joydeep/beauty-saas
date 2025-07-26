@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HomeService } from './home.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
+import { IHomePageData, ICityDto } from './home.models';
 
 describe('HomeService', () => {
   let service: HomeService;
@@ -25,7 +26,7 @@ describe('HomeService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('getHomeData', () => {
+  describe('getHomePageData', () => {
     it('should return home data', () => {
       const mockData = {
         featuredSalons: [],
@@ -34,41 +35,45 @@ describe('HomeService', () => {
         cities: [],
       };
 
-      service.getHomeData().subscribe((data) => {
+      service.getHomePageData().subscribe((data: IHomePageData) => {
         expect(data).toEqual(mockData);
       });
 
-      const req = httpMock.expectOne(`${apiBaseUrl}/data`);
+      const req = httpMock.expectOne(apiBaseUrl);
       expect(req.request.method).toBe('GET');
       req.flush(mockData);
     });
 
     it('should handle error responses', () => {
-      service.getHomeData().subscribe({
+      service.getHomePageData().subscribe({
         next: () => fail('should have errored'),
         error: (err) => {
           expect(err.status).toBe(500);
         },
       });
 
-      const req = httpMock.expectOne(`${apiBaseUrl}/data`);
+      const req = httpMock.expectOne(apiBaseUrl);
       req.flush({}, { status: 500, statusText: 'Server Error' });
     });
   });
 
   describe('searchSalons', () => {
     it('should call search with correct parameters', () => {
-      const params = {
-        q: 'test',
+      const query = 'test';
+      const filters = {
         cityId: '1',
         page: 1,
         limit: 10,
       };
 
-      service.searchSalons(params).subscribe();
+      service.searchSalons(query, filters).subscribe();
 
       const req = httpMock.expectOne(
-        (req) => req.url === `${apiBaseUrl}/search` && req.params.get('q') === params.q && req.params.get('cityId') === params.cityId,
+        (req) => req.url === `${apiBaseUrl}/search` && 
+                req.params.get('q') === query && 
+                req.params.get('cityId') === filters.cityId &&
+                req.params.get('page') === filters.page.toString() &&
+                req.params.get('limit') === filters.limit.toString()
       );
 
       expect(req.request.method).toBe('GET');
@@ -85,19 +90,25 @@ describe('HomeService', () => {
       req.flush([]);
     });
 
-    it('should fetch featured salons with custom limit', () => {
-      const limit = 5;
-      service.getFeaturedSalons(limit).subscribe();
+    it('should fetch featured salons', () => {
+      service.getFeaturedSalons().subscribe();
 
-      const req = httpMock.expectOne(`${apiBaseUrl}/featured-salons?limit=${limit}`);
-      expect(req.request.params.get('limit')).toBe(limit.toString());
+      const req = httpMock.expectOne(`${apiBaseUrl}/featured-salons`);
+      expect(req.request.method).toBe('GET');
       req.flush([]);
     });
   });
 
   describe('getCities', () => {
     it('should fetch cities', () => {
-      const mockCities = [{ id: '1', name: 'Test City' }];
+      const mockCities: ICityDto[] = [{
+        id: '1',
+        name: 'Test City',
+        state: 'Test State',
+        country: 'Test Country',
+        isActive: true,
+        salonCount: 5
+      }];
 
       service.getCities().subscribe((cities) => {
         expect(cities).toEqual(mockCities);
@@ -109,17 +120,5 @@ describe('HomeService', () => {
     });
   });
 
-  describe('getLanguages', () => {
-    it('should fetch languages', () => {
-      const mockLanguages = [{ code: 'en', name: 'English' }];
-
-      service.getLanguages().subscribe((languages) => {
-        expect(languages).toEqual(mockLanguages);
-      });
-
-      const req = httpMock.expectOne(`${apiBaseUrl}/languages`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockLanguages);
-    });
-  });
+  // Removed getLanguages test as it doesn't exist in the service
 });

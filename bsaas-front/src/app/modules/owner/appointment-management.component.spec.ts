@@ -112,9 +112,9 @@ describe('AppointmentManagementComponent', () => {
       customerId: 'customer-123',
       serviceId: 'service-456',
       staffId: 'staff-789',
+      salonId: jasmine.any(String), // Add required salonId field
       startTime: jasmine.any(String),
       endTime: jasmine.any(String),
-      status: AppointmentStatus.CONFIRMED,
       notes: 'Test appointment',
     });
     

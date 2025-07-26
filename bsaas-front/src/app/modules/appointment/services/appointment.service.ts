@@ -10,7 +10,8 @@ import {
   AppointmentResponse, 
   AppointmentListResponse,
   AppointmentStatus,
-  TimeSlot
+  TimeSlot,
+  AppointmentWithDetails
 } from '../models/appointment.model';
 
 export interface RescheduleRequest {
@@ -31,9 +32,17 @@ export class AppointmentService {
    * Get a single appointment by ID
    * @param id The appointment ID
    */
-  getAppointment(id: string): Observable<Appointment> {
-    return this.http.get<AppointmentResponse>(`${this.apiUrl}/${id}`).pipe(
-      map(this.mapToAppointment)
+  getAppointment(id: string): Observable<AppointmentWithDetails> {
+    return this.http.get<AppointmentWithDetails>(`${this.apiUrl}/${id}`).pipe(
+      map(response => ({
+        ...response,
+        // Ensure date fields are properly formatted
+        appointmentDate: response.appointmentDate,
+        startTime: response.startTime,
+        endTime: response.endTime,
+        createdAt: response.createdAt,
+        updatedAt: response.updatedAt
+      }))
     );
   }
 

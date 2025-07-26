@@ -118,7 +118,13 @@ export class SalonSearchComponent {
   }
 
   onImageError(salon: Salon) {
-    salon.imagePath = undefined;
+    // Clear both possible image properties to ensure the fallback image is shown
+    if ('imagePath' in salon) {
+      delete (salon as any).imagePath;
+    }
+    if ('imageUrl' in salon) {
+      delete (salon as any).imageUrl;
+    }
   }
 
   getMapUrl(): string {

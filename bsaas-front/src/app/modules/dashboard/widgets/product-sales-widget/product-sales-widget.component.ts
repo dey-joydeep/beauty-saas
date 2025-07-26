@@ -18,9 +18,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
 
 import { DashboardService } from '../../services/dashboard.service';
-import { ProductSale } from '../../models/dashboard.model';
-import { BaseComponent } from '../../../core/base.component';
-import { DateRange } from '../../../shared/models/date-range.model';
+import { ProductSale, ProductSales } from '../../models/dashboard.model';
+import { BaseComponent } from '../../../../core/base/base.component';
+import { DateRange } from '../../../../shared/models/date-range.model';
 
 @Component({
   selector: 'app-product-sales-widget',
@@ -46,8 +46,8 @@ import { DateRange } from '../../../shared/models/date-range.model';
   templateUrl: './product-sales-widget.component.html',
   styleUrls: ['./product-sales-widget.component.scss'],
 })
-export class ProductSalesWidgetComponent extends BaseComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+export class ProductSalesWidgetComponent extends BaseComponent implements OnInit {
+  // destroy$ is inherited from BaseComponent
 
   isLoading = false;
   error: string | null = null;
@@ -59,7 +59,7 @@ export class ProductSalesWidgetComponent extends BaseComponent implements OnInit
   pageSize = 10;
   pageIndex = 0;
   sortField = 'saleDate';
-  sortDirection = 'desc';
+  sortDirection: 'asc' | 'desc' | undefined = 'desc';
 
   // Date range filter
   dateRange = new FormGroup({
@@ -95,9 +95,8 @@ export class ProductSalesWidgetComponent extends BaseComponent implements OnInit
     });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
   }
 
   loadData(): void {
@@ -118,7 +117,7 @@ export class ProductSalesWidgetComponent extends BaseComponent implements OnInit
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.dataSource = response.items;
+          this.dataSource = response.data;
           this.totalItems = response.total;
           this.isLoading = false;
         },
@@ -146,7 +145,7 @@ export class ProductSalesWidgetComponent extends BaseComponent implements OnInit
             totalRevenue: summary.totalRevenue,
             totalItems: summary.totalItemsSold,
             averageSale: summary.averageSaleValue,
-            topSellingProducts: summary.salesByProduct.slice(0, 5).map((p) => ({ name: p.productName, quantity: p.quantity })),
+            topSellingProducts: (summary as any).salesByProduct?.slice(0, 5).map((p: any) => ({ name: p.productName, quantity: p.quantity })) || [],
           };
         },
         error: (err) => {
@@ -164,7 +163,8 @@ export class ProductSalesWidgetComponent extends BaseComponent implements OnInit
   onSortChange(sort: Sort): void {
     if (sort.active) {
       this.sortField = sort.active;
-      this.sortDirection = sort.direction;
+      // Convert empty string to undefined, otherwise use the direction
+      this.sortDirection = sort.direction === '' ? undefined : sort.direction as 'asc' | 'desc';
       this.loadData();
     }
   }

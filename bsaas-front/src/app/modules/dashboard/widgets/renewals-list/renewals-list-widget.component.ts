@@ -6,11 +6,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
-import { DashboardService } from '../../../dashboard/dashboard.service';
 import { BaseComponent } from '../../../../core/base.component';
-import { Renewal } from '../../../../models/renewal.model';
 import { ErrorService } from '../../../../core/error.service';
 import { Subscription } from 'rxjs';
+import { DashboardApiService } from '../../../../shared/dashboard-api.service';
+
+interface ApiRenewal {
+  salonName: string;
+  renewalDate: string;
+}
 
 @Component({
   selector: 'app-renewals-list-widget',
@@ -24,16 +28,18 @@ export class RenewalsListWidgetComponent extends BaseComponent {
   @Input() title = 'Upcoming Renewals';
   @Input() subtitle = 'View all upcoming subscription renewals';
 
-  renewals: Renewal[] = [];
+  renewals: Array<ApiRenewal & { status: 'pending' | 'completed' | 'overdue' }> = [];
+  private subscriptions = new Subscription();
 
   constructor(
     @Inject(ErrorService) protected override errorService: ErrorService,
-    private dashboardService: DashboardService,
+    private dashboardApiService: DashboardApiService,
   ) {
     super(errorService);
   }
 
   override ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
     super.ngOnDestroy();
   }
 
@@ -41,18 +47,32 @@ export class RenewalsListWidgetComponent extends BaseComponent {
     super.handleError(error);
   }
 
-  private async loadRenewals() {
-    try {
-      this.loading = true;
-      this.error = null;
-      const renewals = await this.dashboardService.getUpcomingRenewals();
-      this.renewals = renewals;
-    } catch (error) {
-      this.error = error instanceof Error ? error.message : 'Failed to load renewals';
-      this.handleError(error);
-    } finally {
-      this.loading = false;
+  private loadRenewals() {
+    if (!this.tenantId) {
+      this.error = 'Tenant ID is required';
+      return;
     }
+    
+    this.loading = true;
+    this.error = null;
+    
+    const sub = this.dashboardApiService.getRenewals(this.tenantId).subscribe({
+      next: (renewals) => {
+        this.renewals = renewals.map(renewal => ({
+          ...renewal,
+          status: this.getRenewalStatus(renewal.renewalDate),
+          renewalDate: renewal.renewalDate // Keep as string to match the interface
+        }));
+        this.loading = false;
+      },
+      error: (error) => {
+        this.error = error instanceof Error ? error.message : 'Failed to load renewals';
+        this.handleError(error);
+        this.loading = false;
+      }
+    });
+    
+    this.subscriptions.add(sub);
   }
 
   public override ngOnInit(): void {
@@ -86,10 +106,17 @@ export class RenewalsListWidgetComponent extends BaseComponent {
     return colorMap[status];
   }
 
-  getDaysUntilRenewal(renewalDate: Date): number {
+  getDaysUntilRenewal(renewalDate: string): number {
     const today = new Date();
     const renewal = new Date(renewalDate);
     return Math.ceil((renewal.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  private getRenewalStatus(renewalDate: string): 'pending' | 'completed' | 'overdue' {
+    const daysUntilRenewal = this.getDaysUntilRenewal(renewalDate);
+    if (daysUntilRenewal < 0) return 'overdue';
+    if (daysUntilRenewal <= 7) return 'pending';
+    return 'completed';
   }
 
   getRenewalCountByStatus(status: 'pending' | 'completed' | 'overdue'): number {

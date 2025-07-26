@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { User } from '../models/user.model';
+import { User } from '../core/shared/current-user.service';
 
 @Injectable({ providedIn: 'root' })
 export class CurrentUserService {

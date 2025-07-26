@@ -42,10 +42,10 @@ export class ForgotPasswordComponent {
     this.loading = true;
     this.error = null;
     const email = this.forgotForm.value.email || '';
-    this.auth.requestPasswordReset({ email }).subscribe({
-      next: (res: { success: boolean }) => {
+    this.auth.requestPasswordReset(email).subscribe({
+      next: (success: boolean) => {
         this.loading = false;
-        if (res.success) {
+        if (success) {
           this.email = email;
           this.step = 'verify';
         } else {
@@ -65,15 +65,17 @@ export class ForgotPasswordComponent {
     this.error = null;
     const otp = this.otpForm.value.otp || '';
     const newPassword = this.otpForm.value.newPassword || '';
-    this.auth.verifyPasswordReset({ email: this.email, otp: String(otp), newPassword: String(newPassword) }).subscribe({
-      next: (res: { success: boolean }) => {
+    
+    // Use the OTP as the token for password reset
+    this.auth.resetPassword(String(otp), String(newPassword)).subscribe({
+      next: (success: boolean) => {
         this.loading = false;
-        if (res.success) {
+        if (success) {
           this.step = 'done';
           this.success = 'Password reset successful! Redirecting to login...';
           setTimeout(() => (window.location.href = '/login'), 2000);
         } else {
-          this.error = 'Failed to reset password.';
+          this.error = 'Failed to reset password. The OTP may be invalid or expired.';
         }
       },
       error: (err: any) => {

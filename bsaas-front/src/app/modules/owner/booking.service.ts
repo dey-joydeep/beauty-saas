@@ -18,8 +18,7 @@ export class AppointmentService {
       staffId: params.staffId,
       startTime: params.startTime,
       endTime: params.endTime,
-      notes: params.notes,
-      status: params.status
+      notes: params.notes
     };
     return this.http.post(`${this.apiUrl}/appointments`, payload).pipe(
       catchError((err) => this.handleError(err))
@@ -34,8 +33,7 @@ export class AppointmentService {
       staffId: data.staffId,
       startTime: data.startTime,
       endTime: data.endTime,
-      notes: data.notes,
-      status: data.status
+      notes: data.notes
     };
     return this.http.post<{ success: boolean }>(`${this.apiUrl}/save`, payload).pipe(
       catchError((err) => this.handleError(err))

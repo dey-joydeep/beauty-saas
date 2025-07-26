@@ -18,8 +18,9 @@ export class PortfolioService {
       payload = {
         title: data.title,
         description: data.description,
-        images: data.images, // array of File objects, ensure backend expects this
-        salonId: data.salonId
+        imageUrl: data.imageUrl,
+        salonId: data.salonId,
+        createdBy: data.createdBy
       };
     }
     return this.http.post<{ success: boolean }>(`${this.apiUrl}/save`, payload).pipe(

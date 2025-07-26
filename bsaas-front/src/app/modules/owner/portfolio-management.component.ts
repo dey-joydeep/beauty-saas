@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,25 +26,28 @@ import { PortfolioService } from './portfolio.service';
   styleUrls: ['./portfolio-management.component.scss']
 })
 export class PortfolioManagementComponent {
-  portfolioForm;
   loading = false;
   error: string | null = null;
   success: string | null = null;
   imagePreview: string | ArrayBuffer | null = null;
+  portfolioForm: FormGroup;
 
   constructor(private fb: FormBuilder, private portfolioService: PortfolioService) {
     this.portfolioForm = this.fb.group({
       title: ['', Validators.required],
       description: ['', Validators.required],
-      image: [null, Validators.required]
+      image: [null as File | null, [Validators.required]]
     });
   }
 
   onImageChange(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
       this.portfolioForm.patchValue({ image: file });
       this.portfolioForm.get('image')?.updateValueAndValidity();
+      
+      // Update image preview
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreview = reader.result;
@@ -67,7 +70,9 @@ export class PortfolioManagementComponent {
     const formData = new FormData();
     formData.append('title', title as string);
     formData.append('description', description as string);
-    if (image) formData.append('image', image as File);
+    if (image) {
+      formData.append('image', image as File);
+    }
     this.portfolioService.savePortfolio(formData).subscribe({
       next: (res: { success: boolean }) => {
         this.loading = false;

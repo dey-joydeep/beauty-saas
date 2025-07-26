@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from '../../../../core/base.component';
 import { ErrorService } from '../../../../core/error.service';
-import { RevenueData } from '../../../../models/dashboard.model';
+import { RevenueData } from '../../models/dashboard.model';
 
 @Component({
   selector: 'app-revenue-chart',
@@ -17,11 +17,11 @@ import { RevenueData } from '../../../../models/dashboard.model';
 export class RevenueChartComponent extends BaseComponent {
   @Input() revenueData!: RevenueData[];
 
-  constructor(protected errorService: ErrorService) {
+  constructor(protected override errorService: ErrorService) {
     super(errorService);
   }
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
     // No additional initialization needed
   }
 }

@@ -111,11 +111,11 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
   statusFilter = new FormControl<AppointmentStatus | 'ALL'>('ALL');
   statusOptions: {value: AppointmentStatus | 'ALL', label: string}[] = [
     { value: 'ALL', label: 'All Statuses' },
-    { value: 'PENDING', label: 'Pending' },
-    { value: 'CONFIRMED', label: 'Confirmed' },
-    { value: 'COMPLETED', label: 'Completed' },
-    { value: 'CANCELLED', label: 'Cancelled' },
-    { value: 'NOSHOW', label: 'No Show' }
+    { value: AppointmentStatus.PENDING, label: 'Pending' },
+    { value: AppointmentStatus.CONFIRMED, label: 'Confirmed' },
+    { value: AppointmentStatus.COMPLETED, label: 'Completed' },
+    { value: AppointmentStatus.CANCELLED, label: 'Cancelled' },
+    { value: AppointmentStatus.NOSHOW, label: 'No Show' }
   ];
   
   // Tabs

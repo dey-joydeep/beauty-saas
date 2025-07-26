@@ -20,13 +20,22 @@ describe('ThemeService', () => {
   });
 
   it('should handle error responses gracefully', () => {
-    service.getThemes().subscribe({
+    const testToken = 'test-token';
+    const testTenantId = 'test-tenant';
+    
+    service.getTheme(testToken, testTenantId).subscribe({
       next: () => fail('should have errored'),
-      error: (err) => {
+      error: (err: any) => {
         expect(err.userMessage || err.error || err.message).toBeDefined();
       },
     });
-    const req = httpMock.expectOne('/api/themes');
-    req.flush({ userMessage: 'Failed to fetch themes.' }, { status: 500, statusText: 'Server Error' });
+    
+    const req = httpMock.expectOne(`${service['apiUrl']}/${testTenantId}`);
+    expect(req.request.headers.get('Authorization')).toBe(`Bearer ${testToken}`);
+    
+    req.flush(
+      { error: 'Failed to fetch theme.' }, 
+      { status: 500, statusText: 'Server Error' }
+    );
   });
 });
