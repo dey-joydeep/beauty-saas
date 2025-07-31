@@ -67,27 +67,54 @@ const serverProviders: (Provider | EnvironmentProviders)[] = [
 // Create a minimal configuration for route extraction
 const routeExtractionConfig: ApplicationConfig = {
   providers: [
-    // Only include the bare minimum providers needed for route extraction
+    // Core Angular providers
+    { provide: PLATFORM_ID, useValue: 'server' },
+    { provide: APP_ID, useValue: 'server-app' },
+    { provide: SERVER_CONTEXT, useValue: 'ssr' },
+    
+    // Route extraction flag
     { provide: 'ROUTE_EXTRACTION', useValue: true },
     { provide: 'BROWSER', useValue: false },
     { provide: 'SSR', useValue: true },
 
-    // Ensure HTTP client is available for route resolvers
+    // Mock browser globals that might be accessed during route resolution
+    { provide: 'WINDOW', useValue: globalThis },
+    { provide: 'DOCUMENT', useValue: { body: {}, addEventListener: () => {}, removeEventListener: () => {} } },
+    { provide: 'LOCAL_STORAGE', useValue: {} },
+    { provide: 'SESSION_STORAGE', useValue: {} },
+
+    // HTTP client with minimal interceptors
     provideHttpClient(
       withInterceptors([
-        // Include only essential interceptors for route extraction
-        ssrInterceptor,
+        ssrInterceptor, // Only include essential interceptors
       ]),
     ),
 
-    // Include any other essential providers needed for route resolution
+    // Include other essential providers from serverProviders
     ...serverProviders.filter((provider) => {
-      // Filter out any providers that might cause injection errors during route extraction
       if (typeof provider !== 'object' || !('provide' in provider)) return true;
-
+      
       const provideToken = String(provider.provide);
-      // Exclude browser-specific providers
-      return !['BROWSER', 'SSR', 'PLATFORM_ID', 'APP_ID'].includes(provideToken);
+      // Keep only essential providers for route extraction
+      const essentialProviders = [
+        'APP_INITIALIZER',
+        'HTTP_INTERCEPTORS',
+        'ENVIRONMENT_INITIALIZER',
+        'APP_BOOTSTRAP_LISTENER',
+        'APP_ID',
+        'PLATFORM_ID',
+        'DOCUMENT',
+        'WINDOW',
+        'LOCAL_STORAGE',
+        'SESSION_STORAGE',
+        'REQUEST',
+        'RESPONSE',
+        'ROUTE_EXTRACTION',
+        'SSR',
+        'BROWSER',
+      ];
+      
+      return essentialProviders.includes(provideToken);
     }),
   ],
 };

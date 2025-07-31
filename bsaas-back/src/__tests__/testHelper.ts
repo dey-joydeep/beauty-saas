@@ -14,7 +14,7 @@ export async function createSolidColorImage(
   color: [number, number, number, number] = [255, 0, 0, 255],
 ) {
   const image = new Jimp({ width, height });
-  image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (this: any, x, y, idx) {
+  image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (this: any, x: number, y: number, idx: number) {
     this.bitmap.data[idx + 0] = color[0]; // Red
     this.bitmap.data[idx + 1] = color[1]; // Green
     this.bitmap.data[idx + 2] = color[2]; // Blue

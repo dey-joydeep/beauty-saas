@@ -10,6 +10,30 @@
 - Use `readonly` for immutable properties
 - Use `const` assertions where appropriate
 
+## Storage Service
+
+### Implementation Standards
+
+- **SSR Compatibility**:
+  - Always use `PlatformUtils` for browser storage access
+  - Handle cases where storage might not be available (SSR, private browsing)
+  - Provide fallback behavior for server-side rendering
+
+- **Type Safety**:
+  - Use generics for type-safe storage operations
+  - Validate stored data on retrieval
+  - Handle serialization/deserialization consistently
+
+- **Error Handling**:
+  - Gracefully handle storage quota exceeded errors
+  - Log storage failures appropriately
+  - Provide meaningful error messages for debugging
+
+- **Performance**:
+  - Minimize direct storage access
+  - Consider in-memory caching for frequently accessed data
+  - Batch storage operations when possible
+
 ## Component Architecture
 
 ### Components

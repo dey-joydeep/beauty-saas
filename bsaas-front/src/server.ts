@@ -23,12 +23,35 @@ const engine = new CommonEngine({
   enablePerformanceProfiler: false,
   bootstrap,
   providers: [
-    { provide: 'REQUEST', useValue: null },
-    { provide: 'RESPONSE', useValue: null },
-    { provide: 'Dd', useValue: null },
+    { provide: APP_BASE_HREF, useValue: '/' },
+    // Provide empty objects for REQUEST and RESPONSE tokens
+    { provide: 'REQUEST', useValue: {} },
+    { provide: 'RESPONSE', useValue: {} },
+    // Mock browser APIs that might be accessed during SSR
+    { provide: 'WINDOW', useValue: globalThis },
+    { provide: 'DOCUMENT', useValue: { body: {}, addEventListener: () => {}, removeEventListener: () => {} } },
+    { provide: 'LOCAL_STORAGE', useValue: {} },
+    { provide: 'SESSION_STORAGE', useValue: {} },
     // Ensure we're in server mode for route extraction
     { provide: 'ROUTE_EXTRACTION', useValue: true },
-    // Add any other server-specific providers
+    { provide: 'SSR', useValue: true },
+    { provide: 'BROWSER', useValue: false },
+    // Add platform location for server-side rendering
+    { provide: 'PLATFORM_ID', useValue: 'server' },
+    // Mock for Dd provider (DataDog or similar analytics/monitoring service)
+    { 
+      provide: 'Dd', 
+      useValue: {
+        // Mock methods that might be called during SSR
+        setUser: () => {},
+        track: () => {},
+        pageView: () => {},
+        error: (error: Error) => console.error('Analytics error:', error),
+        // Add other methods as needed based on actual usage
+      } as const
+    },
+    // Add error handler to prevent uncaught promise rejections
+    { provide: 'ERROR_HANDLER', useValue: (error: any) => console.error('SSR Error:', error) },
   ],
 });
 
@@ -84,7 +107,15 @@ app.get('*', (req, res, next) => {
         { provide: APP_BASE_HREF, useValue: baseUrl },
         { provide: 'REQUEST', useValue: req },
         { provide: 'RESPONSE', useValue: res },
-        { provide: 'Dd', useValue: null },
+        {
+          provide: 'Dd',
+          useValue: {
+            setUser: () => {},
+            track: () => {},
+            pageView: () => {},
+            error: (error: Error) => console.error('Analytics error:', error),
+          } as const
+        },
       ],
     })
     .then((html) => {

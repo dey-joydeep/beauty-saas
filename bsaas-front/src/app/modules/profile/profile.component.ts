@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { CurrentUserService, User } from '../../core/shared/current-user.service';
+import { CurrentUserService, User } from '../../core/auth/services/current-user.service';
 
 @Component({
   selector: 'app-profile',

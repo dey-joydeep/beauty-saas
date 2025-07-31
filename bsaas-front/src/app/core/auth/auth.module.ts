@@ -1,6 +1,5 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -11,13 +10,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { RouterModule, Routes } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { AuthService } from './auth.service';
-import { authGuard, publicGuard } from './auth.guard';
-import { LoginComponent } from './login.component';
-import { RegisterComponent } from './register.component';
-import { ForgotPasswordComponent } from './forgot-password.component';
+// Services
+import { AuthService } from './services/auth.service';
+
+// Guards
+import { authGuard, publicGuard } from './guards/auth.guard';
+
+// Components
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/register/register.component';
 
 const routes: Routes = [
   {
@@ -56,11 +61,13 @@ const routes: Routes = [
     MatProgressBarModule,
     MatProgressSpinnerModule,
     TranslateModule,
-    RouterModule.forChild(routes),
-    LoginComponent,
-    RegisterComponent,
-    ForgotPasswordComponent,
+    RouterModule.forChild(routes)
   ],
-  providers: [AuthService, { provide: 'authGuard', useValue: authGuard }],
+  providers: [
+    AuthService, 
+    { provide: 'authGuard', useValue: authGuard },
+    // Re-export the services to make them available to the rest of the app
+    { provide: 'authService', useClass: AuthService }
+  ]
 })
 export class AuthModule {}

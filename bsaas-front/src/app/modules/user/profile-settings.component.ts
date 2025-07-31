@@ -8,7 +8,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { UserService } from './user.service';
-import { CurrentUserService } from '../../shared/current-user.service';
+import { CurrentUserService } from '../../core/auth/services/current-user.service';
 
 @Component({
   selector: 'app-profile-settings',

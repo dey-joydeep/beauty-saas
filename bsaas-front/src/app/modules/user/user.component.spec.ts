@@ -10,6 +10,47 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { sharedTestProviders } from '../../shared/test-setup';
 import { By } from '@angular/platform-browser';
 
+// Create a mock for TranslateService
+class MockTranslateService {
+  currentLang = 'en';
+  translations: Record<string, Record<string, string>> = {
+    en: {
+      'USER.ERRORS.PERMISSION_DENIED': 'You do not have permission to view this data.',
+      'USER.ERRORS.SESSION_EXPIRED': 'Your session has expired. Please log in again.',
+      'USER.ERRORS.FORBIDDEN': 'You do not have permission to access this resource.'
+    }
+  };
+
+  getTranslation(lang: string): Record<string, string> | undefined {
+    return this.translations[lang];
+  }
+
+  setTranslation(lang: string, translations: Record<string, string>): void {
+    this.translations[lang] = { ...this.translations[lang], ...translations };
+  }
+
+  get(key: string | string[], interpolateParams?: object): string {
+    const keys = Array.isArray(key) ? key : [key];
+    const translation = keys.map(k => {
+      const parts = k.split('.');
+      let result: any = this.translations[this.currentLang];
+      for (const part of parts) {
+        result = result?.[part];
+        if (result === undefined) return k;
+      }
+      return result || k;
+    }).join(' ');
+    
+    if (interpolateParams) {
+      return Object.entries(interpolateParams).reduce(
+        (acc, [key, value]) => acc.replace(new RegExp(`{{${key}}}`, 'g'), String(value)),
+        translation
+      );
+    }
+    return translation;
+  }
+}
+
 const adminToken = `
   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
   eyJ1c2VyX2lkIjoiYWRtaW4iLCJ0ZW5hbnRfaWQiOiJ0ZW5hbnQxIiwiZW1haWwiOiJhZG1pbkBiLmNvbSIsInJvbGUiOiJhZG1pbiJ9.
@@ -25,12 +66,14 @@ const userToken = `
 describe('UserComponent', () => {
   let component: UserComponent;
   let fixture: ComponentFixture<UserComponent>;
-  let userServiceSpy: jasmine.SpyObj<UserService>;
+  let userService: jest.Mocked<UserService>;
   let translateService: TranslateService;
 
   beforeEach(async () => {
-    userServiceSpy = jasmine.createSpyObj('UserService', ['getUserStats']);
-    
+    userService = {
+      getUserStats: jest.fn()
+    } as unknown as jest.Mocked<UserService>;
+
     await TestBed.configureTestingModule({
       imports: [
         CommonModule, 
@@ -38,21 +81,14 @@ describe('UserComponent', () => {
         TranslateModule.forRoot()
       ],
       providers: [
-        { provide: UserService, useValue: userServiceSpy }, 
-        ...sharedTestProviders
+        { provide: UserService, useValue: userService },
+        { provide: TranslateService, useClass: MockTranslateService }
       ],
     }).compileComponents();
     
     fixture = TestBed.createComponent(UserComponent);
     component = fixture.componentInstance;
     translateService = TestBed.inject(TranslateService);
-    
-    // Set up translations
-    translateService.setTranslation('en', {
-      'USER.ERRORS.PERMISSION_DENIED': 'You do not have permission to view this data.',
-      'USER.ERRORS.SESSION_EXPIRED': 'Your session has expired. Please log in again.',
-      'USER.ERRORS.FORBIDDEN': 'You do not have permission to access this resource.'
-    });
     translateService.use('en');
   });
 
@@ -73,7 +109,7 @@ describe('UserComponent', () => {
     });
     
     // Setup service response
-    userServiceSpy.getUserStats.and.returnValue(of(mockStats));
+    userService.getUserStats.mockReturnValue(of(mockStats));
     
     // Trigger change detection
     fixture.detectChanges();
@@ -105,8 +141,10 @@ describe('UserComponent', () => {
       return null;
     });
     
-    // No need to set up getUserStats as it shouldn't be called for non-admin
-    userServiceSpy.getUserStats.and.throwError('getUserStats should not be called for non-admin');
+    // Mock getUserStats to throw an error if called (shouldn't be called for non-admin)
+    userService.getUserStats.mockImplementation(() => {
+      throw new Error('getUserStats should not be called for non-admin');
+    });
     
     // Trigger change detection
     fixture.detectChanges();
@@ -126,14 +164,14 @@ describe('UserComponent', () => {
 
   it('should show session expired for 401', () => {
     // Mock localStorage
-    spyOn(localStorage, 'getItem').and.callFake((key: string) => {
+    jest.spyOn(Storage.prototype, 'getItem').mockImplementation((key: string) => {
       if (key === 'token') return adminToken;
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
     
     // Setup error response
-    userServiceSpy.getUserStats.and.returnValue(throwError(() => ({
+    userService.getUserStats.mockReturnValue(throwError(() => ({
       status: 401,
       error: { message: 'Session expired' }
     })));
@@ -152,14 +190,14 @@ describe('UserComponent', () => {
 
   it('should show forbidden for 403', () => {
     // Mock localStorage
-    spyOn(localStorage, 'getItem').and.callFake((key: string) => {
+    jest.spyOn(Storage.prototype, 'getItem').mockImplementation((key: string) => {
       if (key === 'token') return adminToken;
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
     
     // Setup error response
-    userServiceSpy.getUserStats.and.returnValue(throwError(() => ({
+    userService.getUserStats.mockReturnValue(throwError(() => ({
       status: 403,
       error: { message: 'Forbidden' }
     })));

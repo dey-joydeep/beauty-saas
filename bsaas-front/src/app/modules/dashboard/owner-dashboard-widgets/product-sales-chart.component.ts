@@ -1,13 +1,20 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChartData, ChartOptions } from 'chart.js';
-import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatError } from '@angular/material/form-field';
 import { DashboardApiService, ProductSalesData } from '../../../shared/dashboard-api.service';
 
 @Component({
   selector: 'app-product-sales-chart',
   standalone: true,
-  imports: [CommonModule, NgChartsModule],
+  imports: [
+    CommonModule, 
+    BaseChartDirective,
+    MatProgressBarModule,
+    MatError
+  ],
   templateUrl: './product-sales-chart.component.html',
   styleUrls: ['./product-sales-chart.component.scss'],
 })

@@ -1,35 +1,83 @@
-import { ApplicationConfig, ErrorHandler, importProvidersFrom, isDevMode } from '@angular/core';
-import { provideRouter } from '@angular/router';
 import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-  withInterceptors,
-  withFetch,
-  withXsrfConfiguration,
   HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+  withInterceptorsFromDi,
+  withXsrfConfiguration,
 } from '@angular/common/http';
-import { provideClientHydration, withHttpTransferCacheOptions } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations';
-import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
-import { MatIconRegistry, MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { ApplicationConfig, ErrorHandler, importProvidersFrom, PLATFORM_ID } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
+import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { provideClientHydration, withHttpTransferCacheOptions } from '@angular/platform-browser';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { ErrorHandlerService } from './core/services/error-handler.service';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
 import { ssrInterceptor } from './core/interceptors/ssr-interceptor';
-import { providePlatformUtils } from './core/utils/platform-utils';
-import { provideMaterialSsrHandler } from './core/ssr';
+import { ErrorHandlerService } from './core/services/error-handler.service';
+import { providePlatformUtils, PLATFORM_UTILS_TOKEN } from './core/utils/platform-utils';
+
+// Centralized Material modules provider
+function provideMaterial() {
+  return [
+    // Core modules
+    MatButtonModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatChipsModule,
+    MatDatepickerModule,
+    MatDialogModule,
+    MatDividerModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatMenuModule,
+    MatNativeDateModule,
+    MatPaginatorModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatRadioModule,
+    MatSelectModule,
+    MatSidenavModule,
+    MatSlideToggleModule,
+    MatSnackBarModule,
+    MatSortModule,
+    MatTableModule,
+    MatTabsModule,
+    MatToolbarModule,
+    MatTooltipModule,
+    // Add other Material modules here
+  ];
+}
 
 // Simple error handler for minimal setup
 // class SimpleErrorHandler implements ErrorHandler {
@@ -53,64 +101,34 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(
       withHttpTransferCacheOptions({
         includePostRequests: true,
-        // Only enable hydration in the browser
-        includeHeaders: isBrowser ? ['Accept', 'Authorization'] : [],
-      }),
+      })
     ),
-    // Only provide animations in the browser
-    ...(isBrowser ? [provideAnimations()] : []),
-    // Provide HTTP client with interceptors
+    provideAnimations(),
     provideHttpClient(
-      withInterceptors([
-        // Add global interceptors here
-        ssrInterceptor,
-        loadingInterceptor,
-      ]),
       withInterceptorsFromDi(),
+      withInterceptors([loadingInterceptor, ssrInterceptor]),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN',
       }),
-      withFetch(),
+      withFetch()
     ),
-    // Environment flags - these will be overridden in server config
-    { provide: 'BROWSER', useValue: isBrowser },
-    { provide: 'SSR', useValue: !isBrowser },
-    { provide: 'ROUTE_EXTRACTION', useValue: false },
-    importProvidersFrom(
-      // Material modules
-      MatNativeDateModule,
-      MatMenuModule,
-      MatSidenavModule,
-      MatListModule,
-      MatToolbarModule,
-      MatButtonModule,
-      MatCardModule,
-      MatIconModule,
-      MatInputModule,
-      MatProgressSpinnerModule,
-      MatSnackBarModule,
-      MatChipsModule,
-      MatDividerModule,
-    ),
-    // Global providers
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorHandlerService, multi: true },
     { provide: ErrorHandler, useClass: ErrorHandlerService },
+    // Platform utilities - provided via providePlatformUtils()
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
-    {
-      provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
-      useValue: {
-        duration: 5000,
-        horizontalPosition: 'right',
-        verticalPosition: 'top',
-      },
-    },
-    // Initialize icon registry
-    MatIconRegistry,
-
-    // Platform utilities
+    { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 3000 } },
+    
+    // Import all Material modules
+    importProvidersFrom(
+      ...provideMaterial(),
+      MatIconRegistry
+    ),
+    
+    // Platform utilities - must be after provideHttpClient()
     providePlatformUtils(),
+    
+    // PLATFORM_UTILS_TOKEN is already provided via providePlatformUtils()
 
-    // Material SSR handler
-    provideMaterialSsrHandler(),
   ],
 };

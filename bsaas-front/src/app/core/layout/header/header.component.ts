@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, HostListener, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,8 +15,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subscription, of, timer, Subject } from 'rxjs';
+import { Subscription, of, timer, Subject, firstValueFrom } from 'rxjs';
 import { map, switchMap, takeUntil, tap, catchError, finalize } from 'rxjs/operators';
+import { StorageService } from '../../services/storage.service';
+import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from '../../utils/platform-utils';
 
 // Models
 interface Language {
@@ -62,11 +64,11 @@ interface Notification {
 // Mock services - these should be replaced with actual service implementations
 class CurrentUserService {
   currentUser$ = of<User | null>(null);
-  
+
   getCurrentUser() {
     return of<User | null>(null);
   }
-  
+
   clearCurrentUser() {
     return of({});
   }
@@ -76,19 +78,19 @@ class NotificationService {
   getNotifications() {
     return of<Notification[]>([]);
   }
-  
+
   getUnreadCount() {
     return of(0);
   }
-  
+
   markAsRead(notificationId: string) {
     return of({ success: true });
   }
-  
+
   markAllAsRead() {
     return of({ success: true });
   }
-  
+
   // Process notification to ensure it has required properties
   static processNotification(notification: any): Notification {
     return {
@@ -134,25 +136,28 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private translate = inject(TranslateService);
-  // Services
   private currentUserService = inject(CurrentUserService);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+  private storageService = inject(StorageService);
+  private platformId = inject(PLATFORM_ID);
+  private platformUtils = inject<IPlatformUtils>(PLATFORM_UTILS_TOKEN);
   private destroy$ = new Subject<void>();
+  private isBrowser: boolean = false;
 
   // State properties
   user: User | null = null;
   isLoggedIn = false;
-  
+
   // Header visibility and scroll state
   isVisible = true;
   lastScrollPosition = 0;
-  
+
   // User authentication state
   isAuthenticated = false;
   currentUser: User | null = null;
-  
+
   // UI state
   isMobile = false;
   isLoading = false;
@@ -165,7 +170,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   searchQuery = '';
   selectedLanguage = 'en';
   selectedCity = '1';
-  
+
   // Constants
   readonly languages: Language[] = [
     { code: 'en', name: 'English' },
@@ -179,7 +184,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     { code: 'ml', name: 'മലയാളം' },
     { code: 'pa', name: 'ਪੰਜਾਬੀ' },
   ];
-  
+
   readonly cities: City[] = [
     { id: 'mumbai', name: 'Mumbai', country: 'India' },
     { id: 'delhi', name: 'Delhi', country: 'India' },
@@ -192,10 +197,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     { id: 'jaipur', name: 'Jaipur', country: 'India' },
     { id: 'surat', name: 'Surat', country: 'India' },
   ];
-  
+
   // Private properties
   private subscriptions = new Subscription();
-  
+
   // Handle window resize
   @HostListener('window:resize')
   private onResize() {
@@ -203,13 +208,60 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.checkIfMobile();
-    window.addEventListener('resize', this.onResize);
-    
-    // Initialize scroll handling
-    this.handleScroll();
-    
-    // Subscribe to authentication state changes
+    // Initialize browser-specific code
+    if (this.isBrowser) {
+      // Check if mobile on init
+      this.checkIfMobile();
+
+      // Subscribe to scroll events
+      this.platformUtils.window?.addEventListener('scroll', this.handleScroll.bind(this));
+
+      // Subscribe to window resize events
+      this.platformUtils.window?.addEventListener('resize', this.onResize);
+
+      // Load initial scroll position
+      this.handleScroll();
+    }
+
+    // Load user data
+    this.loadUserData();
+
+    // Load notifications
+    this.loadNotifications();
+
+    // Setup notification polling
+    this.setupNotificationPolling();
+  }
+
+  ngOnDestroy() {
+    // Clean up event listeners
+    if (this.isBrowser) {
+      this.platformUtils.window?.removeEventListener('scroll', this.handleScroll);
+      this.platformUtils.window?.removeEventListener('resize', this.onResize);
+    }
+
+    // Unsubscribe from all subscriptions
+    this.subscriptions.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // Handle scroll events for header visibility
+  @HostListener('window:scroll')
+  private handleScroll() {
+    if (!this.isBrowser) return;
+
+    const currentScrollPosition =
+      this.platformUtils.window?.pageYOffset ||
+      this.platformUtils.document?.documentElement.scrollTop ||
+      0;
+
+    this.isVisible = currentScrollPosition < this.lastScrollPosition || currentScrollPosition < 10;
+    this.lastScrollPosition = currentScrollPosition;
+    this.cdr.markForCheck();
+  }
+
+  private loadUserData(): void {
     this.subscriptions.add(
       this.currentUserService.getCurrentUser().subscribe({
         next: (user) => {
@@ -217,38 +269,44 @@ export class HeaderComponent implements OnInit, OnDestroy {
           this.isLoggedIn = !!user;
           this.isAuthenticated = !!user;
           this.currentUser = user;
-          
+
           if (user) {
             this.loadNotifications();
           }
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('Error loading user:', error);
+          this.cdr.markForCheck();
         }
       })
     );
-    
-    // Set up notification polling
-    this.setupNotificationPolling();
-  }
 
-  ngOnDestroy() {
-    window.removeEventListener('resize', this.onResize);
-    this.subscriptions.unsubscribe();
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-  
-  // Handle scroll events for header visibility
-  @HostListener('window:scroll')
-  private handleScroll() {
-    const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-    this.isVisible = currentScrollPosition < this.lastScrollPosition || currentScrollPosition < 10;
-    this.lastScrollPosition = currentScrollPosition;
+    // Load saved preferences if in browser
+    if (this.isBrowser) {
+      this.storageService.getItem<string>('userLanguage').subscribe({
+        next: (savedLanguage) => {
+          if (savedLanguage) {
+            this.onLanguageChange(savedLanguage);
+          }
+        },
+        error: (error) => console.warn('Failed to load language preference:', error)
+      });
+
+      this.storageService.getItem<string>('userCity').subscribe({
+        next: (savedCity) => {
+          if (savedCity) {
+            this.selectedCity = savedCity;
+            this.cdr.markForCheck();
+          }
+        },
+        error: (error) => console.warn('Failed to load city preference:', error)
+      });
+    }
   }
 
   private checkIfMobile() {
-    this.isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+    this.isMobile = this.isBrowser ? (this.platformUtils.window?.innerWidth || 0) < 768 : false;
   }
 
   private loadNotifications(): void {
@@ -321,47 +379,77 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   // Handle language change
-  onLanguageChange(languageCode: string): void {
+  async onLanguageChange(languageCode: string, showSnackbar = true): Promise<void> {
     this.selectedLanguage = languageCode;
     this.translate.use(languageCode);
-    
-    // Save language preference
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('userLanguage', languageCode);
+
+    // Save preference using storage service
+    if (this.isBrowser) {
+      try {
+        await firstValueFrom(this.storageService.setItem('userLanguage', languageCode));
+      } catch (error) {
+        console.warn('Failed to save language preference:', error);
+      }
     }
 
     // Update document direction for RTL languages
-    const selectedLang = this.languages.find((lang) => lang.code === languageCode);
-    if (typeof document !== 'undefined' && document.documentElement) {
-      document.documentElement.dir = selectedLang?.rtl ? 'rtl' : 'ltr';
-      document.documentElement.lang = languageCode;
+    if (this.isBrowser && this.platformUtils.document?.documentElement) {
+      const selectedLang = this.languages.find(lang => lang.code === languageCode);
+      this.platformUtils.document.documentElement.dir = selectedLang?.rtl ? 'rtl' : 'ltr';
+      this.platformUtils.document.documentElement.lang = languageCode;
     }
 
-    // Close any open menus
-    this.showNotifications = false;
-    this.showUserMenu = false;
-
-    // Notify the app about language change
-    if (typeof document !== 'undefined') {
-      document.dispatchEvent(new CustomEvent('languageChange', { detail: languageCode }));
+    // Show snackbar if requested
+    if (showSnackbar) {
+      this.snackBar.open(
+        this.translate.instant('LANGUAGE_CHANGED'),
+        this.translate.instant('CLOSE'),
+        { duration: 3000 }
+      );
     }
+
+    // Emit event for other components
+    if (this.isBrowser) {
+      this.platformUtils.document?.dispatchEvent(
+        new CustomEvent('languageChange', { detail: languageCode })
+      );
+    }
+
+    this.cdr.markForCheck();
   }
 
   // Handle city selection change
-  onCityChange(cityId: string): void {
+  async onCityChange(cityId: string): Promise<void> {
     this.selectedCity = cityId;
-    this.showCityPopup = false;
-    // Save city preference
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('userCity', cityId);
+
+    // Save preference using storage service
+    if (this.isBrowser) {
+      try {
+        await firstValueFrom(this.storageService.setItem('userCity', cityId));
+      } catch (error) {
+        console.warn('Failed to save city preference:', error);
+      }
     }
+
+    // Show snackbar
+    const selectedCity = this.cities.find(city => city.id === cityId);
+    if (selectedCity) {
+      this.snackBar.open(
+        this.translate.instant('CITY_CHANGED', { city: selectedCity.name }),
+        this.translate.instant('CLOSE'),
+        { duration: 3000 }
+      );
+    }
+
+    // Close the city popup
+    this.showCityPopup = false;
+    this.cdr.markForCheck();
   }
-  
-  // Toggle city selection popup
+
   toggleCityPopup(show?: boolean): void {
     this.showCityPopup = show !== undefined ? show : !this.showCityPopup;
   }
-  
+
   // Handle city confirmation
   confirmCity(cityId?: string): void {
     if (cityId) {
@@ -373,12 +461,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
     this.showCityPopup = false;
   }
-  
+
   // Toggle mobile search
   toggleMobileSearch(show?: boolean): void {
     this.isMobileSearchVisible = show !== undefined ? show : !this.isMobileSearchVisible;
   }
-  
+
   // Alias for template compatibility
   get logout() {
     return this.onLogout.bind(this);

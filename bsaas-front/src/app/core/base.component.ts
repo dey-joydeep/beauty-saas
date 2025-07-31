@@ -1,13 +1,11 @@
-import { OnDestroy, Component, OnInit } from '@angular/core';
+import { OnDestroy, Component, OnInit, Directive } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ErrorService } from './error.service';
+import { Subject } from 'rxjs';
 
-@Component({
-  standalone: true,
-  imports: [CommonModule],
-  template: '',
-})
+@Directive()
 export abstract class BaseComponent implements OnInit, OnDestroy {
+  protected destroy$ = new Subject<void>();
   private _error: string | null = null;
   private _loading = false;
 
@@ -31,8 +29,8 @@ export abstract class BaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // This is optional if we want to unsubscribe from the error stream
-    // In this case, we're not storing the subscription, but we could if needed
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // Helper method for error handling

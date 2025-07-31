@@ -7,15 +7,17 @@ import { ReactiveFormsModule } from '@angular/forms';
 describe('PortfolioManagementComponent', () => {
   let component: PortfolioManagementComponent;
   let fixture: ComponentFixture<PortfolioManagementComponent>;
-  let portfolioServiceSpy: jasmine.SpyObj<PortfolioService>;
+  let portfolioService: jest.Mocked<PortfolioService>;
 
   beforeEach(async () => {
-    portfolioServiceSpy = jasmine.createSpyObj('PortfolioService', ['savePortfolio']);
+    portfolioService = {
+      savePortfolio: jest.fn(),
+    } as unknown as jest.Mocked<PortfolioService>;
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],
       declarations: [PortfolioManagementComponent],
       providers: [
-        { provide: PortfolioService, useValue: portfolioServiceSpy }
+        { provide: PortfolioService, useValue: portfolioService }
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(PortfolioManagementComponent);
@@ -24,7 +26,7 @@ describe('PortfolioManagementComponent', () => {
   });
 
   it('should display error on failed portfolio save', fakeAsync(() => {
-    portfolioServiceSpy.savePortfolio.and.returnValue(throwError(() => ({ userMessage: 'Failed to save portfolio.' })));
+    portfolioService.savePortfolio.mockReturnValue(throwError(() => ({ userMessage: 'Failed to save portfolio.' })));
     component.portfolioForm.setValue({ title: 'Title', description: 'Desc', image: null });
     component.onSubmit();
     tick();
@@ -38,10 +40,10 @@ describe('PortfolioManagementComponent', () => {
   });
 
   it('should call savePortfolio on valid submit', fakeAsync(() => {
-    portfolioServiceSpy.savePortfolio.and.returnValue(of({ success: true }));
+    portfolioService.savePortfolio.mockReturnValue(of({ success: true }));
     component.portfolioForm.setValue({ title: 'Title', description: 'Desc', image: null });
     component.onSubmit();
     tick();
-    expect(portfolioServiceSpy.savePortfolio).toHaveBeenCalled();
+    expect(portfolioService.savePortfolio).toHaveBeenCalled();
   }));
 });

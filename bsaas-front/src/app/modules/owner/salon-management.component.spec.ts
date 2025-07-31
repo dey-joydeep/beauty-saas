@@ -17,10 +17,15 @@ import { User } from '../../models/user.model';
 describe('SalonManagementComponent', () => {
   let component: SalonManagementComponent;
   let fixture: ComponentFixture<SalonManagementComponent>;
-  let salonServiceSpy: jasmine.SpyObj<SalonService>;
+  let salonService: jest.Mocked<SalonService>;
 
   beforeEach(async () => {
-    salonServiceSpy = jasmine.createSpyObj('SalonService', ['saveSalon']);
+    salonService = {
+      saveSalon: jest.fn(),
+      getSalons: jest.fn(),
+      getSalon: jest.fn(),
+      deleteSalon: jest.fn()
+    } as unknown as jest.Mocked<SalonService>;
     
     await TestBed.configureTestingModule({
       imports: [
@@ -37,9 +42,7 @@ describe('SalonManagementComponent', () => {
         TranslateModule.forRoot()
       ],
       declarations: [SalonManagementComponent],
-      providers: [
-        { provide: SalonService, useValue: salonServiceSpy },
-      ],
+      providers: [{ provide: SalonService, useValue: salonService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SalonManagementComponent);
@@ -53,7 +56,7 @@ describe('SalonManagementComponent', () => {
         message: 'Failed to save salon.' 
       } 
     };
-    salonServiceSpy.saveSalon.and.returnValue(throwError(() => errorResponse));
+    salonService.saveSalon.mockReturnValue(throwError(() => errorResponse));
     
     component.salonForm.setValue({
       name: 'Test Salon',
@@ -96,12 +99,12 @@ describe('SalonManagementComponent', () => {
     component.onSubmit();
     
     expect(component.error).toBe('Please fill in all required fields correctly.');
-    expect(salonServiceSpy.saveSalon).not.toHaveBeenCalled();
+    expect(salonService.saveSalon).not.toHaveBeenCalled();
   });
 
   it('should call saveSalon with correct data on valid form submission', fakeAsync(() => {
     const mockResponse = { success: true };
-    salonServiceSpy.saveSalon.and.returnValue(of(mockResponse));
+    salonService.saveSalon.mockReturnValue(of(mockResponse));
     
     // Set form values matching the form control names
     component.salonForm.setValue({
@@ -121,14 +124,14 @@ describe('SalonManagementComponent', () => {
     
     // The component transforms the form data to match CreateSalonParams
     // with zipCode -> zip_code, imageUrl -> image_url, and number conversion for lat/lng
-    expect(salonServiceSpy.saveSalon).toHaveBeenCalledWith(jasmine.objectContaining({
+    expect(salonService.saveSalon).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Test Salon',
       address: '123 Test St',
       city: 'Test City',
       zip_code: '12345',
-      latitude: jasmine.any(Number),
-      longitude: jasmine.any(Number),
-      services: jasmine.arrayContaining(['Haircut', 'Coloring']),
+      latitude: expect.any(Number),
+      longitude: expect.any(Number),
+      services: expect.arrayContaining(['Haircut', 'Coloring']),
       ownerId: 'test-owner-id',
       image_url: 'https://example.com/test.jpg'
     }));
@@ -139,7 +142,7 @@ describe('SalonManagementComponent', () => {
   
   it('should add and remove services correctly', () => {
     // Test adding a service
-    const event = { preventDefault: jasmine.createSpy('preventDefault') } as unknown as Event;
+    const event = { preventDefault: jest.fn() } as unknown as Event;
     component.onAddService('Haircut', event);
     expect(component.salonForm.get('services')?.value).toContain('Haircut');
     expect(event.preventDefault).toHaveBeenCalled();
@@ -151,7 +154,7 @@ describe('SalonManagementComponent', () => {
   
   it('should reset form after successful submission', fakeAsync(() => {
     const mockResponse = { success: true };
-    salonServiceSpy.saveSalon.and.returnValue(of(mockResponse));
+    salonService.saveSalon.mockReturnValue(of(mockResponse));
     
     component.salonForm.setValue({
       name: 'Test Salon',

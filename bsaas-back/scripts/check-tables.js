@@ -1,29 +1,33 @@
 const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 async function checkTables() {
-  const prisma = new PrismaClient();
-  
   try {
-    console.log('Checking for SalonTenantStaff table...');
-    const tenantStaff = await prisma.salonTenantStaff.findMany({ take: 1 });
-    console.log('SalonTenantStaff table exists with', tenantStaff.length, 'records');
-    
-    console.log('Checking for SalonStaff table (should not exist)...');
-    try {
-      await prisma.$queryRaw`SELECT * FROM "SalonStaff" LIMIT 1`;
-      console.log('WARNING: SalonStaff table still exists!');
-    } catch (e) {
-      console.log('SalonStaff table does not exist (expected)');
-    }
-    
-    console.log('Checking foreign key constraints...');
+    // Check if salon_tenant_staff table exists
+    const tenantStaffExists = await prisma.$queryRaw`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE  table_schema = 'public'
+        AND    table_name   = 'salon_tenant_staff'
+      );
+    `;
+    console.log('salon_tenant_staff table exists:', tenantStaffExists[0].exists);
+
+    // Check if salon_staff table still exists
+    const staffExists = await prisma.$queryRaw`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE  table_schema = 'public'
+        AND    table_name   = 'salon_staff'
+      );
+    `;
+    console.log('salon_staff table exists (should be false):', staffExists[0].exists);
+
+    // Check foreign key constraints
     const fkCheck = await prisma.$queryRaw`
       SELECT
-        tc.table_schema, 
-        tc.constraint_name, 
         tc.table_name, 
         kcu.column_name, 
-        ccu.table_schema AS foreign_table_schema,
         ccu.table_name AS foreign_table_name,
         ccu.column_name AS foreign_column_name 
       FROM 
@@ -39,9 +43,9 @@ async function checkTables() {
         AND (ccu.table_name = 'salon_tenant_staff' OR ccu.table_name = 'salon_staff');
     `;
     
-    console.log('Foreign key constraints involving staff tables:');
-    console.log(fkCheck);
-    
+    console.log('\nForeign key constraints involving staff tables:');
+    console.table(fkCheck);
+
   } catch (error) {
     console.error('Error checking tables:', error);
   } finally {

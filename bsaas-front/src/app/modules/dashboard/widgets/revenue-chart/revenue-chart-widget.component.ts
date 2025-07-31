@@ -1,124 +1,188 @@
-import { Component, OnInit, OnDestroy, Inject, ViewChild, ElementRef, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BaseComponent } from '../../../../core/base.component';
-import { ErrorService } from '../../../../core/error.service';
+import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DashboardService } from '../../../dashboard/dashboard.service';
+import { CommonModule } from '@angular/common';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData } from 'chart.js';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Chart, ChartConfiguration } from 'chart.js';
+import { DashboardService } from '../../../dashboard/dashboard.service';
+import { RevenueData } from '../../../dashboard/models/dashboard.model';
+import { ErrorService } from '../../../../core/error.service';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, TranslateModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule, MatProgressSpinnerModule],
   selector: 'app-revenue-chart-widget',
+  standalone: true,
+  imports: [
+    CommonModule,
+    TranslateModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+    BaseChartDirective
+  ],
   templateUrl: './revenue-chart-widget.component.html',
   styleUrls: ['./revenue-chart-widget.component.scss'],
+  host: { class: 'revenue-chart' },
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RevenueChartWidgetComponent extends BaseComponent implements OnInit, OnDestroy {
-  @Input() revenueData: any[] = [];
+export class RevenueChartWidgetComponent implements OnInit, OnDestroy {
+  private dataSubscription?: Subscription;
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+  
+  // Chart configuration
+  public chartType = 'line' as const;
+  public revenueData: RevenueData[] = [];
+  public isLoading = true;
+  public error: string | null = null;
+  
+  // Chart data with proper typing
+  public chartData: ChartData<'line', number[], string> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      label: 'Revenue',
+      borderColor: '#3f51b5',
+      backgroundColor: 'rgba(63, 81, 181, 0.1)',
+      pointBackgroundColor: '#3f51b5',
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: '#3f51b5',
+      fill: true,
+      tension: 0.4
+    }]
+  };
+  
+  // Chart options
+  public chartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      tooltip: {
+        enabled: true,
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: (context) => {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y;
+            return `${label}: $${value?.toLocaleString()}`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Date'
+        },
+        grid: {
+          display: false
+        }
+      },
+      y: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Revenue ($)'
+        },
+        beginAtZero: true,
+        ticks: {
+          callback: (value) => `$${value}`
+        },
+        grid: {
+          display: true,
+          drawOnChartArea: true,
+          drawTicks: true
+        }
+      }
+    }
+  };
+
   constructor(
-    @Inject(ErrorService) protected override errorService: ErrorService,
     private dashboardService: DashboardService,
-  ) {
-    super(errorService);
-  }
+    protected errorService: ErrorService,
+    private changeDetectorRef: ChangeDetectorRef
+  ) {}
 
-  chartData: ChartConfiguration['data'] | undefined;
-  @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
-  private chart!: Chart;
-  chartOptions: ChartConfiguration['options'] | undefined;
-
-  public override ngOnInit(): void {
-    this.setupChart();
+  public ngOnInit(): void {
     this.loadData();
   }
 
-  public override ngOnDestroy(): void {
-    super.setupErrorSubscription();
-    if (this.chart) {
-      this.chart.destroy();
+  public ngOnDestroy(): void {
+    if (this.dataSubscription) {
+      this.dataSubscription.unsubscribe();
     }
-    super.ngOnDestroy();
   }
 
-  private setupChart(): void {
-    this.chartOptions = {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'top',
-        },
-        title: {
-          display: true,
-          text: 'Monthly Revenue',
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function (value) {
-              return '$' + value.toLocaleString();
-            },
-          },
-        },
-      },
-    };
+  private handleDataError(error: unknown): void {
+    console.error('Error in revenue chart:', error);
+    this.error = error instanceof Error ? error.message : 'Failed to load revenue data';
+    this.isLoading = false;
+    this.changeDetectorRef.detectChanges();
   }
 
   private loadData(): void {
-    this.loading = true;
+    this.isLoading = true;
     this.error = null;
-
-    this.dashboardService.getRevenueChart().subscribe({
-      next: (data) => {
-        this.loading = false;
-        this.chartData = {
-          labels: data.map((item) => new Date(item.date).toLocaleDateString()),
-          datasets: [
-            {
-              label: 'Revenue',
-              data: data.map((item) => item.amount),
-              fill: false,
-              borderColor: '#4CAF50',
-              tension: 0.1,
-            },
-          ],
-        };
-      },
-      error: (error) => {
-        this.loading = false;
-        this.error = error.message;
-      },
-    });
-  }
-
-  protected ngAfterViewInit(): void {
-    if (this.chartData && this.chartOptions && this.chartCanvas.nativeElement) {
-      const ctx = this.chartCanvas.nativeElement.getContext('2d');
-      if (ctx) {
-        this.chart = new Chart(ctx, {
-          type: 'line',
-          data: this.chartData,
-          options: this.chartOptions,
+    
+    try {
+      // getRevenueData() returns a Promise<RevenueData[]>
+      this.dashboardService.getRevenueData()
+        .then((revenueData: RevenueData[]) => {
+          this.updateChartData(revenueData);
+          this.isLoading = false;
+          this.changeDetectorRef.detectChanges();
+        })
+        .catch((error: Error) => {
+          this.handleDataError(error);
         });
-      }
+    } catch (error) {
+      this.handleDataError(error);
     }
   }
 
-  private errorSubscription: Subscription | null = null;
+  private updateChartData(revenueData: RevenueData[]): void {
+    if (!revenueData?.length) {
+      this.error = 'No revenue data available';
+      this.isLoading = false;
+      this.changeDetectorRef.detectChanges();
+      return;
+    }
 
-  protected override setupErrorSubscription(): void {
-    this.errorSubscription = this.errorService.error$.subscribe((errorState) => {
-      if (errorState) {
-        this.loading = false;
-        this.error = errorState.message;
-      }
-    });
+    try {
+      // Update the chart data with the new values
+      this.chartData = {
+        labels: revenueData.map(item => item.date),
+        datasets: [{
+          ...this.chartData.datasets[0],
+          data: revenueData.map(item => item.amount)
+        }]
+      };
+      
+      this.error = null;
+      this.chart?.update();
+    } catch (error) {
+      console.error('Error updating chart data:', error);
+      this.error = 'Failed to update chart data';
+      this.changeDetectorRef.detectChanges();
+    }
+  }
+  
+  // Refresh chart data
+  public refreshChart(): void {
+    this.error = null;
+    this.loadData();
   }
 }

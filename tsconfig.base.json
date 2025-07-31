@@ -15,7 +15,13 @@
     "typeRoots": [
       "./node_modules/@types",
       "./src/types"
-    ]
+    ],
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
   },
   "exclude": [
     "node_modules",
@@ -29,7 +35,6 @@
     "**/*.spec.*",
     "**/test-utils/**/*",
     "**/testHelpers.*",
-    "**/*.test.*",
     "**/test-*",
     "**/__mocks__/**/*"
   ]

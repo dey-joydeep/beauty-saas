@@ -1,16 +1,16 @@
 <div class="renewals-list-widget">
   <h3>Upcoming Renewals</h3>
-  <ng-container *ngIf="!loading && !error">
-    <ul *ngIf="renewals.length > 0; else noRenewals">
-      <li *ngFor="let renewal of renewals">
-        <span class="salon-name">{{ renewal.salonName }}</span>
-        <span class="renewal-date">{{ renewal.renewalDate | date: 'mediumDate' }}</span>
-      </li>
-    </ul>
+  <ng-container *ngIf="!loading() && !error()">
+    <mat-list *ngIf="renewals().length > 0; else noRenewals">
+      <mat-list-item *ngFor="let renewal of renewals()">
+        <span matListItemTitle>{{ renewal.salonName }}</span>
+        <span matListItemLine>{{ renewal.renewalDate | date: 'mediumDate' }}</span>
+      </mat-list-item>
+    </mat-list>
     <ng-template #noRenewals>
       <div>No upcoming renewals.</div>
     </ng-template>
   </ng-container>
-  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
-  <mat-error *ngIf="error">{{ error }}</mat-error>
+  <mat-progress-bar *ngIf="loading()" mode="indeterminate"></mat-progress-bar>
+  <mat-error *ngIf="error()">{{ error() }}</mat-error>
 </div>

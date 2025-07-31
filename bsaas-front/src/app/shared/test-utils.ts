@@ -1,6 +1,8 @@
 /**
- * Test utility functions for Angular testing
+ * Test utility functions for Angular testing with Jest
  */
+
+declare const jest: any; // Jest types are globally available when @types/jest is installed
 
 export function getProtectedProperty<T, K extends keyof T>(instance: T, property: K): T[K] {
   return (instance as any)[property];
@@ -21,7 +23,7 @@ export function spyOnProtectedProperty<T, K extends keyof T>(
   instance: T,
   property: K,
   accessType: 'get' | 'set' = 'get'
-): jasmine.Spy {
+): jest.SpyInstance<T[K], []> {
   const prototype = Object.getPrototypeOf(instance);
   const descriptor = Object.getOwnPropertyDescriptor(prototype, property) ||
                     Object.getOwnPropertyDescriptor(instance as any, property);
@@ -30,9 +32,6 @@ export function spyOnProtectedProperty<T, K extends keyof T>(
     throw new Error(`Property ${String(property)} does not exist on the object`);
   }
 
-  if (accessType === 'get') {
-    return spyOnProperty(instance, property as any, 'get').and.callThrough();
-  } else {
-    return spyOnProperty(instance, property as any, 'set').and.callThrough();
-  }
+  // Use Jest's spyOn with property access type
+  return jest.spyOn(instance as any, property as any, accessType);
 }

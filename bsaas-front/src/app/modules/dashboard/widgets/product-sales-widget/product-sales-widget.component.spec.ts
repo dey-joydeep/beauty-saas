@@ -20,7 +20,8 @@ import { of, throwError } from 'rxjs';
 
 import { ProductSalesWidgetComponent } from './product-sales-widget.component';
 import { DashboardService } from '../../services/dashboard.service';
-import { ProductSale, ProductSalesSummary } from '../../models/dashboard.model';
+import { ProductService } from '../../../../modules/owner/product.service';
+import { ProductSale, ProductSalesResponse, ProductSalesFilter, ProductSalesSummary } from '../../models/dashboard.model';
 
 const mockProductSales: ProductSale[] = [
   {
@@ -61,13 +62,23 @@ const mockSummary: ProductSalesSummary = {
 describe('ProductSalesWidgetComponent', () => {
   let component: ProductSalesWidgetComponent;
   let fixture: ComponentFixture<ProductSalesWidgetComponent>;
-  let dashboardService: jasmine.SpyObj<DashboardService>;
-  let translateService: jasmine.SpyObj<TranslateService>;
+  let dashboardService: jest.Mocked<DashboardService>;
+  let productService: jest.Mocked<ProductService>;
+  let translateService: jest.Mocked<TranslateService>;
 
   beforeEach(async () => {
-    const dashboardServiceSpy = jasmine.createSpyObj('DashboardService', ['getProductSales', 'getProductSalesSummary']);
+    dashboardService = {
+      getProductSales: jest.fn(),
+      getProductSalesSummary: jest.fn()
+    } as unknown as jest.Mocked<DashboardService>;
 
-    const translateServiceSpy = jasmine.createSpyObj('TranslateService', ['instant']);
+    productService = {
+      getProductSales: jest.fn()
+    } as unknown as jest.Mocked<ProductService>;
+
+    translateService = {
+      instant: jest.fn()
+    } as unknown as jest.Mocked<TranslateService>;
 
     await TestBed.configureTestingModule({
       declarations: [ProductSalesWidgetComponent],
@@ -91,33 +102,53 @@ describe('ProductSalesWidgetComponent', () => {
         TranslateModule.forRoot(),
       ],
       providers: [
-        { provide: DashboardService, useValue: dashboardServiceSpy },
-        { provide: TranslateService, useValue: translateServiceSpy },
+        { provide: DashboardService, useValue: dashboardService },
+        { provide: ProductService, useValue: productService },
+        { provide: TranslateService, useValue: translateService },
       ],
     }).compileComponents();
-
-    dashboardService = TestBed.inject(DashboardService) as jasmine.SpyObj<DashboardService>;
-    translateService = TestBed.inject(TranslateService) as jasmine.SpyObj<TranslateService>;
-
-    // Setup mock responses
-    dashboardService.getProductSales.and.returnValue(
-      of({
-        items: mockProductSales,
-        total: 2,
-        page: 1,
-        pageSize: 10,
-        totalPages: 1,
-      }),
-    );
-
-    dashboardService.getProductSalesSummary.and.returnValue(of(mockSummary));
-
-    // Setup translation mocks
-    translateService.instant.and.callFake((key: string) => key);
 
     fixture = TestBed.createComponent(ProductSalesWidgetComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+
+    // Setup mock responses
+    const mockResponse: ProductSalesResponse = {
+      data: [
+        { 
+          id: '1', 
+          productId: 'p1', 
+          productName: 'Product 1', 
+          quantity: 100, 
+          unitPrice: 10,
+          totalAmount: 1000, 
+          saleDate: new Date('2023-01-01'),
+          soldBy: 'user1',
+          customerName: 'Customer 1'
+        },
+        { 
+          id: '2', 
+          productId: 'p2', 
+          productName: 'Product 2', 
+          quantity: 50, 
+          unitPrice: 10,
+          totalAmount: 500, 
+          saleDate: new Date('2023-01-02'),
+          soldBy: 'user1',
+          customerName: 'Customer 2'
+        }
+      ],
+      total: 2,
+      page: 1,
+      pageSize: 10,
+      totalPages: 1
+    };
+    dashboardService.getProductSales.mockReturnValue(of(mockResponse));
+
+    dashboardService.getProductSalesSummary.mockReturnValue(of(mockSummary));
+
+    // Setup translation mocks
+    translateService.instant.mockReturnValue('translated text');
   });
 
   it('should create', () => {
@@ -125,23 +156,35 @@ describe('ProductSalesWidgetComponent', () => {
   });
 
   it('should load product sales and summary on init', () => {
-    expect(dashboardService.getProductSales).toHaveBeenCalled();
-    expect(dashboardService.getProductSalesSummary).toHaveBeenCalled();
+    expect(dashboardService.getProductSales).toHaveBeenCalledTimes(1);
+    expect(dashboardService.getProductSalesSummary).toHaveBeenCalledTimes(1);
     expect(component.dataSource.length).toBe(2);
     expect(component.summary).toBeTruthy();
   });
 
   it('should display loading state while fetching data', () => {
     // Reset the component with a delayed response
-    dashboardService.getProductSales.and.returnValue(
-      of({
-        items: [],
-        total: 0,
-        page: 1,
-        pageSize: 10,
-        totalPages: 0,
-      }),
-    );
+    const mockSummary: ProductSalesSummary = {
+      totalSales: 150,
+      totalRevenue: 1500,
+      totalItemsSold: 150,
+      averageSaleValue: 100,
+      salesByProduct: [
+        { 
+          productId: 'p1',
+          productName: 'Product 1', 
+          quantity: 100, 
+          revenue: 1000 
+        },
+        { 
+          productId: 'p2',
+          productName: 'Product 2', 
+          quantity: 50, 
+          revenue: 500 
+        }
+      ]
+    };
+    dashboardService.getProductSalesSummary.mockReturnValue(of(mockSummary));
 
     component.ngOnInit();
     fixture.detectChanges();
@@ -152,7 +195,7 @@ describe('ProductSalesWidgetComponent', () => {
 
   it('should handle error when loading product sales', fakeAsync(() => {
     const errorMessage = 'Error loading product sales';
-    dashboardService.getProductSales.and.returnValue(throwError(() => new Error(errorMessage)));
+    dashboardService.getProductSales.mockReturnValue(throwError(() => new Error(errorMessage)));
 
     component.ngOnInit();
     tick();
@@ -202,11 +245,11 @@ describe('ProductSalesWidgetComponent', () => {
 
   it('should refresh data when refresh is called', () => {
     // Reset call count
-    (dashboardService.getProductSales as jasmine.Spy).calls.reset();
-    (dashboardService.getProductSalesSummary as jasmine.Spy).calls.reset();
+    jest.clearAllMocks();
 
     component.refresh();
 
+    // Check if service methods were called
     expect(dashboardService.getProductSales).toHaveBeenCalledTimes(1);
     expect(dashboardService.getProductSalesSummary).toHaveBeenCalledTimes(1);
   });
