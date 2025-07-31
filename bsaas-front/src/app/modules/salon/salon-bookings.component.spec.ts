@@ -1,7 +1,6 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { SalonAppointmentsComponent } from './salon-appointments.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { of, throwError } from 'rxjs';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { SalonAppointmentsComponent } from './components/appointments/salon-view/salon-appointments.component';
 
 describe('SalonAppointmentsComponent', () => {
   let component: SalonAppointmentsComponent;

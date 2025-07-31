@@ -4,8 +4,30 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "files": ["src/main.ts", "src/main.server.ts", "src/server.ts"],
-  "include": ["src/**/*.d.ts"]
+  "files": [
+    "src/main.ts"
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "**/setup-jest.ts",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "src/test.ts",
+    "src/**/test-utils.ts",
+    "src/**/*.spec.helper.ts",
+    "**/__tests__/**/*",
+    "**/test-utils/**/*",
+    "**/testHelpers.*",
+    "**/test-*",
+    "**/__mocks__/**/*"
+  ]
 }

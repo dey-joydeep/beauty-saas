@@ -1,8 +1,9 @@
-import { Component, HostListener, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 
 import { StatsWidgetComponent } from './widgets/stats/stats-widget.component';
 import { RevenueChartWidgetComponent } from './widgets/revenue-chart/revenue-chart-widget.component';
@@ -12,6 +13,8 @@ import { SubscriptionChartWidgetComponent } from './widgets/subscription-chart/s
 import { RenewalsListWidgetComponent } from './widgets/renewals-list/renewals-list-widget.component';
 import { BaseComponent } from '../../core/base.component';
 import { ErrorService } from '../../core/error.service';
+import { StorageService } from '../../core/services/storage.service';
+import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from '../../core/utils/platform-utils';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,9 +34,10 @@ import { ErrorService } from '../../core/error.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
-export class DashboardComponent extends BaseComponent {
+export class DashboardComponent extends BaseComponent implements OnInit {
   static tenantId = 'demo-tenant';
   tenantId: string;
+  private isBrowser: boolean;
 
   // Define the dashboard layout
   dashboardLayout = {
@@ -45,9 +49,15 @@ export class DashboardComponent extends BaseComponent {
   // Breakpoint configuration for responsive design
   breakpoint: number = 1; // Default to 1 column
 
-  constructor(@Inject(ErrorService) protected override errorService: ErrorService) {
+  constructor(
+    @Inject(ErrorService) protected override errorService: ErrorService,
+    private storageService: StorageService,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils
+  ) {
     super(errorService);
-    this.tenantId = localStorage.getItem('tenantId') || DashboardComponent.tenantId;
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    this.tenantId = DashboardComponent.tenantId; // Default value, will be updated in ngOnInit
     this.setBreakpoint(window.innerWidth);
   }
 
@@ -66,8 +76,30 @@ export class DashboardComponent extends BaseComponent {
   }
 
   // Handle window resize events
+  override async ngOnInit(): Promise<void> {
+    super.ngOnInit();
+    
+    // Load tenant ID from storage if in browser environment
+    if (this.isBrowser) {
+      try {
+        const savedTenantId = await firstValueFrom(this.storageService.getItem<string>('tenantId'));
+        if (savedTenantId) {
+          this.tenantId = savedTenantId;
+        }
+      } catch (error) {
+        console.warn('Failed to load tenant ID:', error);
+      }
+      
+      // Set initial breakpoint based on current window width
+      this.setBreakpoint(this.platformUtils.window?.innerWidth || 0);
+    }
+  }
+
   @HostListener('window:resize', ['$event'])
-  onResize(event: any): void {
-    this.setBreakpoint(event.target.innerWidth);
+  onResize(event: Event): void {
+    if (this.isBrowser) {
+      const target = event.target as Window;
+      this.setBreakpoint(target.innerWidth);
+    }
   }
 }

@@ -1,40 +1,40 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSortModule, MatSort, Sort } from '@angular/material/sort';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatListModule } from '@angular/material/list';
+import { MatNativeDateModule, MatOptionModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { Observable, Subject, of } from 'rxjs';
-import { takeUntil, catchError, finalize } from 'rxjs/operators';
+import { of, Subject } from 'rxjs';
+import { catchError, finalize, takeUntil } from 'rxjs/operators';
 
-import { DashboardService } from '../../services/dashboard.service';
-import { 
-  AppointmentsOverview, 
-  Appointment, 
-  AppointmentsFilter, 
-  AppointmentStatus 
-} from '../../models/appointment.model';
-import { DateRange } from '@angular/material/datepicker';
 import { formatDate } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {
+  Appointment,
+  AppointmentsFilter,
+  AppointmentsOverview,
+  AppointmentStatus
+} from '../../models/appointment.model';
+import { DashboardService } from '../../services/dashboard.service';
 
 interface StatusBadgeConfig {
   text: string;
@@ -61,6 +61,8 @@ interface StatusBadgeConfig {
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatOptionModule,
+    MatSelectModule,
     ReactiveFormsModule,
     MatSnackBarModule,
     MatTabsModule,
@@ -109,14 +111,14 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
   
   // Status filter
   statusFilter = new FormControl<AppointmentStatus | 'ALL'>('ALL');
-  statusOptions: {value: AppointmentStatus | 'ALL', label: string}[] = [
-    { value: 'ALL', label: 'All Statuses' },
+  statusOptions = [
+    { value: 'ALL' as const, label: 'All Statuses' },
     { value: AppointmentStatus.PENDING, label: 'Pending' },
     { value: AppointmentStatus.CONFIRMED, label: 'Confirmed' },
     { value: AppointmentStatus.COMPLETED, label: 'Completed' },
     { value: AppointmentStatus.CANCELLED, label: 'Cancelled' },
-    { value: AppointmentStatus.NOSHOW, label: 'No Show' }
-  ];
+    { value: AppointmentStatus.NOSHOW, label: 'No Show' },
+  ] as const;
   
   // Tabs
   selectedTabIndex = 0;
@@ -216,39 +218,102 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
   }
 
   /**
+   * Get the color associated with a status
+   * @param status The appointment status or 'ALL'
+   * @returns The color for the status
+   */
+  getStatusColor(status: AppointmentStatus | 'ALL'): string {
+    // If status is 'ALL', return a default color
+    if (status === 'ALL') {
+      return '#6c757d'; // Gray
+    }
+    
+    // Handle the enum values
+    const colors: Record<AppointmentStatus, string> = {
+      PENDING: '#ffc107', // Amber
+      CONFIRMED: '#17a2b8', // Teal
+      COMPLETED: '#28a745', // Green
+      CANCELLED: '#dc3545', // Red
+      NOSHOW: '#6c757d' // Gray
+    };
+    
+    return colors[status] || '#6c757d'; // Default gray for unknown statuses
+  }
+
+  /**
+   * Get an array of the last 7 days
+   */
+  getLast7Days(): { date: Date; label: string }[] {
+    const days: { date: Date; label: string }[] = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      
+      days.push({
+        date,
+        label: date.toLocaleDateString(undefined, { weekday: 'short' })
+      });
+    }
+    
+    return days;
+  }
+
+  /**
+   * Get the icon for a status
+   * @param status The appointment status or 'ALL' string
+   * @returns The icon name
+   */
+  getStatusIcon(status: AppointmentStatus | 'ALL'): string {
+    const icons: Record<AppointmentStatus | 'ALL', string> = {
+      'ALL': 'schedule',
+      [AppointmentStatus.PENDING]: 'schedule',
+      [AppointmentStatus.CONFIRMED]: 'check_circle',
+      [AppointmentStatus.COMPLETED]: 'done_all',
+      [AppointmentStatus.CANCELLED]: 'cancel',
+      [AppointmentStatus.NOSHOW]: 'no_accounts'
+    };
+    return icons[status as AppointmentStatus] || 'help';
+  }
+
+  /**
    * Get the status badge configuration
    */
   getStatusBadge(status: AppointmentStatus): StatusBadgeConfig {
-    const config: Record<AppointmentStatus, StatusBadgeConfig> = {
-      PENDING: {
-        text: this.translate.instant('STATUS.PENDING'),
+    // Convert string 'PENDING' to AppointmentStatus.PENDING if needed
+    const statusValue = status === 'PENDING' ? AppointmentStatus.PENDING : status;
+    
+    const badges: Record<AppointmentStatus, StatusBadgeConfig> = {
+      [AppointmentStatus.PENDING]: {
+        text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.PENDING'),
         class: 'status-pending',
         icon: 'schedule'
       },
-      CONFIRMED: {
-        text: this.translate.instant('STATUS.CONFIRMED'),
+      [AppointmentStatus.CONFIRMED]: {
+        text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.CONFIRMED'),
         class: 'status-confirmed',
         icon: 'check_circle'
       },
-      COMPLETED: {
-        text: this.translate.instant('STATUS.COMPLETED'),
+      [AppointmentStatus.COMPLETED]: {
+        text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.COMPLETED'),
         class: 'status-completed',
         icon: 'done_all'
       },
-      CANCELLED: {
-        text: this.translate.instant('STATUS.CANCELLED'),
+      [AppointmentStatus.CANCELLED]: {
+        text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.CANCELLED'),
         class: 'status-cancelled',
         icon: 'cancel'
       },
-      NOSHOW: {
-        text: this.translate.instant('STATUS.NO_SHOW'),
+      [AppointmentStatus.NOSHOW]: {
+        text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.NOSHOW'),
         class: 'status-noshow',
         icon: 'no_accounts'
       }
     };
-    
-    return config[status] || {
-      text: status,
+
+    return badges[statusValue as AppointmentStatus] || {
+      text: statusValue,
       class: 'status-unknown',
       icon: 'help'
     };
@@ -302,23 +367,48 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
   }
 
   /**
-   * Check if a date is today
+   * Handle status change from the template
+   * This is a wrapper around changeStatus that safely handles the status type
    */
-  isToday(dateString: string): boolean {
-    if (!dateString) return false;
-    const date = new Date(dateString);
+  onStatusChange(appointment: Appointment, status: string): void {
+    // Only proceed if the status is a valid AppointmentStatus (not 'ALL')
+    if (status !== 'ALL' && Object.values(AppointmentStatus).includes(status as AppointmentStatus)) {
+      this.changeStatus(appointment, status as AppointmentStatus);
+    }
+  }
+
+
+
+  /**
+   * Check if a date is today
+   * @param dateInput - Date string or Date object
+   */
+  isToday(dateInput: string | Date): boolean {
+    if (!dateInput) return false;
+    
+    const date = new Date(dateInput);
     const today = new Date();
-    return date.toDateString() === today.toDateString();
+    
+    return date.getDate() === today.getDate() &&
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear();
   }
 
   /**
    * Check if a date is in the past
+   * @param dateInput - Date string or Date object
    */
-  isPast(dateString: string): boolean {
-    if (!dateString) return false;
-    const date = new Date(dateString);
+  isPast(dateInput: string | Date): boolean {
+    if (!dateInput) return false;
+    
+    const date = new Date(dateInput);
     const now = new Date();
-    return date < now && !this.isToday(dateString);
+    
+    // Set both dates to midnight for accurate day comparison
+    const dateAtMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nowAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return dateAtMidnight < nowAtMidnight && !this.isToday(dateInput);
   }
 
   /**

@@ -5,6 +5,8 @@ export interface Salon {
   name: string;
   slug: string;
   description?: string;
+  // Alias for logoUrl to maintain backward compatibility with imagePath
+  imagePath?: string;
   address: string;
   city: string;
   state?: string;
@@ -47,6 +49,11 @@ export interface Salon {
     notifyCancellations: boolean;
     [key: string]: any;
   };
+  // Rating and review information
+  rating?: number;
+  reviewCount?: number;
+  
+  // Detailed statistics
   stats?: {
     averageRating: number;
     reviewCount: number;
@@ -150,10 +157,14 @@ export interface SalonSearchResult {
   email: string;
   website?: string;
   logoUrl?: string;
+  // Alias for logoUrl to maintain backward compatibility with imagePath
+  imagePath?: string;
   coverImageUrl?: string;
   isOpenNow: boolean;
   nextOpeningTime?: string; // ISO date string
+  // Rating and review information
   averageRating: number;
+  rating?: number; // Alias for averageRating
   reviewCount: number;
   services?: Array<{
     id: string;

@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID, Renderer2 } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ThemeService, Theme } from './theme.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { Renderer2 } from '@angular/core';
+import { PLATFORM_UTILS_TOKEN, IPlatformUtils } from '../../core/tokens/platform-utils.token';
 
 @Component({
   selector: 'app-theme',
@@ -19,11 +18,16 @@ export class ThemeComponent implements OnInit {
   error: string | null = null;
   themeForm: FormGroup;
 
+  private isBrowser: boolean;
+
   constructor(
     private themeService: ThemeService,
     private fb: FormBuilder,
     private renderer: Renderer2,
+    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
+    @Inject(PLATFORM_ID) platformId: Object
   ) {
+    this.isBrowser = isPlatformBrowser(platformId);
     this.themeForm = this.fb.group({
       primaryColor: ['', Validators.required],
       secondaryColor: ['', Validators.required],
@@ -38,8 +42,8 @@ export class ThemeComponent implements OnInit {
   fetchTheme() {
     this.loading = true;
     this.error = null;
-    const token = localStorage.getItem('token') || '';
-    const tenantId = localStorage.getItem('tenant_id') || 'test-tenant';
+    const token = this.platformUtils.browserLocalStorage?.getItem('token') || '';
+    const tenantId = this.platformUtils.browserLocalStorage?.getItem('tenant_id') || 'test-tenant';
     this.themeService.getTheme(token, tenantId).subscribe({
       next: (theme) => {
         this.theme = theme;
@@ -62,8 +66,8 @@ export class ThemeComponent implements OnInit {
     if (this.themeForm.invalid) return;
     this.loading = true;
     this.error = null;
-    const token = localStorage.getItem('token') || '';
-    const tenantId = localStorage.getItem('tenant_id') || 'test-tenant';
+    const token = this.platformUtils.browserLocalStorage?.getItem('token') || '';
+    const tenantId = this.platformUtils.browserLocalStorage?.getItem('tenant_id') || 'test-tenant';
     const params = this.themeForm.value;
     this.themeService.updateTheme(token, tenantId, params).subscribe({
       next: (updatedTheme) => {
@@ -79,8 +83,13 @@ export class ThemeComponent implements OnInit {
   }
 
   applyTheme(theme: Theme) {
-    this.renderer.setStyle(document.documentElement, '--primary-color', theme.primaryColor);
-    this.renderer.setStyle(document.documentElement, '--secondary-color', theme.secondaryColor);
-    this.renderer.setStyle(document.documentElement, '--accent-color', theme.accentColor);
+    if (!this.isBrowser) return;
+    
+    const doc = this.platformUtils.document;
+    if (!doc) return;
+    
+    this.renderer.setStyle(doc.documentElement, '--primary-color', theme.primaryColor);
+    this.renderer.setStyle(doc.documentElement, '--secondary-color', theme.secondaryColor);
+    this.renderer.setStyle(doc.documentElement, '--accent-color', theme.accentColor);
   }
 }

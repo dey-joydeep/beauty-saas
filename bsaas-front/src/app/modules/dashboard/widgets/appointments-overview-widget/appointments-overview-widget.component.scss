@@ -1,5 +1,6 @@
-@import 'src/styles/variables';
-@import 'src/styles/mixins';
+@use 'sass:color';
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/_mixins' as *;
 
 .appointments-widget {
   background: #fff;
@@ -32,7 +33,7 @@
         
         mat-icon {
           margin-right: 8px;
-          color: $primary-color;
+          color: $primary;
         }
       }
       
@@ -229,7 +230,7 @@
             height: 20px;
             padding: 0 6px;
             border-radius: 10px;
-            background-color: $primary-color;
+            background-color: $primary;
             color: white;
             font-size: 11px;
             font-weight: 600;
@@ -238,16 +239,16 @@
         }
         
         &.mat-tab-label-active {
-          color: $primary-color;
+          color: $primary;
           
           .tab-badge {
-            background-color: darken($primary-color, 10%);
+            background-color: color.adjust($primary, $lightness: -10%);
           }
         }
       }
       
       .mat-ink-bar {
-        background-color: $primary-color;
+        background-color: $primary;
         height: 3px;
       }
       
@@ -358,7 +359,7 @@
             color: #6b7280;
             
             &.today {
-              color: $primary-color;
+              color: $primary;
             }
             
             &.past {
@@ -600,7 +601,7 @@
       }
       
       &:hover mat-icon {
-        color: $primary-color;
+        color: $primary;
       }
     }
     
@@ -731,7 +732,7 @@
     .daily-chart {
       .chart-bars {
         .daily-bar {
-          background-color: $primary-color;
+          background-color: $primary;
           width: 12px;
           min-height: 1px;
           border-radius: 4px 4px 0 0;

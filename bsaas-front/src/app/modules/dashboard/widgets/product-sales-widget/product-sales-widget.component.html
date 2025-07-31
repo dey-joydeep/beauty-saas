@@ -105,7 +105,7 @@
     </div>
 
     <!-- Top Selling Products -->
-    <mat-card *ngIf="summary?.topSellingProducts?.length > 0" class="top-products">
+    <mat-card *ngIf="summary && summary.topSellingProducts && summary.topSellingProducts.length > 0" class="top-products">
       <mat-card-header>
         <mat-card-title>{{ 'DASHBOARD.PRODUCT_SALES.TOP_PRODUCTS' | translate }}</mat-card-title>
         <mat-icon mat-card-avatar>star</mat-icon>
@@ -113,8 +113,8 @@
       <mat-card-content>
         <div class="product-list">
           <div *ngFor="let product of summary.topSellingProducts" class="product-item">
-            <span class="product-name">{{ product.name }}</span>
-            <span class="product-quantity">{{ product.quantity }} {{ 'DASHBOARD.PRODUCT_SALES.SOLD' | translate }}</span>
+            <span class="product-name">{{ product?.name || 'N/A' }}</span>
+            <span class="product-quantity">{{ product?.quantity || 0 }} {{ 'DASHBOARD.PRODUCT_SALES.SOLD' | translate }}</span>
           </div>
         </div>
       </mat-card-content>
@@ -181,7 +181,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="clickable-row" [routerLink]="['/sales', row.id]"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="clickable-row" [routerLink]="['/sales', row?.id || '']"></tr>
       </table>
 
       <!-- Paginator -->

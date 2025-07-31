@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserService, UserStats } from './user.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { CurrentUserService } from '../../shared/current-user.service';
+import { CurrentUserService } from '../../core/auth/services/current-user.service';
 import { ErrorService } from '../../core/error.service';
 import { BaseComponent } from '../../core/base.component'; // Assuming BaseComponent is located here
 

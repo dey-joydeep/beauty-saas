@@ -7,14 +7,19 @@ import { ReactiveFormsModule } from '@angular/forms';
 describe('ProfileSettingsComponent', () => {
   let component: ProfileSettingsComponent;
   let fixture: ComponentFixture<ProfileSettingsComponent>;
-  let userServiceSpy: jasmine.SpyObj<UserService>;
+  let userService: jest.Mocked<UserService>;
 
   beforeEach(async () => {
-    userServiceSpy = jasmine.createSpyObj('UserService', ['updateProfile']);
+    userService = {
+      updateProfile: jest.fn()
+    } as unknown as jest.Mocked<UserService>;
+
+    // Provide the mock service
+    TestBed.overrideProvider(UserService, { useValue: userService });
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],
       declarations: [ProfileSettingsComponent],
-      providers: [{ provide: UserService, useValue: userServiceSpy }],
+      providers: [{ provide: UserService, useValue: userService }],
     }).compileComponents();
     fixture = TestBed.createComponent(ProfileSettingsComponent);
     component = fixture.componentInstance;
@@ -22,7 +27,7 @@ describe('ProfileSettingsComponent', () => {
   });
 
   it('should display error on failed profile update', fakeAsync(() => {
-    userServiceSpy.updateProfile.and.returnValue(throwError(() => ({ userMessage: 'Failed to update profile.' })));
+    userService.updateProfile.mockReturnValue(throwError(() => new Error('Failed to update')));
     component.profileForm.setValue({ 
       name: 'Test', 
       email: 'test@test.com', 
@@ -48,7 +53,7 @@ describe('ProfileSettingsComponent', () => {
   });
 
   it('should call updateProfile on valid submit', fakeAsync(() => {
-    userServiceSpy.updateProfile.and.returnValue(of({ success: true }));
+    userService.updateProfile.mockReturnValueOnce(of({ success: true }));
     component.profileForm.setValue({ 
       name: 'Test', 
       email: 'test@test.com', 
@@ -58,6 +63,6 @@ describe('ProfileSettingsComponent', () => {
     });
     component.onSubmit();
     tick();
-    expect(userServiceSpy.updateProfile).toHaveBeenCalled();
+    expect(userService.updateProfile).toHaveBeenCalled();
   }));
 });

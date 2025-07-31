@@ -1,8 +1,11 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './login.component';
-import { RegisterComponent } from './register.component';
-import { ForgotPasswordComponent } from './forgot-password.component';
-import { publicGuard } from './auth.guard';
+// Components
+import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/register/register.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+
+// Guards
+import { publicGuard } from './guards/auth.guard';
 
 export const AUTH_ROUTES: Routes = [
   {

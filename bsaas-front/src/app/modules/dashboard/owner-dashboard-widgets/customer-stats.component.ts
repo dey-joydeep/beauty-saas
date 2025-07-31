@@ -1,11 +1,20 @@
-import { Component, Input, inject, signal, Signal } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardApiService, DashboardStats } from '../../../shared/dashboard-api.service';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatError, MatFormFieldModule } from '@angular/material/form-field';
+import { DashboardApiService } from '../../../shared/dashboard-api.service';
 
 @Component({
   selector: 'app-customer-stats',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatProgressBarModule,
+    MatFormFieldModule,
+    MatError
+  ],
   templateUrl: './customer-stats.component.html',
   styleUrls: ['./customer-stats.component.scss'],
 })

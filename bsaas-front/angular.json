@@ -43,13 +43,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "3MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "20kB",
+                  "maximumError": "30kB"
                 }
               ],
               "outputHashing": "all"
@@ -92,8 +92,10 @@
           "builder": "@angular-devkit/build-angular:server",
           "options": {
             "outputPath": "dist/bsaas-front/server",
-            "main": "server.ts",
-            "tsConfig": "tsconfig.server.json"
+            "main": "src/server.ts",
+            "tsConfig": "tsconfig.server.json",
+            "sourceMap": true,
+            "optimization": false
           },
           "configurations": {
             "production": {

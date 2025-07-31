@@ -12,7 +12,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 
 import { HomeService } from './home.service';
-import { TopSalonsComponent } from '../salon/top-salons.component';
+import { TopSalonsComponent } from '../salon/components/top-salons/top-salons.component';
 import type { IServiceDto, ITestimonialDto, ICityDto, ISalonDto, IHomePageData } from './home.models';
 
 @Component({
@@ -28,9 +28,9 @@ import type { IServiceDto, ITestimonialDto, ICityDto, ISalonDto, IHomePageData }
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatChipsModule,
+    TopSalonsComponent,
     MatDividerModule,
     MatButtonModule,
-    TopSalonsComponent,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],

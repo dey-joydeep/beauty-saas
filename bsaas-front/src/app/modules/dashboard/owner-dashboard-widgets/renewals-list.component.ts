@@ -1,11 +1,22 @@
 import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatError, MatFormFieldModule } from '@angular/material/form-field';
+import { MatListModule } from '@angular/material/list';
 import { DashboardApiService, Renewal } from '../../../shared/dashboard-api.service';
 
 @Component({
   selector: 'app-renewals-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatProgressBarModule,
+    MatFormFieldModule,
+    MatError,
+    MatListModule
+  ],
   templateUrl: './renewals-list.component.html',
   styleUrls: ['./renewals-list.component.scss'],
 })

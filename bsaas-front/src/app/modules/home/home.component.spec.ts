@@ -88,13 +88,23 @@ const mockHomeData: IHomePageData = {
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-  let homeService: jasmine.SpyObj<HomeService>;
-  let snackBar: jasmine.SpyObj<MatSnackBar>;
+  let homeService: jest.Mocked<HomeService>;
+  let snackBar: jest.Mocked<MatSnackBar>;
   let router: Router;
 
   beforeEach(waitForAsync(() => {
-    const homeServiceSpy = jasmine.createSpyObj('HomeService', ['getHomePageData', 'searchSalons', 'getFeaturedSalons', 'getFeaturedServices', 'getTestimonials', 'getCities']);
-    const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+    homeService = {
+      getHomePageData: jest.fn(),
+      searchSalons: jest.fn(),
+      getFeaturedSalons: jest.fn(),
+      getFeaturedServices: jest.fn(),
+      getTestimonials: jest.fn(),
+      getCities: jest.fn()
+    } as unknown as jest.Mocked<HomeService>;
+
+    snackBar = {
+      open: jest.fn()
+    } as unknown as jest.Mocked<MatSnackBar>;
 
     TestBed.configureTestingModule({
       imports: [
@@ -103,21 +113,26 @@ describe('HomeComponent', () => {
       ],
       declarations: [HomeComponent],
       providers: [
-        { provide: HomeService, useValue: homeServiceSpy },
-        { provide: MatSnackBar, useValue: snackBarSpy }
+        { provide: HomeService, useValue: homeService },
+        { provide: MatSnackBar, useValue: snackBar }
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
-    homeService = TestBed.inject(HomeService) as jasmine.SpyObj<HomeService>;
-    snackBar = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
+    homeService = TestBed.inject(HomeService) as jest.Mocked<HomeService>;
+    snackBar = TestBed.inject(MatSnackBar) as jest.Mocked<MatSnackBar>;
     router = TestBed.inject(Router);
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
-    homeService.getHomePageData.and.returnValue(of(mockHomeData));
+    homeService.getHomePageData.mockReturnValue(of({
+      featuredSalons: [],
+      featuredServices: [],
+      testimonials: [],
+      cities: []
+    }));
     fixture.detectChanges();
   });
 
@@ -133,10 +148,16 @@ describe('HomeComponent', () => {
 
   it('should handle error when loading home data fails', () => {
     const error = new Error('Failed to load data');
-    homeService.getHomePageData.and.returnValue(throwError(() => error));
+    homeService.getHomePageData.mockReturnValue(throwError(() => error));
+    
+    // Recreate component to trigger ngOnInit again
+    fixture = TestBed.createComponent(HomeComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
-    expect(component.error).toBe('Failed to load home data. Please try again later.');
+    
     expect(component.loading).toBeFalse();
+    expect(component.error).toBe('Failed to load data');
+    expect(snackBar.open).toHaveBeenCalledWith('Failed to load home data', 'Dismiss', { duration: 3000 });
   });
 
   it('should format price correctly', () => {

@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from '../../../../core/base.component';
 import { ErrorService } from '../../../../core/error.service';
@@ -12,14 +13,28 @@ import { Subscription } from 'rxjs';
 import { DashboardApiService } from '../../../../shared/dashboard-api.service';
 
 interface ApiRenewal {
+  id?: string; // Make optional as it might not be in the response
   salonName: string;
+  customerName?: string; // Make optional
+  serviceName?: string; // Make optional
   renewalDate: string;
+  amount?: number; // Make optional
+  status?: 'pending' | 'completed' | 'overdue';
 }
 
 @Component({
   selector: 'app-renewals-list-widget',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule, MatListModule, MatButtonModule, MatProgressSpinnerModule, TranslateModule],
+  imports: [
+    CommonModule, 
+    MatCardModule, 
+    MatIconModule, 
+    MatListModule, 
+    MatButtonModule, 
+    MatProgressSpinnerModule, 
+    MatTooltipModule,
+    TranslateModule
+  ],
   templateUrl: './renewals-list-widget.component.html',
   styleUrls: ['./renewals-list-widget.component.scss'],
 })
@@ -79,8 +94,35 @@ export class RenewalsListWidgetComponent extends BaseComponent {
     this.loadRenewals();
   }
 
-  formatRenewalDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
+  getDaysUntilRenewal(renewalDate: string): number {
+    const today = new Date();
+    const renewal = new Date(renewalDate);
+    return Math.ceil((renewal.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  private getRenewalStatus(renewalDate: string): 'pending' | 'completed' | 'overdue' {
+    const daysUntilRenewal = this.getDaysUntilRenewal(renewalDate);
+    if (daysUntilRenewal < 0) return 'overdue';
+    if (daysUntilRenewal <= 7) return 'pending';
+    return 'completed';
+  }
+
+  getStatusIcon(status: 'pending' | 'completed' | 'overdue'): string {
+    const iconMap = {
+      pending: 'pending_actions',
+      completed: 'done',
+      overdue: 'error_outline',
+    };
+    return iconMap[status] || 'help_outline';
+  }
+
+  getRenewalCountByStatus(status: 'pending' | 'completed' | 'overdue'): number {
+    return this.renewals.filter((renewal) => renewal.status === status).length;
+  }
+
+  formatRenewalDate(date: string | Date): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('en-US', {
       weekday: 'short',
       year: 'numeric',
       month: 'short',
@@ -104,31 +146,5 @@ export class RenewalsListWidgetComponent extends BaseComponent {
       overdue: 'var(--mat-error)',
     };
     return colorMap[status];
-  }
-
-  getDaysUntilRenewal(renewalDate: string): number {
-    const today = new Date();
-    const renewal = new Date(renewalDate);
-    return Math.ceil((renewal.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  }
-
-  private getRenewalStatus(renewalDate: string): 'pending' | 'completed' | 'overdue' {
-    const daysUntilRenewal = this.getDaysUntilRenewal(renewalDate);
-    if (daysUntilRenewal < 0) return 'overdue';
-    if (daysUntilRenewal <= 7) return 'pending';
-    return 'completed';
-  }
-
-  getRenewalCountByStatus(status: 'pending' | 'completed' | 'overdue'): number {
-    return this.renewals.filter((renewal) => renewal.status === status).length;
-  }
-
-  getStatusIcon(status: 'pending' | 'completed' | 'overdue'): string {
-    const iconMap = {
-      pending: 'pending_actions',
-      completed: 'done',
-      overdue: 'error_outline',
-    };
-    return iconMap[status];
   }
 }

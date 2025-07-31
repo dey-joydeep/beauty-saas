@@ -1,10 +1,34 @@
-import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { InjectionToken, PLATFORM_ID } from '@angular/core';
 
 /**
- * Service to handle platform-specific code
+ * Interface for platform utilities to ensure type safety
  */
-export class PlatformUtils {
+export interface IPlatformUtils {
+  readonly isBrowser: boolean;
+  readonly isServer: boolean;
+  readonly browserLocalStorage: Storage | null;
+  readonly browserSessionStorage: Storage | null;
+  readonly browserNavigator: Navigator | null;
+  readonly browserLocation: Location | null;
+  readonly window: Window | null;
+  readonly document: Document | null;
+  
+  runInBrowser<T, F = undefined>(
+    callback: () => T,
+    fallback?: () => F
+  ): T | F | undefined;
+}
+
+/**
+ * Injection token for PlatformUtils to support both class and interface injection
+ */
+export const PLATFORM_UTILS_TOKEN = new InjectionToken<IPlatformUtils>('PlatformUtils');
+
+/**
+ * Service to handle platform-specific code in an SSR-compatible way
+ */
+export class PlatformUtils implements IPlatformUtils {
   constructor(private platformId: Object) {}
 
   /**
@@ -19,6 +43,46 @@ export class PlatformUtils {
    */
   get isServer(): boolean {
     return isPlatformServer(this.platformId);
+  }
+
+  /**
+   * Safely access the browser's localStorage
+   */
+  get browserLocalStorage(): Storage | null {
+    return this.runInBrowser<Storage, null>(
+      () => (typeof localStorage !== 'undefined' ? localStorage : null) as Storage,
+      () => null
+    ) ?? null;
+  }
+
+  /**
+   * Safely access the browser's sessionStorage
+   */
+  get browserSessionStorage(): Storage | null {
+    return this.runInBrowser<Storage, null>(
+      () => (typeof sessionStorage !== 'undefined' ? sessionStorage : null) as Storage,
+      () => null
+    ) ?? null;
+  }
+
+  /**
+   * Safely access the browser's navigator object
+   */
+  get browserNavigator(): Navigator | null {
+    return this.runInBrowser<Navigator, null>(
+      () => (typeof navigator !== 'undefined' ? navigator : null) as Navigator,
+      () => null
+    ) ?? null;
+  }
+
+  /**
+   * Safely access the browser's location object
+   */
+  get browserLocation(): Location | null {
+    return this.runInBrowser<Location, null>(
+      () => (typeof location !== 'undefined' ? location : null) as Location,
+      () => null
+    ) ?? null;
   }
 
   /**
@@ -55,32 +119,12 @@ export class PlatformUtils {
       () => null
     ) ?? null;
   }
-
-  /**
-   * Get the localStorage object in a server-compatible way
-   */
-  get localStorage(): Storage | null {
-    return this.runInBrowser<Storage, null>(
-      () => (typeof window !== 'undefined' ? window.localStorage : null) as Storage,
-      () => null
-    ) ?? null;
-  }
-
-  /**
-   * Get the sessionStorage object in a server-compatible way
-   */
-  get sessionStorage(): Storage | null {
-    return this.runInBrowser<Storage, null>(
-      () => (typeof window !== 'undefined' ? window.sessionStorage : null) as Storage,
-      () => null
-    ) ?? null;
-  }
 }
 
 /**
  * Factory function to create PlatformUtils
  */
-export function platformUtilsFactory(platformId: Object): PlatformUtils {
+export function platformUtilsFactory(platformId: Object): IPlatformUtils {
   return new PlatformUtils(platformId);
 }
 
@@ -88,7 +132,7 @@ export function platformUtilsFactory(platformId: Object): PlatformUtils {
  * Provide PlatformUtils as an injectable service
  */
 export const providePlatformUtils = () => ({
-  provide: PlatformUtils,
-  useFactory: platformUtilsFactory,
+  provide: PLATFORM_UTILS_TOKEN,
+  useFactory: (platformId: Object) => platformUtilsFactory(platformId),
   deps: [PLATFORM_ID]
 });

@@ -1,3 +1,8 @@
+import { SalonServiceItem } from './salon-service-item.model';
+import { Staff } from './staff.model';
+// Importing Review from the reviews module
+import { Review } from '../../reviews/models/review.model';
+
 export interface Salon {
   id: string;
   name: string;
@@ -18,7 +23,3 @@ export interface Salon {
   rating?: number;
   reviewCount?: number;
 }
-
-import { SalonServiceItem } from './salon-service-item.model';
-import { Staff } from '../../staff/models/staff.model';
-import { Review } from '../../reviews/models/review.model';

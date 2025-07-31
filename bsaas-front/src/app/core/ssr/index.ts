@@ -1,7 +1,8 @@
 /**
  * Server-Side Rendering (SSR) utilities
+ * 
+ * Note: This file is kept for future SSR-related exports.
+ * The custom Material SSR handler has been removed in favor of Angular's built-in SSR support.
  */
 
-export * from './material-ssr-handler';
-
-// Add any other SSR-related exports here
+// Export any other SSR-related utilities here

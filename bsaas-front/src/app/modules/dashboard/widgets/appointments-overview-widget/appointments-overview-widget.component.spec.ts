@@ -23,19 +23,25 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatDialogModule } from '@angular/material/dialog';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Observable } from 'rxjs';
 
 import { AppointmentsOverviewWidgetComponent } from './appointments-overview-widget.component';
 import { DashboardService } from '../../services/dashboard.service';
-import { AppointmentsOverview, Appointment, AppointmentStatus } from '../../models/appointment.model';
+import { AppointmentsOverview, Appointment, AppointmentStatus, AppointmentsFilter } from '../../models/appointment.model';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+
+type Mocked<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any
+    ? jest.Mock<ReturnType<T[K]>, Parameters<T[K]>>
+    : T[K];
+};
 
 describe('AppointmentsOverviewWidgetComponent', () => {
   let component: AppointmentsOverviewWidgetComponent;
   let fixture: ComponentFixture<AppointmentsOverviewWidgetComponent>;
-  let dashboardService: jasmine.SpyObj<DashboardService>;
-  let translateService: jasmine.SpyObj<TranslateService>;
-  let snackBar: jasmine.SpyObj<MatSnackBar>;
+  let dashboardService: Mocked<DashboardService>;
+  let translateService: Mocked<TranslateService>;
+  let snackBar: jest.Mocked<MatSnackBar>;
 
   const mockAppointment: Appointment = {
     id: '1',
@@ -151,17 +157,25 @@ describe('AppointmentsOverviewWidgetComponent', () => {
     })
     .compileComponents();
 
-    dashboardService = TestBed.inject(DashboardService) as jasmine.SpyObj<DashboardService>;
-    translateService = TestBed.inject(TranslateService) as jasmine.SpyObj<TranslateService>;
-    snackBar = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
-    
-    // Setup mock responses
-    dashboardService.getAppointmentsOverview.and.returnValue(of(mockOverview));
-    dashboardService.updateAppointmentStatus.and.returnValue(of({ ...mockAppointment, status: AppointmentStatus.COMPLETED }));
-    
-    // Setup translate service mock
-    translateService.instant.and.callFake((key: string) => key);
-    translateService.get.and.returnValue(of('translated'));
+    // Create mock services with proper typing
+    dashboardService = {
+      getAppointmentsOverview: jest.fn().mockReturnValue(of(mockOverview)),
+      updateAppointmentStatus: jest.fn().mockReturnValue(of({ ...mockAppointment, status: AppointmentStatus.COMPLETED }))
+    } as unknown as Mocked<DashboardService>;
+
+    translateService = {
+      instant: jest.fn((key: string | string[]) => typeof key === 'string' ? key : key[0]),
+      get: jest.fn().mockReturnValue(of('translated'))
+    } as unknown as Mocked<TranslateService>;
+
+    snackBar = {
+      open: jest.fn()
+    } as unknown as jest.Mocked<MatSnackBar>;
+
+    // Provide the mock services
+    TestBed.overrideProvider(DashboardService, { useValue: dashboardService });
+    TestBed.overrideProvider(TranslateService, { useValue: translateService });
+    TestBed.overrideProvider(MatSnackBar, { useValue: snackBar });
   });
 
   beforeEach(() => {
@@ -175,7 +189,7 @@ describe('AppointmentsOverviewWidgetComponent', () => {
   });
 
   it('should load appointments overview on init', () => {
-    expect(dashboardService.getAppointmentsOverview).toHaveBeenCalled();
+    expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledTimes(1);
     expect(component.overview).toEqual(mockOverview);
     expect(component.dataSource.data).toEqual(mockOverview.upcomingAppointments);
     expect(component.isLoading).toBeFalse();
@@ -183,7 +197,7 @@ describe('AppointmentsOverviewWidgetComponent', () => {
 
   it('should handle error when loading appointments overview', () => {
     const error = new Error('Failed to load');
-    dashboardService.getAppointmentsOverview.and.returnValue(throwError(() => error));
+    dashboardService.getAppointmentsOverview.mockReturnValueOnce(throwError(() => error));
     
     component.ngOnInit();
     fixture.detectChanges();
@@ -200,7 +214,7 @@ describe('AppointmentsOverviewWidgetComponent', () => {
     const status = AppointmentStatus.PENDING;
     component.statusFilter.setValue(status);
     
-    expect(component.filters.status).toBe(status);
+    expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledTimes(2);
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledWith({ status });
   });
 
@@ -211,30 +225,32 @@ describe('AppointmentsOverviewWidgetComponent', () => {
     component.dateRange.setValue({ start: startDate, end: endDate });
     tick(300); // Debounce time
     
-    expect(component.filters.startDate).toBe(startDate.toISOString().split('T')[0]);
-    expect(component.filters.endDate).toBe(endDate.toISOString().split('T')[0]);
+    expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledTimes(2);
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledWith({
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0]
     });
   }));
 
-  it('should change appointment status', () => {
-    const appointment = mockAppointment;
+  it('should update appointment status', fakeAsync(() => {
+    const appointment = { ...mockAppointment };
     const newStatus = AppointmentStatus.COMPLETED;
     
     component.changeStatus(appointment, newStatus);
+    tick(); // Wait for async operations to complete
     
     expect(dashboardService.updateAppointmentStatus).toHaveBeenCalledWith(appointment.id, newStatus);
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalled();
-  });
+    expect(snackBar.open).toHaveBeenCalled();
+  }));
 
   it('should handle error when updating appointment status', () => {
     const error = new Error('Failed to update');
-    dashboardService.updateAppointmentStatus.and.returnValue(throwError(() => error));
+    dashboardService.updateAppointmentStatus.mockReturnValueOnce(throwError(() => error));
     
     component.changeStatus(mockAppointment, AppointmentStatus.COMPLETED);
     
+    expect(snackBar.open).toHaveBeenCalledTimes(1);
     expect(snackBar.open).toHaveBeenCalledWith(
       'DASHBOARD.APPOINTMENTS.STATUS_UPDATE_ERROR',
       'COMMON.CLOSE',
@@ -300,27 +316,30 @@ describe('AppointmentsOverviewWidgetComponent', () => {
   });
 
   it('should refresh data', () => {
-    const initialCalls = dashboardService.getAppointmentsOverview.calls.count();
+    const initialCalls = jest.mocked(dashboardService.getAppointmentsOverview).mock.calls.length;
     component.refresh();
-    expect(dashboardService.getAppointmentsOverview.calls.count()).toBe(initialCalls + 1);
+    expect(jest.mocked(dashboardService.getAppointmentsOverview).mock.calls.length).toBe(initialCalls + 1);
   });
 
-  it('should handle page change', () => {
+  it('should handle page change', fakeAsync(() => {
     const pageEvent = new PageEvent();
     pageEvent.pageIndex = 1;
-    pageEvent.pageSize = 20;
-    
+    pageEvent.pageSize = 5;
     component.onPageChange(pageEvent);
     
-    expect(component.pageIndex).toBe(1);
-    expect(component.pageSize).toBe(20);
+    tick();
+    
+    expect(component.dataSource.paginator).toBeDefined();
+    expect(component.dataSource.paginator?.pageIndex).toBe(1);
+    expect(component.dataSource.paginator?.pageSize).toBe(5);
+    expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledTimes(2);
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledWith({
       page: 2, // pageIndex + 1
-      pageSize: 20,
+      pageSize: 5,
       sortField: 'saleDate',
       sortDirection: 'desc'
     });
-  });
+  }));
 
   it('should handle sort change', () => {
     const sortEvent: Sort = {

@@ -1,20 +1,19 @@
-import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { PortfolioComponent } from './portfolio.component';
-import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
-import { PortfolioService, PortfolioItem } from './portfolio.service';
-import { provideRouter } from '@angular/router';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ReactiveFormsModule } from '@angular/forms';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { of, throwError } from 'rxjs';
+import { provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { ErrorService } from '../../core/error.service';
+import { of, throwError } from 'rxjs';
+import { PortfolioComponent } from './portfolio.component';
+import { PortfolioService } from './portfolio.service';
 
 class MockPortfolioService {
-  getPortfolioItems = jasmine.createSpy('getPortfolioItems').and.returnValue(of([]));
-  createPortfolioItem = jasmine.createSpy('createPortfolioItem').and.returnValue(of({}));
-  updatePortfolioItem = jasmine.createSpy('updatePortfolioItem').and.returnValue(of({}));
-  deletePortfolioItem = jasmine.createSpy('deletePortfolioItem').and.returnValue(of({}));
+  getPortfolioItems = jest.fn().mockReturnValue(of([]));
+  createPortfolioItem = jest.fn().mockReturnValue(of({}));
+  updatePortfolioItem = jest.fn().mockReturnValue(of({}));
+  deletePortfolioItem = jest.fn().mockReturnValue(of({}));
 }
 
 describe('PortfolioComponent', () => {
@@ -49,7 +48,7 @@ describe('PortfolioComponent', () => {
 
   it('should handle load failure', () => {
     const error = new Error('Failed to load portfolio items');
-    service.getPortfolioItems.and.returnValue(throwError(() => error));
+    service.getPortfolioItems.mockReturnValue(throwError(() => error));
     component.ngOnInit();
     expect(service.getPortfolioItems).toHaveBeenCalled();
     // Verify error handling through the component's public API
@@ -64,7 +63,7 @@ describe('PortfolioComponent', () => {
       description: 'desc',
     });
     component.selectedImage = new File([''], 'test.jpg', { type: 'image/jpeg' });
-    service.createPortfolioItem.and.returnValue(
+    service.createPortfolioItem.mockReturnValue(
       of({ id: '1', imagePath: 'some/path.jpg', description: 'desc', tenantId: 't', userId: 'u' }),
     );
     component.addPortfolioItem();
@@ -80,7 +79,7 @@ describe('PortfolioComponent', () => {
       description: 'desc',
     });
     component.selectedImage = new File([''], 'test.jpg', { type: 'image/jpeg' });
-    service.createPortfolioItem.and.returnValue(throwError(() => error));
+    service.createPortfolioItem.mockReturnValue(throwError(() => error));
     
     // Store the initial state
     const initialItems = [...component.portfolioItems];
