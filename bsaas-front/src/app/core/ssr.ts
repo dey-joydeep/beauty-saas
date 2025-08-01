@@ -36,17 +36,21 @@ const _setImmediate = (callback: () => void): any => {
  * Service to handle Material component initialization for server-side rendering
  */
 export class MaterialSsrHandler {
+  private static initialized = false;
+
   constructor(private platformId: Object) {}
 
   /**
    * Initialize Material components for server-side rendering
+   * Safe to call multiple times - will only initialize once
    */
   private static isDefined<T>(value: T | undefined | null): value is T {
     return value !== undefined && value !== null;
   }
 
   initialize(): void {
-    if (!isPlatformServer(this.platformId)) {
+    // Skip if already initialized or not running on server
+    if (MaterialSsrHandler.initialized || !isPlatformServer(this.platformId)) {
       return;
     }
 
@@ -186,16 +190,21 @@ export class MaterialSsrHandler {
 }
 
 /**
+ * Factory function to create MaterialSsrHandler
+ */
+export function materialSsrHandlerFactory(platformId: Object): MaterialSsrHandler {
+  const handler = new MaterialSsrHandler(platformId);
+  handler.initialize();
+  return handler;
+}
+
+/**
  * Provider for MaterialSsrHandler
  */
 export function provideMaterialSsrHandler(): Provider {
   return {
     provide: MaterialSsrHandler,
-    useFactory: () => {
-      const platformId = inject(PLATFORM_ID);
-      const handler = new MaterialSsrHandler(platformId);
-      handler.initialize();
-      return handler;
-    },
+    useFactory: materialSsrHandlerFactory,
+    deps: [PLATFORM_ID]
   };
 }

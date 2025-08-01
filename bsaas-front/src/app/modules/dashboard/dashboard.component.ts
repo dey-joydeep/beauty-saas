@@ -58,7 +58,12 @@ export class DashboardComponent extends BaseComponent implements OnInit {
     super(errorService);
     this.isBrowser = isPlatformBrowser(this.platformId);
     this.tenantId = DashboardComponent.tenantId; // Default value, will be updated in ngOnInit
-    this.setBreakpoint(window.innerWidth);
+    
+    // Safely get initial window width
+    const initialWidth = this.isBrowser && this.platformUtils.window 
+      ? this.platformUtils.window.innerWidth 
+      : 0;
+    this.setBreakpoint(initialWidth);
   }
 
   /**
@@ -97,7 +102,7 @@ export class DashboardComponent extends BaseComponent implements OnInit {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: Event): void {
-    if (this.isBrowser) {
+    if (this.isBrowser && this.platformUtils.window) {
       const target = event.target as Window;
       this.setBreakpoint(target.innerWidth);
     }

@@ -7,6 +7,7 @@ import {
   withXsrfConfiguration,
 } from '@angular/common/http';
 import { ApplicationConfig, ErrorHandler, importProvidersFrom, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -90,36 +91,67 @@ function provideMaterial() {
 //   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 // }
 
-// Configure Material modules and providers
 // Check if we're running in a browser environment
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 // Common providers for both client and server
 export const appConfig: ApplicationConfig = {
   providers: [
+    // Core Angular providers
     provideRouter(routes),
+    
+    // Client hydration with optimized caching
     provideClientHydration(
       withHttpTransferCacheOptions({
         includePostRequests: true,
+        // Exclude API endpoints from hydration cache
+        filter: (req) => !req.url.includes('/api/'),
       })
     ),
+    
+    // Animations with noop support for SSR
     provideAnimations(),
+    
+    // HTTP client configuration
     provideHttpClient(
       withInterceptorsFromDi(),
-      withInterceptors([loadingInterceptor, ssrInterceptor]),
+      withInterceptors([
+        loadingInterceptor,
+        ssrInterceptor
+      ]),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN',
       }),
-      withFetch()
+      withFetch() // Enable fetch API for better SSR support
     ),
-    { provide: HTTP_INTERCEPTORS, useClass: ErrorHandlerService, multi: true },
-    { provide: ErrorHandler, useClass: ErrorHandlerService },
-    // Platform utilities - provided via providePlatformUtils()
-    { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
-    { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 3000 } },
     
-    // Import all Material modules
+    // Error handling
+    { 
+      provide: HTTP_INTERCEPTORS, 
+      useClass: ErrorHandlerService, 
+      multi: true 
+    },
+    { 
+      provide: ErrorHandler, 
+      useClass: ErrorHandlerService 
+    },
+    
+    // Material and third-party providers
+    { 
+      provide: MAT_DATE_LOCALE, 
+      useValue: 'en-US' 
+    },
+    { 
+      provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, 
+      useValue: { 
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      } 
+    },
+    
+    // Material modules
     importProvidersFrom(
       ...provideMaterial(),
       MatIconRegistry
@@ -128,7 +160,20 @@ export const appConfig: ApplicationConfig = {
     // Platform utilities - must be after provideHttpClient()
     providePlatformUtils(),
     
-    // PLATFORM_UTILS_TOKEN is already provided via providePlatformUtils()
-
+    // Add a provider for the document for server-side rendering
+    {
+      provide: 'DOCUMENT',
+      useFactory: (platformId: Object) => 
+        isPlatformBrowser(platformId) ? document : null,
+      deps: [PLATFORM_ID]
+    },
+    
+    // Add a provider for the window for server-side rendering
+    {
+      provide: 'WINDOW',
+      useFactory: (platformId: Object) => 
+        isPlatformBrowser(platformId) ? window : null,
+      deps: [PLATFORM_ID]
+    }
   ],
 };

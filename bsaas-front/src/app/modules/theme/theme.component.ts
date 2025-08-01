@@ -82,14 +82,38 @@ export class ThemeComponent implements OnInit {
     });
   }
 
+  /**
+   * Apply theme styles to the document
+   * Safe to call in both server and browser environments
+   */
   applyTheme(theme: Theme) {
-    if (!this.isBrowser) return;
-    
-    const doc = this.platformUtils.document;
-    if (!doc) return;
-    
-    this.renderer.setStyle(doc.documentElement, '--primary-color', theme.primaryColor);
-    this.renderer.setStyle(doc.documentElement, '--secondary-color', theme.secondaryColor);
-    this.renderer.setStyle(doc.documentElement, '--accent-color', theme.accentColor);
+    if (!this.isBrowser || !this.platformUtils.document) {
+      return;
+    }
+
+    try {
+      const doc = this.platformUtils.document;
+      const rootElement = doc.documentElement;
+      
+      // Batch style updates to minimize reflows
+      this.renderer.setAttribute(rootElement, 'style', ''); // Reset styles first
+      
+      // Apply new styles
+      const styles: Record<string, string> = {
+        '--primary-color': theme.primaryColor,
+        '--secondary-color': theme.secondaryColor,
+        '--accent-color': theme.accentColor,
+        // Add any other theme variables here
+      };
+      
+      Object.entries(styles).forEach(([key, value]) => {
+        if (value) {
+          this.renderer.setStyle(rootElement, key, value);
+        }
+      });
+    } catch (error) {
+      console.error('Error applying theme:', error);
+      // Optionally re-throw or handle the error
+    }
   }
 }

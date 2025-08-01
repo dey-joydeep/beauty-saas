@@ -17,13 +17,28 @@ import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from '../utils/platform-utils';
 })
 export class StorageService {
   private storage: Storage | null = null;
-  private readonly platformUtils = inject(PLATFORM_UTILS_TOKEN, { optional: true });
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly isBrowser: boolean = isPlatformBrowser(this.platformId);
+  private readonly platformUtils: IPlatformUtils | null = null;
+  private readonly platformId: Object = {}; // Initialize with default empty object
+  private isBrowser: boolean = false;
   private readonly memoryStore = new Map<string, string>();
 
   constructor() {
-    this.initialize();
+    // Use try-catch to ensure the service can be instantiated even if injection fails
+    try {
+      this.platformId = inject(PLATFORM_ID);
+      this.isBrowser = isPlatformBrowser(this.platformId);
+      
+      // Only try to get PLATFORM_UTILS_TOKEN if we're in a browser context
+      if (this.isBrowser) {
+        this.platformUtils = inject(PLATFORM_UTILS_TOKEN, { optional: true }) || null;
+      }
+      
+      this.initialize();
+    } catch (error) {
+      console.warn('Error initializing StorageService:', error);
+      this.isBrowser = false;
+      this.storage = this.createMemoryStorage();
+    }
   }
 
   /**
@@ -33,11 +48,16 @@ export class StorageService {
     if (this.storage !== null) return;
 
     try {
-      if (this.platformUtils) {
+      // First try using platformUtils if available
+      if (this.platformUtils?.browserLocalStorage) {
         this.storage = this.platformUtils.browserLocalStorage;
-      } else if (this.isBrowser && typeof window !== 'undefined') {
+      } 
+      // Fall back to direct window access only in browser context
+      else if (this.isBrowser && typeof window !== 'undefined' && window.localStorage) {
         this.storage = window.localStorage;
-      } else {
+      }
+      // Fall back to memory storage
+      if (!this.storage) {
         this.storage = this.createMemoryStorage();
       }
     } catch (error: unknown) {

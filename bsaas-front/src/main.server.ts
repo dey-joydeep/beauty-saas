@@ -1,27 +1,47 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { config as serverConfig } from './app/app.config.server';
-import { MaterialSsrHandler } from './app/core/ssr';
-import { PLATFORM_ID, inject, ApplicationRef } from '@angular/core';
+import { MaterialSsrHandler, materialSsrHandlerFactory } from './app/core/ssr';
+import { PLATFORM_ID, ApplicationRef, APP_INITIALIZER, inject } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
 
 // Platform server for server-side rendering
 const bootstrap = async (): Promise<ApplicationRef> => {
   try {
-    // Get the platform ID
-    const platformId = inject(PLATFORM_ID);
+    const platformId = 'server';
+    
+    // Create a new config with SSR providers
+    const ssrConfig = {
+      ...serverConfig,
+      providers: [
+        ...(serverConfig.providers || []),
+        {
+          provide: MaterialSsrHandler,
+          useFactory: () => materialSsrHandlerFactory(platformId),
+        },
+        {
+          provide: APP_INITIALIZER,
+          useFactory: (handler: MaterialSsrHandler) => {
+            return () => {
+              // Initialize Material SSR in the DI context
+              handler.initialize();
+              
+              // Any additional server-side initialization
+              if (isPlatformServer(platformId)) {
+                // Server-specific initialization
+              }
+            };
+          },
+          deps: [MaterialSsrHandler],
+          multi: true
+        }
+      ]
+    };
 
-    // Initialize Material SSR handler
-    const materialSsrHandler = new MaterialSsrHandler(platformId);
-    materialSsrHandler.initialize();
-
-    // Bootstrap the application with the correct server config
-    const appRef = await bootstrapApplication(AppComponent, serverConfig);
-
-    // Return the application reference
-    return appRef;
+    // Bootstrap the application
+    return await bootstrapApplication(AppComponent, ssrConfig);
   } catch (error) {
-    console.error('Error during server bootstrap:', error);
-    // Re-throw the error to prevent silent failures
+    console.error('❌ Error during server bootstrap:', error);
     throw error;
   }
 };

@@ -7,24 +7,139 @@ import { provideHttpClient, withInterceptors, HttpHandlerFn, HttpRequest } from 
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
 import { ssrInterceptor } from './core/interceptors/ssr-interceptor';
 
-// Mock browser globals for server-side rendering
-const mockWindow = {
-  document: {
-    body: {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  },
-  addEventListener: () => {},
-  removeEventListener: () => {},
-  requestAnimationFrame: (callback: FrameRequestCallback) => 0,
-  cancelAnimationFrame: () => {},
-  setTimeout: (fn: () => void, delay?: number) => 0 as unknown as NodeJS.Timeout,
-  clearTimeout: () => {},
-  // Add other browser APIs that might be needed
-};
+/**
+ * Mock implementation of browser globals for server-side rendering
+ */
+function createMockWindow() {
+  const listeners: Record<string, Set<(...args: any[]) => void>> = {};
+  
+  return {
+    // Basic window properties
+    document: {
+      body: {},
+      documentElement: {},
+      head: {},
+      addEventListener: (type: string, listener: any) => {
+        if (!listeners[type]) listeners[type] = new Set();
+        listeners[type].add(listener);
+      },
+      removeEventListener: (type: string, listener: any) => {
+        if (listeners[type]) {
+          listeners[type].delete(listener);
+        }
+      },
+      createElement: (tag: string) => ({
+        setAttribute: () => {},
+        style: {},
+        classList: {
+          add: () => {},
+          remove: () => {},
+          toggle: () => {},
+        },
+      }),
+      getElementById: () => null,
+      querySelector: () => null,
+      querySelectorAll: () => [],
+    },
+    
+    // Event handling
+    addEventListener: (type: string, listener: any) => {
+      if (!listeners[type]) listeners[type] = new Set();
+      listeners[type].add(listener);
+    },
+    removeEventListener: (type: string, listener: any) => {
+      if (listeners[type]) {
+        listeners[type].delete(listener);
+      }
+    },
+    dispatchEvent: (event: Event) => true,
+    
+    // Animation frames
+    requestAnimationFrame: (callback: FrameRequestCallback) => 
+      setTimeout(() => callback(performance.now()), 0) as unknown as number,
+    cancelAnimationFrame: (id: number) => clearTimeout(id as any),
+    
+    // Timers
+    setTimeout: (fn: (...args: any[]) => void, delay = 0, ...args: any[]) => {
+      const id = setTimeout(fn, delay, ...args);
+      return id as unknown as number;
+    },
+    clearTimeout: (id: number) => clearTimeout(id as any),
+    setInterval: (fn: (...args: any[]) => void, delay = 0, ...args: any[]) => {
+      const id = setInterval(fn, delay, ...args);
+      return id as unknown as number;
+    },
+    clearInterval: (id: number) => clearInterval(id as any),
+    
+    // Storage
+    localStorage: {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+      clear: () => {},
+      key: () => null,
+      length: 0,
+    },
+    
+    sessionStorage: {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+      clear: () => {},
+      key: () => null,
+      length: 0,
+    },
+    
+    // Navigation
+    navigator: {
+      userAgent: 'Mozilla/5.0 (compatible; Server-side Rendering)',
+      language: 'en-US',
+      languages: ['en-US', 'en'],
+    },
+    
+    // Location
+    location: {
+      href: 'http://localhost:4000',
+      protocol: 'http:',
+      host: 'localhost:4000',
+      hostname: 'localhost',
+      port: '4000',
+      pathname: '/',
+      search: '',
+      hash: '',
+      origin: 'http://localhost:4000',
+    },
+    
+    // Performance
+    performance: {
+      now: () => Date.now(),
+      timeOrigin: Date.now(),
+      timing: {
+        navigationStart: Date.now(),
+      },
+    },
+    
+    // MatchMedia mock
+    matchMedia: () => ({
+      matches: false,
+      media: '',
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => true,
+    }),
+  };
+}
+
+const mockWindow = createMockWindow();
 
 // Server-specific providers
 const serverProviders: (Provider | EnvironmentProviders)[] = [
+  // Ensure PLATFORM_ID is provided for server
+  { provide: PLATFORM_ID, useValue: 'server' },
+  { provide: APP_ID, useValue: 'server-app' },
   provideServerRendering(),
   provideAnimations(),
 

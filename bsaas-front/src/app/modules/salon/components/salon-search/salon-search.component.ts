@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Salon } from '../../models/salon.model';
 import { SalonServiceItem } from '../../models/salon-service-item.model';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
+import { PLATFORM_UTILS_TOKEN } from '../../../../core/utils/platform-utils';
+import { IPlatformUtils } from '../../../../core/interfaces/platform-utils.interface';
 
 @Component({
   selector: 'app-salon-search',
@@ -34,6 +36,10 @@ export class SalonSearchComponent {
   services: SalonServiceItem[] = [];
   sort = '';
   showMap = false;
+
+  private readonly platformUtils = inject(PLATFORM_UTILS_TOKEN);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   constructor(private http: HttpClient) {}
 
@@ -106,11 +112,13 @@ export class SalonSearchComponent {
   }
 
   openMap(salon: Salon): void {
-    if (!salon || salon.latitude == null || salon.longitude == null) return;
-    const name = salon.name ? salon.name : '';
-    const url =
-      'https://www.google.com/maps/search/?api=1&query=' + salon.latitude + ',' + salon.longitude + '(' + encodeURIComponent(name) + ')';
-    window.open(url, '_blank');
+    const url = `https://www.google.com/maps?q=${encodeURIComponent(salon.address)}`;
+    if (this.isBrowser && this.platformUtils.window) {
+      this.platformUtils.window.open(url, '_blank');
+    } else if (this.isBrowser) {
+      // Fallback for browser environment if platformUtils.window is not available
+      window.open(url, '_blank');
+    }
   }
 
   getSalonServices(salon: Salon): string {
