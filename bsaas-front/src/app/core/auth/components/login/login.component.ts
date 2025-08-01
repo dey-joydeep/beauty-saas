@@ -1,16 +1,16 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
-import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, Inject, OnDestroy, OnInit, Optional, PLATFORM_ID } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Subject, firstValueFrom } from 'rxjs';
 
 // Services
-import { AuthService, AuthUser } from '../../services/auth.service';
 import { ErrorService } from '../../../error.service';
 import { StorageService } from '../../../services/storage.service';
-import { IPlatformUtils } from '../../../utils/platform-utils';
 import { PLATFORM_UTILS_TOKEN } from '../../../tokens/platform-utils.token';
+import { IPlatformUtils } from '../../../utils/platform-utils';
+import { AuthService, AuthUser } from '../../services/auth.service';
 
 // Angular Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -24,8 +24,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Base Component
-import { BaseComponent } from '../../../base.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { BaseComponent } from '../../../base.component';
 
 @Component({
   standalone: true,
@@ -54,6 +54,31 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
+  // Debug logging helper methods
+  private logDebug(message: string, data?: any) {
+    if (this.ssrDebug?.log) {
+      this.ssrDebug.log(`[LoginComponent] ${message}`, data);
+    } else if (this.isBrowser) {
+      console.log(`[LoginComponent] ${message}`, data || '');
+    }
+  }
+  
+  private logError(message: string, error: any) {
+    if (this.ssrDebug?.error) {
+      this.ssrDebug.error(`[LoginComponent] ${message}`, error);
+    } else if (this.isBrowser) {
+      console.error(`[LoginComponent] ${message}`, error);
+    }
+    
+    // Also log to error service if available
+    try {
+      if (this.errorService) {
+        this.errorService.handleError(error);
+      }
+    } catch (e) {
+      console.error('Error logging to error service:', e);
+    }
+  }
   loginForm: FormGroup;
   otpForm: FormGroup;
   step: 'credentials' | 'otp' = 'credentials';
@@ -81,14 +106,20 @@ export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     protected override errorService: ErrorService,
     private router: Router,
-    @Inject(DOCUMENT) private document: Document,
     private translate: TranslateService,
     private storageService: StorageService,
     @Inject(PLATFORM_ID) private platformId: Object,
-    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils
+    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
+    @Optional() @Inject('SSR_DEBUG') private ssrDebug: any
   ) {
     super(errorService);
     this.isBrowser = isPlatformBrowser(this.platformId);
+    
+    // Log constructor execution for debugging
+    this.logDebug('LoginComponent constructor called', {
+      isBrowser: this.isBrowser,
+      platformId: platformId.toString()
+    });
     
     // Initialize userType to null
     this.userType = null;
@@ -336,30 +367,43 @@ export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
 
     this.authService.socialLogin(provider, oauthToken).pipe(
       takeUntil(this.destroy$)
-    ).subscribe({
-      next: (res: any) => {
-        if (res.token) {
-          localStorage.setItem('authToken', res.token);
+    ).subscribe(
+      (res: any) => {
+        try {
+          if (res.token) {
+            if (this.isBrowser) {
+              localStorage.setItem('authToken', res.token);
 
-          // Store user data if available
-          if (res.user) {
-            localStorage.setItem('user', JSON.stringify(res.user));
+              // Store user data if available
+              if (res.user) {
+                localStorage.setItem('user', JSON.stringify(res.user));
+              }
+            }
+
+            // Redirect to dashboard or intended URL
+            const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'] || '/dashboard';
+            this.logDebug('Redirecting to:', returnUrl);
+            this.router.navigateByUrl(returnUrl);
+          } else {
+            this.error = 'Authentication failed. Please try again.';
+            this.logError('Authentication failed:', this.error);
           }
-
-          // Redirect to dashboard or intended URL
-          const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'] || '/dashboard';
-          this.router.navigateByUrl(returnUrl);
-        } else {
-          this.error = 'Authentication failed. Please try again.';
+        } catch (error) {
+          this.logError('Error in social login:', error);
+          this.error = 'An error occurred during login';
+        } finally {
+          this.loading = false;
         }
-        this.loading = false;
       },
-      error: (err: any) => {
+      (err: any) => {
         this.loading = false;
         this.error = err.error?.error || 'Social login failed';
-        this.errorService.handleError(err);
-      },
-    });
+        this.logError('Social login error:', this.error);
+        if (this.errorService) {
+          this.errorService.handleError(err);
+        }
+      }
+    );
   }
 
 

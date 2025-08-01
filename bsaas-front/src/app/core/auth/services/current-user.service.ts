@@ -1,9 +1,10 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, of, Subject, timer } from 'rxjs';
+import { Injectable, OnDestroy, Injector, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { BehaviorSubject, Subject, timer } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, takeUntil } from 'rxjs/operators';
-import { AuthService } from './auth.service';
-import { StorageService } from '../../services/storage.service';
 import { User } from '../../../models/user.model';
+import { StorageService } from '../../services/storage.service';
+import { AuthService } from './auth.service';
 
 export type { User }; // Re-export User type for isolatedModules
 
@@ -47,15 +48,21 @@ export class CurrentUserService implements OnDestroy {
     distinctUntilChanged(),
   );
 
+  private _authService: AuthService | null = null;
+  
   constructor(
-    private authService: AuthService,
+    private injector: Injector,
     private storage: StorageService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    // Load user from storage on init
-    this.loadUserFromStorage();
+    // Only run in browser environment
+    if (isPlatformBrowser(this.platformId)) {
+      // Load user from storage on init
+      this.loadUserFromStorage();
 
-    // Set up authentication state subscription
-    this.setupAuthState();
+      // Set up authentication state subscription
+      this.setupAuthState();
+    }
   }
 
   ngOnDestroy(): void {
@@ -161,6 +168,13 @@ export class CurrentUserService implements OnDestroy {
   /**
    * Check the current authentication state and update the user accordingly
    */
+  private get authService(): AuthService {
+    if (!this._authService) {
+      this._authService = this.injector.get(AuthService);
+    }
+    return this._authService;
+  }
+
   private checkAuthState(): void {
     const isAuthenticated = this.authService.isAuthenticated();
     

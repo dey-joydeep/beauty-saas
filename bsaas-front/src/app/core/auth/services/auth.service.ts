@@ -1,21 +1,13 @@
+
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, throwError, firstValueFrom, from } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
-// Models
-
-// Services
 import { NotificationService } from '../../services/notification.service';
 import { StorageService } from '../../services/storage.service';
-
-// Interfaces
-interface VerifyPasswordResetParams {
-  email: string;
-  token: string;
-  newPassword: string;
-}
 
 export interface AuthUser {
   id: string;
@@ -79,50 +71,39 @@ export interface ApiResponse<T = any> {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = '/api/auth';
+  private readonly apiUrl = '/api/auth';
   private readonly TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly TOKEN_EXPIRY_KEY = 'token_expiry';
   private readonly USER_KEY = 'current_user';
 
-  private http = inject(HttpClient);
-  private router = inject(Router);
-  private storage = inject(StorageService);
-  private notificationService = inject(NotificationService);
-
+  private readonly isBrowser: boolean;
   private currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  public readonly currentUser$ = this.currentUserSubject.asObservable();
+  private refreshTokenInterval: any = null;
 
-  constructor() {
-    this.initializeAuthState();
-    this.setupTokenRefresh();
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private http: HttpClient,
+    private router: Router,
+    private storage: StorageService,
+    private notificationService: NotificationService
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    
+    if (this.isBrowser) {
+      this.initializeAuthState();
+      this.setupTokenRefresh();
+    }
   }
 
-  // ========== AUTHENTICATION ==========
-
-  /**
-   * Login with email and password
-   */
   login(credentials: LoginCredentials): Observable<AuthUser> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/login`, credentials).pipe(
       map((response) => this.handleAuthResponse(response)),
-      catchError((error) => this.handleAuthError(error)),
+      catchError((error) => this.handleAuthError(error))
     );
   }
 
-  /**
-   * Social login (Google, Facebook, etc.)
-   */
-  socialLogin(provider: 'google' | 'facebook', token: string): Observable<AuthUser> {
-    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/social/${provider}`, { token }).pipe(
-      map((response) => this.handleAuthResponse(response)),
-      catchError((error) => this.handleAuthError(error)),
-    );
-  }
-
-  /**
-   * Initialize login process (may trigger OTP)
-   */
   initLogin(credentials: LoginCredentials): Observable<InitLoginResponse> {
     return this.http.post<ApiResponse<InitLoginResponse>>(`${this.apiUrl}/login/init`, credentials).pipe(
       map((response) => {
@@ -130,93 +111,99 @@ export class AuthService {
           throw new Error(response.error || 'Login initialization failed');
         }
         return response.data!;
-      }),
+      })
     );
   }
 
-  /**
-   * Verify OTP for 2FA
-   */
   verifyOtp(params: VerifyOtpParams): Observable<AuthUser> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/verify-otp`, params).pipe(
       map((response) => this.handleAuthResponse(response)),
-      catchError((error) => this.handleAuthError(error)),
+      catchError((error) => this.handleAuthError(error))
     );
   }
 
-  /**
-   * Logout the current user
-   */
-  logout(): Observable<boolean> {
-    // Clear local storage and state
+  socialLogin(provider: 'google' | 'facebook', token: string): Observable<AuthUser> {
+    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/social/${provider}`, { token }).pipe(
+      map((response) => this.handleAuthResponse(response)),
+      catchError((error) => this.handleAuthError(error))
+    );
+  }
+
+  async logout(): Promise<Observable<boolean>> {
     this.clearAuthData();
-
-    // Call server-side logout if token exists
-    const token = this.getToken();
-    if (token) {
-      return this.http.post<ApiResponse>(`${this.apiUrl}/logout`, {}).pipe(
-        map(() => true),
-        catchError(() => of(true)), // Continue even if logout fails
-        tap(() => {
-          this.router.navigate(['/auth/login']);
-        }),
-      );
-    }
-
-    // If no token, just redirect
-    this.router.navigate(['/auth/login']);
-    return of(true);
-  }
-
-  // ========== PASSWORD RESET ==========
-
-  /**
-   * Request password reset
-   */
-  requestPasswordReset(email: string): Observable<boolean> {
-    return this.http.post<ApiResponse>(`${this.apiUrl}/forgot-password`, { email }).pipe(map((response) => response.success));
-  }
-
-  /**
-   * Reset password with token
-   */
-  resetPassword(token: string, newPassword: string): Observable<boolean> {
-    return this.http.post<ApiResponse>(`${this.apiUrl}/reset-password`, { token, newPassword }).pipe(map((response) => response.success));
-  }
-
-  // ========== TOKEN MANAGEMENT ==========
-
-  /**
-   * Get the current access token
-   */
-  getToken(): string | null {
-    const token = this.storage.getItemSync<string>(this.TOKEN_KEY);
-    return token || null;
-  }
-
-  /**
-   * Get the refresh token
-   */
-  getRefreshToken(): string | null {
-    const token = this.storage.getItemSync<string>(this.REFRESH_TOKEN_KEY);
-    return token || null;
-  }
-
-  /**
-   * Check if a JWT token is valid (not expired)
-   * @param token The JWT token to validate
-   * @returns boolean indicating if the token is valid
-   */
-  isTokenValid(token: string | null): boolean {
-    if (!token) return false;
-
     try {
-      // Decode the token
+      const token = await this.getToken();
+      if (token) {
+        return this.http.post<ApiResponse>(`${this.apiUrl}/logout`, {}).pipe(
+          map(() => true),
+          catchError(() => of(true)),
+          tap(() => {
+            this.router.navigate(['/auth/login']);
+          })
+        );
+      }
+      this.router.navigate(['/auth/login']);
+      return of(true);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      this.router.navigate(['/auth/login']);
+      return of(true);
+    }
+  }
+
+  requestPasswordReset(email: string): Observable<boolean> {
+    return this.http.post<ApiResponse>(`${this.apiUrl}/forgot-password`, { email }).pipe(
+      map((response) => response.success)
+    );
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<boolean> {
+    return this.http.post<ApiResponse>(`${this.apiUrl}/reset-password`, { token, newPassword }).pipe(
+      map((response) => response.success)
+    );
+  }
+
+  register(data: { name: string; email: string; password: string; role?: string }): Observable<{ user: any }> {
+    return this.http.post<{ user: any }>(`${this.apiUrl}/user/register`, data).pipe(
+      catchError((error: any) => this.handleAuthError(error))
+    );
+  }
+
+  resendOtp(email: string): Observable<{ success: boolean; message?: string }> {
+    return this.http.post<{ success: boolean; message?: string }>(`${this.apiUrl}/login/resend-otp`, { email }).pipe(
+      catchError((error: any) => this.handleAuthError(error))
+    );
+  }
+
+  async isAuthenticated(): Promise<boolean> {
+    if (!this.isBrowser) return false;
+    
+    try {
+      const token = await this.getToken();
+      if (!token) return false;
+      
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(base64));
+        const currentTime = Math.floor(Date.now() / 1000);
+        return payload.exp > currentTime;
+      } catch (error) {
+        console.error('Error validating token:', error);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return false;
+    }
+  }
+
+  private isTokenValid(token: string | null | undefined): boolean {
+    if (!token) return false;
+    try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const payload = JSON.parse(atob(base64));
-
-      // Check if token is expired
       const currentTime = Math.floor(Date.now() / 1000);
       return payload.exp > currentTime;
     } catch (error) {
@@ -225,103 +212,32 @@ export class AuthService {
     }
   }
 
-  /**
-   * Check if user is authenticated
-   */
-  isAuthenticated(): boolean {
-    const token = this.getToken();
-    if (!token) return false;
-
-    // Check if token is expired using the token's own expiry
-    if (this.isTokenValid(token)) {
-      // Also check our stored expiry as an additional check
-      const expiry = this.storage.getItemSync<string>(this.TOKEN_EXPIRY_KEY);
-      if (expiry) {
-        return new Date().getTime() < Number(expiry);
-      }
-      return true; // If no stored expiry but token is valid, assume valid
-    }
-
-    return false;
-  }
-
-  // ========== PRIVATE METHODS ==========
-
-  /**
-   * Initialize authentication state from storage
-   */
   private initializeAuthState(): void {
-    const token = this.getToken();
-    const userStr = this.storage.getItemSync<string>('current_user');
-
-    if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr) as AuthUser;
-        this.currentUserSubject.next(user);
-      } catch (e) {
-        console.error('Failed to parse user data from storage', e);
+    if (!this.isBrowser) return;
+    
+    this.storage.getItem<AuthUser>(this.USER_KEY).subscribe({
+      next: (user) => {
+        if (user) {
+          this.currentUserSubject.next(user);
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load user from storage', error);
         this.clearAuthData();
       }
-    } else {
-      this.clearAuthData();
-    }
+    });
   }
 
-  /**
-   * Handle successful authentication response
-   */
-  private handleAuthResponse(response: ApiResponse<AuthResponse | AuthUser>): AuthUser {
+  private handleAuthResponse(response: ApiResponse<AuthResponse>): AuthUser {
     const { data } = response;
-    let user: AuthUser;
-    let accessToken: string | undefined;
-    let refreshToken: string | undefined;
-    let expiresIn: number | undefined;
-
-    // Handle both AuthResponse and AuthUser types
-    if ('accessToken' in data) {
-      // This is an AuthResponse
-      const { accessToken: token, refreshToken: refToken, expiresIn: expIn, ...userData } = data as AuthResponse;
-      user = userData;
-      accessToken = token;
-      refreshToken = refToken;
-      expiresIn = expIn;
-    } else {
-      // This is an AuthUser (tokens are optional)
-      const { accessToken: token, refreshToken: refToken, expiresIn: expIn, ...userData } = data;
-      user = userData as AuthUser;
-      accessToken = token;
-      refreshToken = refToken;
-      expiresIn = expIn;
-    }
-
-    // Store tokens and user data if tokens are available
-    if (accessToken) {
-      this.storage.setItem(this.TOKEN_KEY, accessToken);
-    }
-    if (refreshToken) {
-      this.storage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
-    }
-    this.storage.setItem('current_user', JSON.stringify(user));
-
-    // Calculate and store token expiry if expiresIn is available
-    if (expiresIn) {
-      const expiryTime = new Date().getTime() + expiresIn * 1000;
-      this.storage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
-    }
-
-    // Update current user
-    this.currentUserSubject.next(user);
+    const user = { ...data };
+    this.setLoggedInUser(user);
     return user;
   }
 
-  /**
-   * Handle authentication errors
-   */
   private handleAuthError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An error occurred during authentication';
-
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = error.error.message;
     } else if (error.status === 0) {
       errorMessage = 'Unable to connect to the server. Please check your internet connection.';
@@ -332,77 +248,126 @@ export class AuthService {
     } else if (error.error?.message) {
       errorMessage = error.error.message;
     }
-
     this.notificationService.showError(errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 
-  /**
-   * Clear all authentication data
-   */
   private clearAuthData(): void {
-    this.storage.removeItem(this.TOKEN_KEY);
-    this.storage.removeItem(this.REFRESH_TOKEN_KEY);
-    this.storage.removeItem(this.TOKEN_EXPIRY_KEY);
-    this.storage.removeItem(this.USER_KEY);
+    if (!this.isBrowser) return;
+    
+    // Clear from storage
+    this.storage.removeItem(this.TOKEN_KEY).subscribe();
+    this.storage.removeItem(this.REFRESH_TOKEN_KEY).subscribe();
+    this.storage.removeItem(this.TOKEN_EXPIRY_KEY).subscribe();
+    this.storage.removeItem(this.USER_KEY).subscribe();
+    
+    // Clear in-memory data
     this.currentUserSubject.next(null);
-  }
-
-  /**
-   * Set up token refresh mechanism
-   */
-  private setupTokenRefresh(): void {
-    // Check token expiry periodically
-    setInterval(() => {
-      const token = this.getToken();
-      const refreshToken = this.getRefreshToken();
-      const expiry = this.storage.getItem(this.TOKEN_EXPIRY_KEY);
-
-      if (token && refreshToken && expiry) {
-        const expiresIn = Number(expiry) - new Date().getTime();
-
-        // If token expires in less than 5 minutes, refresh it
-        if (expiresIn < 5 * 60 * 1000) {
-          this.refreshToken().subscribe();
-        }
-      }
-    }, 60000); // Check every minute
-  }
-
-  /**
-   * Refresh access token using refresh token
-   */
-  private refreshToken(): Observable<AuthUser> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      this.clearAuthData();
-      return throwError(() => new Error('No refresh token available'));
+    
+    // Clear any pending refresh token attempts
+    if (this.refreshTokenInterval) {
+      clearInterval(this.refreshTokenInterval);
+      this.refreshTokenInterval = null;
     }
+  }
 
-    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/refresh-token`, { refreshToken }).pipe(
-      map((response) => this.handleAuthResponse(response)),
-      catchError((error) => {
-        this.clearAuthData();
-        this.router.navigate(['/auth/login']);
-        return throwError(() => error);
-      }),
+  private setLoggedInUser(user: AuthUser): void {
+    if (!this.isBrowser) return;
+    
+    // Update in-memory user
+    this.currentUserSubject.next(user);
+    
+    // Update storage
+    this.storage.setItem(this.USER_KEY, user).subscribe({
+      error: (error) => {
+        console.error('Failed to save user to storage:', error);
+      }
+    });
+  }
+
+  private async getToken(): Promise<string | null> {
+    if (!this.isBrowser) return null;
+    try {
+      return await firstValueFrom(this.storage.getItem<string>(this.TOKEN_KEY));
+    } catch (error) {
+      console.error('Error getting token from storage:', error);
+      return null;
+    }
+  }
+
+  private async getRefreshToken(): Promise<string | null> {
+    if (!this.isBrowser) return null;
+    try {
+      return await firstValueFrom(this.storage.getItem<string>(this.REFRESH_TOKEN_KEY));
+    } catch (error) {
+      console.error('Error getting refresh token from storage:', error);
+      return null;
+    }
+  }
+
+  private setupTokenRefresh(): void {
+    if (!this.isBrowser) return;
+    
+    // Clear any existing interval
+    if (this.refreshTokenInterval) {
+      clearInterval(this.refreshTokenInterval);
+    }
+    
+    // Refresh token 5 minutes before it expires
+    const refreshThreshold = 5 * 60 * 1000; // 5 minutes in milliseconds
+    
+    const checkTokenExpiry = () => {
+      this.storage.getItem<string>(this.TOKEN_EXPIRY_KEY).pipe(
+        switchMap(expiry => {
+          if (!expiry) return of(undefined);
+          
+          const expiryTime = parseInt(expiry, 10);
+          const currentTime = new Date().getTime();
+          const timeUntilExpiry = expiryTime - currentTime;
+          
+          if (timeUntilExpiry <= refreshThreshold) {
+            return this.refreshToken().pipe(
+              catchError((error: Error) => {
+                console.error('Failed to refresh token:', error);
+                return this.logout();
+              })
+            );
+          }
+          return of(undefined);
+        }),
+        catchError((error: Error) => {
+          console.error('Error checking token expiry:', error);
+          return of(undefined);
+        })
+      ).subscribe();
+    };
+    
+    // Initial check
+    checkTokenExpiry();
+    
+    // Check every minute
+    this.refreshTokenInterval = setInterval(checkTokenExpiry, 60000);
+  }
+
+  private refreshToken(): Observable<AuthUser> {
+    return from(this.getRefreshToken()).pipe(
+      switchMap(refreshToken => {
+        if (!refreshToken) {
+          this.clearAuthData();
+          return throwError(() => new Error('No refresh token available'));
+        }
+        return this.http.post<ApiResponse<AuthResponse>>(
+          `${this.apiUrl}/refresh-token`, 
+          { refreshToken }
+        ).pipe(
+          map((response) => this.handleAuthResponse(response)),
+          catchError((error: Error) => {
+            this.clearAuthData();
+            this.router.navigate(['/auth/login']);
+            return throwError(() => error);
+          })
+        );
+      })
     );
-  }
-
-  // Register new user
-  register(data: { name: string; email: string; password: string; role?: string }): Observable<{ user: any }> {
-    return this.http
-      .post<{ user: any }>(`${this.apiUrl}/user/register`, data)
-      .pipe(catchError((error: any) => this.handleAuthError(error)));
-  }
-
-  /**
-   * Resend OTP to the user's email
-   * @param email The user's email address
-   */
-  resendOtp(email: string): Observable<{ success: boolean; message?: string }> {
-    return this.http
-      .post<{ success: boolean; message?: string }>(`${this.apiUrl}/login/resend-otp`, { email: email })
-      .pipe(catchError((error: any) => this.handleAuthError(error)));
   }
 }

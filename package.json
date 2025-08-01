@@ -32,11 +32,7 @@
     "test": "npm run test --workspace=bsaas-back && npm run test --workspace=bsaas-front",
     "test:coverage": "npm run test:coverage --workspace=bsaas-back && npm run test:coverage --workspace=bsaas-front",
     "check-updates": "npm-check-updates -u",
-    "check-updates:frontend": "npm-check-updates -u --workspace=bsaas-front",
-    "check-updates:backend": "npm-check-updates -u --workspace=bsaas-back",
-    "update-all": "npm run check-updates && npm install",
-    "update-frontend": "npm run check-updates:frontend && npm install --workspace=bsaas-front",
-    "update-backend": "npm run check-updates:backend && npm install --workspace=bsaas-back"
+    "update-all": "npm run check-updates && npm install"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2"

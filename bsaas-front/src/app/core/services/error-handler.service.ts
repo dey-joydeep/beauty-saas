@@ -1,34 +1,31 @@
-import { ErrorHandler, Injectable, Injector } from '@angular/core';
+import { ErrorHandler, Injectable, Inject, PLATFORM_ID, Optional } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({ providedIn: 'root' })
 export class ErrorHandlerService implements ErrorHandler {
-  constructor(private injector: Injector) {}
+  private isBrowser = false;
+
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   handleError(error: Error | HttpErrorResponse): void {
-    const snackBar = this.injector.get(MatSnackBar);
-    const translate = this.injector.get(TranslateService);
-
+    // Always log the error to the console
     console.error('Error occurred:', error);
 
-    let errorMessage = 'ERRORS.GENERIC';
-    
+    // In a real app, you might want to send errors to a logging service
+    // For now, we'll just log to console
     if (error instanceof HttpErrorResponse) {
       if (error.status === 0) {
-        errorMessage = 'ERRORS.NETWORK';
+        console.error('Network error: Unable to connect to the server');
       } else if (error.status >= 400 && error.status < 500) {
-        errorMessage = 'ERRORS.CLIENT';
+        console.error(`Client error (${error.status}):`, error.message || 'Unknown error');
       } else if (error.status >= 500) {
-        errorMessage = 'ERRORS.SERVER';
+        console.error('Server error: Please try again later');
       }
     }
-
-    snackBar.open(
-      translate.instant(errorMessage),
-      translate.instant('COMMON.CLOSE'),
-      { duration: 5000, panelClass: ['error-snackbar'] }
-    );
   }
 }

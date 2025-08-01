@@ -38,7 +38,7 @@ const _setImmediate = (callback: () => void): any => {
 export class MaterialSsrHandler {
   private static initialized = false;
 
-  constructor(private platformId: Object) {}
+  constructor(private platformId: Object) { }
 
   /**
    * Initialize Material components for server-side rendering
@@ -56,7 +56,7 @@ export class MaterialSsrHandler {
 
     // Safely handle process and global variables
     const globalAny = _global as any;
-    
+
     // Initialize process if it doesn't exist
     if (!globalAny.process) {
       globalAny.process = {
@@ -66,27 +66,27 @@ export class MaterialSsrHandler {
         },
       };
     }
-    
+
     if (typeof globalAny.window === 'undefined') {
       // Create a minimal window mock for server-side rendering
       globalAny.window = {
         // Document mock
         document: {
           body: {},
-          addEventListener: (): void => {},
-          removeEventListener: (): void => {},
+          addEventListener: (): void => { },
+          removeEventListener: (): void => { },
           createElement: (): HTMLElement => ({
-            setAttribute: (): void => {},
+            setAttribute: (): void => { },
             style: {},
             getContext: () => ({}),
             toDataURL: () => ''
           } as unknown as HTMLElement)
         },
-        
+
         // Basic browser APIs
-        addEventListener: (): void => {},
-        removeEventListener: (): void => {},
-        
+        addEventListener: (): void => { },
+        removeEventListener: (): void => { },
+
         // Performance API
         performance: {
           now: () => Date.now(),
@@ -116,75 +116,98 @@ export class MaterialSsrHandler {
             redirectCount: 0
           }
         },
-        
+
         // MatchMedia mock
         matchMedia: (): any => ({
           matches: false,
-          addListener: (): void => {},
-          removeListener: (): void => {}
+          addListener: (): void => { },
+          removeListener: (): void => { }
         }),
-        
+
         // Animation frame mocks
         requestAnimationFrame: (callback: FrameRequestCallback): number => {
           const now = performance.now();
           const id = setTimeout(() => callback(now), 0);
           return id as unknown as number;
         },
-        
+
         cancelAnimationFrame: (id: number): void => {
           clearTimeout(id);
         },
-        
+
         // Storage mocks
         localStorage: {
           getItem: (): null => null,
-          setItem: (): void => {},
-          removeItem: (): void => {},
-          clear: (): void => {},
+          setItem: (): void => { },
+          removeItem: (): void => { },
+          clear: (): void => { },
           key: (): null => null,
           length: 0
         },
-        
+
         sessionStorage: {
           getItem: (): null => null,
-          setItem: (): void => {},
-          removeItem: (): void => {},
-          clear: (): void => {},
+          setItem: (): void => { },
+          removeItem: (): void => { },
+          clear: (): void => { },
           key: (): null => null,
           length: 0
         },
-        
+
         // Navigation
         navigator: {
           userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         },
-        
+
         // Location
         location: {
           protocol: 'http:',
           host: 'localhost:4200'
         },
-        
+
         // CSS
         CSS: {
           escape: (val: string): string => val
         },
-        
+
         // Basic DOM types
-        HTMLElement: class {},
-        Element: class {},
-        Node: class {}
+        HTMLElement: class { },
+        Element: class { },
+        Node: class { }
       };
 
       // Set global references
-      globalAny.document = globalAny.window.document;
-      globalAny.navigator = globalAny.window.navigator;
-      globalAny.localStorage = globalAny.window.localStorage;
-      globalAny.sessionStorage = globalAny.window.sessionStorage;
-      globalAny.HTMLElement = globalAny.window.HTMLElement;
-      globalAny.Element = globalAny.window.Element;
-      globalAny.Node = globalAny.window.Node;
-      globalAny.CSS = globalAny.window.CSS;
+      if (typeof globalAny.document === 'undefined') {
+        globalAny.document = globalAny.window.document;
+      }
+
+      if (typeof globalAny.navigator === 'undefined') {
+        globalAny.navigator = globalAny.window.navigator;
+      }
+
+      if (typeof globalAny.localStorage === 'undefined') {
+        globalAny.localStorage = globalAny.window.localStorage;
+      }
+
+      if (typeof globalAny.sessionStorage === 'undefined') {
+        globalAny.sessionStorage = globalAny.window.sessionStorage;
+      }
+
+      if (typeof globalAny.HTMLElement === 'undefined') {
+        globalAny.HTMLElement = globalAny.window.HTMLElement;
+      }
+
+      if (typeof globalAny.Element === 'undefined') {
+        globalAny.Element = globalAny.window.Element;
+      }
+
+      if (typeof globalAny.Node === 'undefined') {
+        globalAny.Node = globalAny.window.Node;
+      }
+
+      if (typeof globalAny.CSS === 'undefined') {
+        globalAny.CSS = globalAny.window.CSS;
+      }
     }
   }
 }

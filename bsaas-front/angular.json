@@ -20,7 +20,9 @@
             "outputPath": "dist/bsaas-front",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -30,13 +32,10 @@
               },
               "src/assets"
             ],
-            "styles": ["src/styles.scss"],
-            "scripts": [],
-            "server": "src/main.server.ts",
-            "prerender": true,
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -58,14 +57,6 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
-            },
-            "prerender": {
-              "optimization": true,
-              "extractLicenses": true,
-              "sourceMap": false,
-              "environment": {
-                "NG_APP_PHASE": "route-extraction"
-              }
             }
           },
           "defaultConfiguration": "production"
@@ -78,9 +69,6 @@
             },
             "development": {
               "buildTarget": "bsaas-front:build:development"
-            },
-            "prerender": {
-              "buildTarget": "bsaas-front:build:prerender"
             }
           },
           "defaultConfiguration": "development"
@@ -118,23 +106,25 @@
           "defaultConfiguration": "production"
         },
         "prerender": {
-          "builder": "@angular/ssr:prerender",
+          "builder": "@angular-devkit/build-angular:prerender",
           "options": {
             "browserTarget": "bsaas-front:build:production",
-            "routes": ["/"],
-            "guessRoutes": false
-          },
-          "configurations": {
-            "development": {
-              "browserTarget": "bsaas-front:build:development"
-            }
+            "serverTarget": "bsaas-front:server:production",
+            "routes": [
+              "/",
+              "/login",
+              "/register"
+            ]
           },
           "defaultConfiguration": "production"
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": ["zone.js", "zone.js/testing"],
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -144,7 +134,9 @@
               },
               "src/assets"
             ],
-            "styles": ["src/styles.scss"],
+            "styles": [
+              "src/styles.scss"
+            ],
             "scripts": []
           }
         }

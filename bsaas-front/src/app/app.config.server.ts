@@ -1,244 +1,160 @@
-import { mergeApplicationConfig, ApplicationConfig, Provider, EnvironmentProviders, PLATFORM_ID, APP_ID } from '@angular/core';
+import { mergeApplicationConfig, ApplicationConfig, PLATFORM_ID, APP_ID, makeStateKey, TransferState, Provider, isDevMode, EnvironmentProviders, inject } from '@angular/core';
 import { provideServerRendering, ɵSERVER_CONTEXT as SERVER_CONTEXT } from '@angular/platform-server';
 import { appConfig } from './app.config';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { provideHttpClient, withInterceptors, HttpHandlerFn, HttpRequest } from '@angular/common/http';
-import { loadingInterceptor } from './core/interceptors/loading.interceptor';
-import { ssrInterceptor } from './core/interceptors/ssr-interceptor';
+import { provideHttpClient, withInterceptors, withFetch, HttpClient, HttpRequest, HttpHandlerFn, HttpHandler, HttpInterceptorFn } from '@angular/common/http';
+import { TranslateLoader, TranslateStore, TranslateService } from '@ngx-translate/core';
+import { TranslateServerLoader } from './core/translate/translate-server.loader';
+import { StorageService } from './core/services/storage.service';
+import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from './core/utils/platform-utils';
+import { PlatformUtils } from './core/utils/platform-utils';
+import { ErrorService } from './core/error.service';
 
-/**
- * Mock implementation of browser globals for server-side rendering
- */
-function createMockWindow() {
-  const listeners: Record<string, Set<(...args: any[]) => void>> = {};
-  
-  return {
-    // Basic window properties
-    document: {
-      body: {},
-      documentElement: {},
-      head: {},
-      addEventListener: (type: string, listener: any) => {
-        if (!listeners[type]) listeners[type] = new Set();
-        listeners[type].add(listener);
-      },
-      removeEventListener: (type: string, listener: any) => {
-        if (listeners[type]) {
-          listeners[type].delete(listener);
-        }
-      },
-      createElement: (tag: string) => ({
-        setAttribute: () => {},
-        style: {},
-        classList: {
-          add: () => {},
-          remove: () => {},
-          toggle: () => {},
-        },
-      }),
-      getElementById: () => null,
-      querySelector: () => null,
-      querySelectorAll: () => [],
-    },
-    
-    // Event handling
-    addEventListener: (type: string, listener: any) => {
-      if (!listeners[type]) listeners[type] = new Set();
-      listeners[type].add(listener);
-    },
-    removeEventListener: (type: string, listener: any) => {
-      if (listeners[type]) {
-        listeners[type].delete(listener);
-      }
-    },
-    dispatchEvent: (event: Event) => true,
-    
-    // Animation frames
-    requestAnimationFrame: (callback: FrameRequestCallback) => 
-      setTimeout(() => callback(performance.now()), 0) as unknown as number,
-    cancelAnimationFrame: (id: number) => clearTimeout(id as any),
-    
-    // Timers
-    setTimeout: (fn: (...args: any[]) => void, delay = 0, ...args: any[]) => {
-      const id = setTimeout(fn, delay, ...args);
-      return id as unknown as number;
-    },
-    clearTimeout: (id: number) => clearTimeout(id as any),
-    setInterval: (fn: (...args: any[]) => void, delay = 0, ...args: any[]) => {
-      const id = setInterval(fn, delay, ...args);
-      return id as unknown as number;
-    },
-    clearInterval: (id: number) => clearInterval(id as any),
-    
-    // Storage
-    localStorage: {
-      getItem: () => null,
-      setItem: () => {},
-      removeItem: () => {},
-      clear: () => {},
-      key: () => null,
-      length: 0,
-    },
-    
-    sessionStorage: {
-      getItem: () => null,
-      setItem: () => {},
-      removeItem: () => {},
-      clear: () => {},
-      key: () => null,
-      length: 0,
-    },
-    
-    // Navigation
-    navigator: {
-      userAgent: 'Mozilla/5.0 (compatible; Server-side Rendering)',
-      language: 'en-US',
-      languages: ['en-US', 'en'],
-    },
-    
-    // Location
-    location: {
-      href: 'http://localhost:4000',
-      protocol: 'http:',
-      host: 'localhost:4000',
-      hostname: 'localhost',
-      port: '4000',
-      pathname: '/',
-      search: '',
-      hash: '',
-      origin: 'http://localhost:4000',
-    },
-    
-    // Performance
-    performance: {
-      now: () => Date.now(),
-      timeOrigin: Date.now(),
-      timing: {
-        navigationStart: Date.now(),
-      },
-    },
-    
-    // MatchMedia mock
-    matchMedia: () => ({
-      matches: false,
-      media: '',
-      onchange: null,
-      addListener: () => {},
-      removeListener: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      dispatchEvent: () => true,
-    }),
-  };
+// Import interceptors
+import { ssrInterceptor } from './core/interceptors/ssr-interceptor';
+import { loadingInterceptor } from './core/interceptors/loading.interceptor';
+import { ssrTranslateInterceptor } from './core/interceptors/ssr-translate.interceptor';
+
+// Server-side interceptors
+const serverInterceptors: HttpInterceptorFn[] = [
+  ssrInterceptor,
+  ssrTranslateInterceptor,
+  loadingInterceptor
+];
+
+// Mock browser APIs for SSR
+const mockWindow = {
+  document: {
+    body: {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  },
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  localStorage: {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+    clear: () => {},
+  },
+  sessionStorage: {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+    clear: () => {},
+  },
+  navigator: {
+    language: 'en-US',
+    languages: ['en-US']
+  }
+};
+
+// Create a server-side translate loader
+function serverTranslateLoader() {
+  const http = inject(HttpClient);
+  const transferState = inject(TransferState);
+  return new TranslateServerLoader(transferState, http, './assets/i18n/', '.json');
 }
 
-const mockWindow = createMockWindow();
-
-// Server-specific providers
+// Server-side providers
 const serverProviders: (Provider | EnvironmentProviders)[] = [
-  // Ensure PLATFORM_ID is provided for server
-  { provide: PLATFORM_ID, useValue: 'server' },
-  { provide: APP_ID, useValue: 'server-app' },
+  // Core server providers
   provideServerRendering(),
-  provideAnimations(),
-
-  // Provide mock browser globals
+  {
+    provide: 'ENABLE_DETAILED_ERRORS',
+    useValue: isDevMode(),
+  },
+  
+  // Platform utilities with SSR support
+  {
+    provide: PLATFORM_UTILS_TOKEN,
+    useFactory: () => {
+      console.log('🔧 Initializing PlatformUtils for SSR');
+      const platformId = inject(PLATFORM_ID);
+      return new PlatformUtils(platformId);
+    }
+  },
+  
+  // Storage service with SSR support
+  {
+    provide: StorageService,
+    useFactory: () => {
+      console.log('🔧 Initializing StorageService for SSR');
+      const platformId = inject(PLATFORM_ID);
+      const platformUtils = inject(PLATFORM_UTILS_TOKEN);
+      return new StorageService(platformId, platformUtils);
+    }
+  },
+  
+  // Error handling with SSR support
+  {
+    provide: ErrorService,
+    useFactory: () => {
+      console.log('🔧 Initializing ErrorService for SSR');
+      const translate = inject(TranslateService);
+      return new ErrorService(translate);
+    }
+  },
+  
+  // Translation with SSR support
+  {
+    provide: TranslateLoader,
+    useFactory: () => {
+      console.log('🔧 Initializing TranslateServerLoader');
+      const transferState = inject(TransferState);
+      const http = inject(HttpClient);
+      return new TranslateServerLoader(transferState, http, './assets/i18n/', '.json');
+    }
+  },
+  
+  // Core services with SSR support
+  {
+    provide: TranslateStore,
+    useFactory: () => {
+      console.log('🔧 Initializing TranslateStore for SSR');
+      return new TranslateStore();
+    }
+  },
+  TranslateStore,
+  
+  // Server-specific configurations
+  { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
+  { provide: 'SSR', useValue: true },
+  { provide: 'BROWSER', useValue: false },
+  
+  // HTTP client configuration with server interceptors
+  provideHttpClient(
+    withInterceptors([
+      ...serverInterceptors
+      // Add any additional interceptors here
+    ]),
+    withFetch()
+  ),
   { provide: 'WINDOW', useValue: mockWindow },
   { provide: 'DOCUMENT', useValue: mockWindow.document },
-  { provide: 'LOCAL_STORAGE', useValue: {} },
-  { provide: 'SESSION_STORAGE', useValue: {} },
+  { provide: 'LOCAL_STORAGE', useValue: mockWindow.localStorage },
+  { provide: 'SESSION_STORAGE', useValue: mockWindow.sessionStorage },
   { provide: 'REQUEST', useValue: null },
   { provide: 'RESPONSE', useValue: null },
-  { provide: 'Dd', useValue: null }, // Mock for Dd provider
-
-  // Platform and app identification
+  { provide: 'Dd', useValue: null },
   { provide: PLATFORM_ID, useValue: 'server' },
   { provide: APP_ID, useValue: 'server-app' },
   { provide: SERVER_CONTEXT, useValue: 'ssr' },
-
-  // Material and other third-party providers
   { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
 
-  // Configure HTTP client for SSR
   provideHttpClient(
     withInterceptors([
-      // Server-specific request handling
-      (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
-        // Add any server-specific request modifications here
-        return next(req);
-      },
-      // Include global interceptors
       ssrInterceptor,
       loadingInterceptor,
-    ]),
+      (req: HttpRequest<unknown>, next: HttpHandlerFn) => next(req),
+    ])
   ),
 
-  // SSR flag and other server-specific providers
   { provide: 'SSR', useValue: true },
   { provide: 'BROWSER', useValue: false },
 ];
 
-// Create a minimal configuration for route extraction
-const routeExtractionConfig: ApplicationConfig = {
-  providers: [
-    // Core Angular providers
-    { provide: PLATFORM_ID, useValue: 'server' },
-    { provide: APP_ID, useValue: 'server-app' },
-    { provide: SERVER_CONTEXT, useValue: 'ssr' },
-    
-    // Route extraction flag
-    { provide: 'ROUTE_EXTRACTION', useValue: true },
-    { provide: 'BROWSER', useValue: false },
-    { provide: 'SSR', useValue: true },
-
-    // Mock browser globals that might be accessed during route resolution
-    { provide: 'WINDOW', useValue: globalThis },
-    { provide: 'DOCUMENT', useValue: { body: {}, addEventListener: () => {}, removeEventListener: () => {} } },
-    { provide: 'LOCAL_STORAGE', useValue: {} },
-    { provide: 'SESSION_STORAGE', useValue: {} },
-
-    // HTTP client with minimal interceptors
-    provideHttpClient(
-      withInterceptors([
-        ssrInterceptor, // Only include essential interceptors
-      ]),
-    ),
-
-    // Include other essential providers from serverProviders
-    ...serverProviders.filter((provider) => {
-      if (typeof provider !== 'object' || !('provide' in provider)) return true;
-      
-      const provideToken = String(provider.provide);
-      // Keep only essential providers for route extraction
-      const essentialProviders = [
-        'APP_INITIALIZER',
-        'HTTP_INTERCEPTORS',
-        'ENVIRONMENT_INITIALIZER',
-        'APP_BOOTSTRAP_LISTENER',
-        'APP_ID',
-        'PLATFORM_ID',
-        'DOCUMENT',
-        'WINDOW',
-        'LOCAL_STORAGE',
-        'SESSION_STORAGE',
-        'REQUEST',
-        'RESPONSE',
-        'ROUTE_EXTRACTION',
-        'SSR',
-        'BROWSER',
-      ];
-      
-      return essentialProviders.includes(provideToken);
-    }),
-  ],
-};
-
-// For the full server configuration, include all providers
-const serverConfig: ApplicationConfig = {
-  providers: [...serverProviders, { provide: 'BROWSER', useValue: false }, { provide: 'SSR', useValue: true }],
-};
-
-// Export the appropriate config based on the current phase
-export const config =
-  process.env['NG_APP_PHASE'] === 'route-extraction' ? routeExtractionConfig : mergeApplicationConfig(appConfig, serverConfig);
+// Combine with base app config
+export const config: ApplicationConfig = mergeApplicationConfig(appConfig, {
+  providers: serverProviders,
+});

@@ -1,6 +1,4 @@
 import type { Config } from '@jest/types';
-import { pathsToModuleNameMapper } from 'ts-jest';
-import { compilerOptions } from './tsconfig.json';
 
 // Sync object
 export default async (): Promise<Config.InitialOptions> => ({

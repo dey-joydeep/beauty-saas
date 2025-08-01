@@ -4,7 +4,7 @@
  * Provides a consistent API for storage operations with SSR support
  * and memory fallback when localStorage is not available.
  */
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, Inject, Optional } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, from, firstValueFrom } from 'rxjs';
 import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from '../utils/platform-utils';
@@ -18,26 +18,26 @@ import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from '../utils/platform-utils';
 export class StorageService {
   private storage: Storage | null = null;
   private readonly platformUtils: IPlatformUtils | null = null;
-  private readonly platformId: Object = {}; // Initialize with default empty object
-  private isBrowser: boolean = false;
+  private readonly platformId: Object;
+  private readonly isBrowser: boolean;
   private readonly memoryStore = new Map<string, string>();
+  private initialized = false;
 
-  constructor() {
-    // Use try-catch to ensure the service can be instantiated even if injection fails
+  constructor(
+    @Inject(PLATFORM_ID) platformId: Object,
+    @Optional() @Inject(PLATFORM_UTILS_TOKEN) platformUtils: IPlatformUtils | null
+  ) {
+    this.platformId = platformId;
+    this.isBrowser = isPlatformBrowser(platformId);
+    this.platformUtils = platformUtils;
+    
     try {
-      this.platformId = inject(PLATFORM_ID);
-      this.isBrowser = isPlatformBrowser(this.platformId);
-      
-      // Only try to get PLATFORM_UTILS_TOKEN if we're in a browser context
-      if (this.isBrowser) {
-        this.platformUtils = inject(PLATFORM_UTILS_TOKEN, { optional: true }) || null;
-      }
-      
       this.initialize();
     } catch (error) {
       console.warn('Error initializing StorageService:', error);
-      this.isBrowser = false;
       this.storage = this.createMemoryStorage();
+    } finally {
+      this.initialized = true;
     }
   }
 
@@ -48,16 +48,29 @@ export class StorageService {
     if (this.storage !== null) return;
 
     try {
-      // First try using platformUtils if available
-      if (this.platformUtils?.browserLocalStorage) {
-        this.storage = this.platformUtils.browserLocalStorage;
-      } 
-      // Fall back to direct window access only in browser context
-      else if (this.isBrowser && typeof window !== 'undefined' && window.localStorage) {
-        this.storage = window.localStorage;
+      // In SSR, always use memory storage
+      if (!this.isBrowser) {
+        this.storage = this.createMemoryStorage();
+        return;
       }
-      // Fall back to memory storage
+
+      // In browser, try different storage options
+      try {
+        // First try using platformUtils if available
+        if (this.platformUtils?.browserLocalStorage) {
+          this.storage = this.platformUtils.browserLocalStorage;
+        } 
+        // Fall back to direct window access
+        else if (typeof window !== 'undefined' && window.localStorage) {
+          this.storage = window.localStorage;
+        }
+      } catch (e) {
+        console.warn('Failed to access browser storage:', e);
+      }
+
+      // If no storage available or error occurred, use memory storage
       if (!this.storage) {
+        console.warn('Using in-memory storage as fallback');
         this.storage = this.createMemoryStorage();
       }
     } catch (error: unknown) {

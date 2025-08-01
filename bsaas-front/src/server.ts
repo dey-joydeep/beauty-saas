@@ -6,6 +6,13 @@ import { fileURLToPath } from 'node:url';
 import 'zone.js/node';
 import bootstrap from './main.server';
 
+// Enable more verbose error logging
+process.env['DEBUG'] = 'angular-ssr:*';
+console.log('Server starting with environment:', process.env['NODE_ENV'] || 'development');
+
+// Enable stack trace limit for better error debugging
+Error.stackTraceLimit = 50;
+
 // Server configuration
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
@@ -18,12 +25,80 @@ const app = express();
 app.set('view engine', 'html');
 app.set('views', browserDistFolder);
 
-// Create CommonEngine for server-side rendering
+// Global error handler
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error('\n🔥 Unhandled error in request:', req.originalUrl);
+  console.error('Error:', err);
+  
+  if (err instanceof Error) {
+    console.error('Error stack:', err.stack);
+  }
+  
+  // Send appropriate response based on environment
+  if (process.env['NODE_ENV'] !== 'production') {
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: err instanceof Error ? err.message : 'An unknown error occurred',
+      stack: process.env['NODE_ENV'] !== 'production' && err instanceof Error ? err.stack : undefined,
+      timestamp: new Date().toISOString(),
+      path: req.originalUrl
+    });
+  } else {
+    res.status(500).send('An error occurred. Please try again later.');
+  }
+});
+
+// Create CommonEngine for server-side rendering with enhanced error handling
+// Enhanced error handler for SSR
+const errorHandler = (error: any, req: any) => {
+  console.error('\n🚨 SSR Error during request to:', req.originalUrl);
+  console.error('Error:', error);
+  
+  if (error instanceof Error) {
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
+    // Log additional error properties if they exist
+    const additionalProps = Object.getOwnPropertyNames(error)
+      .filter(prop => !['name', 'message', 'stack'].includes(prop))
+      .reduce((obj, prop) => ({
+        ...obj,
+        [prop]: (error as any)[prop]
+      }), {});
+    
+    if (Object.keys(additionalProps).length > 0) {
+      console.error('Additional error properties:', JSON.stringify(additionalProps, null, 2));
+    }
+  } else if (typeof error === 'object' && error !== null) {
+    console.error('Error details:', JSON.stringify(error, null, 2));
+  }
+  
+  return { 
+    status: 500, 
+    message: 'Server-side rendering error',
+    error: error instanceof Error ? 
+      { name: error.name, message: error.message, stack: error.stack } : 
+      String(error)
+  };
+};
+
 const engine = new CommonEngine({
-  enablePerformanceProfiler: false,
+  enablePerformanceProfiler: true,
   bootstrap,
   providers: [
     { provide: APP_BASE_HREF, useValue: '/' },
+    // Add error handler for SSR
+    {
+      provide: 'ERROR_HANDLER',
+      useValue: (error: any) => {
+        console.error('SSR Error:', error);
+        if (error instanceof Error) {
+          console.error('Error stack:', error.stack);
+        }
+        return { status: 500, message: 'Server-side rendering error' };
+      }
+    },
     // Provide empty objects for REQUEST and RESPONSE tokens
     { provide: 'REQUEST', useValue: {} },
     { provide: 'RESPONSE', useValue: {} },
@@ -88,38 +163,76 @@ app.use(
 /**
  * Handle all other requests by rendering the Angular application.
  */
-// Handle all requests with the Angular application
+// Handle all other requests by rendering the Angular application.
 app.get('*', (req, res, next) => {
   const { protocol, originalUrl, baseUrl, headers } = req;
-  const fullUrl = `${protocol}://${headers.host}${originalUrl}`;
-
-  console.log(`Rendering URL: ${fullUrl}`);
-
   const startTime = Date.now();
-
-  engine
-    .render({
-      bootstrap,
-      documentFilePath: indexHtml,
-      url: fullUrl,
-      publicPath: browserDistFolder,
-      providers: [
-        { provide: APP_BASE_HREF, useValue: baseUrl },
-        { provide: 'REQUEST', useValue: req },
-        { provide: 'RESPONSE', useValue: res },
-        {
-          provide: 'Dd',
-          useValue: {
-            setUser: () => {},
-            track: () => {},
-            pageView: () => {},
-            error: (error: Error) => console.error('Analytics error:', error),
-          } as const
+  
+  // Log request for debugging
+  console.log(`\n📡 [${new Date().toISOString()}] Request for: ${originalUrl}`);
+  console.log('Method:', req.method);
+  console.log('Headers:', JSON.stringify(headers, null, 2));
+  
+  // Set no-cache headers for HTML to ensure fresh content on each request during development
+  if (process.env['NODE_ENV'] !== 'production') {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  
+  // Log request body if present
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+  }
+  
+  // Set up SSR providers with request/response objects
+  const providers = [
+    { provide: 'REQUEST', useValue: req },
+    { provide: 'RESPONSE', useValue: res },
+    { provide: 'SSR', useValue: true },
+    { provide: 'BROWSER', useValue: false },
+    { provide: 'PLATFORM_ID', useValue: 'server' },
+    // Add more detailed logging for debugging
+    {
+      provide: 'SSR_DEBUG',
+      useValue: {
+        log: (message: string, data?: any) => {
+          console.log(`[SSR] ${message}`, data || '');
         },
-      ],
-    })
+        error: (error: Error, context?: string) => {
+          console.error(`[SSR Error] ${context || 'Unhandled error'}:`, error);
+          if (error.stack) {
+            console.error('Stack trace:', error.stack);
+          }
+        }
+      }
+    }
+  ];
+
+  const renderOptions = {
+    bootstrap,
+    documentFilePath: indexHtml,
+    url: `${protocol}://${headers.host}${originalUrl}`,
+    publicPath: browserDistFolder,
+    providers: [
+      { provide: APP_BASE_HREF, useValue: baseUrl },
+      { provide: 'REQUEST', useValue: req },
+      { provide: 'RESPONSE', useValue: res },
+      { provide: 'SSR', useValue: true },
+      { provide: 'BROWSER', useValue: false },
+      // Add error handler for this request
+      {
+        provide: 'ERROR_HANDLER',
+        useValue: (error: any) => errorHandler(error, req)
+      },
+    ],
+  };
+  
+  console.log('Starting SSR render...');
+  
+  engine
+    .render(renderOptions)
     .then((html) => {
-      console.log(`Rendered ${fullUrl} in ${Date.now() - startTime}ms`);
+      const renderTime = Date.now() - startTime;
+      console.log(`✅ SSR render completed in ${renderTime}ms`);
       res.send(html);
     })
     .catch((err) => {
