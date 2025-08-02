@@ -1,0 +1,14 @@
+{
+  "name": "bsaas-front",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "nx jest:test --config=jest.config.ts --passWithNoTests",
+    "lint": "nx eslint:lint",
+    "build:ssr": "ng build && ng run bsaas-front:server",
+    "serve:ssr": "node dist/bsaas-front/server/server.mjs"
+  }
+}

@@ -1,56 +1,36 @@
-# Node
+# Dependencies
 node_modules/
-# .env
-# .env.test
+
+# Build outputs
 dist/
-logs/
-# *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+.nx/
+*.tsbuildinfo
+
+# Testing
+/coverage-*
+
+# Logs
+logs
+*.log
+*.sw?
+
+# IDE and editor files
+.vscode/
 
 # Angular
-bsaas-front/dist/
-bsaas-front/node_modules/
-bsaas-front/.angular/cache/
-bsaas-front/.angular/*
-bsaas-front/.env
-bsaas-front/.env.test
+.angular/
 
-# Backend
-bsaas-back/node_modules/
-bsaas-back/dist/
-# bsaas-back/.env
-# bsaas-back/.env.test
-# bsaas-back/logs/
-# bsaas-back/prisma/.env
-# bsaas-back/prisma/.env.test
-bsaas-back/prisma/migrations/*/README.md
+# Nx specific
+.nx/workspace/
+.nx/daemon/
 
-# IDEs
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+# Prisma - Project-specific patterns are in their respective project directories
 
-# OS
-.DS_Store
-Thumbs.db
+# Husky
+!.husky/_/.gitignore
+
+# Environment files
+.env
 
 # Coverage
 coverage/
-
-# Misc
-*.swp
-*.bak
-*.tmp
-.nx/
-
-
-
-.nx/cache
-.nx/workspace-data
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
