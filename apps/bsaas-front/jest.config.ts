@@ -1,8 +1,5 @@
-import type { Config } from '@jest/types';
-
-// Sync object
-export default async (): Promise<Config.InitialOptions> => ({
-  // Your Jest configuration options here
+// @ts-ignore - Using CommonJS for better compatibility
+module.exports = {
   preset: 'jest-preset-angular/presets/defaults',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setup-jest.ts'],
@@ -11,7 +8,7 @@ export default async (): Promise<Config.InitialOptions> => ({
     '/node_modules/',
     '/dist/'
   ],
-  moduleFileExtensions: ['ts', 'js', 'json'],
+  moduleFileExtensions: ['ts', 'js', 'json', 'mjs'],
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.spec.ts', '!src/**/*.d.ts', '!src/test/**'],
   coverageDirectory: 'coverage',
@@ -54,6 +51,6 @@ export default async (): Promise<Config.InitialOptions> => ({
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',
-    'jest-preset-angular/build/serializers/html-comment',
-  ],
-});
+    'jest-preset-angular/build/serializers/html-comment'
+  ]
+};

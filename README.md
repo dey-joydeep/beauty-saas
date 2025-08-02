@@ -1,52 +1,171 @@
-# Beauty SaaS Platform
+# Beauty SaaS Platform (Nx Monorepo)
 
-## Development Environment Setup
+[![Nx](https://img.shields.io/badge/powered%20by-nx-143055?style=flat-square&logo=nx&logoColor=white)](https://nx.dev)
+
+A modern, scalable beauty salon management platform built with Nx, Angular, and NestJS.
+
+> **Last Updated**: August 2, 2025
+
+## 🏗️ Project Structure
+
+```text
+beauty-saas/
+├── apps/
+│   ├── bsaas-front/      # Frontend application (Angular)
+│   ├── bsaas-back/       # Backend API (NestJS)
+│   └── bsaas-docs/       # Documentation site
+├── libs/                 # Shared libraries
+│   └── shared/           # Shared code between frontend and backend
+├── scripts/              # Utility scripts
+├── .github/              # GitHub workflows
+├── .husky/               # Git hooks
+└── .vscode/              # VS Code settings
+```
+
+## 🚀 Development Setup
 
 ### Prerequisites
 
 - Node.js 18+
-- npm 9+ or yarn 1.22+
-- Docker 20.10+
+- npm 9+
+- Docker 20.10+ (optional, for local database)
 - Git 2.35+
-- Your favorite code editor (VS Code recommended)
+- Nx CLI (optional): `npm install -g nx`
 
-### Setup Steps
+### Getting Started
 
-1. Clone the repository:
-
+1. **Clone the repository**
    ```bash
    git clone https://github.com/your-org/beauty-saas.git
    cd beauty-saas
    ```
 
-2. Install dependencies:
+2. **Install dependencies**
 
    ```bash
    npm install
-   # or
-   yarn
    ```
 
-3. Set up environment variables:
+3. **Set up environment variables**
 
    ```bash
    cp .env.example .env
    # Update the .env file with your configuration
    ```
 
-4. Start development services:
+4. **Start development servers**
 
+   Start the frontend:
    ```bash
-   docker-compose up -d
+   npm run dev:frontend
    ```
 
-5. Run database migrations:
-
+   In a separate terminal, start the backend:
    ```bash
-   npm run db:migrate
-   # or
-   yarn db:migrate
+   npm run dev:api
    ```
+
+   For documentation:
+   ```bash
+   npm run dev:docs
+   ```
+
+5. **Run database migrations**
+   ```bash
+   npx nx run bsaas-back:db:migrate
+   ```
+
+## 🛠 Development Commands
+
+### Run applications
+
+- **Start frontend in development mode**
+  ```bash
+  npx nx serve bsaas-front
+  ```
+
+- **Start backend in development mode**
+  ```bash
+  npx nx serve bsaas-back
+  ```
+
+### Build applications
+
+- **Build all applications**
+  ```bash
+  npx nx run-many --target=build --all
+  ```
+
+- **Build specific application**
+  ```bash
+  npx nx build bsaas-front
+  npx nx build bsaas-back
+  ```
+
+### Testing
+
+- **Run all tests**
+  ```bash
+  npx nx run-many --target=test --all
+  ```
+
+- **Run tests for specific project**
+  ```bash
+  npx nx test bsaas-front
+  npx nx test bsaas-back
+  ```
+
+- **Run tests in watch mode**
+  ```bash
+  npx nx test bsaas-front --watch
+  ```
+
+### Linting
+
+- **Lint all projects**
+  ```bash
+  npx nx run-many --target=lint --all
+  ```
+
+- **Fix linting issues**
+  ```bash
+  npx nx run-many --target=lint --all --fix
+  ```
+
+## 🏗️ Project Structure Details
+
+### Apps
+
+- **bsaas-front**: Angular-based frontend application
+- **bsaas-back**: NestJS-based backend API
+
+### Libraries
+
+- **shared**: Code shared between frontend and backend (DTOs, interfaces, utilities)
+
+## 🔧 Tools
+
+- **Nx**: Monorepo build system with powerful project graph
+- **Angular**: Frontend framework
+- **NestJS**: Backend framework
+- **Prisma**: Database ORM
+- **Jest**: Testing framework
+- **ESLint**: JavaScript/TypeScript linting
+- **Prettier**: Code formatting
+
+## 🤝 Contributing
+
+1. Create a new feature branch: `git checkout -b feature/your-feature`
+2. Make your changes
+3. Run tests: `npx nx affected:test`
+4. Lint your code: `npx nx affected:lint`
+5. Commit your changes: `git commit -m 'feat: your feature'`
+6. Push to the branch: `git push origin feature/your-feature`
+7. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 6. Start the development server:
    ```bash

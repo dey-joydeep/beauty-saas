@@ -1,10 +1,12 @@
 import { APP_BASE_HREF } from '@angular/common';
-import { CommonEngine } from '@angular/ssr/node';
-import express from 'express';
+import express, { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import 'zone.js/node';
 import bootstrap from './main.server';
+
+// Static ESM import for CommonEngine
+import { CommonEngine } from '@angular/ssr/node';
 
 // Enable more verbose error logging
 process.env['DEBUG'] = 'angular-ssr:*';
@@ -25,8 +27,8 @@ const app = express();
 app.set('view engine', 'html');
 app.set('views', browserDistFolder);
 
-// Global error handler
-app.use((err: any, req: any, res: any, next: any) => {
+// Global error handler middleware
+const globalErrorHandler: ErrorRequestHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('\n🔥 Unhandled error in request:', req.originalUrl);
   console.error('Error:', err);
   
@@ -46,11 +48,13 @@ app.use((err: any, req: any, res: any, next: any) => {
   } else {
     res.status(500).send('An error occurred. Please try again later.');
   }
-});
+};
 
-// Create CommonEngine for server-side rendering with enhanced error handling
-// Enhanced error handler for SSR
-const errorHandler = (error: any, req: any) => {
+// Apply global error handler
+app.use(globalErrorHandler);
+
+// SSR error handler
+const ssrErrorHandler = (error: unknown, req: Request): { status: number; message: string; error: any } => {
   console.error('\n🚨 SSR Error during request to:', req.originalUrl);
   console.error('Error:', error);
   
@@ -74,12 +78,45 @@ const errorHandler = (error: any, req: any) => {
     console.error('Error details:', JSON.stringify(error, null, 2));
   }
   
+  console.error('\n🚨 SSR Error during request to:', req.originalUrl);
+  console.error('Error:', error);
+  
+  let errorDetails: any;
+  
+  if (error instanceof Error) {
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
+    // Get additional error properties
+    const additionalProps = Object.getOwnPropertyNames(error)
+      .filter(prop => !['name', 'message', 'stack'].includes(prop))
+      .reduce((obj, prop) => ({
+        ...obj,
+        [prop]: (error as any)[prop]
+      }), {});
+    
+    if (Object.keys(additionalProps).length > 0) {
+      console.error('Additional error properties:', JSON.stringify(additionalProps, null, 2));
+    }
+    
+    errorDetails = {
+      name: error.name,
+      message: error.message,
+      stack: process.env['NODE_ENV'] !== 'production' ? error.stack : undefined,
+      ...additionalProps
+    };
+  } else if (typeof error === 'object' && error !== null) {
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    errorDetails = error;
+  } else {
+    errorDetails = String(error);
+  }
+  
   return { 
     status: 500, 
     message: 'Server-side rendering error',
-    error: error instanceof Error ? 
-      { name: error.name, message: error.message, stack: error.stack } : 
-      String(error)
+    error: errorDetails
   };
 };
 
@@ -221,7 +258,7 @@ app.get('*', (req, res, next) => {
       // Add error handler for this request
       {
         provide: 'ERROR_HANDLER',
-        useValue: (error: any) => errorHandler(error, req)
+        useValue: (error: any) => ssrErrorHandler(error, req)
       },
     ],
   };
@@ -230,12 +267,12 @@ app.get('*', (req, res, next) => {
   
   engine
     .render(renderOptions)
-    .then((html) => {
+    .then((html: string) => {
       const renderTime = Date.now() - startTime;
       console.log(`✅ SSR render completed in ${renderTime}ms`);
       res.send(html);
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       console.error('Error during server-side rendering:', err);
       next(err);
     });

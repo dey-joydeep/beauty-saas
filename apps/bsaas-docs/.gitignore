@@ -1,0 +1,5 @@
+# PVM report files
+pvm/report
+
+# Database backup files
+db/bk/
