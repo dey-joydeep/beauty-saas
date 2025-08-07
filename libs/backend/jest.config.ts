@@ -10,11 +10,9 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: '../../coverage/libs/backend',
   moduleNameMapper: {
-    '^@beauty-saas/(.*)$': '<rootDir>/../../libs/$1/src',
+    '^@backend/(.*)$': '<rootDir>/src/$1',
+    '^@backend-shared/(.*)$': '<rootDir>/src/$1',
+    '^@shared/(.*)$': '<rootDir>/../shared/src/$1',
   },
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/',
-    '/e2e/'
-  ]
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/e2e/'],
 };

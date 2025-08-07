@@ -25,7 +25,10 @@ const config: Config.InitialOptions = {
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
   moduleNameMapper: {
-    '^@bsaas/(.*)$': '<rootDir>/../../libs/$1/src',
+    '^@shared/(.*)$': '<rootDir>/../../libs/shared/src/$1',
+    '^@backend/(.*)$': '<rootDir>/../../libs/backend/src/$1',
+    '^@backend-shared/(.*)$': '<rootDir>/../../libs/backend/src/$1',
+    '^@frontend/(.*)$': '<rootDir>/../../libs/frontend/src/$1',
   },
   // Add Haste configuration to handle module name collisions
   haste: {
@@ -40,7 +43,6 @@ const config: Config.InitialOptions = {
     '<rootDir>/node_modules',
     '<rootDir>/dist',
     '<rootDir>/coverage',
-    '<rootDir>/apps/.*/dist',
     '<rootDir>/libs/.*/dist',
   ],
   // Reset the module registry before running each test
@@ -52,10 +54,7 @@ const config: Config.InitialOptions = {
   // Restore mock state between tests
   restoreMocks: true,
   // Watch plugins configuration
-  watchPlugins: [
-    'jest-watch-typeahead/filename',
-    'jest-watch-typeahead/testname',
-  ],
+  watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
   // Test timeout
   testTimeout: 10000,
 };
