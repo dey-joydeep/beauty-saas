@@ -4,7 +4,7 @@
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "bundler",
     "moduleDetection": "force",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
