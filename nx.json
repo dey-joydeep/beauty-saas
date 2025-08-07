@@ -9,15 +9,7 @@
         {
             "plugin": "@nx/jest/plugin",
             "options": {
-                "targetName": "test",
-                "configFile": "jest.config.ts",
-                "timeout": 120000,
-                "transformers": [
-                    {
-                        "test": "jest\\.config\\.(ts|js)$",
-                        "implementation": "./tools/jest-transformer"
-                    }
-                ]
+                "targetName": "test"
             }
         }
     ],
@@ -43,6 +35,11 @@
                 "default",
                 "{workspaceRoot}/.eslintrc.json"
             ]
+        },
+        "@nx/js:tsc": {
+            "options": {
+                "generateExportsField": true
+            }
         }
     },
     "namedInputs": {
