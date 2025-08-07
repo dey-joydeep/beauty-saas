@@ -35,6 +35,11 @@
                                                        "default",
                                                        "{workspaceRoot}/.eslintrc.json"
                                                    ]
+                                    },
+                           "@nx/js:tsc": {
+                                        "options": {
+                                                       "generateExportsField": true
+                                                   }
                                     }
                        },
     "namedInputs":  {
