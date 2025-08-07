@@ -11,13 +11,12 @@ const config = {
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../../coverage/libs/shared',
   moduleNameMapper: {
-    '^@bsaas/(.*)$': '<rootDir>/../../libs/$1/src',
+    '^@shared/(.*)$': '<rootDir>/src/$1',
+    '^@backend/(.*)$': '<rootDir>/../backend/src/$1',
+    '^@backend-shared/(.*)$': '<rootDir>/../backend/src/$1',
   },
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/'
-  ]
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
 };
 
-// Use module.exports for better compatibility with Nx
+// Export using ESM syntax for ts-jest compatibility
 export default config;

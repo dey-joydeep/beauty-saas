@@ -22,8 +22,7 @@
     "paths": {
       "@shared/*": ["../../libs/shared/src/*"],
       "@backend-shared/*": ["../../libs/backend/src/*"],
-      "@backend/*": ["src/*"],
-      "@app/*": ["../../apps/bsaas-front/src/app/*"]
+      "@backend/*": ["src/*"]
     }
   },
   "exclude": ["**/*.spec.ts", "**/*.test.ts"],
