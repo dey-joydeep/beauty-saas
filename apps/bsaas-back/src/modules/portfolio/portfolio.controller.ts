@@ -1,93 +1,232 @@
-import { Request, Response } from 'express';
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../../common/middleware/auth';
 import { PortfolioService } from './portfolio.service';
-import type {
-  GetPortfoliosParams,
-  CreatePortfolioParams,
+import { 
+  GetPortfoliosParams, 
+  CreatePortfolioParams, 
   UpdatePortfolioParams,
-  DeletePortfolioParams,
   GetPortfolioByIdParams,
+  DeletePortfolioParams
 } from './portfolio-params.model';
-import { authenticateJWT } from '../../middleware/auth';
-import { requireRole } from '../../middleware/requireRole';
-import { validate } from '../../middleware/validate';
+import { authenticateJWT } from '../../common/middleware/auth';
+import { requireRole } from '../../common/middleware/requireRole';
+import { validate } from '../../common/middleware/validate';
 import { createPortfolioSchema, updatePortfolioSchema } from './portfolio.validation';
-import type { NextFunction } from 'express';
+import { ApiResponse } from '../../types/api.types';
 
 const portfolioService = new PortfolioService();
 
-function withAuthAndRole(
-  roles: string[],
-  handler: (req: Request, res: Response, next: NextFunction) => Promise<any>,
-) {
-  return [authenticateJWT, requireRole(roles), handler];
+// Helper function to create success response
+function createSuccessResponse<T>(data: T, message: string = 'Success'): ApiResponse<T> {
+  return {
+    success: true,
+    code: 'success',
+    message,
+    data,
+    status: 200
+  };
 }
 
-export const getPortfolios = withAuthAndRole(
-  ['admin', 'owner', 'staff', 'customer'],
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const params: GetPortfoliosParams = { filter: req.query };
-      // Not implemented in service, just return empty array for now
-      res.json([]);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  },
-);
+// Helper function to create error response
+function createErrorResponse(code: string, message: string, status: number): ApiResponse<null> {
+  return {
+    success: false,
+    code,
+    message,
+    data: null,
+    status
+  };
+}
 
-export const createPortfolio = [
-  authenticateJWT,
-  requireRole(['owner', 'staff']),
-  validate(createPortfolioSchema),
-  async (req: Request, res: Response) => {
-    try {
-      const params: CreatePortfolioParams = { data: req.body };
-      const portfolio = await portfolioService.createPortfolio(params);
-      res.status(201).json(portfolio);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
+// Type for our middleware handlers
+type MiddlewareHandler = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => Promise<unknown> | unknown;
+
+// Helper to create authenticated routes with role checks
+function withAuthAndRole(roles: string[], handler: MiddlewareHandler): MiddlewareHandler[] {
+  return [
+    (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+      const result = authenticateJWT(req, res, next);
+      return result === undefined ? undefined : Promise.resolve(result);
+    },
+    (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+      const result = requireRole(roles)(req, res, next);
+      return result === undefined ? undefined : Promise.resolve(result);
+    },
+    async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+      try {
+        await handler(req, res, next);
+      } catch (error) {
+        next(error);
+      }
     }
-  },
+  ];
+}
+
+// Get all portfolios
+export const getPortfolios: MiddlewareHandler[] = [
+  ...withAuthAndRole(
+    ['admin', 'owner', 'staff', 'customer'],
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const params: GetPortfoliosParams = { filter: req.query };
+        // Not implemented in service, just return empty array for now
+        res.status(200).json(createSuccessResponse([], 'Portfolios retrieved successfully'));
+      } catch (err: any) {
+        res.status(500).json(createErrorResponse('internal_error', err.message, 500));
+      }
+    }
+  )
 ];
 
-export const updatePortfolio = [
-  authenticateJWT,
-  requireRole(['owner', 'staff']),
-  validate(updatePortfolioSchema),
-  async (req: Request, res: Response) => {
-    try {
-      const params: UpdatePortfolioParams = { id: req.params.id, data: req.body };
-      const portfolio = await portfolioService.updatePortfolio(params);
-      res.json(portfolio);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
+// Create a new portfolio
+export const createPortfolio: MiddlewareHandler[] = [
+  ...withAuthAndRole(
+    ['owner', 'staff'],
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        if (!req.user?.id) {
+          return res.status(401).json(
+            createErrorResponse('unauthorized', 'User not authenticated', 401)
+          );
+        }
+
+        const params: CreatePortfolioParams = { 
+          data: {
+            ...req.body,
+            userId: req.user.id
+          },
+          userId: req.user.id
+        };
+        
+        const portfolio = await portfolioService.createPortfolio(params);
+        return res.status(201).json(
+          createSuccessResponse(portfolio, 'Portfolio created successfully')
+        );
+      } catch (err: any) {
+        return res.status(400).json(
+          createErrorResponse('bad_request', err.message, 400)
+        );
+      }
     }
-  },
+  ),
+  (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const result = validate(createPortfolioSchema)(req, res, next);
+    return result === undefined ? undefined : Promise.resolve(result);
+  }
 ];
 
-export const deletePortfolio = withAuthAndRole(
-  ['admin', 'owner'],
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const params: DeletePortfolioParams = { id: req.params.id };
-      await portfolioService.deletePortfolio(params.id);
-      res.status(204).end();
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
-    }
-  },
-);
+// Update a portfolio
+export const updatePortfolio: MiddlewareHandler[] = [
+  ...withAuthAndRole(
+    ['owner', 'staff'],
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const portfolioId = req.params?.['id'];
+        if (!portfolioId) {
+          return res.status(400).json(
+            createErrorResponse('bad_request', 'Portfolio ID is required', 400)
+          );
+        }
 
-export const getPortfolioById = withAuthAndRole(
-  ['admin', 'owner', 'staff', 'customer'],
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const params: GetPortfolioByIdParams = { id: req.params.id };
-      const portfolio = await portfolioService.getPortfolioById(params);
-      if (!portfolio) return res.status(404).json({ error: 'Portfolio not found' });
-      res.json(portfolio);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
+        if (!req.user?.id) {
+          return res.status(401).json(
+            createErrorResponse('unauthorized', 'User not authenticated', 401)
+          );
+        }
+
+        const params: UpdatePortfolioParams = {
+          id: portfolioId,
+          data: req.body,
+          userId: req.user.id
+        };
+        
+        const portfolio = await portfolioService.updatePortfolio(params);
+        return res.status(200).json(
+          createSuccessResponse(portfolio, 'Portfolio updated successfully')
+        );
+      } catch (err: any) {
+        return res.status(400).json(
+          createErrorResponse('bad_request', err.message, 400)
+        );
+      }
     }
-  },
-);
+  ),
+  (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const result = validate(updatePortfolioSchema)(req, res, next);
+    return result === undefined ? undefined : Promise.resolve(result);
+  }
+];
+
+// Delete a portfolio
+export const deletePortfolio: MiddlewareHandler[] = [
+  ...withAuthAndRole(
+    ['admin', 'owner'],
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const portfolioId = req.params?.['id'];
+        if (!portfolioId) {
+          return res.status(400).json(
+            createErrorResponse('bad_request', 'Portfolio ID is required', 400)
+          );
+        }
+
+        if (!req.user?.id) {
+          return res.status(401).json(
+            createErrorResponse('unauthorized', 'User not authenticated', 401)
+          );
+        }
+        
+        await portfolioService.deletePortfolio({
+          id: portfolioId,
+          userId: req.user.id
+        });
+        
+        return res.status(204).end();
+      } catch (err: any) {
+        return res.status(400).json(
+          createErrorResponse('bad_request', err.message, 400)
+        );
+      }
+    }
+  )
+];
+
+// Get portfolio by ID
+export const getPortfolioById: MiddlewareHandler[] = [
+  ...withAuthAndRole(
+    ['admin', 'owner', 'staff', 'customer'],
+    async (req: AuthenticatedRequest, res: Response) => {
+      try {
+        const portfolioId = req.params?.['id'];
+        if (!portfolioId) {
+          return res.status(400).json(
+            createErrorResponse('bad_request', 'Portfolio ID is required', 400)
+          );
+        }
+        
+        const portfolio = await portfolioService.getPortfolioById({
+          id: portfolioId,
+          userId: req.user?.id
+        });
+        
+        if (!portfolio) {
+          return res.status(404).json(
+            createErrorResponse('not_found', 'Portfolio not found', 404)
+          );
+        }
+        
+        return res.status(200).json(
+          createSuccessResponse(portfolio, 'Portfolio retrieved successfully')
+        );
+      } catch (err: any) {
+        return res.status(400).json(
+          createErrorResponse('bad_request', err.message, 400)
+        );
+      }
+    }
+  )
+];

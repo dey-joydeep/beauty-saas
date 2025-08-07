@@ -59,7 +59,7 @@ describe('Security: JWT Authentication', () => {
     await prisma.$disconnect();
   });
 
-  const secret = process.env.JWT_SECRET || 'test_secret';
+  const secret = process.env['JWT_SECRET'] || 'test_secret';
   const validPayload = {
     id: 'test-user',
     email: 'test@example.com',

@@ -15,9 +15,9 @@ import {
   AppointmentsFilter, 
   AppointmentsOverview, 
   AppointmentsPageableResponse, 
-  Appointment, 
-  AppointmentStatus 
+  Appointment
 } from '../models/appointment.model';
+import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -169,8 +169,36 @@ export class DashboardService {
   getTopSellingProducts(limit: number = 5): Observable<Array<{ productId: string; productName: string; quantity: number; revenue: number }>> {
     const params = new HttpParams().set('limit', limit.toString());
     return this.http.get<Array<{ productId: string; productName: string; quantity: number; revenue: number }>>(
-      `${this.apiUrl}/product-sales/top-selling`, 
+      `${this.apiUrl}/products/top-selling`,
       { params }
     );
+  }
+
+  /**
+   * Get upcoming subscription renewals for a tenant
+   * @param tenantId ID of the tenant
+   */
+  getRenewals(tenantId: string): Observable<Array<{
+    id?: string;
+    salonName: string;
+    customerName?: string;
+    serviceName?: string;
+    renewalDate: string;
+    amount?: number;
+    status?: 'pending' | 'completed' | 'overdue';
+  }>> {
+    // For now, return an empty array as a placeholder
+    // TODO: Implement actual API call when backend is ready
+    return this.http.get<Array<{
+      id?: string;
+      salonName: string;
+      customerName?: string;
+      serviceName?: string;
+      renewalDate: string;
+      amount?: number;
+      status?: 'pending' | 'completed' | 'overdue';
+    }>>(`${this.apiUrl}/renewals`, {
+      params: { tenantId }
+    });
   }
 }

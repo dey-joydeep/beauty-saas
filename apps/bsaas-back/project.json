@@ -12,7 +12,8 @@
         "main": "apps/bsaas-back/src/main.ts",
         "tsConfig": "apps/bsaas-back/tsconfig.app.json",
         "assets": ["apps/bsaas-back/src/assets"],
-        "generatePackageJson": true
+        "generatePackageJson": true,
+        "incremental": true
       },
       "configurations": {
         "production": {

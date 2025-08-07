@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { PlatformUtils } from '../utils/platform-utils';
+import { PlatformUtils } from '@frontend-shared/core/utils/platform-utils';
 
 export interface IPlatformUtils extends Pick<PlatformUtils, 'browserNavigator' | 'browserLocalStorage' | 'browserSessionStorage' | 'browserLocation' | 'isBrowser' | 'isServer' | 'document' | 'window'> {
   /**

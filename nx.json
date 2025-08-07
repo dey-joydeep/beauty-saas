@@ -1,74 +1,80 @@
 {
-    "plugins":  [
+    "plugins": [
+        {
+            "plugin": "@nx/eslint/plugin",
+            "options": {
+                "targetName": "eslint:lint"
+            }
+        },
+        {
+            "plugin": "@nx/jest/plugin",
+            "options": {
+                "targetName": "test",
+                "configFile": "jest.config.ts",
+                "timeout": 120000,
+                "transformers": [
                     {
-                        "plugin":  "@nx/eslint/plugin",
-                        "options":  {
-                                        "targetName":  "eslint:lint"
-                                    }
-                    },
-                    {
-                        "plugin":  "@nx/jest/plugin",
-                        "options":  {
-                                        "targetName":  "test"
-                                    }
+                        "test": "jest\\.config\\.(ts|js)$",
+                        "implementation": "./tools/jest-transformer"
                     }
-                ],
-    "targetDefaults":  {
-                           "build":  {
-                                         "dependsOn":  [
-                                                           "^build"
-                                                       ],
-                                         "inputs":  [
-                                                        "production",
-                                                        "^production"
-                                                    ]
-                                     },
-                           "test":  {
-                                        "inputs":  [
-                                                       "default",
-                                                       "^production",
-                                                       "{workspaceRoot}/jest.preset.js"
-                                                   ]
-                                    },
-                           "lint":  {
-                                        "inputs":  [
-                                                       "default",
-                                                       "{workspaceRoot}/.eslintrc.json"
-                                                   ]
-                                    }
-                       },
-    "namedInputs":  {
-                        "default":  [
-                                        "{projectRoot}/**/*",
-                                        "sharedGlobals"
-                                    ],
-                        "sharedGlobals":  [
-
-                                          ],
-                        "production":  [
-                                           "default"
-                                       ]
-                    },
-    "tasksRunnerOptions":  {
-                               "default":  {
-                                               "runner":  "nx/tasks-runners/default",
-                                               "options":  {
-                                                               "cacheableOperations":  [
-                                                                                           "build",
-                                                                                           "test",
-                                                                                           "lint",
-                                                                                           "e2e"
-                                                                                       ]
-                                                           }
-                                           }
-                           },
-    "affected":  {
-                     "defaultBase":  "main"
-                 },
-    "workspaceLayout":  {
-                            "appsDir":  "apps",
-                            "libsDir":  "libs"
-                        },
-    "nxCloudId":  "688d916733e08f6745766d01",
-    "$schema":  "./node_modules/nx/schemas/workspace-schema.json"
+                ]
+            }
+        }
+    ],
+    "targetDefaults": {
+        "build": {
+            "dependsOn": [
+                "^build"
+            ],
+            "inputs": [
+                "production",
+                "^production"
+            ]
+        },
+        "test": {
+            "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js"
+            ]
+        },
+        "lint": {
+            "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json"
+            ]
+        }
+    },
+    "namedInputs": {
+        "default": [
+            "{projectRoot}/**/*",
+            "sharedGlobals"
+        ],
+        "sharedGlobals": [],
+        "production": [
+            "default"
+        ]
+    },
+    "tasksRunnerOptions": {
+        "default": {
+            "runner": "nx/tasks-runners/default",
+            "options": {
+                "cacheableOperations": [
+                    "build",
+                    "test",
+                    "lint",
+                    "e2e"
+                ]
+            }
+        }
+    },
+    "affected": {
+        "defaultBase": "main"
+    },
+    "workspaceLayout": {
+        "appsDir": "apps",
+        "libsDir": "libs"
+    },
+    "nxCloudId": "688d916733e08f6745766d01",
+    "$schema": "./node_modules/nx/schemas/workspace-schema.json"
 }

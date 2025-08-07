@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
-import { 
-  Appointment, 
-  AppointmentRequest, 
-  AppointmentResponse, 
+import {
+  Appointment,
   AppointmentListResponse,
-  AppointmentStatus,
-  TimeSlot,
-  AppointmentWithDetails
+  AppointmentRequest,
+  AppointmentResponse,
+  AppointmentWithDetails,
+  TimeSlot
 } from '../models/appointment.model';
+import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
 
 export interface RescheduleRequest {
   startTime: Date;

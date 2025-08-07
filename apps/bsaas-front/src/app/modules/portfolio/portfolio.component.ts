@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PortfolioService, PortfolioItem } from './portfolio.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { BaseComponent } from '../../core/base.component';
-import { ErrorService } from '../../core/error.service';
+import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
 
 @Component({
   selector: 'app-portfolio',
@@ -14,7 +14,7 @@ import { ErrorService } from '../../core/error.service';
   templateUrl: './portfolio.component.html',
   styleUrls: ['./portfolio.component.scss'],
 })
-export class PortfolioComponent extends BaseComponent {
+export class PortfolioComponent extends AbstractBaseComponent {
   portfolioItems: PortfolioItem[] = [];
   addForm: FormGroup;
   editIndex: number | null = null;
@@ -25,7 +25,7 @@ export class PortfolioComponent extends BaseComponent {
   constructor(
     public portfolioService: PortfolioService,
     private fb: FormBuilder,
-    protected override errorService: ErrorService,
+    @Inject(ErrorService) protected override errorService: ErrorService,
   ) {
     super(errorService);
     this.addForm = this.fb.group({

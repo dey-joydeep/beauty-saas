@@ -1,24 +1,24 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, HostListener, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { FormsModule } from '@angular/forms';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { Router, RouterModule } from '@angular/router';
+import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
+import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subscription, of, timer, Subject, firstValueFrom } from 'rxjs';
-import { map, switchMap, takeUntil, tap, catchError, finalize } from 'rxjs/operators';
-import { StorageService } from '../../services/storage.service';
-import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from '../../utils/platform-utils';
+import { Subject, Subscription, firstValueFrom, of, timer } from 'rxjs';
+import { catchError, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 // Models
 interface Language {
@@ -284,23 +284,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     // Load saved preferences if in browser
     if (this.isBrowser) {
-      this.storageService.getItem<string>('userLanguage').subscribe({
-        next: (savedLanguage) => {
+      this.storageService.getItem$<string>('userLanguage').subscribe({
+        next: (savedLanguage: string | null) => {
           if (savedLanguage) {
             this.onLanguageChange(savedLanguage);
           }
         },
-        error: (error) => console.warn('Failed to load language preference:', error)
+        error: (error: any) => console.warn('Failed to load language preference:', error)
       });
 
-      this.storageService.getItem<string>('userCity').subscribe({
-        next: (savedCity) => {
+      this.storageService.getItem$<string>('userCity').subscribe({
+        next: (savedCity: string | null) => {
           if (savedCity) {
             this.selectedCity = savedCity;
             this.cdr.markForCheck();
           }
         },
-        error: (error) => console.warn('Failed to load city preference:', error)
+        error: (error: any) => console.warn('Failed to load city preference:', error)
       });
     }
   }
@@ -386,7 +386,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Save preference using storage service
     if (this.isBrowser) {
       try {
-        await firstValueFrom(this.storageService.setItem('userLanguage', languageCode));
+        await firstValueFrom(this.storageService.setItem$('userLanguage', languageCode));
       } catch (error) {
         console.warn('Failed to save language preference:', error);
       }
@@ -425,7 +425,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Save preference using storage service
     if (this.isBrowser) {
       try {
-        await firstValueFrom(this.storageService.setItem('userCity', cityId));
+        await firstValueFrom(this.storageService.setItem$('userCity', cityId));
       } catch (error) {
         console.warn('Failed to save city preference:', error);
       }

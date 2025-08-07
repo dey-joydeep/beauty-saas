@@ -3,7 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ThemeService, Theme } from './theme.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { PLATFORM_UTILS_TOKEN, IPlatformUtils } from '../../core/tokens/platform-utils.token';
+import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
 
 @Component({
   selector: 'app-theme',
@@ -94,10 +95,10 @@ export class ThemeComponent implements OnInit {
     try {
       const doc = this.platformUtils.document;
       const rootElement = doc.documentElement;
-      
+
       // Batch style updates to minimize reflows
       this.renderer.setAttribute(rootElement, 'style', ''); // Reset styles first
-      
+
       // Apply new styles
       const styles: Record<string, string> = {
         '--primary-color': theme.primaryColor,
@@ -105,7 +106,7 @@ export class ThemeComponent implements OnInit {
         '--accent-color': theme.accentColor,
         // Add any other theme variables here
       };
-      
+
       Object.entries(styles).forEach(([key, value]) => {
         if (value) {
           this.renderer.setStyle(rootElement, key, value);

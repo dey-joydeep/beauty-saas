@@ -12,7 +12,8 @@ import { of, throwError } from 'rxjs';
 
 import { AppointmentManagementComponent } from './appointment-management.component';
 import { AppointmentService } from './appointment.service';
-import { AppointmentStatus } from '../../models/appointment.model';
+
+import { AppointmentStatus } from '../../../../../../libs/frontend/src/app/shared/enums/appointment-status.enum';
 
 describe('AppointmentManagementComponent', () => {
   let component: AppointmentManagementComponent;
@@ -126,7 +127,7 @@ describe('AppointmentManagementComponent', () => {
       notes: 'Test appointment',
     });
     
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBeFalsy();
     expect(component.success).toBe('Appointment created successfully!');
   });
 
@@ -151,7 +152,7 @@ describe('AppointmentManagementComponent', () => {
 
     // Assert
     expect(appointmentService.createAppointment).toHaveBeenCalled();
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBeFalsy();
     expect(component.error).toBe('Error creating appointment');
   });
 

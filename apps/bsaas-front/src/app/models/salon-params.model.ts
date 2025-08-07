@@ -1,4 +1,4 @@
-import { DayOfWeek } from '../shared/models/day-of-week.enum';
+import { DayOfWeek } from '@frontend-shared/shared/models/day-of-week.enum';
 
 export interface CreateSalonParams {
   name: string;

@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserService, UserStats } from './user.service';
+import { Component, OnInit } from '@angular/core';
+import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { CurrentUserService } from '../../core/auth/services/current-user.service';
-import { ErrorService } from '../../core/error.service';
-import { BaseComponent } from '../../core/base.component'; // Assuming BaseComponent is located here
+import { UserService, UserStats } from './user.service';
 
 @Component({
   selector: 'app-user',
@@ -13,7 +13,7 @@ import { BaseComponent } from '../../core/base.component'; // Assuming BaseCompo
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.scss'],
 })
-export class UserComponent extends BaseComponent implements OnInit {
+export class UserComponent extends AbstractBaseComponent implements OnInit {
   stats: UserStats | null = null;
   isAdmin = false;
 

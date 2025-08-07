@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, Inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, Inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -18,9 +18,11 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
-import { Appointment, AppointmentStatus, TimeSlot } from '../models/appointment.model';
-import { LoadingService } from '../../../core/services/loading.service';
+import { Appointment, TimeSlot } from '../models/appointment.model';
+import { LoadingService } from '@frontend-shared/core/services/loading.service';
 import { AppointmentService } from '../services/appointment.service';
+import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 // Using the base Appointment model which already has startTime and endTime
 
@@ -135,15 +137,18 @@ export class AppointmentRescheduleComponent implements OnInit, OnDestroy {
   };
 
   constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
     private appointmentService: AppointmentService,
-    private loadingService: LoadingService,
+    @Inject(MAT_DIALOG_DATA) public data: { appointment: Appointment },
+    private dialogRef: MatDialogRef<AppointmentRescheduleComponent>,
+    @Inject(LoadingService) private loadingService: LoadingService,
+    private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar,
     private translate: TranslateService,
     @Inject(MAT_SNACK_BAR_DEFAULT_OPTIONS) private snackBarConfig: any,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     // Initialize form groups
     this.dateTimeFormGroup = this.fb.group({

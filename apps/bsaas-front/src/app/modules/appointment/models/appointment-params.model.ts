@@ -1,4 +1,4 @@
-import { AppointmentStatus } from './appointment.model';
+import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
 
 export interface CreateAppointmentParams {
   customerId: string;

@@ -1,18 +1,10 @@
+// Core
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, Optional, PLATFORM_ID } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
-// Services
-import { ErrorService } from '../../../error.service';
-import { StorageService } from '../../../services/storage.service';
-import { PLATFORM_UTILS_TOKEN } from '../../../tokens/platform-utils.token';
-import { IPlatformUtils } from '../../../utils/platform-utils';
-import { AuthService, AuthUser } from '../../services/auth.service';
-
-// Angular Material Modules
+// Material
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -23,9 +15,22 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-// Base Component
+// RxJS
+import { firstValueFrom } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+// Translate
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { BaseComponent } from '../../../base.component';
+
+// Services
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
+import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
+import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import type { AuthUser } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
+
+import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
 
 @Component({
   standalone: true,
@@ -53,7 +58,30 @@ import { BaseComponent } from '../../../base.component';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
+export class LoginComponent extends AbstractBaseComponent implements OnInit, OnDestroy {
+  // Component state
+  private isBrowser: boolean;
+
+  // Form state
+  loginForm: FormGroup;
+  otpForm: FormGroup;
+  step: 'credentials' | 'otp' = 'credentials';
+  hidePassword = true;
+  isSubmitting = false;
+  
+  // OTP related state
+  showOtpForm = false;
+  resendCountdown = 0;
+  resendDisabled = false;
+  countdown = 30;
+  email = '';
+  userType: 'owner' | 'staff' | 'customer' | null = null;
+  
+  // Private state
+  private resendTimer: any;
+  private returnUrl = '';
+  private countdownInterval: any;
+
   // Debug logging helper methods
   private logDebug(message: string, data?: any) {
     if (this.ssrDebug?.log) {
@@ -79,37 +107,18 @@ export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
       console.error('Error logging to error service:', e);
     }
   }
-  loginForm: FormGroup;
-  otpForm: FormGroup;
-  step: 'credentials' | 'otp' = 'credentials';
-  resendCountdown = 0;
-  resendDisabled = false;
-  private resendTimer: any;
-  userType: 'owner' | 'staff' | 'customer' | null; // Component state
-  isSubmitting = false;
-  showOtpForm = false;
-  countdown = 30;
-  private returnUrl: string = '';
-  private countdownInterval: any;
-  hidePassword = true;
-  // These properties are inherited from BaseComponent
-
-  // Email property for OTP resend functionality
-  email: string = '';
-  
   // User type for multi-role support
 
-  private isBrowser: boolean;
-
   constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
+    @Inject(PLATFORM_UTILS_TOKEN) protected platformUtils: IPlatformUtils,
+    @Inject(FormBuilder) private fb: FormBuilder,
+    @Inject(Router) private router: Router,
+    @Inject(ActivatedRoute) private route: ActivatedRoute,
+    @Optional() @Inject(TranslateService) private translate: TranslateService,
     protected override errorService: ErrorService,
-    private router: Router,
-    private translate: TranslateService,
-    private storageService: StorageService,
+    @Inject(StorageService) private storageService: StorageService,
+    @Inject(AuthService) private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object,
-    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
     @Optional() @Inject('SSR_DEBUG') private ssrDebug: any
   ) {
     super(errorService);
@@ -169,7 +178,7 @@ export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
     // Load saved email if in browser environment
     if (this.isBrowser) {
       try {
-        const savedEmail = await firstValueFrom(this.storageService.getItem<string>('savedEmail'));
+        const savedEmail = await firstValueFrom(this.storageService.getItem$<string>('savedEmail'));
         if (savedEmail) {
           this.loginForm.patchValue({
             email: savedEmail,
@@ -207,9 +216,9 @@ export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
     if (this.isBrowser) {
       try {
         if (rememberMe) {
-          await firstValueFrom(this.storageService.setItem('savedEmail', email));
+          await firstValueFrom(this.storageService.setItem$('savedEmail', email));
         } else {
-          await firstValueFrom(this.storageService.removeItem('savedEmail'));
+          await firstValueFrom(this.storageService.removeItem$('savedEmail'));
         }
       } catch (error) {
         console.warn('Failed to update saved email:', error);
@@ -262,7 +271,7 @@ export class LoginComponent extends BaseComponent implements OnInit, OnDestroy {
         // Store token if available (browser only)
         if (this.isBrowser && user.accessToken) {
           try {
-            await firstValueFrom(this.storageService.setItem('authToken', user.accessToken));
+            await firstValueFrom(this.storageService.setItem$('authToken', user.accessToken));
           } catch (error) {
             console.warn('Failed to store auth token:', error);
           }

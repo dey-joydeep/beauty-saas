@@ -1,10 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
-import { BaseComponent } from '../../../../core/base.component';
-import { ErrorService } from '../../../../core/error.service';
+import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
 import { RevenueData } from '../../models/dashboard.model';
 
 @Component({
@@ -14,10 +14,10 @@ import { RevenueData } from '../../models/dashboard.model';
   templateUrl: './revenue-chart.component.html',
   styleUrls: ['./revenue-chart.component.scss'],
 })
-export class RevenueChartComponent extends BaseComponent {
+export class RevenueChartComponent extends AbstractBaseComponent {
   @Input() revenueData!: RevenueData[];
 
-  constructor(protected override errorService: ErrorService) {
+  constructor(@Inject(ErrorService) protected override errorService: ErrorService) {
     super(errorService);
   }
 

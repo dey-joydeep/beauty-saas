@@ -1,20 +1,24 @@
-import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
+import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
-import { StatsWidgetComponent } from './widgets/stats/stats-widget.component';
-import { RevenueChartWidgetComponent } from './widgets/revenue-chart/revenue-chart-widget.component';
+// Widget Components
 import { CustomerStatsWidgetComponent } from './widgets/customer-stats/customer-stats-widget.component';
-import { ProductSalesWidgetComponent } from './widgets/product-sales/product-sales-widget.component';
-import { SubscriptionChartWidgetComponent } from './widgets/subscription-chart/subscription-chart-widget.component';
+import { ProductSalesWidgetComponent } from './widgets/product-sales-widget/product-sales-widget.component';
 import { RenewalsListWidgetComponent } from './widgets/renewals-list/renewals-list-widget.component';
-import { BaseComponent } from '../../core/base.component';
-import { ErrorService } from '../../core/error.service';
-import { StorageService } from '../../core/services/storage.service';
-import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from '../../core/utils/platform-utils';
+import { RevenueChartComponent } from './widgets/revenue-chart/revenue-chart.component';
+import { StatsWidgetComponent } from './widgets/stats/stats-widget.component';
+import { SubscriptionChartWidgetComponent } from './widgets/subscription-chart/subscription-chart-widget.component';
+
+// Services
 
 @Component({
   selector: 'app-dashboard',
@@ -25,16 +29,16 @@ import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from '../../core/utils/platform-
     MatIconModule,
     TranslateModule,
     StatsWidgetComponent,
-    RevenueChartWidgetComponent,
+    RevenueChartComponent,
     CustomerStatsWidgetComponent,
     ProductSalesWidgetComponent,
     SubscriptionChartWidgetComponent,
-    RenewalsListWidgetComponent,
+    RenewalsListWidgetComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
-export class DashboardComponent extends BaseComponent implements OnInit {
+export class DashboardComponent extends AbstractBaseComponent implements OnInit {
   static tenantId = 'demo-tenant';
   tenantId: string;
   private isBrowser: boolean;
@@ -50,8 +54,8 @@ export class DashboardComponent extends BaseComponent implements OnInit {
   breakpoint: number = 1; // Default to 1 column
 
   constructor(
+    @Inject(StorageService) private storageService: StorageService,
     @Inject(ErrorService) protected override errorService: ErrorService,
-    private storageService: StorageService,
     @Inject(PLATFORM_ID) private platformId: Object,
     @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils
   ) {
@@ -87,16 +91,22 @@ export class DashboardComponent extends BaseComponent implements OnInit {
     // Load tenant ID from storage if in browser environment
     if (this.isBrowser) {
       try {
-        const savedTenantId = await firstValueFrom(this.storageService.getItem<string>('tenantId'));
+        // Use getItem$ which returns an Observable
+        const tenantId$ = this.storageService.getItem$<string>('tenantId');
+        const savedTenantId = await firstValueFrom(tenantId$);
         if (savedTenantId) {
           this.tenantId = savedTenantId;
         }
-      } catch (error) {
-        console.warn('Failed to load tenant ID:', error);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.warn('Failed to load tenant ID:', errorMessage);
+        this.errorService.handleError(error as Error);
       }
       
       // Set initial breakpoint based on current window width
-      this.setBreakpoint(this.platformUtils.window?.innerWidth || 0);
+      if (this.platformUtils.window) {
+        this.setBreakpoint(this.platformUtils.window.innerWidth);
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import {
   HttpClient,
+  HTTP_INTERCEPTORS,
   provideHttpClient,
   withFetch,
   withInterceptors,
@@ -17,7 +18,7 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { TranslateLoader, TranslateModule, TranslateStore } from '@ngx-translate/core';
-import { TranslateBrowserLoader } from './core/translate/translate-ssr-loader';
+import { TranslateBrowserLoader } from '@frontend-shared/core/translate/translate-ssr-loader';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -47,8 +48,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 // App imports
 import { AUTH_ROUTES } from './core/auth/auth.routes';
-import { ErrorHandlerService } from './core/services/error-handler.service';
-import { PLATFORM_UTILS_TOKEN, PlatformUtils } from './core/utils/platform-utils';
+import { ErrorHandlerService } from '@frontend-shared/core/services/error/error-handler.service';
+import { ErrorInterceptor } from '@frontend-shared/core/interceptors/error.interceptor';
+import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@frontend-shared/core/utils/platform-utils';
 
 // AoT requires an exported function for factories
 export function httpLoaderFactory(http: HttpClient, transferState: TransferState) {
@@ -91,6 +93,8 @@ export const appConfig: ApplicationConfig = {
       ]),
       withFetch()
     ),
+    // Register global HTTP interceptors
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     importProvidersFrom([
       BrowserAnimationsModule,
       MatButtonModule,

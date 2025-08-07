@@ -1,11 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
-import { BaseComponent } from '../../../../core/base.component';
-import { ErrorService } from '../../../../core/error.service';
-import { DashboardStats } from '../../models/dashboard.model';
+import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import type { DashboardStats } from '../../models/dashboard.model';
 
 @Component({
   selector: 'app-stats-widget',
@@ -14,10 +14,10 @@ import { DashboardStats } from '../../models/dashboard.model';
   templateUrl: './stats-widget.component.html',
   styleUrls: ['./stats-widget.component.scss'],
 })
-export class StatsWidgetComponent extends BaseComponent {
+export class StatsWidgetComponent extends AbstractBaseComponent {
   @Input() stats!: DashboardStats;
 
-  constructor(protected override errorService: ErrorService) {
+  constructor(@Inject(ErrorService) protected override errorService: ErrorService) {
     super(errorService);
   }
 

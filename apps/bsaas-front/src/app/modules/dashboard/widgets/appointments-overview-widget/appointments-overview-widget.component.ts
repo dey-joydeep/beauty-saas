@@ -31,9 +31,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
   Appointment,
   AppointmentsFilter,
-  AppointmentsOverview,
-  AppointmentStatus
+  AppointmentsOverview
 } from '../../models/appointment.model';
+import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
 import { DashboardService } from '../../services/dashboard.service';
 
 interface StatusBadgeConfig {
@@ -234,7 +234,8 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
       CONFIRMED: '#17a2b8', // Teal
       COMPLETED: '#28a745', // Green
       CANCELLED: '#dc3545', // Red
-      NOSHOW: '#6c757d' // Gray
+      NOSHOW: '#6c757d', // Gray
+      RESCHEDULED: '#6c757d' // Gray
     };
     
     return colors[status] || '#6c757d'; // Default gray for unknown statuses
@@ -272,7 +273,8 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
       [AppointmentStatus.CONFIRMED]: 'check_circle',
       [AppointmentStatus.COMPLETED]: 'done_all',
       [AppointmentStatus.CANCELLED]: 'cancel',
-      [AppointmentStatus.NOSHOW]: 'no_accounts'
+      [AppointmentStatus.NOSHOW]: 'no_accounts',
+      [AppointmentStatus.RESCHEDULED]: 'reschedule'
     };
     return icons[status as AppointmentStatus] || 'help';
   }
@@ -309,6 +311,11 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
         text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.NOSHOW'),
         class: 'status-noshow',
         icon: 'no_accounts'
+      },
+      [AppointmentStatus.RESCHEDULED]: {
+        text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.RESCHEDULED'),
+        class: 'status-rescheduled',
+        icon: 'reschedule'
       }
     };
 
@@ -429,7 +436,8 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
       CONFIRMED: 'event_available',
       COMPLETED: 'done_all',
       CANCELLED: 'cancel',
-      NOSHOW: 'no_accounts'
+      NOSHOW: 'no_accounts',
+      RESCHEDULED: 'reschedule'
     };
     
     return statusIcons[appointment.status] || 'event';

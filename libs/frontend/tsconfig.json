@@ -1,0 +1,34 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "tsBuildInfoFile": "../../dist/out-tsc/tsconfig.frontend.tsbuildinfo",
+    "types": [
+      "node"
+    ],
+    "declaration": true,
+    "composite": true,
+    "rootDir": ".",
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": [
+        "../../libs/shared/src/*"
+      ],
+      "@frontend-shared/*": [
+        "libs/frontend/src/app/*"
+      ]
+    }
+  },
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ],
+  "include": [
+    "**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../../libs/shared/tsconfig.json"
+    }
+  ]
+}

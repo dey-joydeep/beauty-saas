@@ -10,7 +10,7 @@ const testUserId = 'test-user';
 const testSalonId = 'test-salon';
 const testToken = jwt.sign(
   { id: testUserId, tenantId: testTenantId, roles: ['owner'] },
-  process.env.JWT_SECRET || 'testsecret',
+  process.env['JWT_SECRET'] || 'testsecret',
 );
 
 describe('Salon Controller Integration', () => {

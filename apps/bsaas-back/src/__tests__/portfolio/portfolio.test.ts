@@ -9,7 +9,7 @@ const testUserId = 'test-user';
 let token = '';
 
 beforeAll(async () => {
-  token = process.env.TEST_JWT || '';
+  token = process.env['TEST_JWT'] || '';
   // Optionally, create a sample image for upload
   fs.writeFileSync(
     testImagePath,

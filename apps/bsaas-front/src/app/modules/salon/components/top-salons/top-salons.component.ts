@@ -4,7 +4,8 @@ import { SalonService } from '../../services/salon.service';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ISalonDto } from '../../../home/home.models';
-import { PLATFORM_UTILS_TOKEN, IPlatformUtils } from '../../../../core/tokens/platform-utils.token';
+import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
 
 // Extend ISalonDto with any additional properties needed for this component
 export type Salon = ISalonDto & {

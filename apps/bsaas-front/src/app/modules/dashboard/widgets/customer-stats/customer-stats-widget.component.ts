@@ -1,16 +1,16 @@
-import { Component, Input, OnInit, OnDestroy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { BaseComponent } from '../../../../core/base.component';
-import { ErrorService } from '../../../../core/error.service';
+import { Subscription } from 'rxjs';
 import { DashboardService } from '../../dashboard.service';
 import { DashboardStats } from '../../models/dashboard.model';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-customer-stats-widget',
@@ -19,7 +19,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './customer-stats-widget.component.html',
   styleUrls: ['./customer-stats-widget.component.scss'],
 })
-export class CustomerStatsWidgetComponent extends BaseComponent {
+export class CustomerStatsWidgetComponent extends AbstractBaseComponent {
   stats: DashboardStats = {
     totalCustomers: 0,
     totalAppointments: 0,
@@ -34,7 +34,7 @@ export class CustomerStatsWidgetComponent extends BaseComponent {
 
   constructor(
     @Inject(ErrorService) protected override errorService: ErrorService,
-    private dashboardService: DashboardService,
+    @Inject(DashboardService) private dashboardService: DashboardService,
   ) {
     super(errorService);
   }

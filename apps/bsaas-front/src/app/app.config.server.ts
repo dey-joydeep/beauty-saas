@@ -1,18 +1,17 @@
-import { mergeApplicationConfig, ApplicationConfig, PLATFORM_ID, APP_ID, makeStateKey, TransferState, Provider, isDevMode, EnvironmentProviders, inject } from '@angular/core';
-import { provideServerRendering, ɵSERVER_CONTEXT as SERVER_CONTEXT } from '@angular/platform-server';
-import { appConfig } from './app.config';
+import { HttpClient, HttpHandlerFn, HttpInterceptorFn, HttpRequest, provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { APP_ID, ApplicationConfig, EnvironmentProviders, inject, isDevMode, mergeApplicationConfig, PLATFORM_ID, Provider, TransferState } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { provideHttpClient, withInterceptors, withFetch, HttpClient, HttpRequest, HttpHandlerFn, HttpHandler, HttpInterceptorFn } from '@angular/common/http';
-import { TranslateLoader, TranslateStore, TranslateService } from '@ngx-translate/core';
-import { TranslateServerLoader } from './core/translate/translate-server.loader';
-import { StorageService } from './core/services/storage.service';
-import { IPlatformUtils, PLATFORM_UTILS_TOKEN } from './core/utils/platform-utils';
-import { PlatformUtils } from './core/utils/platform-utils';
-import { ErrorService } from './core/error.service';
+import { provideServerRendering, ɵSERVER_CONTEXT as SERVER_CONTEXT } from '@angular/platform-server';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
+import { TranslateServerLoader } from '@frontend-shared/core/translate/translate-server.loader';
+import { TranslateLoader, TranslateService, TranslateStore } from '@ngx-translate/core';
+import { appConfig } from './app.config';
 
 // Import interceptors
-import { ssrInterceptor } from './core/interceptors/ssr-interceptor';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
+import { ssrInterceptor } from './core/interceptors/ssr-interceptor';
 import { ssrTranslateInterceptor } from './core/interceptors/ssr-translate.interceptor';
 
 // Server-side interceptors
@@ -91,8 +90,7 @@ const serverProviders: (Provider | EnvironmentProviders)[] = [
     provide: ErrorService,
     useFactory: () => {
       console.log('🔧 Initializing ErrorService for SSR');
-      const translate = inject(TranslateService);
-      return new ErrorService(translate);
+      return new ErrorService();
     }
   },
   

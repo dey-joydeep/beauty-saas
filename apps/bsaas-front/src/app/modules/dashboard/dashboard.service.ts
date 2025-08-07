@@ -1,11 +1,10 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-import { Renewal, DashboardStats, RevenueData, ProductSales, SubscriptionData, AppointmentTrend } from './models/dashboard.model';
-import { DashboardComponent } from './dashboard.component';
+import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-import { ErrorService } from '../../core/error.service';
+import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { DashboardComponent } from './dashboard.component';
+import { AppointmentTrend, DashboardStats, ProductSales, Renewal, RevenueData, SubscriptionData } from './models/dashboard.model';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {

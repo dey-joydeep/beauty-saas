@@ -1,20 +1,20 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription, finalize } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { first } from 'rxjs/operators';
+import { Subscription, finalize } from 'rxjs';
 
-import { Appointment, AppointmentStatus, AppointmentWithDetails } from '../models/appointment.model';
-import { AppointmentService } from '../services/appointment.service';
 import { AppointmentCancelDialogComponent } from '../appointment-cancel-dialog/appointment-cancel-dialog.component';
+import { AppointmentWithDetails } from '../models/appointment.model';
+import { AppointmentService } from '../services/appointment.service';
+import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
 
 @Component({
   selector: 'app-appointment-detail',

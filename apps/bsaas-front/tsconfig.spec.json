@@ -4,7 +4,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "module": "commonjs",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "target": "es2022",
     "types": ["jest", "node", "@testing-library/jest-dom", "jest-environment-jsdom"],
     "esModuleInterop": true,
@@ -18,15 +19,11 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
     "typeRoots": [
       "./node_modules/@types",
       "./src/types"
     ],
-    "lib": [
-      "es2022",
-      "dom"
-    ]
+    "lib": ["es2022", "dom"]
   },
   "include": [
     "src/**/*.spec.ts",

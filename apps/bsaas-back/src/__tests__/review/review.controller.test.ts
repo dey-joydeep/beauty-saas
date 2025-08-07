@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
 import { ReviewService, Review } from '../../modules/review/review.service';
-import { reviewServiceHolder } from '../../controllers/review.controller';
+import { reviewServiceHolder } from '../../modules/review/review.controller';
 jest.mock('../../modules/review/review.service');
 const mockedServiceInstance = new (ReviewService as any)() as jest.Mocked<ReviewService>;
 const testSalonId = 'test-salon';

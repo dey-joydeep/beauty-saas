@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import app from '../../app';
 
 describe('Security: Role-Based Access Control (RBAC)', () => {
-  const secret = process.env.JWT_SECRET || 'test_secret';
+  const secret = process.env['JWT_SECRET'] || 'test_secret';
   const basePayload = {
     id: 'test-user',
     email: 'test@example.com',

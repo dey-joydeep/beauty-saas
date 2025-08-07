@@ -1,10 +1,10 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StaffRequestService, CreateLeaveRequestPayload } from '../../services/staff-request.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { BaseComponent } from '../../../../core/base.component';
-import { ErrorService } from '../../../../core/error.service';
+import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
 
 @Component({
   selector: 'app-staff-request-form',
@@ -12,7 +12,7 @@ import { ErrorService } from '../../../../core/error.service';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './staff-request-form.component.html',
 })
-export class StaffRequestFormComponent extends BaseComponent {
+export class StaffRequestFormComponent extends AbstractBaseComponent {
   @Input() staffId: string = '';
   @Output() requestCreated = new EventEmitter<void>();
 
@@ -22,7 +22,7 @@ export class StaffRequestFormComponent extends BaseComponent {
   constructor(
     private fb: FormBuilder,
     private staffRequestService: StaffRequestService,
-    protected override errorService: ErrorService
+    @Inject(ErrorService) protected override errorService: ErrorService
   ) {
     super(errorService);
     this.form = this.fb.group({

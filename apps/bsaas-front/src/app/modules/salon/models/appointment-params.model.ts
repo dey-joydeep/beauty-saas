@@ -1,4 +1,4 @@
-import { AppointmentStatus } from './appointment-status.enum';
+import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
 
 export interface CreateAppointmentParams {
   salonId: string;

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatError, MatFormFieldModule } from '@angular/material/form-field';
-import { DashboardApiService } from '../../../shared/dashboard-api.service';
+import { DashboardApiService } from '@frontend-shared/features/dashboard/services/dashboard-api.service';
 
 @Component({
   selector: 'app-customer-stats',

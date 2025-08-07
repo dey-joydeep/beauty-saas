@@ -1,6 +1,6 @@
 // Mock PrismaClient to avoid real DB connection during edge-case tests
-jest.mock('../../services/portfolio.service', () => {
-  const original = jest.requireActual('../../services/portfolio.service');
+jest.mock('../../modules/portfolio/portfolio.service', () => {
+  const original = jest.requireActual('../../modules/portfolio/portfolio.service');
   return {
     ...original,
     PortfolioService: class extends original.PortfolioService {
@@ -17,7 +17,7 @@ jest.mock('../../services/portfolio.service', () => {
   };
 });
 
-import { PortfolioService } from '../../services/portfolio.service';
+import { PortfolioService } from '../../modules/portfolio/portfolio.service';
 
 describe('PortfolioService Edge Cases', () => {
   const service = new PortfolioService();

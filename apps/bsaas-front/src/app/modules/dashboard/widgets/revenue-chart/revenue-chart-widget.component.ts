@@ -11,7 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DashboardService } from '../../../dashboard/dashboard.service';
 import { RevenueData } from '../../../dashboard/models/dashboard.model';
-import { ErrorService } from '../../../../core/error.service';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
 
 @Component({
   selector: 'app-revenue-chart-widget',

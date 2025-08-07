@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { authenticateJWT } from '../../middleware/auth';
-import { requireRole } from '../../middleware/requireRole';
-import { validate } from '../../middleware/validate';
+import { authenticateJWT } from '../../common/middleware/auth';
+import { requireRole } from '../../common/middleware/requireRole';
+import { validate } from '../../common/middleware/validate';
 import {
   createSalonStaffRequestSchema,
   updateSalonStaffRequestSchema,

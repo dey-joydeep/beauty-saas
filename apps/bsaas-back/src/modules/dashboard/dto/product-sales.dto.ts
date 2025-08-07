@@ -1,4 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+/**
+ * DTOs for product sales reporting
+ */
+/**
+ * DTOs for product sales reporting
+ * 
+ * These DTOs are used for validating and documenting the product sales API.
+ */
 import {
   IsDateString,
   IsNotEmpty,
@@ -10,51 +17,74 @@ import {
 } from 'class-validator';
 
 export class SalesByProductDto {
-  @ApiProperty({ description: 'Product ID' })
+  /**
+   * Product ID
+   */
   @IsUUID()
   productId!: string;
 
-  @ApiProperty({ description: 'Product name' })
+  /**
+   * Product name
+   */
   @IsString()
   productName!: string;
 
-  @ApiProperty({ description: 'Number of items sold' })
+  /**
+   * Number of items sold
+   */
   @IsNumber()
   quantity!: number;
 
-  @ApiProperty({ description: 'Total revenue from this product' })
+  /**
+   * Total revenue from this product
+   */
   @IsNumber()
+  @Min(0)
   revenue!: number;
 
-  @ApiProperty({ description: 'Percentage of total sales' })
+  /**
+   * Percentage of total sales
+   */
   @IsNumber()
   percentage!: number;
 }
 
 export class SalesByDateDto {
-  @ApiProperty({ description: 'Date of sales' })
+  /**
+   * Date of sales (YYYY-MM-DD format)
+   */
   @IsString()
   date!: string;
 
-  @ApiProperty({ description: 'Total sales for this date' })
+  /**
+   * Total sales amount for this date
+   */
   @IsNumber()
   sales!: number;
 
-  @ApiProperty({ description: 'Number of items sold' })
+  /**
+   * Number of items sold
+   */
   @IsNumber()
   items!: number;
 }
 
 export class ProductSaleDto {
-  @ApiProperty({ description: 'ID of the product sale' })
+  /**
+   * ID of the product sale
+   */
   @IsUUID()
   id!: string;
 
-  @ApiProperty({ description: 'ID of the product' })
+  /**
+   * ID of the product
+   */
   @IsUUID()
   productId!: string;
 
-  @ApiProperty({ description: 'Name of the product' })
+  /**
+   * Name of the product
+   */
   @IsString()
   productName!: string;
 
@@ -73,24 +103,34 @@ export class ProductSaleDto {
   @Min(0)
   totalAmount!: number;
 
-  @ApiProperty({ description: 'Date of the sale' })
+  /**
+   * Date of the sale in ISO format
+   */
   @IsDateString()
   saleDate!: Date;
 
-  @ApiProperty({ description: 'ID of the staff who made the sale' })
+  /**
+   * ID of the staff who made the sale
+   */
   @IsUUID()
   soldById!: string;
 
-  @ApiProperty({ description: 'Name of the staff who made the sale' })
+  /**
+   * Name of the staff who made the sale
+   */
   @IsString()
   soldByName!: string;
 
-  @ApiProperty({ description: 'ID of the customer (if any)', required: false })
+  /**
+   * ID of the customer (if any)
+   */
   @IsUUID()
   @IsOptional()
   customerId?: string;
 
-  @ApiProperty({ description: 'Name of the customer (if any)', required: false })
+  /**
+   * Name of the customer (if any)
+   */
   @IsString()
   @IsOptional()
   customerName?: string;
@@ -107,7 +147,9 @@ export class ProductSaleDto {
 }
 
 export class CreateProductSaleDto {
-  @ApiProperty({ description: 'ID of the product' })
+  /**
+   * ID of the product
+   */
   @IsUUID()
   productId!: string;
 
@@ -126,12 +168,16 @@ export class CreateProductSaleDto {
   @Min(0)
   totalAmount!: number;
 
-  @ApiProperty({ description: 'Date of the sale', required: false })
+  /**
+   * Date of the sale (defaults to current date if not provided)
+   */
   @IsDateString()
   @IsOptional()
   saleDate?: Date;
 
-  @ApiProperty({ description: 'ID of the customer (if any)', required: false })
+  /**
+   * ID of the customer (if any)
+   */
   @IsUUID()
   @IsOptional()
   customerId?: string;
@@ -148,55 +194,67 @@ export class CreateProductSaleDto {
 }
 
 export class ProductSalesFilterDto {
-  @ApiProperty({ description: 'Start date for filtering sales', required: false })
+  /**
+   * Start date for filtering sales (inclusive)
+   * Format: YYYY-MM-DD
+   */
   @IsDateString()
   @IsOptional()
   startDate?: Date;
 
-  @ApiProperty({ description: 'End date for filtering sales', required: false })
+  /**
+   * End date for filtering sales (inclusive)
+   * Format: YYYY-MM-DD
+   */
   @IsDateString()
   @IsOptional()
   endDate?: Date;
 
-  @ApiProperty({ description: 'ID of the product to filter by', required: false })
+  /**
+   * Filter by specific product ID
+   */
   @IsUUID()
   @IsOptional()
   productId?: string;
 
-  @ApiProperty({ description: 'ID of the staff who made the sale', required: false })
+  /**
+   * Filter by staff member who made the sale
+   */
   @IsUUID()
   @IsOptional()
   soldById?: string;
 
-  @ApiProperty({ description: 'ID of the customer', required: false })
+  /**
+   * Filter by customer ID
+   */
   @IsUUID()
   @IsOptional()
   customerId?: string;
 }
 
 export class ProductSalesSummaryDto {
-  @ApiProperty({ description: 'Total number of sales' })
+  /** Total number of sales in the period */
   totalSales!: number;
 
-  @ApiProperty({ description: 'Total revenue from sales' })
+  /** Total revenue from sales in the period */
   totalRevenue!: number;
 
-  @ApiProperty({ description: 'Total cost of goods sold' })
+  /** Total cost of goods sold in the period */
   totalCost!: number;
 
-  @ApiProperty({ description: 'Total profit (revenue - cost)' })
+  /** Total profit (revenue - cost) in the period */
   totalProfit!: number;
 
-  @ApiProperty({ description: 'Number of products sold' })
+  /** Total number of individual items sold */
   totalItemsSold!: number;
 
-  @ApiProperty({ description: 'Average sale value' })
+  /** Average value of each sale */
   averageSaleValue!: number;
 
-  @ApiProperty({ description: 'Sales by product', type: () => [SalesByProductDto] })
+  /** Breakdown of sales by product */
   salesByProduct!: SalesByProductDto[];
 
-  @ApiProperty({ description: 'Sales by date', type: () => [SalesByDateDto] })
+  /** Daily sales data */
   salesByDate!: SalesByDateDto[];
 }
 

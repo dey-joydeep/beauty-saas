@@ -1,27 +1,28 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSortModule, Sort } from '@angular/material/sort';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSortModule, Sort } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subject, takeUntil } from 'rxjs';
+import { takeUntil } from 'rxjs';
 
-import { DashboardService } from '../../services/dashboard.service';
-import { ProductSale, ProductSales } from '../../models/dashboard.model';
-import { BaseComponent } from '../../../../core/base/base.component';
-import { DateRange } from '../../../../shared/models/date-range.model';
+import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
+import { DateRange } from '@frontend-shared/shared/models/date-range.model';
+import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { DashboardService } from '../../dashboard.service';
+import { ProductSale } from '../../models/dashboard.model';
 
 @Component({
   selector: 'app-product-sales-widget',
@@ -48,11 +49,8 @@ import { DateRange } from '../../../../shared/models/date-range.model';
   templateUrl: './product-sales-widget.component.html',
   styleUrls: ['./product-sales-widget.component.scss'],
 })
-export class ProductSalesWidgetComponent extends BaseComponent implements OnInit {
-  // destroy$ is inherited from BaseComponent
-
-  isLoading = false;
-  error: string | null = null;
+export class ProductSalesWidgetComponent extends AbstractBaseComponent implements OnInit {
+  // Loading and error states are managed by AbstractBaseComponent
 
   // Table data
   displayedColumns: string[] = ['productName', 'quantity', 'unitPrice', 'totalAmount', 'saleDate', 'soldBy'];
@@ -79,13 +77,15 @@ export class ProductSalesWidgetComponent extends BaseComponent implements OnInit
   } | null = null;
 
   constructor(
-    private dashboardService: DashboardService,
-    private translate: TranslateService,
+    @Inject(DashboardService) private dashboardService: DashboardService,
+    @Inject(TranslateService) private translate: TranslateService,
+    @Inject(ErrorService) protected override errorService: ErrorService
   ) {
-    super();
+    super(errorService);
   }
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.loadData();
     this.loadSummary();
 
@@ -102,68 +102,84 @@ export class ProductSalesWidgetComponent extends BaseComponent implements OnInit
   }
 
   loadData(): void {
-    this.isLoading = true;
-    this.error = null;
-
+    this.loading = true;
     const { start, end } = this.dateRange.value;
-
-    this.dashboardService
-      .getProductSales({
-        page: this.pageIndex + 1,
-        pageSize: this.pageSize,
-        sortField: this.sortField,
-        sortDirection: this.sortDirection,
-        startDate: start ? start.toISOString() : undefined,
-        endDate: end ? end.toISOString() : undefined,
+    const tenantId = 'default-tenant'; // TODO: Get tenant ID from auth service or config
+    
+    // Convert date range to query params
+    const params = new URLSearchParams();
+    if (start) params.set('startDate', start.toISOString());
+    if (end) params.set('endDate', end.toISOString());
+    params.set('page', (this.pageIndex + 1).toString());
+    params.set('pageSize', this.pageSize.toString());
+    params.set('sortField', this.sortField);
+    if (this.sortDirection) {
+      params.set('sortDirection', this.sortDirection);
+    }
+    
+    // Call the service with the tenant ID and query params
+    this.dashboardService.getProductSales(tenantId + '?' + params.toString())
+      .then((data: any) => {
+        this.dataSource = Array.isArray(data) ? data : [];
+        this.totalItems = Array.isArray(data) ? data.length : 0;
+        this.loading = false;
       })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.dataSource = response.data;
-          this.totalItems = response.total;
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error('Error loading product sales:', err);
-          this.error = this.translate.instant('DASHBOARD.PRODUCT_SALES.ERROR_LOADING');
-          this.isLoading = false;
-        },
+      .catch((err: any) => {
+        console.error('Error loading product sales:', err);
+        this.handleError(err);
+        const errorMessage = this.translate.instant('DASHBOARD.PRODUCT_SALES.ERROR_LOADING');
+        this.errorService.handleError(new Error(errorMessage));
+        this.loading = false;
       });
   }
 
   loadSummary(): void {
     const { start, end } = this.dateRange.value;
-
-    this.dashboardService
-      .getProductSalesSummary({
-        startDate: start ? start.toISOString() : undefined,
-        endDate: end ? end.toISOString() : undefined,
+    const tenantId = 'default-tenant'; // TODO: Get tenant ID from auth service or config
+    
+    // Convert date range to query params
+    const params = new URLSearchParams();
+    if (start) params.set('startDate', start.toISOString());
+    if (end) params.set('endDate', end.toISOString());
+    params.set('page', '1');
+    params.set('pageSize', '5');
+    params.set('sortField', 'quantity');
+    params.set('sortDirection', 'desc');
+    
+    // Call the service with the tenant ID and query params
+    this.dashboardService.getProductSales(tenantId + '?' + params.toString())
+      .then((items: any) => {
+        const validItems = Array.isArray(items) ? items : [];
+        const totalRevenue = validItems.reduce((sum: number, item: any) => sum + (item.totalAmount || 0), 0);
+        const totalItems = validItems.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
+        
+        this.summary = {
+          totalSales: validItems.length,
+          totalRevenue,
+          totalItems,
+          averageSale: validItems.length > 0 ? totalRevenue / validItems.length : 0,
+          topSellingProducts: validItems.slice(0, 5).map((item: any) => ({
+            name: item.productName || 'Unknown',
+            quantity: item.quantity || 0
+          }))
+        };
       })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (summary) => {
-          this.summary = {
-            totalSales: summary.totalSales,
-            totalRevenue: summary.totalRevenue,
-            totalItems: summary.totalItemsSold,
-            averageSale: summary.averageSaleValue,
-            topSellingProducts: (summary as any).salesByProduct?.slice(0, 5).map((p: any) => ({ name: p.productName, quantity: p.quantity })) || [],
-          };
-        },
-        error: (err) => {
-          console.error('Error loading product sales summary:', err);
-        },
+      .catch((err: any) => {
+        console.error('Error loading product sales summary:', err);
+        this.handleError(err);
       });
   }
 
   onPageChange(event: PageEvent): void {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.loadData();
+    if (event) {
+      this.pageIndex = event.pageIndex;
+      this.pageSize = event.pageSize;
+      this.loadData();
+    }
   }
 
   onSortChange(sort: Sort): void {
-    if (sort.active) {
+    if (sort && sort.active) {
       this.sortField = sort.active;
       // Convert empty string to undefined, otherwise use the direction
       this.sortDirection = sort.direction === '' ? undefined : sort.direction as 'asc' | 'desc';
@@ -172,10 +188,12 @@ export class ProductSalesWidgetComponent extends BaseComponent implements OnInit
   }
 
   onDateRangeSelected(range: DateRange): void {
-    this.dateRange.patchValue({
-      start: range.start,
-      end: range.end,
-    });
+    if (range) {
+      this.dateRange.patchValue({
+        start: range.start,
+        end: range.end,
+      });
+    }
   }
 
   refresh(): void {
@@ -184,7 +202,8 @@ export class ProductSalesWidgetComponent extends BaseComponent implements OnInit
   }
 
   exportToCSV(): void {
-    // TODO: Implement CSV export
+    // TODO: Implement CSV export functionality
     console.log('Exporting to CSV...');
+    // Implementation would go here
   }
 }

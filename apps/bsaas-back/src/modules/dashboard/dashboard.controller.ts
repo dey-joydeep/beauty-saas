@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { authenticateJWT } from '../../middleware/auth';
-import { requireRole } from '../../middleware/requireRole';
+import { authenticateJWT } from '../../common/middleware/auth';
+import { requireRole } from '../../common/middleware/requireRole';
 import { DashboardService } from './dashboard.service';
 import {
   ProductSalesFilterDto,

@@ -1,11 +1,4 @@
-export enum AppointmentStatus {
-  PENDING = 'pending',
-  BOOKED = 'booked',
-  CONFIRMED = 'confirmed',
-  CANCELLED = 'cancelled',
-  COMPLETED = 'completed',
-  NOSHOW = 'noshow',
-}
+import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
 
 export interface Appointment {
   id: string;

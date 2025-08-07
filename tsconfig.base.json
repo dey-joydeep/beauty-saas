@@ -4,21 +4,16 @@
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2020",
-    "module": "esnext",
-    "lib": ["es2020", "dom"],
+    "target": "es2022",
+    "module": "es2022",
+    "lib": ["es2022", "dom", "dom.iterable"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@beauty-saas/shared": ["libs/shared/src/index.ts"],
-      "@beauty-saas/bsaas-front/*": ["apps/bsaas-front/src/app/*"],
-      "@beauty-saas/bsaas-back/*": ["apps/bsaas-back/src/*"]
-    },
     "types": ["node", "jest"],
     "typeRoots": [
       "node_modules/@types"
@@ -33,6 +28,12 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx"
+  ],
   "exclude": [
     "node_modules",
     "dist",
@@ -46,7 +47,8 @@
     "**/test-utils/**/*",
     "**/testHelpers.*",
     "**/test-*",
-    "**/__mocks__/**/*"
+    "**/__mocks__/**/*",
+    "**/jest.config.ts"
   ],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

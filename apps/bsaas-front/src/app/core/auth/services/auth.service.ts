@@ -1,13 +1,13 @@
 
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Inject, Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, of, throwError, firstValueFrom, from } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, forkJoin, Observable, firstValueFrom, from, of, throwError } from 'rxjs';
+import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { NotificationService } from '../../services/notification.service';
-import { StorageService } from '../../services/storage.service';
+import { NotificationService } from '@frontend-shared/core/services/notification.service';
+import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
 
 export interface AuthUser {
   id: string;
@@ -179,29 +179,21 @@ export class AuthService {
     if (!this.isBrowser) return false;
     
     try {
-      const token = await this.getToken();
-      if (!token) return false;
-      
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const payload = JSON.parse(atob(base64));
-        const currentTime = Math.floor(Date.now() / 1000);
-        return payload.exp > currentTime;
-      } catch (error) {
-        console.error('Error validating token:', error);
-        return false;
-      }
+      const token = await firstValueFrom(this.getToken());
+      return this.isTokenValid(token);
     } catch (error) {
-      console.error('Error getting token:', error);
+      console.error('Error checking authentication:', error);
       return false;
     }
   }
 
   private isTokenValid(token: string | null | undefined): boolean {
     if (!token) return false;
+    
     try {
       const base64Url = token.split('.')[1];
+      if (!base64Url) return false;
+      
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const payload = JSON.parse(atob(base64));
       const currentTime = Math.floor(Date.now() / 1000);
@@ -215,13 +207,14 @@ export class AuthService {
   private initializeAuthState(): void {
     if (!this.isBrowser) return;
     
-    this.storage.getItem<AuthUser>(this.USER_KEY).subscribe({
-      next: (user) => {
+    // Use getItem$ for Observable-based access
+    this.storage.getItem$<AuthUser>(this.USER_KEY).subscribe({
+      next: (user: AuthUser | null) => {
         if (user) {
           this.currentUserSubject.next(user);
         }
       },
-      error: (error) => {
+      error: (error: Error) => {
         console.error('Failed to load user from storage', error);
         this.clearAuthData();
       }
@@ -255,20 +248,30 @@ export class AuthService {
   private clearAuthData(): void {
     if (!this.isBrowser) return;
     
-    // Clear from storage
-    this.storage.removeItem(this.TOKEN_KEY).subscribe();
-    this.storage.removeItem(this.REFRESH_TOKEN_KEY).subscribe();
-    this.storage.removeItem(this.TOKEN_EXPIRY_KEY).subscribe();
-    this.storage.removeItem(this.USER_KEY).subscribe();
-    
-    // Clear in-memory data
-    this.currentUserSubject.next(null);
-    
-    // Clear any pending refresh token attempts
-    if (this.refreshTokenInterval) {
-      clearInterval(this.refreshTokenInterval);
-      this.refreshTokenInterval = null;
-    }
+    // Clear from storage using Observable-based methods
+    forkJoin([
+      this.storage.removeItem$(this.TOKEN_KEY),
+      this.storage.removeItem$(this.REFRESH_TOKEN_KEY),
+      this.storage.removeItem$(this.TOKEN_EXPIRY_KEY),
+      this.storage.removeItem$(this.USER_KEY)
+    ]).subscribe({
+      next: () => {
+        // All storage items cleared successfully
+      },
+      error: (error) => {
+        console.error('Error clearing auth data:', error);
+      },
+      complete: () => {
+        // Clear in-memory data after storage is cleared
+        this.currentUserSubject.next(null);
+        
+        // Clear any pending refresh token attempts
+        if (this.refreshTokenInterval) {
+          clearInterval(this.refreshTokenInterval);
+          this.refreshTokenInterval = null;
+        }
+      }
+    });
   }
 
   private setLoggedInUser(user: AuthUser): void {
@@ -277,32 +280,39 @@ export class AuthService {
     // Update in-memory user
     this.currentUserSubject.next(user);
     
-    // Update storage
-    this.storage.setItem(this.USER_KEY, user).subscribe({
-      error: (error) => {
+    // Update storage using Observable-based method
+    this.storage.setItem$(this.USER_KEY, user).subscribe({
+      next: () => {
+        // Successfully saved to storage
+      },
+      error: (error: Error) => {
         console.error('Failed to save user to storage:', error);
       }
     });
   }
 
-  private async getToken(): Promise<string | null> {
-    if (!this.isBrowser) return null;
-    try {
-      return await firstValueFrom(this.storage.getItem<string>(this.TOKEN_KEY));
-    } catch (error) {
-      console.error('Error getting token from storage:', error);
-      return null;
+  private getToken(): Observable<string | null> {
+    if (!this.isBrowser) {
+      return of(null);
     }
+    return this.storage.getItem$<string>(this.TOKEN_KEY).pipe(
+      catchError((error: Error) => {
+        console.error('Error getting token from storage:', error);
+        return of(null);
+      })
+    );
   }
 
-  private async getRefreshToken(): Promise<string | null> {
-    if (!this.isBrowser) return null;
-    try {
-      return await firstValueFrom(this.storage.getItem<string>(this.REFRESH_TOKEN_KEY));
-    } catch (error) {
-      console.error('Error getting refresh token from storage:', error);
-      return null;
+  private getRefreshToken(): Observable<string | null> {
+    if (!this.isBrowser) {
+      return of(null);
     }
+    return this.storage.getItem$<string>(this.REFRESH_TOKEN_KEY).pipe(
+      catchError((error: Error) => {
+        console.error('Error getting refresh token from storage:', error);
+        return of(null);
+      })
+    );
   }
 
   private setupTokenRefresh(): void {
@@ -311,17 +321,27 @@ export class AuthService {
     // Clear any existing interval
     if (this.refreshTokenInterval) {
       clearInterval(this.refreshTokenInterval);
+      this.refreshTokenInterval = null;
     }
     
     // Refresh token 5 minutes before it expires
     const refreshThreshold = 5 * 60 * 1000; // 5 minutes in milliseconds
     
     const checkTokenExpiry = () => {
-      this.storage.getItem<string>(this.TOKEN_EXPIRY_KEY).pipe(
+      if (!this.isBrowser) return;
+      
+      this.storage.getItem$<string>(this.TOKEN_EXPIRY_KEY).pipe(
         switchMap(expiry => {
-          if (!expiry) return of(undefined);
+          if (!expiry) {
+            return of(undefined);
+          }
           
           const expiryTime = parseInt(expiry, 10);
+          if (isNaN(expiryTime)) {
+            console.error('Invalid expiry time in storage');
+            return of(undefined);
+          }
+          
           const currentTime = new Date().getTime();
           const timeUntilExpiry = expiryTime - currentTime;
           
@@ -329,7 +349,7 @@ export class AuthService {
             return this.refreshToken().pipe(
               catchError((error: Error) => {
                 console.error('Failed to refresh token:', error);
-                return this.logout();
+                return from(this.logout());
               })
             );
           }
@@ -342,15 +362,13 @@ export class AuthService {
       ).subscribe();
     };
     
-    // Initial check
+    // Check immediately and then every minute
     checkTokenExpiry();
-    
-    // Check every minute
-    this.refreshTokenInterval = setInterval(checkTokenExpiry, 60000);
+    this.refreshTokenInterval = setInterval(checkTokenExpiry, 60 * 1000);
   }
 
   private refreshToken(): Observable<AuthUser> {
-    return from(this.getRefreshToken()).pipe(
+    return this.getRefreshToken().pipe(
       switchMap(refreshToken => {
         if (!refreshToken) {
           this.clearAuthData();

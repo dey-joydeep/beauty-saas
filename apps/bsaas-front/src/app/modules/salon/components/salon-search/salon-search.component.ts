@@ -7,8 +7,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Salon } from '../../models/salon.model';
 import { SalonServiceItem } from '../../models/salon-service-item.model';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
-import { PLATFORM_UTILS_TOKEN } from '../../../../core/utils/platform-utils';
-import { IPlatformUtils } from '../../../../core/interfaces/platform-utils.interface';
+import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
 
 @Component({
   selector: 'app-salon-search',

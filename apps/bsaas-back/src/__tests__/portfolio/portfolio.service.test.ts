@@ -1,4 +1,4 @@
-import { PortfolioService } from '../../services/portfolio.service';
+import { PortfolioService } from '../../modules/portfolio/portfolio.service';
 import prisma from '../prismaTestClient';
 
 describe('PortfolioService', () => {

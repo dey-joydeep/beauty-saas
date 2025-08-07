@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import { ReviewService } from './review.service';
 import type { NextFunction } from 'express';
 import { AppointmentService } from '../appointment/appointment.service';
-import { authenticateJWT } from '../../middleware/auth';
-import { requireRole } from '../../middleware/requireRole';
-import { validate } from '../../middleware/validate';
+import { authenticateJWT } from '../../common/middleware/auth';
+import { requireRole } from '../../common/middleware/requireRole';
+import { validate } from '../../common/middleware/validate';
 import { createReviewSchema, updateReviewSchema } from './review.validation';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../core/database/prisma/prisma.service';
 
 // Initialize services
 const prismaService = new PrismaService();

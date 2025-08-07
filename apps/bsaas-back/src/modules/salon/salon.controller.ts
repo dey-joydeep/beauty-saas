@@ -1,17 +1,14 @@
 // SalonController: Handles HTTP for salon search/top salons and single salon details
-import { Request, Response, NextFunction } from 'express';
-import { SalonService } from './salon.service';
+import { Request, Response } from 'express';
+import { z } from 'zod';
+import { validate } from '../../common/middleware/validate';
 import { ReviewService } from '../review/review.service';
-import { requireRole } from '../middleware/requireRole';
-import { validate } from '../middleware/validate';
+import { SalonService } from './salon.service';
 import { searchSalonsSchema } from './salon.validation';
 
-const salonService = new SalonService();
-const reviewService = new ReviewService();
-
-// Update parameter type imports to match new modular structure
-type GetSalonByIdParams = { salonId: string };
-type CreateSalonParams = {
+// Define request parameter types
+type GetSalonByIdRequest = Request<{ id: string }>;
+type CreateSalonRequest = Request<{}, {}, {
   name: string;
   address: string;
   zipCode: string;
@@ -19,93 +16,128 @@ type CreateSalonParams = {
   latitude: number;
   longitude: number;
   ownerId: string;
-};
-type UpdateSalonParams = {
-  salonId: string;
+}>;
+type UpdateSalonRequest = Request<{ id: string }, {}, {
   name?: string;
   address?: string;
   zipCode?: string;
   city?: string;
   latitude?: number;
   longitude?: number;
-};
-type DeleteSalonParams = { salonId: string };
+}>;
+type DeleteSalonRequest = Request<{ id: string }>;
 
-export class SalonController {
+// Define query parameter types
+type TopSalonsQuery = {
+  lat?: string;
+  lng?: string;
+};
+
+class SalonController {
+  private static instance: SalonController;
+  private salonService: SalonService;
+  private reviewService: ReviewService;
+  
+  private constructor() {
+    this.salonService = new SalonService();
+    this.reviewService = new ReviewService();
+  }
+  
+  public static getInstance(): SalonController {
+    if (!SalonController.instance) {
+      SalonController.instance = new SalonController();
+    }
+    return SalonController.instance;
+  }
+
   // GET /salons/top?lat=...&lng=... (optionally with lat/lng)
-  static getTopSalons = [
-    validate(searchSalonsSchema),
-    async (req: Request, res: Response) => {
-      try {
-        const lat = req.query.lat ? parseFloat(String(req.query.lat)) : undefined;
-        const lng = req.query.lng ? parseFloat(String(req.query.lng)) : undefined;
-        const salons = salonService.getTopSalons({
-          latitude: lat,
-          longitude: lng,
-          reviewService,
-        });
-        res.json(salons);
-      } catch (err: any) {
-        res.status(400).json({ error: err.message });
-      }
-    },
-  ];
+  public getTopSalons() {
+    return [
+      validate(searchSalonsSchema),
+      async (req: Request<{}, {}, {}, TopSalonsQuery>, res: Response) => {
+        try {
+          const { lat, lng } = req.query;
+          const latitude = lat ? parseFloat(lat) : undefined;
+          const longitude = lng ? parseFloat(lng) : undefined;
+          
+          const salons = await this.salonService.getTopSalons({
+            latitude,
+            longitude,
+            reviewService: this.reviewService,
+          });
+          
+          return res.json(salons);
+        } catch (err: any) {
+          return res.status(500).json({ 
+            message: 'Error fetching top salons', 
+            error: err.message 
+          });
+        }
+      },
+    ];
+  }
 
   // GET /salons/search
-  static searchSalons = [
-    validate(searchSalonsSchema),
-    async (req: Request, res: Response) => {
-      try {
-        const filters = searchSalonsSchema.parse(req.query);
-        const salons = await salonService.searchSalons(filters);
-        res.json(salons);
-      } catch (err: any) {
-        res.status(400).json({ error: err.message });
-      }
-    },
-  ];
+  public searchSalons() {
+    return [
+      validate(searchSalonsSchema),
+      async (req: Request<{}, {}, {}, z.infer<typeof searchSalonsSchema>>, res: Response) => {
+        try {
+          const filters = searchSalonsSchema.parse(req.query);
+          const salons = await this.salonService.searchSalons(filters);
+          return res.json(salons);
+        } catch (err: any) {
+          return res.status(500).json({ 
+            message: 'Error fetching salons',
+            error: err.message
+          });
+        }
+      },
+    ];
+  }
 
-  static getSalonById = async (req: Request, res: Response) => {
+  public async getSalonById(req: GetSalonByIdRequest, res: Response) {
     try {
-      const params: GetSalonByIdParams = { salonId: req.params.id };
-      const salon = await salonService.getSalonById(params);
+      const salon = await this.salonService.getSalonById({ salonId: req.params.id });
       if (!salon) return res.status(404).json({ error: 'Salon not found' });
-      res.json(salon);
+      return res.json(salon);
     } catch (err: any) {
-      res.status(400).json({ error: err.message });
+      return res.status(400).json({ error: err.message });
     }
-  };
+  }
 
-  static createSalon = async (req: Request, res: Response) => {
+  public async createSalon(req: CreateSalonRequest, res: Response) {
     try {
-      // Spread req.body to match CreateSalonParams
-      const params: CreateSalonParams = { ...req.body };
-      const salon = await salonService.createSalon(params);
-      res.status(201).json(salon);
+      const salon = await this.salonService.createSalon(req.body);
+      return res.status(201).json(salon);
     } catch (err: any) {
-      res.status(400).json({ error: err.message });
+      return res.status(400).json({ error: err.message });
     }
-  };
+  }
 
-  static updateSalon = async (req: Request, res: Response) => {
+  public async updateSalon(req: UpdateSalonRequest, res: Response) {
     try {
-      // Spread req.body to match UpdateSalonParams
-      const params: UpdateSalonParams = { salonId: req.params.id, ...req.body };
-      const salon = await salonService.updateSalon(params);
+      const params = { 
+        salonId: req.params.id, 
+        ...req.body 
+      };
+      const salon = await this.salonService.updateSalon(params);
       if (!salon) return res.status(404).json({ error: 'Salon not found' });
-      res.json(salon);
+      return res.json(salon);
     } catch (err: any) {
-      res.status(400).json({ error: err.message });
+      return res.status(400).json({ error: err.message });
     }
-  };
+  }
 
-  static deleteSalon = async (req: Request, res: Response) => {
+  public async deleteSalon(req: DeleteSalonRequest, res: Response) {
     try {
-      const params: DeleteSalonParams = { salonId: req.params.id };
-      const deleted = await salonService.deleteSalon(params);
-      res.json({ deleted });
+      const deleted = await this.salonService.deleteSalon({ salonId: req.params.id });
+      return res.json({ deleted });
     } catch (err: any) {
-      res.status(400).json({ error: err.message });
+      return res.status(400).json({ error: err.message });
     }
-  };
+  }
 }
+
+// Export a singleton instance
+export const salonController = SalonController.getInstance();

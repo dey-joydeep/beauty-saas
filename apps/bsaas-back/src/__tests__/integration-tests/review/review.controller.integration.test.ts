@@ -11,7 +11,7 @@ const testAppointmentId = 'testAppointmentId';
 const testOwnerId = 'testOwnerId';
 const testToken = jwt.sign(
   { id: testUserId, tenantId: testTenantId, roles: ['user'] },
-  process.env.JWT_SECRET || 'testsecret',
+  process.env['JWT_SECRET'] || 'testsecret',
 );
 
 describe('Review Controller Integration', () => {

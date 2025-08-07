@@ -1,26 +1,29 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
-  "compileOnSave": false,
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@env/*": ["environments/*"]
+      "@env/*": ["src/environments/*"],
+      "@app/*": ["src/app/*"],
+      "@shared/*": ["../../libs/shared/src/*"],
+      "@frontend-shared/*": ["../../libs/frontend/src/app/*"]
     },
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
+    "module": "es2022",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "ES2022",
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es2022", "dom", "dom.iterable"],
     "types": ["node", "jest"],
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true

@@ -1,9 +1,9 @@
-import { Injectable, OnDestroy, Injector, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { Inject, Injectable, Injector, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
 import { BehaviorSubject, Subject, timer } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, takeUntil } from 'rxjs/operators';
 import { User } from '../../../models/user.model';
-import { StorageService } from '../../services/storage.service';
 import { AuthService } from './auth.service';
 
 export type { User }; // Re-export User type for isolatedModules
@@ -119,7 +119,10 @@ export class CurrentUserService implements OnDestroy {
 
     const updatedUser = { ...this.currentUser, ...user } as User;
     this.currentUserSubject.next(updatedUser);
-    this.storage.setItem(USER_STORAGE_KEY, updatedUser).subscribe();
+    // Use setItem$ which returns an Observable and handle subscription
+    this.storage.setItem$(USER_STORAGE_KEY, updatedUser).subscribe({
+      error: (error) => console.error('Error saving user to storage:', error)
+    });
   }
 
   /**
@@ -127,7 +130,10 @@ export class CurrentUserService implements OnDestroy {
    */
   clearUser(): void {
     this.currentUserSubject.next(null);
-    this.storage.removeItem(USER_STORAGE_KEY).subscribe();
+    // Use removeItem$ which returns an Observable and handle subscription
+    this.storage.removeItem$(USER_STORAGE_KEY).subscribe({
+      error: (error) => console.error('Error removing user from storage:', error)
+    });
   }
 
   /**
@@ -190,14 +196,13 @@ export class CurrentUserService implements OnDestroy {
    * Load the current user from storage
    */
   private loadUserFromStorage(): void {
-    this.storage
-      .getItem<User>(USER_STORAGE_KEY)
+    this.storage.getItem$<User>(USER_STORAGE_KEY)
       .pipe(
-        filter((user: User | null) => user !== null),
-        takeUntil(this.destroy$),
+        filter((user: User | null): user is User => user !== null),
+        takeUntil(this.destroy$)
       )
       .subscribe({
-        next: (user: User | null) => {
+        next: (user: User) => {
           if (user) {
             this.currentUserSubject.next(user);
           }

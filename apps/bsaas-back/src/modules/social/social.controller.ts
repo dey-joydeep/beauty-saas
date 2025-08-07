@@ -5,9 +5,9 @@ import {
   DeleteSocialParams,
   GetSocialByIdParams,
 } from './social.service';
-import { authenticateJWT } from '../../middleware/auth';
-import { requireRole } from '../../middleware/requireRole';
-import { validate } from '../../middleware/validate';
+import { authenticateJWT } from '../../common/middleware/auth';
+import { requireRole } from '../../common/middleware/requireRole';
+import { validate } from '../../common/middleware/validate';
 import { createSocialSchema, updateSocialSchema } from './social.validation';
 
 const socialService = new SocialService();
