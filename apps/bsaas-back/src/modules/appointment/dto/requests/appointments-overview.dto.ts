@@ -1,7 +1,7 @@
 import { IsOptional, IsEnum, IsNumber, IsDateString, IsUUID, Min, Max } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AppointmentStatus } from '@shared';
+import { AppointmentStatus } from '@shared/enums';
 
 /**
  * DTO for filtering appointments

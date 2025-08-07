@@ -1,11 +1,14 @@
 import type { Config } from '@jest/types';
-import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 // Get the root directory of the workspace
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '../../..');
 
 // Import the shared base config
-const baseConfig = require('../../libs/shared/jest/jest-base.config');
+const baseConfig = (await import('../../libs/shared/jest/jest-base.config.js')).default;
 
 // Path to the Haste implementation
 const hasteImplPath = join(__dirname, '../../libs/shared/jest/jest-haste-impl.ts');

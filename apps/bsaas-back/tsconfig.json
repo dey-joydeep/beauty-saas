@@ -3,37 +3,18 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "es2022",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../../dist/libs/shared/src/*"],
+      "@shared/*": ["../../dist/libs/shared/*"],
       "@backend-shared/*": ["../../libs/backend/src/*"],
       "@backend/*": ["src/*"]
     },
-    "skipLibCheck": true,
     "typeRoots": [
       "../../node_modules/@types",
       "./node_modules/@types",
       "./src/types"
     ],
-    "types": ["node", "express", "jest"],
-    "allowImportingTsExtensions": false,
-    "allowSyntheticDefaultImports": true,
-    "noEmit": false,
-    "emitDeclarationOnly": false,
-    "preserveSymlinks": true,
-    "moduleSuffixes": ["", ".js", ".ts", ".tsx"],
-    "customConditions": ["node", "import"]
-  },
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
+    "types": ["node", "express", "jest"]
   },
   "include": ["src/**/*.ts", "src/**/*.spec.ts"],
   "exclude": ["node_modules", "dist"]

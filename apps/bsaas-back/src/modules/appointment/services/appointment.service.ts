@@ -1,8 +1,8 @@
-import { Injectable, Logger, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { Prisma, User, AppointmentStatus as PrismaAppointmentStatus } from '@prisma/client';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Prisma, AppointmentStatus as PrismaAppointmentStatus } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma/prisma.service';
+import { AppointmentDto, AppointmentsFilterDto, AppointmentsOverviewDto } from '../dto/requests/appointments-overview.dto';
 import { StaffWithUser, UserWithMinimalInfo } from '../types/appointment.types';
-import { AppointmentsFilterDto, AppointmentsOverviewDto, AppointmentDto } from '../dto/requests/appointments-overview.dto';
 
 // Define AppointmentStatus enum to match Prisma's enum
 export enum AppointmentStatus {

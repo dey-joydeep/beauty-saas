@@ -1,47 +1,18 @@
 {
-    "extends": "../../tsconfig.base.json",
-    "compilerOptions": {
-        "outDir": "../../dist/libs/shared",
-        "tsBuildInfoFile": "../../dist/libs/shared/tsconfig.tsbuildinfo",
-        "types": ["node"],
-        "declaration": true,
-        "composite": true,
-        "declarationMap": true,
-        "rootDir": "src",
-        "module": "es2022",
-        "moduleResolution": "bundler",
-        "target": "es2022",
-        "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "baseUrl": ".",
-        "paths": {
-            "@shared/*": ["./src/*"]
-        },
-        "rootDirs": [
-            "./src"
-        ],
-        "allowImportingTsExtensions": false,
-        "allowSyntheticDefaultImports": true,
-        "noEmit": false,
-        "emitDeclarationOnly": false,
-        "noEmitOnError": false,
-        "preserveSymlinks": true,
-        "moduleSuffixes": ["", ".js", ".ts", ".tsx"],
-        "customConditions": ["node", "import"]
-    },
-    "ts-node": {
-        "esm": true,
-        "experimentalSpecifierResolution": "node"
-    },
-    "exclude": [
-        "**/*.spec.ts",
-        "**/*.test.ts",
-        "jest.config.ts",
-        "jest/**/*"
-    ],
-    "include": [
-        "src/**/*.ts"
-    ]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../../dist/libs/shared",
+    "rootDir": "src",
+    "composite": true,
+    "paths": {
+      "@shared/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "jest.config.ts",
+    "jest/**/*"
+  ]
 }

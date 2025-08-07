@@ -61,6 +61,8 @@
     "@nx/webpack": "21.3.11",
     "@nx/workspace": "21.3.11",
     "@prisma/client": "6.13.0",
+    "@swc/core": "^1.13.3",
+    "@swc/jest": "^0.2.39",
     "@types/cors": "2.8.17",
     "@types/express": "^5.0.3",
     "@types/express-serve-static-core": "4.17.43",
@@ -85,7 +87,8 @@
     "lint-staged": "16.1.2",
     "nx": "21.3.11",
     "prettier": "3.6.2",
-    "ts-node": "10.9.2",
+    "ts-jest": "^29.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "5.8.3"
   },
   "dependencies": {

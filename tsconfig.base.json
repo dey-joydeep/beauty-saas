@@ -1,54 +1,39 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "rootDir": ".",
-    "sourceMap": true,
-    "declaration": false,
-    "moduleResolution": "bundler",
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "node",
     "moduleDetection": "force",
+    "useDefineForClassFields": true,
+    "lib": ["es2022", "dom"],
+    "allowJs": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2022",
-    "module": "es2022",
-    "lib": ["es2022", "dom", "dom.iterable"],
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "types": ["node", "jest"],
-    "typeRoots": [
-      "node_modules/@types"
-    ],
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@beauty-saas/*": ["libs/*/src/index.ts"]
+    },
+    "types": ["node", "jest"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx"
-  ],
   "exclude": [
     "node_modules",
-    "dist",
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "**/test.ts",
-    "**/__tests__/**/*",
-    "**/test/**/*",
-    "**/*.test.*",
-    "**/*.spec.*",
-    "**/test-utils/**/*",
-    "**/testHelpers.*",
-    "**/test-*",
-    "**/__mocks__/**/*",
-    "**/jest.config.ts"
+    "dist"
   ],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

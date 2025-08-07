@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist/out-tsc",
+    "outDir": "../../dist/apps/bsaas-front",
     "baseUrl": ".",
     "paths": {
       "@env/*": ["src/environments/*"],
@@ -9,24 +9,7 @@
       "@shared/*": ["../../libs/shared/src/*"],
       "@frontend-shared/*": ["../../libs/frontend/src/app/*"]
     },
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "moduleResolution": "NodeNext",
-    "module": "es2022",
-    "importHelpers": true,
-    "target": "ES2022",
-    "forceConsistentCasingInFileNames": true,
-    "lib": ["es2022", "dom", "dom.iterable"],
-    "types": ["node", "jest"],
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "types": ["node", "jest"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

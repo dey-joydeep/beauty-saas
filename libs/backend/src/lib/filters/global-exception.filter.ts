@@ -1,7 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
-import { AppError } from '../errors/app.error';
-import { InternalServerError } from '../errors/http-errors';
+import { AppError } from '../errors/app.error.js';
+import { InternalServerError } from '../errors/http-errors.js';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -47,7 +47,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     else if (exception instanceof Error) {
       message = exception.message;
       code = 'UNHANDLED_ERROR';
-      stack = process.env.NODE_ENV !== 'production' ? exception.stack : undefined;
+      stack = process.env['NODE_ENV'] !== 'production' ? exception.stack : undefined;
       
       console.error('Unhandled Error:', {
         timestamp: new Date().toISOString(),
@@ -58,7 +58,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     // In production, don't expose internal errors
-    if (process.env.NODE_ENV === 'production' && status >= 500) {
+    if (process.env['NODE_ENV'] === 'production' && status >= 500) {
       message = 'An internal server error occurred';
       details = undefined;
       stack = undefined;

@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/out-tsc/server",
+    "outDir": "../../dist/out-tsc/server",
     "target": "es2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "types": ["node"],
     "typeRoots": [
       "./node_modules/@types",
@@ -18,13 +18,6 @@
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "files": [
-      "src/main.server.ts",
-      "src/server.ts"
-    ],
-    "include": [
-      "src/**/*.d.ts"
-    ],
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
@@ -33,21 +26,22 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": [
+  "files": [
     "src/main.server.ts",
-    "src/server.ts",
-    "src/app/**/*.ts",
-    "src/environments/*.ts",
-    "src/**/*.d.ts"
+    "src/server.ts"
   ],
-  "exclude": [
-    "src/test.ts",
-    "**/*.spec.ts"
+  "include": [
+    "src/**/*.d.ts"
   ],
   "angularCompilerOptions": {
     "entryModule": "./src/app/app.server.module#AppServerModule",
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "exclude": [
+    "src/test.ts",
+    "src/**/*.spec.ts",
+    "**/*.spec.ts"
+  ]
 }

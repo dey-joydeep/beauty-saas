@@ -6,13 +6,17 @@ import { UserRole } from '@prisma/client';
 // Define a type that represents both string and object role formats
 type UserRoleInfo = string | { name: string; [key: string]: any };
 
+// Define the AuthenticatedUser interface
+export interface AuthenticatedUser {
+  id: string;
+  roles: string[] | UserRoleInfo[];
+  [key: string]: any;
+}
+
 export const ROLES_KEY = 'roles';
 
 type Constructor = new (...args: any[]) => any;
 type MethodDecoratorReturn = (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => void;
-
-// Define a type that represents both string and object role formats
-type UserRoleInfo = string | { name: string; [key: string]: any };
 
 export function Roles(...roles: string[]): MethodDecorator & ClassDecorator {
   return function (target: any, key?: string | symbol, descriptor?: TypedPropertyDescriptor<any>) {

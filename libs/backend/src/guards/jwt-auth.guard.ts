@@ -30,7 +30,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  canActivate(
+  override canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
@@ -70,20 +70,23 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       };
 
       return true;
-    } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        throw new UnauthorizedException({
-          code: 'error.token_expired',
-          message: 'Token expired',
-        });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.name === 'TokenExpiredError') {
+          throw new UnauthorizedException({
+            code: 'error.token_expired',
+            message: 'Token expired',
+          });
+        }
+        if (error.name === 'JsonWebTokenError') {
+          throw new UnauthorizedException({
+            code: 'error.invalid_token',
+            message: 'Invalid token',
+          });
+        }
+        console.error('Authentication error:', error);
       }
-      if (error.name === 'JsonWebTokenError') {
-        throw new UnauthorizedException({
-          code: 'error.invalid_token',
-          message: 'Invalid token',
-        });
-      }
-      console.error('Authentication error:', error);
+      
       throw new UnauthorizedException({
         code: 'error.authentication_failed',
         message: 'Authentication failed',

@@ -3,10 +3,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/spec",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "es2022",
+    "outDir": "../../dist/out-tsc",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "ES2022",
     "types": ["jest", "node", "@testing-library/jest-dom", "jest-environment-jsdom"],
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
@@ -28,10 +28,17 @@
   "include": [
     "src/**/*.spec.ts",
     "src/**/*.d.ts",
-    "jest.config.ts"
+    "src/test-setup.ts",
+    "jest.config.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/test-utils.tsx",
+    "src/**/test-utils.ts",
+    "src/**/__mocks__/*.ts",
+    "src/**/__tests__/*.ts"
   ],
   "files": [
-    "src/setup-jest.ts"
+    "src/test-setup.ts"
   ],
   "exclude": [
     "node_modules/jasmine",
