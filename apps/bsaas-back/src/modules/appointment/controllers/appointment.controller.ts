@@ -20,11 +20,9 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/auth/guards/jwt-auth.guard';
 import { Roles, RolesGuard } from '../../core/auth/guards/roles.guard';
-import {
-  AppointmentDto,
-  AppointmentsFilterDto,
-  AppointmentsOverviewDto
-} from '../dto/requests/appointments-overview.dto';
+import { AppointmentsFilterDto } from '../dto/appointment-filter.dto';
+import { AppointmentDto } from '../dto/appointment.dto';
+import { AppointmentsOverviewDto } from '../dto/appointments-overview.dto';
 import { AppUserRole } from '../models/user-params.model';
 import { AppointmentService } from '../services/appointment.service';
 

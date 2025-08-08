@@ -1,245 +1,20 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { Prisma, AppointmentStatus as PrismaAppointmentStatus } from '@prisma/client';
+import { Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma/prisma.service';
-import { AppointmentDto, AppointmentsFilterDto, AppointmentsOverviewDto } from '../dto/requests/appointments-overview.dto';
-import { StaffWithUser, UserWithMinimalInfo } from '../types/appointment.types';
+import { AppointmentsFilterDto } from '../dto/appointment-filter.dto';
+import { AppointmentDto } from '../dto/appointment.dto';
+import { AppointmentsOverviewDto } from '../dto/appointments-overview.dto';
 
-// Define AppointmentStatus enum to match Prisma's enum
-export enum AppointmentStatus {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-  NO_SHOW = 'NO_SHOW',
-  BOOKED = 'BOOKED'
-}
-
-type Decimal = Prisma.Decimal;
-
-// Define local type aliases for Prisma types
-type PrismaDecimal = Decimal;
-type PrismaJsonValue = Record<string, unknown>;
-
-// Define a type for the Prisma where clause
-type PrismaWhereInput = {
-  [key: string]: unknown;
-  AND?: PrismaWhereInput[];
-  OR?: PrismaWhereInput[];
-  NOT?: PrismaWhereInput | PrismaWhereInput[];
-};
-
-// Define a type for Prisma client with our models
-type PrismaClient = {
-  $connect: () => Promise<void>;
-  $disconnect: () => Promise<void>;
-  $on: (event: string, callback: (e: any) => void) => void;
-  $use: (params: any) => any;
-  $transaction: <T>(fn: (prisma: any) => Promise<T>) => Promise<T>;
-  $queryRaw: <T = any>(query: TemplateStringsArray | string, ...values: any[]) => Promise<T>;
-  $executeRaw: (query: string, ...values: any[]) => Promise<number>;
-  $queryRawUnsafe: <T = any>(query: string, ...values: any[]) => Promise<T>;
-  $executeRawUnsafe: (query: string, ...values: any[]) => Promise<number>;
-  
-  // Define the appointment model methods
-  appointment: {
-    findMany: (args: any) => Promise<any[]>;
-    findUnique: (args: any) => Promise<any | null>;
-    create: (args: any) => Promise<any>;
-    update: (args: any) => Promise<any>;
-    delete: (args: any) => Promise<any>;
-    count: (args: any) => Promise<number>;
-    groupBy: (args: any) => Promise<Array<{ status: string; _count: number }>>;
-    aggregate: (args: any) => Promise<{ _sum?: { totalPrice?: number | null } | null }>;
-  };
-  // Add other models as needed
-};
-
-// Helper function to convert Decimal to number
-const toNumber = (value: Decimal | number | string | null | undefined): number => {
-  if (value === null || value === undefined) return 0;
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string') return parseFloat(value) || 0;
-  return value.toNumber();
-};
-
-// Helper function to map appointment status to internal status
-const mapStatus = (status: string): AppointmentStatus => {
-  const statusMap: Record<string, AppointmentStatus> = {
-    'PENDING': AppointmentStatus.PENDING,
-    'CONFIRMED': AppointmentStatus.CONFIRMED,
-    'IN_PROGRESS': AppointmentStatus.IN_PROGRESS,
-    'COMPLETED': AppointmentStatus.COMPLETED,
-    'CANCELLED': AppointmentStatus.CANCELLED,
-    'NO_SHOW': AppointmentStatus.NO_SHOW,
-    'BOOKED': AppointmentStatus.BOOKED
-  };
-  
-  const normalizedStatus = status.toUpperCase();
-  if (normalizedStatus in statusMap) {
-    return statusMap[normalizedStatus as keyof typeof statusMap];
+// Local error class to replace NestJS dependency
+class InternalServerErrorException extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InternalServerErrorException';
   }
-  return AppointmentStatus.BOOKED;
-};
-
-// Import Prisma types for ProductSale and Review
-
-// Base types that match our Prisma schema
-type BaseAppointmentService = {
-  id: string;
-  appointmentId: string;
-  tenantServiceId: string;
-  staffId: string | null;
-  price: Prisma.Decimal | number;
-  duration: number;
-  notes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  tenantService: {
-    id: string;
-    name: string;
-    description: string | null;
-    price: Prisma.Decimal | number;
-    duration: number;
-    tenantId: string;
-    salonId: string | null;
-    serviceCategoryId: string | null;
-    isActive: boolean;
-    metadata: Prisma.JsonValue;
-    taxRate: number | null;
-    isTaxable: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-  } | null;
-  staff: StaffWithUser | null;
-};
-
-type BaseReview = {
-  id: string;
-  appointmentId: string;
-  customerId: string;
-  staffId: string | null;
-  rating: number;
-  comment: string | null;
-  isAnonymous: boolean;
-  isApproved: boolean;
-  response: string | null;
-  responseDate: Date | null;
-  tenantId: string;
-  salonId: string | null;
-  adminComment: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  customer: UserWithMinimalInfo | null;
-  staff: StaffWithUser | null;
-};
-
-type BaseProductSale = {
-  id: string;
-  appointmentId: string;
-  tenantProductId: string | null;
-  quantity: number;
-  pricePerUnit: Prisma.Decimal | number;
-  discount: Prisma.Decimal | number;
-  taxRate: Prisma.Decimal | number;
-  taxAmount: Prisma.Decimal | number;
-  totalPrice: Prisma.Decimal | number;
-  notes: string | null;
-  isRefunded: boolean;
-  refundedAt: Date | null;
-  refundReason: string | null;
-  tenantId: string;
-  customerId: string | null;
-  metadata: Prisma.JsonValue | null;
-  createdAt: Date;
-  updatedAt: Date;
-  product: {
-    id: string;
-    name: string;
-    description: string | null;
-    price: Prisma.Decimal | number;
-    isActive: boolean;
-    tenantId: string;
-    salonId: string | null;
-    serviceCategoryId: string | null;
-    taxRate: number | null;
-    isTaxable: boolean;
-    sku: string | null;
-    barcode: string | null;
-    quantityInStock: number;
-    reorderPoint: number;
-    metadata: Prisma.JsonValue;
-    createdAt: Date;
-    updatedAt: Date;
-  } | null;
-};
-
-type PrismaTransaction = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>;
-
-enum NotificationType {
-  APPOINTMENT_CREATED = 'APPOINTMENT_CREATED',
-  APPOINTMENT_UPDATED = 'APPOINTMENT_UPDATED',
-  APPOINTMENT_CANCELLED = 'APPOINTMENT_CANCELLED',
-  APPOINTMENT_REMINDER = 'APPOINTMENT_REMINDER',
-  APPOINTMENT_CONFIRMATION = 'APPOINTMENT_CONFIRMATION',
-  APPOINTMENT_COMPLETED = 'APPOINTMENT_COMPLETED',
-  APPOINTMENT_REVIEW_REQUEST = 'APPOINTMENT_REVIEW_REQUEST',
-  APPOINTMENT_RESCHEDULED = 'APPOINTMENT_RESCHEDULED',
-  APPOINTMENT_NEW = 'APPOINTMENT_NEW',
-  APPOINTMENT_ASSIGNED = 'APPOINTMENT_ASSIGNED',
-  APPOINTMENT_STATUS_CHANGED = 'APPOINTMENT_STATUS_CHANGED',
-  APPOINTMENT_REMINDER_24H = 'APPOINTMENT_REMINDER_24H',
-  APPOINTMENT_REMINDER_1H = 'APPOINTMENT_REMINDER_1H',
-  APPOINTMENT_FOLLOW_UP = 'APPOINTMENT_FOLLOW_UP',
-  APPOINTMENT_CUSTOM = 'APPOINTMENT_CUSTOM',
-  APPOINTMENT_OTHER = 'APPOINTMENT_OTHER',
 }
 
-type ProductSaleWithProduct = any;
-
-type PrismaServiceType = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use">;
-
-// Status mapping from string to internal status
-const statusMap: Record<string, string> = {
-  'PENDING': 'booked',
-  'CONFIRMED': 'booked',
-  'IN_PROGRESS': 'inProgress',
-  'COMPLETED': 'completed',
-  'CANCELLED': 'cancelled',
-  'NO_SHOW': 'noShow',
-  'BOOKED': 'booked',
-  'booked': 'booked',
-  'inProgress': 'inProgress',
-  'completed': 'completed',
-  'cancelled': 'cancelled',
-  'noShow': 'noShow'
-} as const;
-
-type StatusKey = keyof typeof statusMap;
-type StatusValue = typeof statusMap[StatusKey];
-
-type AppointmentStatusCounts = {
-  [key in keyof typeof AppointmentStatus]: number;
-} & {
-  [key: string]: number; // Allow dynamic access
-};
-
-// Interface for appointment statistics
-export interface AppointmentStats {
-  total: number;
-  completed: number;
-  cancelled: number;
-  upcoming: number;
-  inProgress: number;
-  noShow: number;
-  booked: number;
-  pending: number;
-  confirmed: number;
-  statusCounts: AppointmentStatusCounts;
-  dailyCounts: Record<string, number>;
-  revenue: number;
-  averageRating: number;
-}
+// Import shared appointment status utilities
+import { AppointmentStatus, isAppointmentStatus } from '@shared/enums/appointment-status.enum';
 
 @Injectable()
 export class AppointmentService {
@@ -279,9 +54,9 @@ export class AppointmentService {
     userId: string
   ): Promise<AppointmentsOverviewDto> {
     try {
-      // Set default values for pagination
+      // Use pagination values from filters (with defaults)
       const limit = filters.limit || 10;
-      const offset = (filters.page ? filters.page - 1 : 0) * limit;
+      const offset = filters.offset || 0;
       
       // Build the base where clause for the query
       const baseWhere: Prisma.AppointmentWhereInput = {
@@ -299,9 +74,11 @@ export class AppointmentService {
         if (filters.endDate) baseWhere.startTime.lte = new Date(filters.endDate);
       }
       
-      // Add status filter if provided
-      if (filters.status) {
-        baseWhere.status = filters.status as PrismaAppointmentStatus;
+      // Add status filter if provided and not 'all'
+      if (filters.status && filters.status.toString().toLowerCase() !== 'all') {
+        if (isAppointmentStatus(filters.status.toString())) {
+          baseWhere.status = filters.status.toString() as any; // Safe cast since we've validated it's a valid status
+        }
       }
       
       // Add customer, staff, or salon filters if provided
@@ -407,13 +184,11 @@ export class AppointmentService {
         recentAppointments: recentAppointments
           .slice(0, 5)
           .map((appt: any) => this.mapToAppointmentDto(appt)),
-        // Map status distribution
-        statusDistribution: statusCounts.reduce<Record<AppointmentStatus, number>>(
-          (acc, curr) => {
-            // Only include valid status values
-            if (Object.values(AppointmentStatus).includes(curr.status as AppointmentStatus)) {
-              acc[curr.status as AppointmentStatus] = curr._count;
-            }
+        // Map status distribution with proper type safety
+        statusDistribution: Object.values(AppointmentStatus).reduce<Record<AppointmentStatus, number>>(
+          (acc, status) => {
+            const statusCount = statusCounts.find(item => item.status === status);
+            acc[status] = statusCount?._count || 0;
             return acc;
           }, 
           {} as Record<AppointmentStatus, number>
@@ -462,8 +237,12 @@ export class AppointmentService {
           where.startTime.lte = new Date(filters.endDate);
         }
         
-        if (filters.status && filters.status !== 'all' && Object.values(AppointmentStatus).includes(filters.status as any)) {
-          where.status = filters.status;
+        if (filters.status) {
+          const statusStr = filters.status.toString();
+          // Only apply status filter if it's a valid status and not 'all'
+          if (statusStr.toLowerCase() !== 'all' && isAppointmentStatus(statusStr)) {
+            where.status = statusStr as any; // Safe cast since we've validated it's a valid status
+          }
         }
       }
 
@@ -572,8 +351,10 @@ export class AppointmentService {
     const customerName = appointment.customer?.name || 'Unknown';
     const staffName = appointment.staff?.user?.name || 'Unassigned';
     
-    // Map status to AppointmentStatus enum
-    const status = mapStatus(appointment.status);
+    // Map to a valid AppointmentStatus with fallback to PENDING
+    const status = isAppointmentStatus(appointment.status) 
+      ? appointment.status 
+      : AppointmentStatus.PENDING;
     
     // Ensure all required fields have proper defaults
     const dto: AppointmentDto = {
@@ -582,7 +363,7 @@ export class AppointmentService {
       description: appointment.notes || '',
       startTime: appointment.startTime?.toISOString() || new Date().toISOString(),
       endTime: appointment.endTime?.toISOString() || new Date().toISOString(),
-      status: status,
+      status,
       customerId: appointment.customerId || '',
       customerName: customerName,
       customerEmail: appointment.customer?.email || '',
@@ -701,34 +482,4 @@ export class AppointmentService {
       throw new InternalServerErrorException(`Failed to check ${entityType} review eligibility`);
     }
   }
-
-  /**
-   * Helper function to map appointment status to internal status
-   */
-  private mapStatus(status: string): StatusValue {
-    if (!status) return 'booked';
-    
-    const normalizedStatus = status.toUpperCase() as StatusKey;
-    
-    // Map similar statuses to standard ones
-    switch (normalizedStatus) {
-      case 'PENDING':
-      case 'CONFIRMED':
-        return 'booked';
-      case 'IN_PROGRESS':
-      case 'INPROGRESS':
-        return 'inProgress';
-      case 'COMPLETED':
-      case 'DONE':
-        return 'completed';
-      case 'CANCELLED':
-      case 'CANCELED':
-        return 'cancelled';
-      case 'NO_SHOW':
-      case 'NOSHOW':
-        return 'noShow';
-      default:
-        return 'booked';
-    }
-  };
 }

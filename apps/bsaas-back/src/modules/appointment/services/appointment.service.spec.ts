@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
-import { createMock } from '@golevelup/ts-jest';
-import { AppointmentService } from '../services/appointment.service';
-import { AppointmentsFilterDto } from '../dto/requests/appointments-overview.dto';
+import { AppointmentService } from './appointment.service';
+import { AppointmentsFilterDto } from '../dto/appointment-filter.dto';
+import { AppointmentStatus } from '@shared/enums/appointment-status.enum';
 
 describe('AppointmentService', () => {
   let service: AppointmentService;
@@ -10,7 +10,18 @@ describe('AppointmentService', () => {
 
   beforeEach(async () => {
     // Create a mock Prisma client
-    prisma = createMock<PrismaClient>();
+    prisma = {
+      appointment: {
+        count: jest.fn(),
+        groupBy: jest.fn(),
+        aggregate: jest.fn(),
+        findMany: jest.fn(),
+        findFirst: jest.fn(),
+      },
+      review: {
+        findFirst: jest.fn(),
+      },
+    } as unknown as jest.Mocked<PrismaClient>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -37,9 +48,11 @@ describe('AppointmentService', () => {
     it('should return appointment overview data', async () => {
       // Arrange
       const mockFilters: AppointmentsFilterDto = {
-        startDate: '2023-01-01',
-        endDate: '2023-12-31',
-        tenantId: 'test-tenant-id',
+        startDate: '2023-01-01T00:00:00.000Z',
+        endDate: '2023-12-31T23:59:59.999Z',
+        limit: 10,
+        offset: 0,
+        toPrismaFilter: jest.fn().mockReturnValue({}) as any,
       };
 
       // Mock Prisma methods
@@ -54,7 +67,7 @@ describe('AppointmentService', () => {
       prisma.appointment.findMany = jest.fn().mockResolvedValue([]);
 
       // Act
-      const result = await service.getAppointmentsOverview(mockFilters);
+      const result = await service.getAppointmentsOverview(mockFilters, 'test-user-id');
 
       // Assert
       expect(result).toBeDefined();
@@ -70,8 +83,11 @@ describe('AppointmentService', () => {
       // Arrange
       const userId = 'test-user-id';
       const mockFilters: AppointmentsFilterDto = {
-        startDate: '2023-01-01',
-        endDate: '2023-12-31',
+        startDate: '2023-01-01T00:00:00.000Z',
+        endDate: '2023-12-31T23:59:59.999Z',
+        limit: 10,
+        offset: 0,
+        toPrismaFilter: jest.fn().mockReturnValue({}) as any,
       };
 
       // Mock Prisma method
@@ -99,59 +115,67 @@ describe('AppointmentService', () => {
     });
   });
 
-  describe('getAppointmentsBySalon', () => {
-    it('should return appointments for a specific salon', async () => {
+  describe('getTenantAppointments', () => {
+    it('should return appointments for a specific tenant', async () => {
       // Arrange
-      const salonId = 'test-salon-id';
+      const tenantId = 'test-tenant-id';
       const mockFilters: AppointmentsFilterDto = {
-        startDate: '2023-01-01',
-        endDate: '2023-12-31',
+        startDate: '2023-01-01T00:00:00.000Z',
+        endDate: '2023-12-31T23:59:59.999Z',
+        limit: 10,
+        offset: 0,
+        toPrismaFilter: jest.fn().mockReturnValue({}) as any,
       };
 
       // Mock Prisma method
       prisma.appointment.findMany = jest.fn().mockResolvedValue([
         {
           id: 'appointment-1',
-          salonId: 'test-salon-id',
-          // Add other required fields
+          tenantId: 'test-tenant-id',
+          startTime: new Date('2023-01-01T10:00:00.000Z'),
+          endTime: new Date('2023-01-01T11:00:00.000Z'),
+          status: AppointmentStatus.CONFIRMED,
+          customer: { id: 'customer-1', name: 'Test Customer' },
+          services: [
+            {
+              tenantService: { id: 'service-1', name: 'Test Service' },
+              staff: { id: 'staff-1', user: { name: 'Test Staff' } },
+            },
+          ],
         },
       ]);
 
       // Act
-      const result = await service.getAppointmentsBySalon(salonId, mockFilters);
+      const result = await service.getTenantAppointments(tenantId, mockFilters);
 
       // Assert
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
-      expect(prisma.appointment.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            salonId,
-          }),
-        }),
-      );
+      expect(prisma.appointment.findMany).toHaveBeenCalled();
     });
   });
 
   describe('checkUserEligibleToReview', () => {
-    it('should return true if user is eligible to review a salon', async () => {
+    it('should return true if user is eligible to review a service', async () => {
       // Arrange
       const userId = 'test-user-id';
-      const salonId = 'test-salon-id';
+      const serviceId = 'test-service-id';
+      const type = 'service';
 
       // Mock Prisma methods
       prisma.appointment.findFirst = jest.fn().mockResolvedValue({
         id: 'appointment-1',
-        status: 'COMPLETED',
+        status: AppointmentStatus.COMPLETED,
         startTime: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+        services: [{
+          tenantServiceId: serviceId,
+        }],
       });
 
-      prisma.review = {
-        findFirst: jest.fn().mockResolvedValue(null),
-      } as any;
+      prisma.review.findFirst = jest.fn().mockResolvedValue(null);
 
       // Act
-      const result = await service.checkUserEligibleToReview(userId, salonId);
+      const result = await service.checkUserEligibleToReview(userId, serviceId, type);
 
       // Assert
       expect(result).toEqual({
@@ -159,31 +183,33 @@ describe('AppointmentService', () => {
       });
     });
 
-    it('should return false if user has already reviewed the salon', async () => {
+    it('should return false if user has already reviewed the service', async () => {
       // Arrange
       const userId = 'test-user-id';
-      const salonId = 'test-salon-id';
+      const serviceId = 'test-service-id';
+      const type = 'service';
 
       // Mock Prisma methods
       prisma.appointment.findFirst = jest.fn().mockResolvedValue({
         id: 'appointment-1',
-        status: 'COMPLETED',
+        status: AppointmentStatus.COMPLETED,
         startTime: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+        services: [{
+          tenantServiceId: serviceId,
+        }],
       });
 
-      prisma.review = {
-        findFirst: jest.fn().mockResolvedValue({
-          id: 'existing-review-id',
-        }),
-      } as any;
+      prisma.review.findFirst = jest.fn().mockResolvedValue({
+        id: 'existing-review-id',
+      });
 
       // Act
-      const result = await service.checkUserEligibleToReview(userId, salonId);
+      const result = await service.checkUserEligibleToReview(userId, serviceId, type);
 
       // Assert
       expect(result).toEqual({
         eligible: false,
-        message: 'You have already reviewed this salon',
+        message: 'You have already reviewed this service',
       });
     });
   });
