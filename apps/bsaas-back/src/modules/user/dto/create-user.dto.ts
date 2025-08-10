@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MinLength, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, MinLength, IsNotEmpty, IsOptional, IsBoolean, IsArray } from 'class-validator';
 import { BaseUserDto } from './base-user.dto';
 import { AppUserRole } from '@shared/types/user.types';
 
@@ -16,34 +16,58 @@ export class CreateUserDto extends BaseUserDto {
   @ApiProperty({
     description: 'User password',
     required: true,
-    minLength: 8,
+    minLength: 6,
     example: 'securePassword123!',
     type: String
   })
   @IsString()
-  @MinLength(8)
+  @MinLength(6, { message: 'Password must be at least 6 characters' })
   @IsNotEmpty()
   password!: string;
 
-  // Override role to make it optional with default value
-  @ApiProperty({
-    example: AppUserRole.CUSTOMER,
-    description: `User role that determines access level and permissions.`,
-    enum: Object.values(AppUserRole),
-    default: AppUserRole.CUSTOMER,
-    required: false
-  })
-  @IsOptional()
-  declare role: AppUserRole;
+  // tenantId is already defined in BaseUserDto
 
-  // Override tenantId to match base type
-  @ApiProperty({ 
-    example: 'tenant123', 
-    description: 'Tenant ID', 
-    required: false,
-    nullable: true 
+  @ApiPropertyOptional({ 
+    description: 'User roles', 
+    type: [String],
+    example: [AppUserRole.CUSTOMER]
   })
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  declare tenantId?: string | null;
+  roles?: string[] = [AppUserRole.CUSTOMER];
+
+  @ApiPropertyOptional({ 
+    description: 'Whether the user is verified',
+    default: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  isVerified?: boolean = false;
+
+  @ApiPropertyOptional({ 
+    description: 'Whether the user is a SaaS owner',
+    default: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  saasOwner?: boolean = false;
+
+  @ApiPropertyOptional({ 
+    description: 'Whether the user is salon staff',
+    default: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  salonStaff?: boolean = false;
+
+  @ApiPropertyOptional({ 
+    description: 'Whether the user is a customer',
+    default: true
+  })
+  @IsBoolean()
+  @IsOptional()
+  customer?: boolean = true;
+
+  // tenantId, phone, and role are already defined in BaseUserDto | null;
 }

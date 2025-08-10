@@ -1,18 +1,18 @@
-// moved from services/salon.service.ts
-import { PrismaClient } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../../core/database/prisma.service';
 
-const prisma = new PrismaClient();
-
+@Injectable()
 export class SalonService {
+  constructor(private prisma: PrismaService) {}
   async searchSalons(filters: any) {
-    return prisma.salon.findMany({ where: filters });
+    return this.prisma.salon.findMany({ where: filters });
   }
 
   // Replace dummy logic with actual business logic: fetch salons, join reviews, sort by average rating, filter by distance if lat/lng provided
   async getTopSalons(params: { latitude?: number; longitude?: number; reviewService: any }) {
     const { latitude, longitude, reviewService } = params;
     // Fetch all salons
-    let salons = await prisma.salon.findMany();
+    let salons = await this.prisma.salon.findMany();
 
     // If lat/lng provided, filter/sort by distance (Haversine formula)
     if (latitude !== undefined && longitude !== undefined) {
@@ -84,8 +84,10 @@ export class SalonService {
   }
 
   async getSalonById(params: { salonId: string }): Promise<any | null> {
-    const salon = await prisma.salon.findUnique({ where: { id: params.salonId } });
-    if (!salon) return null;
+    const salon = await this.prisma.salon.findUnique({ where: { id: params.salonId } });
+    if (!salon) {
+      throw new NotFoundException(`Salon with ID ${params.salonId} not found`);
+    }
     return {
       id: salon.id,
       name: salon.name,
@@ -101,7 +103,7 @@ export class SalonService {
   }
 
   async createSalon(params: any): Promise<any> {
-    const created = await prisma.salon.create({ data: params });
+    const created = await this.prisma.salon.create({ data: params });
     return {
       id: created.id,
       name: created.name,
@@ -117,8 +119,18 @@ export class SalonService {
   }
 
   async updateSalon(params: any): Promise<any | null> {
-    const updated = await prisma.salon.update({ where: { id: params.salonId }, data: params });
-    if (!updated) return null;
+    try {
+      const updated = await this.prisma.salon.update({ 
+        where: { id: params.salonId }, 
+        data: params 
+      });
+      return updated;
+    } catch (error) {
+      if (error.code === 'P2025') { // Prisma not found error code
+        throw new NotFoundException(`Salon with ID ${params.salonId} not found`);
+      }
+      throw error;
+    }
     return {
       id: updated.id,
       name: updated.name,
@@ -134,8 +146,15 @@ export class SalonService {
   }
 
   async deleteSalon(params: { salonId: string }): Promise<boolean> {
-    await prisma.salon.delete({ where: { id: params.salonId } });
-    return true;
+    try {
+      await this.prisma.salon.delete({ where: { id: params.salonId } });
+      return true;
+    } catch (error) {
+      if (error.code === 'P2025') { // Prisma not found error code
+        throw new NotFoundException(`Salon with ID ${params.salonId} not found`);
+      }
+      throw error;
+    }
   }
 
   async getStaff(params: { salonId: string }): Promise<any[]> {

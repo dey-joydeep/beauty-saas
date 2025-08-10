@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, IsBoolean, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsBoolean, IsOptional, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 /**
  * User login data transfer object
@@ -25,20 +26,32 @@ export class LoginUserDto {
   @ApiProperty({
     example: 'yourSecurePassword123!',
     description: 'User\'s password',
-    minLength: 8,
+    minLength: 6,
     type: String,
     format: 'password'
   })
   @IsString({ message: 'Password must be a string' })
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
   @IsNotEmpty({ message: 'Password is required' })
   password!: string;
 
   @ApiPropertyOptional({
-    example: false,
-    description: 'Whether to remember the user for an extended period',
-    default: false
+    example: true,
+    description: 'Whether to create a persistent session that lasts longer',
+    default: false,
+    required: false
   })
-  @IsBoolean()
+  @IsBoolean({ message: 'Remember me must be a boolean value' })
+  @Transform(({ value }) => value === 'true' || value === true || value === 1 || value === '1')
   @IsOptional()
-  rememberMe: boolean = false;
+  rememberMe?: boolean = false;
+
+  @ApiPropertyOptional({
+    description: 'Optional tenant ID for multi-tenant authentication',
+    required: false,
+    example: 'tenant-123'
+  })
+  @IsString()
+  @IsOptional()
+  tenantId?: string;
 }

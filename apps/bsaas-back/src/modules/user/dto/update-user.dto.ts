@@ -1,7 +1,7 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PartialType } from '@nestjs/mapped-types';
-import { IsOptional, IsString, IsBoolean } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { AppUserRole } from '@shared/types/user.types';
+import { IsArray, IsBoolean, IsOptional, IsString, MinLength } from 'class-validator';
 import { BaseUserDto } from './base-user.dto';
 
 /**
@@ -16,23 +16,64 @@ import { BaseUserDto } from './base-user.dto';
 export class UpdateUserDto extends PartialType(BaseUserDto) {
   @ApiPropertyOptional({
     example: 'newpassword123',
-    description: 'New password (min 8 characters)',
-    minLength: 8,
+    description: 'New password (min 6 characters)',
+    minLength: 6,
     type: String,
     required: false
   })
   @IsString()
+  @MinLength(6, { message: 'Password must be at least 6 characters' })
   @IsOptional()
   password?: string;
 
   @ApiPropertyOptional({
-    example: AppUserRole.CUSTOMER,
-    description: `User's role in the system`,
-    enum: Object.values(AppUserRole),
+    description: 'User roles',
+    type: [String],
+    example: [AppUserRole.CUSTOMER],
     required: false
   })
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  declare role?: AppUserRole;
+  roles?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Whether the user is verified',
+    default: false,
+    required: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  isVerified?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Whether the user is a SaaS owner',
+    default: false,
+    required: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  saasOwner?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Whether the user is salon staff',
+    default: false,
+    required: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  salonStaff?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Whether the user is a customer',
+    default: true,
+    required: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  customer?: boolean;
+
+  // Role is handled through the roles array
 
   @ApiPropertyOptional({
     example: true,
