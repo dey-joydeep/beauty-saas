@@ -1,5 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsEmail, IsOptional, MinLength, IsEnum, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, MinLength, IsNotEmpty, IsOptional } from 'class-validator';
+import { BaseUserDto } from './base-user.dto';
 import { AppUserRole } from '@shared/types/user.types';
 
 /**
@@ -7,86 +8,35 @@ import { AppUserRole } from '@shared/types/user.types';
  * 
  * @remarks
  * This DTO is used for creating new users in the system.
- * The role determines the level of access and permissions the user will have.
+ * Extends BaseUserDto and adds password field.
  * 
  * @public
  */
-
-export class CreateUserDto {
+export class CreateUserDto extends BaseUserDto {
   @ApiProperty({
-    example: 'user@example.com',
-    description: 'User email',
-    required: true,
-    pattern: '^[^\s@]+@[^\s@]+\.[^\s@]+$',
-    maxLength: 255,
-    type: String
-  })
-  @IsEmail()
-  @IsNotEmpty()
-  email!: string;
-
-  @ApiPropertyOptional({
-    example: 'John Doe',
-    description: 'User full name',
-    maxLength: 255,
-    type: String,
-    required: false
-  })
-  @IsString()
-  @IsOptional()
-  name?: string;
-
-  @ApiProperty({
-    example: 'password123',
     description: 'User password',
-    minLength: 8,
-    maxLength: 100,
     required: true,
-    type: String,
-    format: 'password',
-    pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$',
-    examples: [
-      'StrongP@ssw0rd!',
-      'Secure123$Pass'
-    ]
+    minLength: 8,
+    example: 'securePassword123!',
+    type: String
   })
   @IsString()
   @MinLength(8)
   @IsNotEmpty()
   password!: string;
 
-  @ApiProperty({ 
-    example: '+1234567890', 
-    description: 'User phone number', 
-    required: false,
-    nullable: true 
-  })
-  @IsString()
-  @IsOptional()
-  phone?: string | null;
-
-  @ApiPropertyOptional({
-    example: 'CUSTOMER',
-    description: `User role that determines access level and permissions. \n\
-**Available Roles:**
-- **${AppUserRole.ADMIN}**: Full system access, can manage all resources and users
-- **${AppUserRole.OWNER}**: Can manage their business(es) and staff
-- **${AppUserRole.STAFF}**: Staff member with limited permissions
-- **${AppUserRole.CUSTOMER}**: Standard customer with basic access
-
-**Note:** Only users with appropriate permissions can assign certain roles.`,
-    enum: AppUserRole,
+  // Override role to make it optional with default value
+  @ApiProperty({
+    example: AppUserRole.CUSTOMER,
+    description: `User role that determines access level and permissions.`,
+    enum: Object.values(AppUserRole),
     default: AppUserRole.CUSTOMER,
-    enumName: 'AppUserRole',
-    required: false,
-    type: String
-  })
-  @IsEnum(AppUserRole, { 
-    message: 'Invalid user role. Must be one of: ' + Object.values(AppUserRole).join(', ')
+    required: false
   })
   @IsOptional()
-  role?: AppUserRole = AppUserRole.CUSTOMER;
+  declare role: AppUserRole;
 
+  // Override tenantId to match base type
   @ApiProperty({ 
     example: 'tenant123', 
     description: 'Tenant ID', 
@@ -95,5 +45,5 @@ export class CreateUserDto {
   })
   @IsString()
   @IsOptional()
-  tenantId?: string | null;
+  declare tenantId?: string | null;
 }

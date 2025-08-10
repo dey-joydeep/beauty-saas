@@ -1,5 +1,5 @@
 import { Injectable, Inject, forwardRef, NotFoundException, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { PrismaClient, User as PrismaUser, Prisma, Role as PrismaRole, UserRole as PrismaUserRole } from '@prisma/client';
+import { PrismaClient, User as PrismaUser, Prisma, Role as PrismaRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -19,13 +19,8 @@ interface UserWithRoles extends Omit<PrismaUser, 'roles'> {
   customer?: any;
 }
 
-type User = Omit<UserWithRoles, 'roles'> & {
-  roles: Array<{
-    role: PrismaRole;
-    userId: string;
-    roleId: number;
-  }>;
-};
+// User type is now an alias for UserWithRoles to ensure consistency
+type User = UserWithRoles;
 
 @Injectable()
 export class UserService {
@@ -125,15 +120,36 @@ export class UserService {
     });
     
     return users.map((user) => {
-      const userWithRoles = user as unknown as UserWithRoles;
-      return {
+      // Map the roles to the expected format
+      const mappedRoles = user.roles?.map(ur => ({
+        role: {
+          id: ur.roleId,
+          name: ur.role?.name || '',
+        },
+        userId: user.id,
+        roleId: ur.roleId,
+      })) || [];
+      
+      // Create a properly typed user object with all required fields
+      const userWithRoles: UserWithRoles = {
         ...user,
-        roles: userWithRoles.roles?.map(ur => ({
-          role: ur.role,
-          userId: ur.userId,
-          roleId: ur.roleId,
-        })) || [],
+        // Ensure all required fields are present with proper types
+        name: user.name || null,
+        phone: user.phone || null,
+        isVerified: user.isVerified ?? false,
+        isActive: user.isActive ?? true,
+        avatarUrl: user.avatarUrl || null,
+        lastLoginAt: user.lastLoginAt || null,
+        createdAt: user.createdAt || new Date(),
+        updatedAt: user.updatedAt || new Date(),
+        tenantId: user.tenantId || null,
+        roles: mappedRoles,
+        saasOwner: user.saasOwner || undefined,
+        salonStaff: user.salonStaff || undefined,
+        customer: user.customer || undefined,
       };
+      
+      return userWithRoles;
     });
   }
 

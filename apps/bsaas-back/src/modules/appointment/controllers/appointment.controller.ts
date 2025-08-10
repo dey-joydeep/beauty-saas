@@ -1,38 +1,120 @@
 import {
+  Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
   Query,
-  Request,
   UseGuards,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
+import { User } from '../../../common/decorators/user.decorator';
+import type { AuthUser } from '../../../modules/dashboard/interfaces/dashboard-request.interface';
 import {
   ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../core/auth/guards/jwt-auth.guard';
-import { Roles, RolesGuard } from '../../core/auth/guards/roles.guard';
-import { AppointmentsFilterDto } from '../dto/appointment-filter.dto';
-import { AppointmentDto } from '../dto/appointment.dto';
-import { AppointmentsOverviewDto } from '../dto/appointments-overview.dto';
+import { JwtAuthGuard } from '../../../core/auth/guards/jwt-auth.guard';
+import { Roles, RolesGuard } from '../../../core/auth/guards/roles.guard';
 import { AppUserRole } from '../models/user-params.model';
 import { AppointmentService } from '../services/appointment.service';
+import { CreateAppointmentDto } from '../dto/requests/create-appointment.dto';
+import { UpdateAppointmentDto } from '../dto/requests/update-appointment.dto';
+import { FilterAppointmentsDto } from '../dto/requests/filter-appointments.dto';
+import { AppointmentResponseDto } from '../dto/responses/appointment-response.dto';
+import { AppointmentDetailsDto } from '../dto/responses/appointment-details.dto';
+import { PaginatedAppointmentsDto } from '../dto/responses/paginated-appointments.dto';
+import { AppointmentStatsDto } from '../dto/responses/appointment-stats.dto';
 
 @ApiTags('appointments')
 @Controller('appointments')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+@UsePipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
 @ApiBearerAuth()
+@ApiTags('Appointments')
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
+
+  @Post()
+  @Roles(AppUserRole.ADMIN, AppUserRole.OWNER, AppUserRole.STAFF, AppUserRole.CUSTOMER)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ 
+    summary: 'Create a new appointment',
+    description: 'Creates a new appointment with the provided details.'
+  })
+  @ApiCreatedResponse({ 
+    description: 'Appointment successfully created',
+    type: AppointmentDetailsDto
+  })
+  @ApiResponse({ 
+    status: HttpStatus.BAD_REQUEST, 
+    description: 'Invalid input data' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Unauthorized: Authentication required' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Forbidden: Insufficient permissions' 
+  })
+  async create(
+    @Body() createAppointmentDto: CreateAppointmentDto,
+    @User() user: AuthUser
+  ): Promise<AppointmentDetailsDto> {
+    // Customers can only create appointments for themselves
+    if (user.roles.some(role => role.name === AppUserRole.CUSTOMER)) {
+      createAppointmentDto.customerId = user.id;
+    }
+    
+    return this.appointmentService.createAppointment(createAppointmentDto, user);
+  }
+
+  @Get()
+  @Roles(AppUserRole.ADMIN, AppUserRole.OWNER, AppUserRole.STAFF, AppUserRole.CUSTOMER)
+  @ApiOperation({ 
+    summary: 'Get all appointments',
+    description: 'Returns a paginated list of appointments based on the provided filters.'
+  })
+  @ApiOkResponse({
+    description: 'Successfully retrieved appointments',
+    type: PaginatedAppointmentsDto,
+  })
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Unauthorized: Authentication required' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Forbidden: Insufficient permissions' 
+  })
+  async findAll(
+    @Query() filterDto: FilterAppointmentsDto,
+    @User() user: AuthUser
+  ): Promise<PaginatedAppointmentsDto> {
+    // Non-admin users can only see their own appointments
+    if (user.roles.some(role => role.name === AppUserRole.CUSTOMER)) {
+      filterDto.customerId = user.id;
+    } else if (user.roles.some(role => role.name === AppUserRole.STAFF)) {
+      filterDto.staffId = user.id;
+    }
+    
+    return this.appointmentService.findAllAppointments(filterDto);
+  }
 
   @Get('overview')
   @Roles(AppUserRole.ADMIN, AppUserRole.OWNER, AppUserRole.STAFF, AppUserRole.CUSTOMER)
@@ -43,7 +125,7 @@ export class AppointmentController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Successfully retrieved appointments overview',
-    type: AppointmentsOverviewDto,
+    type: AppointmentStatsDto,
   })
   @ApiResponse({ 
     status: HttpStatus.UNAUTHORIZED, 
@@ -55,21 +137,19 @@ export class AppointmentController {
   })
   @ApiQuery({ 
     name: 'filters', 
-    type: AppointmentsFilterDto,
+    type: FilterAppointmentsDto,
     required: false,
     description: 'Filter criteria for appointments' 
   })
   async getAppointmentsOverview(
-    @Request() req: { user: { id: string; role: AppUserRole } },
-    @Query() filters: AppointmentsFilterDto,
-  ): Promise<AppointmentsOverviewDto> {
-    // Create a new instance of AppointmentsFilterDto with the query parameters
-    const filterDto = AppointmentsFilterDto.create({
-      ...filters,
-      page: filters.page ? Number(filters.page) : undefined,
-    });
+    @Query() filter: Partial<FilterAppointmentsDto>,
+    @User() user: AuthUser,
+  ): Promise<AppointmentStatsDto> {
+    // Create a new filter instance with default values
+    const filterDto = new FilterAppointmentsDto();
+    Object.assign(filterDto, filter);
 
-    return this.appointmentService.getAppointmentsOverview(filterDto, req.user.id);
+    return this.appointmentService.getAppointmentsOverview(filterDto, user.id);
   }
 
   @Get('user')
@@ -81,7 +161,7 @@ export class AppointmentController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Successfully retrieved user appointments',
-    type: [AppointmentDto],
+    type: [AppointmentResponseDto],
   })
   @ApiResponse({ 
     status: HttpStatus.UNAUTHORIZED, 
@@ -97,7 +177,7 @@ export class AppointmentController {
   })
   @ApiQuery({ 
     name: 'filters', 
-    type: AppointmentsFilterDto,
+    type: FilterAppointmentsDto,
     required: false,
     description: 'Optional filter criteria for appointments' 
   })
@@ -107,23 +187,27 @@ export class AppointmentController {
     description: 'Optional user ID to get appointments for (admin/owner/staff only)'
   })
   async getUserAppointments(
-    @Request() req: { user: { id: string; role: AppUserRole } },
+    @User() user: AuthUser,
     @Query('userId') targetUserId?: string,
-    @Query() filters: AppointmentsFilterDto = AppointmentsFilterDto.create({}),
-  ): Promise<AppointmentDto[]> {
+    @Query() filters: Partial<FilterAppointmentsDto> = {} as Partial<FilterAppointmentsDto>,
+  ): Promise<AppointmentResponseDto[]> {
     // If no targetUserId is provided, default to the current user's ID
-    const userId = targetUserId || req.user.id;
+    const userId = targetUserId || user.id;
 
     // If a user is trying to access another user's appointments, check permissions
-    if (userId !== req.user.id && 
-        !([AppUserRole.ADMIN, AppUserRole.OWNER, AppUserRole.STAFF] as string[]).includes(req.user.role)) {
-      throw new ForbiddenException('You do not have permission to view these appointments');
+    if (userId !== user.id) {
+      const hasPermission = user.roles.some(role => 
+        [AppUserRole.ADMIN, AppUserRole.OWNER, AppUserRole.STAFF].includes(role.name as AppUserRole)
+      );
+      
+      if (!hasPermission) {
+        throw new ForbiddenException('You do not have permission to view these appointments');
+      }
     }
 
-    // Ensure we have a properly instantiated DTO
-    const filterDto = filters instanceof AppointmentsFilterDto 
-      ? filters 
-      : AppointmentsFilterDto.create(filters);
+    // Create a new filter instance with default values
+    const filterDto = new FilterAppointmentsDto();
+    Object.assign(filterDto, filters);
 
     return this.appointmentService.getAppointmentsByUser(userId, filterDto);
   }
@@ -138,7 +222,7 @@ export class AppointmentController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Successfully retrieved tenant appointments',
-    type: [AppointmentDto],
+    type: [AppointmentResponseDto],
   })
   @ApiResponse({ 
     status: HttpStatus.UNAUTHORIZED, 
@@ -153,27 +237,22 @@ export class AppointmentController {
     description: 'Tenant not found' 
   })
   async getTenantAppointments(
-    @Request() req: { user: { id: string; role: AppUserRole } },
     @Param('tenantId') tenantId: string,
-    @Query() filters: AppointmentsFilterDto = AppointmentsFilterDto.create({}),
-  ): Promise<AppointmentDto[]> {
+    @Query() filters: Partial<FilterAppointmentsDto> = {},
+    @User() user: AuthUser,
+  ): Promise<AppointmentResponseDto[]> {
+    // Create a new filter instance with default values
+    const filterDto = new FilterAppointmentsDto();
+    Object.assign(filterDto, filters);
+
     // For customers, only show their own appointments for this tenant
-    if (req.user.role === AppUserRole.CUSTOMER) {
-      // Create a new filter with the customer's ID and tenant ID
-      const customerFilter = AppointmentsFilterDto.create({
-        ...filters,
-        customerId: req.user.id,
-        tenantId: tenantId
-      });
-      return this.appointmentService.getAppointmentsByUser(req.user.id, customerFilter);
+    if (user.roles.some(role => role.name === AppUserRole.CUSTOMER)) {
+      filterDto.customerId = user.id;
+      return this.appointmentService.getAppointmentsByUser(user.id, filterDto);
     }
     
     // For admin/owner/staff, show all appointments for the tenant
-    const tenantFilter = AppointmentsFilterDto.create({
-      ...filters,
-      tenantId: tenantId
-    });
-    return this.appointmentService.getTenantAppointments(tenantId, tenantFilter);
+    return this.appointmentService.getTenantAppointments(tenantId, filterDto);
   }
 
   @Get('eligible-to-review/:tenantId')
@@ -216,12 +295,13 @@ export class AppointmentController {
     type: String,
   })
   async getUserEligibleToReview(
-    @Request() req: { user: { id: string; role: AppUserRole } },
     @Param('userId') userId: string,
     @Param('tenantId') tenantId: string,
+    @User() user: AuthUser,
   ): Promise<{ eligible: boolean; message?: string }> {
     // Only allow users to check their own eligibility or admins to check any user
-    if (req.user.role !== AppUserRole.ADMIN && req.user.id !== userId) {
+    const isAdmin = user.roles.some(role => role.name === AppUserRole.ADMIN);
+    if (!isAdmin && user.id !== userId) {
       throw new ForbiddenException('You do not have permission to check review eligibility for this user');
     }
 

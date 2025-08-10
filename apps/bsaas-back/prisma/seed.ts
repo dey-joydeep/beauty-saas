@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 const prisma = new PrismaClient();
 
 // Helper function to generate random coordinates within a radius
-function generateRandomCoordinates(center: { lat: number; lng: number }, radiusInKm: number) {
+function generateRandomCoordinates(center, radiusInKm) {
   const earthRadius = 6371; // km
   const y0 = center.lat * Math.PI / 180;
   const x0 = center.lng * Math.PI / 180;

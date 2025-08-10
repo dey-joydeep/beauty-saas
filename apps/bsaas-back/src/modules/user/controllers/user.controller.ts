@@ -15,20 +15,23 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   UnauthorizedException,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { IRequestWithUser } from '../interfaces/user-request.interface';
+import { Prisma } from '@prisma/client';
 import { AppUserRole } from '@shared/types/user.types';
 import { JwtAuthGuard } from '../../../core/auth/guards/jwt-auth.guard';
 import { Roles } from '../../../core/auth/guards/roles.guard';
+import { User } from '../../../common/decorators/user.decorator';
+import type { AuthUser } from '../../../modules/dashboard/interfaces/dashboard-request.interface';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserService } from '../services/user.service';
+
+import { UserResponseDto } from '../dto/user-response.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -47,7 +50,7 @@ export class UserController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getUserStats(
     @Query('tenant_id') tenantId: string,
-    @Req() req: IRequestWithUser,
+    @User() _user: AuthUser,
   ) {
     try {
       // The JwtAuthGuard and RolesGuard already verify the user's authentication and authorization
@@ -68,42 +71,77 @@ export class UserController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
-  @Roles(AppUserRole.ADMIN, AppUserRole.OWNER, AppUserRole.STAFF)
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @UseGuards(JwtAuthGuard, Roles)
+  @Roles(AppUserRole.ADMIN, AppUserRole.OWNER)
+  @ApiOperation({ summary: 'Get all users (admin/owner only)' })
+  @ApiResponse({ status: 200, description: 'List of users', type: [UserResponseDto] })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  @UseInterceptors(ClassSerializerInterceptor)
   async getUsers(
-    @Query('tenant_id') tenantId?: string,
-    @Req() req?: IRequestWithUser,
-  ) {
+    @Query('page') _page = 1,
+    @Query('limit') _limit = 10,
+    @Query('search') _search = '',
+    @Query('role') _role?: AppUserRole,
+    @Query('status') _status?: string,
+    @User() user?: AuthUser,
+  ): Promise<UserResponseDto[]> {
     try {
+      let tenantId: string | null = null;
+
       // If user is not an admin, they can only see users from their own tenant
-      if (
-        !req?.user?.roles.some((r) => r.name === AppUserRole.ADMIN) &&
-        tenantId &&
-        tenantId !== req?.user?.tenantId
-      ) {
-        throw new ForbiddenException(
-          'You do not have permission to view users from this tenant',
-        );
+      if (user && !user.roles.some((r) => r.name === AppUserRole.ADMIN)) {
+        tenantId = user.tenantId || null;
       }
 
-      // If no tenant ID is provided and user is not an admin, use the user's tenant ID
-      if (
-        !tenantId &&
-        req?.user &&
-        !req.user.roles.some((r) => r.name === AppUserRole.ADMIN)
-      ) {
-        tenantId = req.user.tenantId || undefined;
+      // Build the where clause with optional filters
+      const where: Prisma.UserWhereInput = {};
+      
+      if (tenantId) {
+        where.tenantId = tenantId;
+      }
+      
+      if (_search) {
+        where.OR = [
+          { name: { contains: _search, mode: 'insensitive' } },
+          { email: { contains: _search, mode: 'insensitive' } },
+        ];
+      }
+      
+      if (_role) {
+        where.roles = {
+          some: {
+            role: {
+              name: _role,
+            },
+          },
+        };
+      }
+      
+      if (_status) {
+        where.isActive = _status === 'active';
       }
 
-      // Pass the where clause directly to getUsers
-      const where = tenantId ? { tenantId } : undefined;
-      return await this.userService.getUsers(where);
+      // Get paginated results
+      const users = await this.userService.getUsers(where);
+      
+      // Transform the response to match the expected format
+      return users.map(user => ({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        isVerified: user.isVerified,
+        isActive: user.isActive,
+        avatarUrl: user.avatarUrl,
+        lastLoginAt: user.lastLoginAt,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        tenantId: user.tenantId,
+        roles: user.roles?.map(ur => ({
+          id: ur.roleId,
+          name: ur.role?.name || ''
+        })) || [],
+      }));
     } catch (error) {
       if (error instanceof ForbiddenException) {
         throw error;
@@ -113,24 +151,30 @@ export class UserController {
   }
 
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User registered successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 409, description: 'Email already exists' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async register(@Body() createUserDto: CreateUserDto) {
+  @ApiResponse({ status: 201, description: 'User registered successfully', type: UserResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 409, description: 'User already exists' })
+  async register(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
     try {
       const user = await this.userService.createUser(createUserDto);
       return {
         id: user.id,
-        name: user.name,
         email: user.email,
-        tenantId: user.tenantId,
-        roles: user.roles,
-        isVerified: user.isVerified,
+        name: user.name,
         phone: user.phone,
+        isVerified: user.isVerified,
+        isActive: user.isActive,
+        avatarUrl: user.avatarUrl,
+        lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        tenantId: user.tenantId,
+        roles: user.roles?.map(ur => ({
+          id: ur.roleId,
+          name: ur.role?.name || ''
+        })) || []
       };
     } catch (error) {
       if (error instanceof ConflictException) {
@@ -141,24 +185,24 @@ export class UserController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, Roles)
   @Roles(AppUserRole.ADMIN, AppUserRole.OWNER)
-  @ApiOperation({ summary: 'Create a new user' })
-  @ApiResponse({ status: 201, description: 'User created successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new user (admin/owner only)' })
+  @ApiResponse({ status: 201, description: 'User created successfully', type: UserResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 409, description: 'User already exists' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  @UseInterceptors(ClassSerializerInterceptor)
   async create(
     @Body() createUserDto: CreateUserDto,
-    @Req() req: IRequestWithUser,
-  ) {
+    @User() currentUser: AuthUser,
+  ): Promise<UserResponseDto> {
     try {
       // Only allow ADMIN to create users with ADMIN role
       // OWNER can only create CUSTOMER and STAFF users
       if (
-        !req.user.roles.some((r) => r.name === AppUserRole.ADMIN) &&
+        !currentUser.roles.some((r) => r.name === AppUserRole.ADMIN) &&
         createUserDto.role === AppUserRole.ADMIN
       ) {
         throw new ForbiddenException(
@@ -168,10 +212,28 @@ export class UserController {
 
       // Set the tenant ID from the current user if not provided
       if (!createUserDto.tenantId) {
-        createUserDto.tenantId = req.user.tenantId || null;
+        createUserDto.tenantId = currentUser.tenantId || null;
       }
 
-      return await this.userService.createUser(createUserDto);
+      const newUser = await this.userService.createUser(createUserDto);
+      
+      return {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        phone: newUser.phone,
+        isVerified: newUser.isVerified,
+        isActive: newUser.isActive,
+        avatarUrl: newUser.avatarUrl,
+        lastLoginAt: newUser.lastLoginAt,
+        createdAt: newUser.createdAt,
+        updatedAt: newUser.updatedAt,
+        tenantId: newUser.tenantId,
+        roles: newUser.roles?.map(ur => ({
+          id: ur.roleId,
+          name: ur.role?.name || ''
+        })) || []
+      };
     } catch (error) {
       if (error instanceof ConflictException) {
         throw new ConflictException(error.message);
@@ -187,27 +249,34 @@ export class UserController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update a user' })
-  @ApiResponse({ status: 200, description: 'User updated successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 200, description: 'User updated successfully', type: UserResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 409, description: 'Email already exists' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async updateUser(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ) {
+    @User() _user: AuthUser,
+  ): Promise<UserResponseDto> {
     try {
       const updatedUser = await this.userService.updateUser(id, updateUserDto);
       return {
         id: updatedUser.id,
-        name: updatedUser.name,
         email: updatedUser.email,
-        tenantId: updatedUser.tenantId,
-        roles: updatedUser.roles,
-        isVerified: updatedUser.isVerified,
+        name: updatedUser.name,
         phone: updatedUser.phone,
+        isVerified: updatedUser.isVerified,
+        isActive: updatedUser.isActive,
+        avatarUrl: updatedUser.avatarUrl,
+        lastLoginAt: updatedUser.lastLoginAt,
         createdAt: updatedUser.createdAt,
         updatedAt: updatedUser.updatedAt,
+        tenantId: updatedUser.tenantId,
+        roles: updatedUser.roles?.map(ur => ({
+          id: ur.roleId,
+          name: ur.role?.name || ''
+        })) || []
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -251,13 +320,11 @@ export class UserController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async login(@Body() loginUserDto: LoginUserDto) {
     try {
-      const { email, password } = loginUserDto;
-      
       // Use the service to handle login and token generation
       const loginResult = await this.userService.login(loginUserDto);
       
       // Get the full user with roles
-      const user = await this.userService.getUserByEmail(email);
+      const user = await this.userService.getUserByEmail(loginUserDto.email);
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
@@ -289,28 +356,31 @@ export class UserController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
+  @ApiResponse({ status: 200, description: 'Current user profile', type: UserResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async getCurrentUser(@Req() req: IRequestWithUser) {
+  async getCurrentUser(@User() user: AuthUser): Promise<UserResponseDto> {
     try {
-      const user = await this.userService.getUserById(req.user.id);
-      if (!user) {
+      const currentUser = await this.userService.getUserById(user.id);
+      if (!currentUser) {
         throw new NotFoundException('User not found');
       }
 
       return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        tenantId: user.tenantId,
-        roles: user.roles ? user.roles.map((r: any) => r.role?.name || r) : [],
-        isVerified: user.isVerified,
-        isActive: user.isActive,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        id: currentUser.id,
+        email: currentUser.email,
+        name: currentUser.name,
+        phone: currentUser.phone,
+        isVerified: currentUser.isVerified,
+        isActive: currentUser.isActive,
+        avatarUrl: currentUser.avatarUrl,
+        lastLoginAt: currentUser.lastLoginAt,
+        createdAt: currentUser.createdAt,
+        updatedAt: currentUser.updatedAt,
+        tenantId: currentUser.tenantId,
+        roles: (currentUser.roles || []).map(ur => ({
+          id: ur.roleId,
+          name: ur.role?.name || ''
+        }))
       };
     } catch (error) {
       if (error instanceof NotFoundException) {

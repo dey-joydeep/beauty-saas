@@ -1,19 +1,16 @@
 /**
  * DTOs for product sales reporting
- */
-/**
- * DTOs for product sales reporting
  * 
  * These DTOs are used for validating and documenting the product sales API.
  */
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDateString,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
-  Min,
+  Min
 } from 'class-validator';
 
 export class SalesByProductDto {
