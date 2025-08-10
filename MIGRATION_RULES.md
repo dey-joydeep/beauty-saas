@@ -27,6 +27,8 @@
 
 - [ ] Update all import paths after moving files
 
+- [ ] When running commands, use Windows PowerShell syntax (not bash) for file operations
+
 ## 3. Code Changes (Priority #2)
 
 - [ ] Replace Express patterns with NestJS decorators:
@@ -107,39 +109,259 @@
 
 ## 9. DTO and Validation Guidelines
 
-- [ ] Move all custom validators to `src/common/validators/`
+### DTO Creation and Structure
 
-- [ ] Use `class-validator` decorators for all DTO validations
-
-- [ ] Remove any remaining `*.validator.ts` files after migration
-
-- [ ] Ensure enums are defined in shared locations when used across modules
-
-- [ ] Add proper JSDoc comments to all DTOs
-
-- [ ] Verify all decorators have corresponding imports
-
-- [ ] Check for missing imports of common utilities and decorators
-
-## 10. Code Quality Standards
-
-- [ ] Follow consistent formatting (use Prettier)
-
-- [ ] Maintain consistent property ordering in DTOs:
+- [ ] Create DTOs in the `dto` folder with proper validation decorators
+- [ ] Follow consistent naming conventions:
+  - `CreateXDto` for creation DTOs
+  - `UpdateXDto` for update DTOs
+  - `XResponseDto` for response DTOs
+  - `XQueryDto` for query parameters
+- [ ] Use `class-validator` and `class-transformer` decorators for all validations
+- [ ] Organize DTO properties in this order:
   1. Required properties
   2. Optional properties
-  3. Date fields (createdAt, updatedAt)
+  3. Readonly properties (like IDs)
+  4. Date fields (createdAt, updatedAt)
+
+### Validation Rules
+
+- [ ] Move all custom validators to `src/common/validators/`
+- [ ] Remove any remaining `*.validator.ts` files after migration
+- [ ] Use appropriate validation decorators:
+  - `@IsString()`, `@IsNumber()`, `@IsBoolean()` for type validation
+  - `@IsOptional()` for optional fields
+  - `@IsEnum()` for enum validations
+  - `@IsDateString()` for date strings
+  - `@ValidateNested()` for nested objects
+  - `@Type()` for proper type transformation
+
+### Documentation
+
+- [ ] Add proper JSDoc comments to all DTOs
+- [ ] Document each property with `@ApiProperty()` including:
+  - `description`: Clear description of the field
+  - `required`: Whether the field is required
+  - `example`: Example value
+  - `enum`: For enum types
+  - `type`: For proper type documentation
+- [ ] Add `@ApiTags()` to all controllers
+- [ ] Add `@ApiOperation()` to all endpoint methods
+- [ ] Add `@ApiResponse()` for all possible responses
+
+### Type Safety and Imports
 
 - [ ] Use proper TypeScript types and interfaces
+- [ ] Avoid using `any` type
+- [ ] Use enums for fixed sets of values
+- [ ] Verify all decorators have corresponding imports
+- [ ] Ensure all used decorators and utilities are properly imported
+- [ ] Group imports by source (external, internal)
+- [ ] Use absolute imports when possible
+- [ ] Remove unused imports
 
-- [ ] Add appropriate JSDoc comments for all public methods and classes
+## 10. DTO Schema Guidelines
 
-- [ ] Ensure all imports are organized and grouped by source
+### Naming Conventions
+- [ ] Use `CreateXDto` for creation DTOs (e.g., `CreateSalonStaffRequestDto`)
+- [ ] Use `UpdateXDto` for update DTOs
+- [ ] Use `XResponseDto` for response DTOs
+- [ ] Use `XQueryDto` for query parameters
+- [ ] Suffix with `Status` or `Type` for enums (e.g., `RequestStatus`, `RequestType`)
 
-## 11. Error Handling
+### Structure and Organization
+- [ ] Place DTOs in the `dto` directory of each module
+- [ ] Group related DTOs in the same file when appropriate
+- [ ] Use inheritance for shared fields when applicable
+- [ ] Keep DTOs focused on a single responsibility
+
+### Validation Rules
+- [ ] Use `class-validator` decorators for all validations
+- [ ] Apply appropriate validators:
+  - `@IsString()`, `@IsNumber()`, `@IsBoolean()` for type validation
+  - `@IsOptional()` for optional fields
+  - `@IsEnum()` for enum validations
+  - `@IsDateString()` for date strings
+  - `@ValidateNested()` for nested objects
+  - `@Type()` for proper type transformation
+- [ ] Add custom validation decorators when needed
+
+### Documentation
+- [ ] Add `@ApiProperty()` decorator for all properties
+- [ ] Include `description` for all properties
+- [ ] Add `example` values for better API documentation
+- [ ] Mark required/optional fields with `required: true/false`
+- [ ] Document enums with `enum` and `enumName`
+
+### Example DTO Structure
+```typescript
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDateString } from 'class-validator';
+import { SomeEnum } from '@prisma/client';
+
+export class CreateExampleDto {
+  @ApiProperty({
+    description: 'Description of the field',
+    example: 'Example value',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({
+    description: 'Enum field example',
+    enum: SomeEnum,
+    example: SomeEnum.VALUE,
+  })
+  @IsEnum(SomeEnum)
+  @IsNotEmpty()
+  type: SomeEnum;
+
+  @ApiProperty({
+    description: 'Optional date field',
+    required: false,
+    type: Date,
+  })
+  @IsDateString()
+  @IsOptional()
+  someDate?: Date;
+}
+```
+
+## 11. Module and Code Organization
+
+### Module Structure
+
+- [ ] Each module should have its own folder with a clear structure:
+
+  ```text
+  module-name/
+  ├── controllers/
+  ├── services/
+  ├── dto/
+  │   ├── requests/
+  │   └── responses/
+  ├── interfaces/
+  └── module.ts
+  ```
+
+- [ ] Keep controllers thin (delegate business logic to services)
+- [ ] Services should contain the business logic
+- [ ] DTOs should handle input validation and data transfer
+- [ ] Use proper NestJS module organization with `@Module()` decorator
+
+### Code Quality Standards
+
+- [ ] Follow consistent formatting (use Prettier)
+- [ ] Use meaningful and consistent naming conventions
+- [ ] Keep functions and methods focused and small
+- [ ] Avoid deep nesting of control structures
+- [ ] Use early returns when possible
+- [ ] Follow the Single Responsibility Principle
+
+### Documentation
+
+- [ ] Add JSDoc comments to all public methods and classes
+- [ ] Document complex logic with inline comments
+- [ ] Include examples in Swagger documentation
+- [ ] Document error cases and possible exceptions
+
+### Error Handling
+
+- [ ] Use NestJS built-in exception filters
+- [ ] Create custom exceptions when needed
+- [ ] Provide meaningful error messages
+- [ ] Use appropriate HTTP status codes
+- [ ] Log errors appropriately
+- [ ] Handle both expected and unexpected errors
+
+## 11. Testing and Verification
+
+### Test Organization
+
+- [ ] Move existing test files to the appropriate test directory
+- [ ] Update test imports after moving files
+- [ ] Ensure tests follow the same structure as the codebase
+- [ ] Group related tests with `describe` blocks
+- [ ] Use clear and descriptive test names
+- [ ] Follow the Arrange-Act-Assert pattern
+
+### Test Data
+
+- [ ] Use test factories or builders for creating test data
+- [ ] Keep test data close to the tests that use it
+- [ ] Use meaningful test data values
+- [ ] Consider using faker libraries for generating test data
+
+### Test Coverage
+
+- [ ] Ensure all public methods are tested
+- [ ] Test both happy paths and error cases
+- [ ] Test edge cases and boundary conditions
+- [ ] Test validation rules
+- [ ] Test error handling
+
+### Final Verification
+
+- [ ] Verify all files are in the correct folders
+- [ ] Ensure no Express patterns remain
+- [ ] Check for any empty folders (except test/.keep)
+- [ ] Verify all shared code is properly imported
+- [ ] Ensure all DTOs have proper validation decorators
+- [ ] Check for any duplicate enums or interfaces
+- [ ] Verify all custom validators are in the common directory
+- [ ] Ensure all API endpoints have proper Swagger documentation
+- [ ] Check that all imports are correctly defined and used
+- [ ] Remove any unused imports
+
+## 12. Migration-Specific Guidelines
+
+### Controller Migration
+- [ ] Convert Express route handlers to NestJS controller methods
+- [ ] Use appropriate decorators (`@Get()`, `@Post()`, etc.)
+- [ ] Replace `req` and `res` with decorators (`@Req()`, `@Res()`, `@Body()`, `@Param()`, etc.)
+- [ ] Implement proper error handling with NestJS exceptions
+- [ ] Add Swagger decorators for API documentation
+
+### Service Migration
+- [ ] Move business logic from route handlers to service methods
+- [ ] Use dependency injection for services and repositories
+- [ ] Implement proper error handling and logging
+- [ ] Ensure all database operations use the Prisma client
+
+### DTO Migration
+- [ ] Create DTOs for all request/response objects
+- [ ] Use `class-validator` for input validation
+- [ ] Add proper TypeScript types and interfaces
+- [ ] Document DTOs with JSDoc comments
+
+### Module Organization
+- [ ] Organize code into proper NestJS modules
+- [ ] Set up proper imports and exports
+- [ ] Configure global pipes and filters
+- [ ] Set up proper dependency injection
+
+## 13. Post-Migration Verification
+
+### Code Review
+- [ ] Verify all Express patterns have been removed
+- [ ] Check for proper use of NestJS decorators
+- [ ] Ensure all routes are properly documented
+- [ ] Verify error handling is consistent
+
+### Testing
+- [ ] Update existing tests to work with the new NestJS structure
+- [ ] Add tests for new functionality
+- [ ] Test error cases and edge conditions
+- [ ] Verify all tests pass
+
+## 14. When in Doubt
 
 If unsure about ANYTHING:
+
 1. STOP immediately
 2. Review the migration guide
-3. Ask for clarification
-4. Get explicit approval before proceeding
+3. Check existing patterns in the codebase
+4. Ask for clarification
+5. Get explicit approval before proceeding
