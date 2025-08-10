@@ -7,75 +7,75 @@ import { AppointmentStatus } from '@shared/enums/appointment-status.enum';
  * DTO for filtering appointments
  */
 export class AppointmentsFilterDto {
-  @ApiPropertyOptional({ 
-    type: String, 
-    format: 'date-time', 
-    description: 'Start date for filtering appointments' 
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    description: 'Start date for filtering appointments'
   })
   @IsOptional()
   @IsDateString()
   startDate?: string;
 
-  @ApiPropertyOptional({ 
-    type: String, 
-    format: 'date-time', 
-    description: 'End date for filtering appointments' 
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    description: 'End date for filtering appointments'
   })
   @IsOptional()
   @IsDateString()
   endDate?: string;
 
-  @ApiPropertyOptional({ 
-    enum: AppointmentStatus, 
+  @ApiPropertyOptional({
+    enum: AppointmentStatus,
     enumName: 'AppointmentStatus',
-    description: 'Filter by appointment status' 
+    description: 'Filter by appointment status'
   })
   @IsOptional()
   @IsEnum(AppointmentStatus)
   status?: AppointmentStatus;
 
-  @ApiPropertyOptional({ 
-    type: String, 
+  @ApiPropertyOptional({
+    type: String,
     format: 'uuid',
-    description: 'Filter by salon ID' 
+    description: 'Filter by salon ID'
   })
   @IsOptional()
   @IsUUID()
   salonId?: string;
 
-  @ApiPropertyOptional({ 
-    type: String, 
+  @ApiPropertyOptional({
+    type: String,
     format: 'uuid',
-    description: 'Filter by staff member ID' 
+    description: 'Filter by staff member ID'
   })
   @IsOptional()
   @IsUUID()
   staffId?: string;
 
-  @ApiPropertyOptional({ 
-    type: String, 
+  @ApiPropertyOptional({
+    type: String,
     format: 'uuid',
-    description: 'Filter by customer ID' 
+    description: 'Filter by customer ID'
   })
   @IsOptional()
   @IsUUID()
   customerId?: string;
 
-  @ApiPropertyOptional({ 
-    type: String, 
+  @ApiPropertyOptional({
+    type: String,
     format: 'uuid',
-    description: 'Filter by service ID' 
+    description: 'Filter by service ID'
   })
   @IsOptional()
   @IsUUID()
   serviceId?: string;
 
-  @ApiPropertyOptional({ 
-    type: Number, 
+  @ApiPropertyOptional({
+    type: Number,
     minimum: 1,
     maximum: 100,
     default: 10,
-    description: 'Maximum number of results to return' 
+    description: 'Maximum number of results to return'
   })
   @IsOptional()
   @IsNumber()
@@ -84,11 +84,11 @@ export class AppointmentsFilterDto {
   @Transform(({ value }) => parseInt(value, 10), { toClassOnly: true })
   limit: number = 10;
 
-  @ApiPropertyOptional({ 
-    type: Number, 
+  @ApiPropertyOptional({
+    type: Number,
     minimum: 0,
     default: 0,
-    description: 'Number of results to skip' 
+    description: 'Number of results to skip'
   })
   @IsOptional()
   @IsNumber()

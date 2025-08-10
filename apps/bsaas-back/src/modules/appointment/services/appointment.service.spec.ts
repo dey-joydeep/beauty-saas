@@ -4,6 +4,7 @@ import { APPOINTMENT_REPOSITORY } from '../repositories/appointment.repository';
 import { AppointmentService } from './appointment.service';
 import { CreateAppointmentDto } from '../dto/requests/create-appointment.dto';
 import { AuthUser } from '../../user/interfaces/auth.interface';
+import { AppointmentStatus } from '@shared/enums/appointment-status.enum';
 
 // Test data
 const TEST_USER_ID = 'test-user-id';
@@ -46,7 +47,7 @@ describe('AppointmentService', () => {
 
     service = module.get<AppointmentService>(AppointmentService);
     prisma = module.get(PrismaService);
-    
+
     // Reset mocks before each test
     jest.clearAllMocks();
   });
@@ -60,13 +61,14 @@ describe('AppointmentService', () => {
       // Test data
       const now = new Date();
       const oneHourLater = new Date(now.getTime() + 3600000);
-      
+
       const createAppointmentDto: CreateAppointmentDto = {
         customerId: TEST_CUSTOMER_ID,
         salonId: TEST_SALON_ID,
         startTime: now.toISOString(),
         endTime: oneHourLater.toISOString(),
         services: [{ serviceId: 'service-1', staffId: 'staff-1' }],
+        status: AppointmentStatus.PENDING
       };
 
       const mockUser: AuthUser = {
@@ -120,13 +122,14 @@ describe('AppointmentService', () => {
       // Test data
       const now = new Date();
       const oneHourLater = new Date(now.getTime() + 3600000);
-      
+
       const createAppointmentDto: CreateAppointmentDto = {
         customerId: 'non-existent-customer-id',
         salonId: TEST_SALON_ID,
         startTime: now.toISOString(),
         endTime: oneHourLater.toISOString(),
         services: [{ serviceId: 'service-1', staffId: 'staff-1' }],
+        status: AppointmentStatus.PENDING
       };
 
       const mockUser: AuthUser = {

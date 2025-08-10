@@ -1,18 +1,19 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { AppointmentStatus } from '@shared/enums/appointment-status.enum';
 import { Transform, Type } from 'class-transformer';
-import { 
-  IsDateString, 
-  IsEnum, 
-  IsNumber, 
-  IsOptional, 
-  IsString, 
-  IsUUID, 
-  Max, 
-  Min, 
+import {
+  IsDateString,
+  IsEnum,
   IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
   ValidateIf
 } from 'class-validator';
-import { AppointmentStatus } from '@shared/enums/appointment-status.enum';
 
 // Define allowed sort fields as a constant for reuse and type safety
 const ALLOWED_SORT_FIELDS = ['createdAt', 'startTime', 'endTime', 'status'] as const;

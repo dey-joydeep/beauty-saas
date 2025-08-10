@@ -1,12 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { 
-  IsString, 
-  IsOptional, 
-  IsEnum, 
-  IsDateString, 
-  IsUUID, 
-  IsNumber, 
-  Min, 
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsDateString,
+  IsUUID,
+  IsNumber,
+  Min,
   IsEmail,
   IsNotEmpty,
   MaxLength,
@@ -25,7 +25,7 @@ import { IsValidAppointmentStatus, IsValidAppointmentTime } from '../../../commo
  * DTO representing an appointment
  */
 export class AppointmentDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Unique identifier for the appointment',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -35,7 +35,7 @@ export class AppointmentDto {
   @IsNotEmpty({ message: 'ID is required' })
   id!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Title of the appointment',
     example: 'Haircut and Styling',
     maxLength: 200,
@@ -46,7 +46,7 @@ export class AppointmentDto {
   @MaxLength(200, { message: 'Title cannot be longer than 200 characters' })
   title!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Optional description of the appointment',
     example: 'Please arrive 10 minutes early for a consultation',
     maxLength: 1000,
@@ -57,7 +57,7 @@ export class AppointmentDto {
   @MaxLength(1000, { message: 'Description cannot be longer than 1000 characters' })
   description?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment starts',
     example: '2023-12-25T14:00:00.000Z',
     required: true
@@ -67,7 +67,7 @@ export class AppointmentDto {
   @IsNotEmpty({ message: 'Start time is required' })
   startTime!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment ends',
     example: '2023-12-25T15:00:00.000Z',
     required: true
@@ -76,21 +76,21 @@ export class AppointmentDto {
   @IsNotEmpty({ message: 'End time is required' })
   endTime!: string;
 
-  @ApiProperty({ 
-    enum: AppointmentStatus, 
+  @ApiProperty({
+    enum: AppointmentStatus,
     enumName: 'AppointmentStatus',
     example: AppointmentStatus.CONFIRMED,
     description: 'Current status of the appointment',
     required: true
   })
   @IsValidAppointmentStatus()
-  @IsEnum(AppointmentStatus, { 
-    message: `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}` 
+  @IsEnum(AppointmentStatus, {
+    message: `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}`
   })
   @IsNotEmpty({ message: 'Status is required' })
   status!: AppointmentStatus;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ID of the customer',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -100,7 +100,7 @@ export class AppointmentDto {
   @IsNotEmpty({ message: 'Customer ID is required' })
   customerId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Name of the customer',
     example: 'John Doe',
     maxLength: 100,
@@ -111,7 +111,7 @@ export class AppointmentDto {
   @MaxLength(100, { message: 'Customer name cannot be longer than 100 characters' })
   customerName!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Email of the customer',
     example: 'customer@example.com',
     maxLength: 255,
@@ -122,7 +122,7 @@ export class AppointmentDto {
   @MaxLength(255, { message: 'Customer email cannot be longer than 255 characters' })
   customerEmail!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ID of the staff member assigned to the appointment',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -133,7 +133,7 @@ export class AppointmentDto {
   @IsUUID(4, { message: 'Staff ID must be a valid UUID v4' })
   staffId!: string | null;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Name of the staff member',
     example: 'Jane Smith',
     maxLength: 100,
@@ -144,7 +144,7 @@ export class AppointmentDto {
   @MaxLength(100, { message: 'Staff name cannot be longer than 100 characters' })
   staffName!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ID of the service',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -154,7 +154,7 @@ export class AppointmentDto {
   @IsNotEmpty({ message: 'Service ID is required' })
   serviceId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Name of the service',
     example: 'Haircut and Styling',
     maxLength: 200,
@@ -165,7 +165,7 @@ export class AppointmentDto {
   @MaxLength(200, { message: 'Service name cannot be longer than 200 characters' })
   serviceName!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Duration of the appointment in minutes',
     example: 60,
     minimum: 1,
@@ -178,7 +178,7 @@ export class AppointmentDto {
   @Max(1440, { message: 'Duration cannot exceed 24 hours (1440 minutes)' })
   duration!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Price of the appointment',
     example: 50.00,
     minimum: 0,
@@ -189,7 +189,7 @@ export class AppointmentDto {
   @Min(0, { message: 'Price cannot be negative' })
   price!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ID of the salon',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -199,7 +199,7 @@ export class AppointmentDto {
   @IsNotEmpty({ message: 'Salon ID is required' })
   salonId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Name of the salon',
     example: 'Beauty & Style Salon',
     maxLength: 200,
@@ -210,7 +210,7 @@ export class AppointmentDto {
   @MaxLength(200, { message: 'Salon name cannot be longer than 200 characters' })
   salonName!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment was created',
     example: '2023-12-20T10:00:00.000Z',
     required: true
@@ -219,7 +219,7 @@ export class AppointmentDto {
   @IsNotEmpty({ message: 'Created at timestamp is required' })
   createdAt!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment was last updated',
     example: '2023-12-20T10:00:00.000Z',
     required: true

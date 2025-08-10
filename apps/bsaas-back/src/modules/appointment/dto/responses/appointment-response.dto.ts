@@ -1,22 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { 
-  IsDateString, 
-  IsEnum, 
-  IsNumber, 
-  IsOptional, 
-  IsString, 
-  IsUUID, 
-  Min, 
-  Max, 
-  IsPositive,
-  IsNotEmpty,
-  ValidateNested,
-  IsArray,
-  IsBoolean,
-  IsObject
-} from 'class-validator';
 import { AppointmentStatus } from '@shared/enums/appointment-status.enum';
+import {
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min
+} from 'class-validator';
 
 /**
  * Base response DTO for appointment data
@@ -24,7 +21,7 @@ import { AppointmentStatus } from '@shared/enums/appointment-status.enum';
  * @description Contains all the properties that should be included when returning appointment data to the client
  */
 export class AppointmentResponseDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Unique identifier for the appointment',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -33,7 +30,7 @@ export class AppointmentResponseDto {
   @IsUUID(4, { message: 'ID must be a valid UUID v4' })
   id!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Title of the appointment',
     example: 'Haircut and Styling',
     required: true,
@@ -44,7 +41,7 @@ export class AppointmentResponseDto {
   @MaxLength(200, { message: 'Title cannot be longer than 200 characters' })
   title!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Description of the appointment',
     example: 'Regular haircut with styling and blow dry',
     maxLength: 1000,
@@ -56,7 +53,7 @@ export class AppointmentResponseDto {
   @IsOptional()
   description?: string | null;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment starts',
     example: '2023-12-01T10:00:00.000Z',
     required: true
@@ -65,7 +62,7 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'Start time is required' })
   startTime!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment ends',
     example: '2023-12-01T11:00:00.000Z',
     required: true
@@ -74,20 +71,20 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'End time is required' })
   endTime!: string;
 
-  @ApiProperty({ 
-    enum: AppointmentStatus, 
+  @ApiProperty({
+    enum: AppointmentStatus,
     enumName: 'AppointmentStatus',
     description: 'Current status of the appointment',
-    example: AppointmentStatus.BOOKED,
+    example: AppointmentStatus.CONFIRMED,
     required: true
   })
-  @IsEnum(AppointmentStatus, { 
-    message: `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}` 
+  @IsEnum(AppointmentStatus, {
+    message: `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}`
   })
   @IsNotEmpty({ message: 'Status is required' })
   status!: AppointmentStatus;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Duration of the appointment in minutes',
     example: 60,
     minimum: 1,
@@ -100,7 +97,7 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'Duration is required' })
   duration!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Price of the appointment',
     example: 75.50,
     minimum: 0,
@@ -111,7 +108,7 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'Price is required' })
   price!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Customer ID for the appointment',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174005',
@@ -121,7 +118,7 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'Customer ID is required' })
   customerId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Staff member ID for the appointment',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174006',
@@ -131,7 +128,7 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'Staff ID is required' })
   staffId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Service ID for the appointment',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174007',
@@ -141,7 +138,7 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'Service ID is required' })
   serviceId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Salon ID where the appointment takes place',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174008',
@@ -151,7 +148,7 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'Salon ID is required' })
   salonId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Tenant ID for multi-tenancy',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174009',
@@ -161,7 +158,7 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'Tenant ID is required' })
   tenantId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment was created',
     example: '2023-11-20T15:30:00.000Z',
     required: true
@@ -170,7 +167,7 @@ export class AppointmentResponseDto {
   @IsNotEmpty({ message: 'Created at timestamp is required' })
   createdAt!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment was last updated',
     example: '2023-11-25T09:15:00.000Z',
     required: true

@@ -1,20 +1,16 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { 
-  IsNumber, 
-  IsArray, 
-  IsObject, 
-  IsOptional, 
-  IsEnum, 
-  IsNotEmpty, 
-  Min, 
-  Max, 
-  ValidateNested,
-  IsDateString,
-  IsNotEmptyObject
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { AppointmentDto } from './appointment.dto';
+import { ApiProperty } from '@nestjs/swagger';
 import { AppointmentStatus } from '@shared/enums/appointment-status.enum';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNotEmptyObject,
+  IsNumber,
+  IsObject,
+  Min,
+  ValidateNested
+} from 'class-validator';
+import { AppointmentDto } from './appointment.dto';
 
 /**
  * DTO representing an overview of appointments with statistics
