@@ -38,15 +38,6 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
   roles?: string[];
 
   @ApiPropertyOptional({
-    description: 'Whether the user is verified',
-    default: false,
-    required: false
-  })
-  @IsBoolean()
-  @IsOptional()
-  isVerified?: boolean;
-
-  @ApiPropertyOptional({
     description: 'Whether the user is a SaaS owner',
     default: false,
     required: false

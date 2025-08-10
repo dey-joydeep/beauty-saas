@@ -1,44 +1,122 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { 
+  IsNumber, 
+  IsArray, 
+  IsObject, 
+  IsOptional, 
+  IsEnum, 
+  IsNotEmpty, 
+  Min, 
+  Max, 
+  ValidateNested,
+  IsDateString,
+  IsNotEmptyObject
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { AppointmentDto } from './appointment.dto';
 import { AppointmentStatus } from '@shared/enums/appointment-status.enum';
 
 /**
  * DTO representing an overview of appointments with statistics
+ * @class AppointmentsOverviewDto
+ * @description Contains aggregated statistics and metrics about appointments
  */
 export class AppointmentsOverviewDto {
-  @ApiProperty({ description: 'Total number of appointments' })
+  @ApiProperty({ 
+    description: 'Total number of appointments',
+    example: 150,
+    minimum: 0,
+    required: true
+  })
+  @IsNumber({}, { message: 'Total appointments must be a number' })
+  @IsNotEmpty({ message: 'Total appointments is required' })
+  @Min(0, { message: 'Total appointments cannot be negative' })
   totalAppointments!: number;
 
-  @ApiProperty({ description: 'Number of booked appointments' })
+  @ApiProperty({ 
+    description: 'Number of booked appointments',
+    example: 75,
+    minimum: 0,
+    required: true
+  })
+  @IsNumber({}, { message: 'Booked appointments must be a number' })
+  @IsNotEmpty({ message: 'Booked appointments is required' })
+  @Min(0, { message: 'Booked appointments cannot be negative' })
   bookedAppointments!: number;
 
-  @ApiProperty({ description: 'Number of completed appointments' })
+  @ApiProperty({ 
+    description: 'Number of completed appointments',
+    example: 60,
+    minimum: 0,
+    required: true
+  })
+  @IsNumber({}, { message: 'Completed appointments must be a number' })
+  @IsNotEmpty({ message: 'Completed appointments is required' })
+  @Min(0, { message: 'Completed appointments cannot be negative' })
   completedAppointments!: number;
 
-  @ApiProperty({ description: 'Number of cancelled appointments' })
+  @ApiProperty({ 
+    description: 'Number of cancelled appointments',
+    example: 15,
+    minimum: 0,
+    required: true
+  })
+  @IsNumber({}, { message: 'Cancelled appointments must be a number' })
+  @IsNotEmpty({ message: 'Cancelled appointments is required' })
+  @Min(0, { message: 'Cancelled appointments cannot be negative' })
   cancelledAppointments!: number;
 
-  @ApiProperty({ description: 'Total revenue from all appointments' })
+  @ApiProperty({ 
+    description: 'Total revenue from all appointments',
+    example: 12500.75,
+    minimum: 0,
+    required: true
+  })
+  @IsNumber({}, { message: 'Total revenue must be a number' })
+  @IsNotEmpty({ message: 'Total revenue is required' })
+  @Min(0, { message: 'Total revenue cannot be negative' })
   totalRevenue!: number;
 
-  @ApiProperty({ description: 'Average duration of appointments in minutes' })
+  @ApiProperty({ 
+    description: 'Average duration of appointments in minutes',
+    example: 60,
+    minimum: 0,
+    required: true
+  })
+  @IsNumber({}, { message: 'Average duration must be a number' })
+  @IsNotEmpty({ message: 'Average duration is required' })
+  @Min(0, { message: 'Average duration cannot be negative' })
   averageDuration!: number;
 
   @ApiProperty({ 
     type: [AppointmentDto],
-    description: 'List of upcoming appointments' 
+    description: 'List of upcoming appointments',
+    required: true
   })
+  @IsArray({ message: 'Upcoming appointments must be an array' })
+  @ValidateNested({ each: true })
+  @Type(() => AppointmentDto)
+  @IsNotEmpty({ message: 'Upcoming appointments are required' })
   upcomingAppointments!: AppointmentDto[];
 
   @ApiProperty({ 
     type: [AppointmentDto],
-    description: 'List of recent appointments' 
+    description: 'List of recent appointments',
+    required: true
   })
+  @IsArray({ message: 'Recent appointments must be an array' })
+  @ValidateNested({ each: true })
+  @Type(() => AppointmentDto)
+  @IsNotEmpty({ message: 'Recent appointments are required' })
   recentAppointments!: AppointmentDto[];
 
   @ApiProperty({
     type: 'object',
-    additionalProperties: { type: 'number' },
+    additionalProperties: { 
+      type: 'number',
+      minimum: 0,
+      description: 'Count of appointments for this status'
+    },
     description: 'Distribution of appointments by status',
     example: {
       [AppointmentStatus.PENDING]: 5,
@@ -47,20 +125,30 @@ export class AppointmentsOverviewDto {
       [AppointmentStatus.CANCELLED]: 2,
       [AppointmentStatus.NOSHOW]: 1,
       [AppointmentStatus.RESCHEDULED]: 0
-    }
+    },
+    required: true
   })
+  @IsObject({ message: 'Status distribution must be an object' })
+  @IsNotEmptyObject({}, { message: 'Status distribution cannot be empty' })
   statusDistribution!: Record<AppointmentStatus, number>;
 
   @ApiProperty({
     type: 'object',
-    additionalProperties: { type: 'number' },
+    additionalProperties: { 
+      type: 'number',
+      minimum: 0,
+      description: 'Number of appointments for the date'
+    },
     description: 'Number of appointments per day',
     example: {
       '2023-01-01': 5,
       '2023-01-02': 3,
       '2023-01-03': 7
-    }
+    },
+    required: true
   })
+  @IsObject({ message: 'Daily appointments must be an object' })
+  @IsNotEmptyObject({}, { message: 'Daily appointments cannot be empty' })
   dailyAppointments!: Record<string, number>;
 
   /**
