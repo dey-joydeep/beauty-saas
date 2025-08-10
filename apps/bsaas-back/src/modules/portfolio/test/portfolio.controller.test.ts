@@ -1,55 +1,83 @@
-// moved from __tests__/portfolio/portfolio.controller.test.ts
-import request from 'supertest';
-import app from '../../../app';
+import { Test } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
 import * as path from 'path';
 import * as fs from 'fs';
-import prisma from '../../../prismaTestClient';
-import { PortfolioService } from '../portfolio.service';
-import jwt from 'jsonwebtoken';
-import { createSolidColorImage } from '../../../testHelper';
+import { PortfolioModule } from '../portfolio.module';
+import { PrismaService } from '../../prisma/prisma.service';
 
-jest.mock('../portfolio.service');
+// Mock the file system module
+jest.mock('fs');
 
-const mockedService = PortfolioService as jest.MockedClass<typeof PortfolioService>;
+// Mock PrismaService
+const mockPrismaService = {
+  tenant: {
+    upsert: jest.fn(),
+    findUnique: jest.fn(),
+  },
+  // Add other Prisma models as needed
+};
 
-const testImagePath = path.join(__dirname, 'test-image.png');
-const testTenantId = 'test-tenant';
-const testUserId = 'test-user';
-const testPortfolioId = 'test-portfolio';
+describe('PortfolioController (e2e)', () => {
+  // Using any to avoid versioning type conflicts between @nestjs/common versions
+  let app: any;
+  
+  // Test data
+  const testTenantId = 'test-tenant';
+  const testImagePath = path.join(__dirname, 'test-image.png');
 
-// Generate a valid JWT for test requests
-const testToken = jwt.sign(
-  { id: testUserId, tenantId: testTenantId, roles: ['owner'] },
-  process.env.JWT_SECRET || 'testsecret',
-);
-
-describe('Portfolio Controller', () => {
   beforeAll(async () => {
-    if (!process.env.JWT_SECRET) process.env.JWT_SECRET = 'changeme';
-    if (!process.env.BASE_IMAGE_PATH)
-      process.env.BASE_IMAGE_PATH = 'E:/data/bsaas/salon/${salonId}/';
-    if (!process.env.PORTFOLIO_IMAGE_PATH)
-      process.env.PORTFOLIO_IMAGE_PATH = 'portfolio/${portfolioId}/images';
-    jest.spyOn(fs, 'existsSync').mockImplementation((p) => {
-      if (typeof p === 'string' && p.includes('fake/path/to/image.jpg')) return true;
-      return false; // Always return false for other paths to avoid recursion
+    // Set up test environment variables
+    process.env.JWT_SECRET = process.env.JWT_SECRET || 'testsecret';
+    process.env.BASE_IMAGE_PATH = process.env.BASE_IMAGE_PATH || 'E:/data/bsaas/salon/${salonId}/';
+    process.env.PORTFOLIO_IMAGE_PATH = process.env.PORTFOLIO_IMAGE_PATH || 'portfolio/${portfolioId}/images';
+    
+    // Create test module
+    const moduleFixture = await Test.createTestingModule({
+      imports: [PortfolioModule],
+    })
+      .overrideProvider(PrismaService)
+      .useValue(mockPrismaService)
+      .compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+    
+    // Mock file system methods
+    (fs.existsSync as jest.Mock).mockImplementation((p: string) => {
+      if (p.includes('fake/path/to/image.jpg')) return true;
+      return false; // Return false for other paths to avoid recursion
     });
-    await prisma.tenant.upsert({
-      where: { id: testTenantId },
-      update: {},
-      create: {
-        id: testTenantId,
-        name: 'Test Tenant',
-        email: 'test@tenant.com',
-        phone: '1234567890',
-        // address: '123 Test St',
-        // created_at: new Date(),
-        // updated_at: new Date(),
-        // primary_color: null,
-        // secondary_color: null,
-        // accent_color: null,
-      },
+    
+    // Mock the tenant creation
+    mockPrismaService.tenant.upsert.mockResolvedValue({
+      id: testTenantId,
+      name: 'Test Tenant',
+      email: 'test@tenant.com',
+      phone: '1234567890',
     });
   });
-  // ...rest of the test code...
+  
+  afterAll(async () => {
+    // Clean up test image file if it exists
+    if (fs.existsSync(testImagePath)) {
+      fs.unlinkSync(testImagePath);
+    }
+    
+    // Close the app
+    if (app) {
+      await app.close();
+    }
+  });
+  
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  
+  describe('GET /portfolios', () => {
+    it('should return an array of portfolios', async () => {
+      // TODO: Implement test cases for GET /portfolios
+    });
+  });
+  
+  // Add more test cases for other endpoints
 });

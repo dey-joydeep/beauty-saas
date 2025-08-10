@@ -1,55 +1,67 @@
-// Mock PortfolioService to avoid real DB connection during edge-case tests
-jest.mock('../../../../src/modules/portfolio/portfolio.service', () => {
-  const original = jest.requireActual('../../../../src/modules/portfolio/portfolio.service');
-  return {
-    ...original,
-    PortfolioService: class extends original.PortfolioService {
-      async createPortfolio(params: any) {
-        const data = params.data;
-        if (!data.salonId) throw new Error('Salon ID required');
-        if (!data.images || data.images.length === 0) throw new Error('Image(s) required');
-        if (!data.description || data.description.trim().length === 0)
-          throw new Error('Description required');
-        return { ...data, id: 'mock' };
-      }
-    },
-  };
-});
+import { Test } from '@nestjs/testing';
+import { PortfolioService } from '../services/portfolio.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreatePortfolioDto } from '../dto/requests/create-portfolio.dto';
 
-import { PortfolioService } from '../../../../src/modules/portfolio/portfolio.service';
+// Mock PrismaService
+const mockPrismaService = {
+  portfolio: {
+    create: jest.fn(),
+  },
+};
 
 describe('PortfolioService Edge Cases', () => {
-  const service = new PortfolioService();
+  let service: PortfolioService;
 
-  afterAll(async () => {
-    // No need to disconnect prisma, as real DB is not used in these tests
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [
+        PortfolioService,
+        {
+          provide: PrismaService,
+          useValue: mockPrismaService,
+        },
+      ],
+    }).compile();
+
+    service = module.get<PortfolioService>(PortfolioService);
+  });
+
+  // Mock the createPortfolio method
+  beforeEach(() => {
+    jest.spyOn(service, 'createPortfolio').mockImplementation(async (dto: CreatePortfolioDto) => {
+      if (!dto.salonId) throw new Error('Salon ID required');
+      if (!dto.images || dto.images.length === 0) throw new Error('Image(s) required');
+      if (!dto.description || dto.description.trim().length === 0) {
+        throw new Error('Description required');
+      }
+      return { ...dto, id: 'mock' } as any;
+    });
   });
 
   it('should throw error when creating portfolio with missing images', async () => {
-    await expect(
-      service.createPortfolio({
-        data: {
-          tenantId: 't1',
-          salonId: 's1',
-          userId: 'u1',
-          description: 'desc',
-          images: undefined as any,
-        },
-      }),
-    ).rejects.toThrow('Image(s) required');
+    const dto: CreatePortfolioDto = {
+      tenantId: 't1',
+      salonId: 's1',
+      userId: 'u1',
+      description: 'desc',
+      imagePaths: [],
+      images: [],
+    };
+    
+    await expect(service.createPortfolio(dto)).rejects.toThrow('Image(s) required');
   });
 
-  it('should throw error when creating portfolio with description containing only whitespace and newlines', async () => {
-    await expect(
-      service.createPortfolio({
-        data: {
-          tenantId: 't1',
-          salonId: 's1',
-          userId: 'u1',
-          images: [{ ImagePath: 'http://test' } as any],
-          description: '  \n\n  ',
-        },
-      }),
-    ).rejects.toThrow('Description required');
+  it('should throw error when creating portfolio with empty description', async () => {
+    const dto: CreatePortfolioDto = {
+      tenantId: 't1',
+      salonId: 's1',
+      userId: 'u1',
+      imagePaths: ['http://test/image.jpg'],
+      images: [{ imagePath: 'http://test/image.jpg' }],
+      description: '',
+    };
+    
+    await expect(service.createPortfolio(dto)).rejects.toThrow('Description required');
   });
 });

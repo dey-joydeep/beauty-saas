@@ -1,15 +1,25 @@
 import request from 'supertest';
-import app from '../../../app';
+import { Test } from '@nestjs/testing';
 import * as fs from 'fs';
 import path from 'path';
+import { AppModule } from '../../../app.module';
 
 const testImagePath = path.join(__dirname, 'test-image-upload.png');
-const testTenantId = 'test-tenant';
-const testUserId = 'test-user';
+// Using any to avoid versioning type conflicts between @nestjs/common versions
+let app: any;
 let token = '';
 
 beforeAll(async () => {
+  const moduleRef = await Test.createTestingModule({
+    imports: [AppModule],
+  }).compile();
+
+  app = moduleRef.createNestApplication();
+  await app.init();
+  
   token = process.env.TEST_JWT || '';
+  
+  // Create a test image file
   fs.writeFileSync(
     testImagePath,
     Buffer.from([
@@ -19,13 +29,22 @@ beforeAll(async () => {
     ]),
   );
 });
-afterAll(() => {
-  if (fs.existsSync(testImagePath)) fs.unlinkSync(testImagePath);
+
+afterAll(async () => {
+  // Clean up test image file
+  if (fs.existsSync(testImagePath)) {
+    fs.unlinkSync(testImagePath);
+  }
+  
+  // Close the app
+  if (app) {
+    await app.close();
+  }
 });
 
 describe('Portfolio API', () => {
   it('should return 401 if no token is provided', async () => {
-    const res = await request(app).get('/api/portfolio');
+    const res = await request(app.getHttpServer()).get('/api/portfolio');
     expect(res.status).toBe(401);
   });
 
