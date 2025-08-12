@@ -66,7 +66,7 @@ model SalonTenant {
   createdAt            DateTime             @default(now()) @map("created_at")
   updatedAt            DateTime             @updatedAt @map("updated_at")
 
-  @@map("salon_tenant")
+  @@map("tenant")
 }
 
 model User {
@@ -756,7 +756,7 @@ model SalonService {
   isFeatured        Boolean  @default(false) @map("is_featured")
   position          Int?     @default(0)
   createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime    @updatedAt @map("updated_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
   metadata          Json?    @db.JsonB
 
   // Relations

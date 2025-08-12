@@ -10,7 +10,7 @@
    - [ ] Eligibility:
      - [ ] Only customers with completed appointments can review
      - [ ] One review per appointment
-     - [ ] Time window for submission (e.g., within 14 days)
+     - [ ] Review can be empty if rating is provided.
    - [ ] Rating System:
      - [ ] 1-5 star rating
      - [ ] Multiple rating categories (service, cleanliness, etc.)

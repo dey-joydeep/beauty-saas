@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "public"."ReviewStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateEnum
 CREATE TYPE "public"."AppointmentStatus" AS ENUM ('booked', 'completed', 'cancelled');
 
 -- CreateEnum
@@ -29,7 +32,7 @@ CREATE TABLE "public"."business_address" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."tenant" (
+CREATE TABLE "public"."salon_tenant" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -41,7 +44,7 @@ CREATE TABLE "public"."tenant" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "tenant_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "salon_tenant_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -57,7 +60,7 @@ CREATE TABLE "public"."user" (
     "last_login_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "tenant_id" UUID,
+    "salon_tenant_id" UUID,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -120,14 +123,25 @@ CREATE TABLE "public"."salon_staff_request" (
 
 -- CreateTable
 CREATE TABLE "public"."customer" (
-    "customer_id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "user_id" UUID NOT NULL,
+    "phone" TEXT,
+    "date_of_birth" TIMESTAMP(3),
+    "gender" TEXT,
+    "address" TEXT,
+    "city" TEXT,
+    "state" TEXT,
+    "country" TEXT,
+    "postal_code" TEXT,
+    "preferred_salon_tenant_id" UUID,
     "loyalty_points" INTEGER NOT NULL DEFAULT 0,
-    "preferred_salon_id" UUID,
+    "last_visit" TIMESTAMP(3),
+    "notes" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
     "registered_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "customer_pkey" PRIMARY KEY ("customer_id")
+    CONSTRAINT "customer_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -183,29 +197,26 @@ CREATE TABLE "public"."otp" (
 
 -- CreateTable
 CREATE TABLE "public"."salon" (
-    "id" UUID NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "tenant_id" UUID NOT NULL,
+    "business_address_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
     "description" TEXT,
-    "business_address_id" UUID,
-    "latitude" DOUBLE PRECISION,
-    "longitude" DOUBLE PRECISION,
-    "phone" TEXT,
+    "phone" TEXT NOT NULL,
     "email" TEXT,
     "website" TEXT,
-    "owner_id" UUID NOT NULL,
-    "image_url" TEXT,
+    "logo_url" TEXT,
     "cover_image_url" TEXT,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "is_verified" BOOLEAN NOT NULL DEFAULT false,
-    "rating" DOUBLE PRECISION DEFAULT 0.0,
+    "is_featured" BOOLEAN NOT NULL DEFAULT false,
+    "average_rating" DECIMAL(3,2) DEFAULT 0.0,
     "review_count" INTEGER NOT NULL DEFAULT 0,
-    "working_hours" JSONB,
-    "amenities" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "renewal_date" TIMESTAMP(3),
+    "owner_id" UUID NOT NULL,
+    "metadata" JSONB,
 
     CONSTRAINT "salon_pkey" PRIMARY KEY ("id")
 );
@@ -255,35 +266,19 @@ CREATE TABLE "public"."appointment_service" (
     "appointment_id" UUID NOT NULL,
     "salon_service_id" UUID NOT NULL,
     "staff_id" UUID,
-    "scheduled_at" TIMESTAMP(3),
-    "status" TEXT NOT NULL DEFAULT 'scheduled',
-    "notes" TEXT,
-    "price" DECIMAL(10,2),
-    "duration" INTEGER,
+    "price" DECIMAL(10,2) NOT NULL,
+    "original_price" DECIMAL(10,2),
+    "discount_amount" DECIMAL(10,2),
+    "duration" INTEGER NOT NULL DEFAULT 30,
     "start_time" TIMESTAMP(3),
     "end_time" TIMESTAMP(3),
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "notes" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "metadata" JSONB,
 
     CONSTRAINT "appointment_service_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."review" (
-    "id" UUID NOT NULL,
-    "rating" INTEGER NOT NULL,
-    "comment" TEXT,
-    "response" TEXT,
-    "is_approved" BOOLEAN NOT NULL DEFAULT false,
-    "is_featured" BOOLEAN NOT NULL DEFAULT false,
-    "user_id" UUID NOT NULL,
-    "customer_id" UUID NOT NULL,
-    "tenant_id" UUID NOT NULL,
-    "appointment_id" UUID,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "review_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -318,7 +313,7 @@ CREATE TABLE "public"."social" (
 -- CreateTable
 CREATE TABLE "public"."product_sale" (
     "id" UUID NOT NULL,
-    "tenant_id" UUID NOT NULL,
+    "salon_tenant_id" UUID NOT NULL,
     "tenant_product_id" UUID NOT NULL,
     "quantity" INTEGER NOT NULL,
     "unit_price" DOUBLE PRECISION NOT NULL,
@@ -482,7 +477,7 @@ CREATE TABLE "public"."global_service" (
 -- CreateTable
 CREATE TABLE "public"."appointment" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "tenant_id" UUID NOT NULL,
+    "salon_tenant_id" UUID NOT NULL,
     "customer_id" UUID,
     "staff_id" UUID,
     "status" TEXT NOT NULL DEFAULT 'pending',
@@ -506,7 +501,7 @@ CREATE TABLE "public"."appointment" (
 -- CreateTable
 CREATE TABLE "public"."tenant_product" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "tenant_id" UUID NOT NULL,
+    "salon_tenant_id" UUID NOT NULL,
     "global_product_id" UUID,
     "product_category_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
@@ -562,6 +557,26 @@ CREATE TABLE "public"."tenant_salon_service" (
     CONSTRAINT "tenant_salon_service_pkey" PRIMARY KEY ("tenant_id","salon_service_id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."salon_service_review" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "appointment_service_id" UUID NOT NULL,
+    "rating" SMALLINT NOT NULL,
+    "comment" TEXT,
+    "response" TEXT,
+    "is_approved" BOOLEAN NOT NULL DEFAULT false,
+    "is_featured" BOOLEAN NOT NULL DEFAULT false,
+    "status" "public"."ReviewStatus" NOT NULL DEFAULT 'PENDING',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "customer_id" UUID NOT NULL,
+    "tenant_id" UUID NOT NULL,
+    "salon_service_id" UUID NOT NULL,
+    "staff_id" UUID,
+
+    CONSTRAINT "salon_service_review_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "business_address_country_id_idx" ON "public"."business_address"("country_id");
 
@@ -572,7 +587,10 @@ CREATE INDEX "business_address_state_id_idx" ON "public"."business_address"("sta
 CREATE INDEX "business_address_city_id_idx" ON "public"."business_address"("city_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tenant_email_key" ON "public"."tenant"("email");
+CREATE UNIQUE INDEX "salon_tenant_email_key" ON "public"."salon_tenant"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "salon_tenant_business_address_id_key" ON "public"."salon_tenant"("business_address_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_email_key" ON "public"."user"("email");
@@ -641,10 +659,16 @@ CREATE INDEX "otp_is_used_idx" ON "public"."otp"("is_used");
 CREATE INDEX "otp_expires_at_idx" ON "public"."otp"("expires_at");
 
 -- CreateIndex
-CREATE INDEX "salon_tenant_id_idx" ON "public"."salon"("tenant_id");
+CREATE UNIQUE INDEX "salon_business_address_id_key" ON "public"."salon"("business_address_id");
 
 -- CreateIndex
-CREATE INDEX "salon_owner_id_idx" ON "public"."salon"("owner_id");
+CREATE UNIQUE INDEX "salon_slug_key" ON "public"."salon"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "salon_owner_id_key" ON "public"."salon"("owner_id");
+
+-- CreateIndex
+CREATE INDEX "salon_tenant_id_idx" ON "public"."salon"("tenant_id");
 
 -- CreateIndex
 CREATE INDEX "salon_is_active_idx" ON "public"."salon"("is_active");
@@ -653,7 +677,10 @@ CREATE INDEX "salon_is_active_idx" ON "public"."salon"("is_active");
 CREATE INDEX "salon_is_verified_idx" ON "public"."salon"("is_verified");
 
 -- CreateIndex
-CREATE INDEX "salon_rating_idx" ON "public"."salon"("rating");
+CREATE INDEX "salon_average_rating_idx" ON "public"."salon"("average_rating");
+
+-- CreateIndex
+CREATE INDEX "salon_review_count_idx" ON "public"."salon"("review_count");
 
 -- CreateIndex
 CREATE INDEX "portfolio_tenant_id_idx" ON "public"."portfolio"("tenant_id");
@@ -677,40 +704,19 @@ CREATE INDEX "portfolio_order_idx" ON "public"."portfolio"("order");
 CREATE UNIQUE INDEX "social_account_provider_provider_user_id_key" ON "public"."social_account"("provider", "provider_user_id");
 
 -- CreateIndex
-CREATE INDEX "idx_appointment_service_appointment" ON "public"."appointment_service"("appointment_id");
+CREATE INDEX "appointment_service_appointment_id_idx" ON "public"."appointment_service"("appointment_id");
 
 -- CreateIndex
-CREATE INDEX "idx_appointment_service_salon_service" ON "public"."appointment_service"("salon_service_id");
+CREATE INDEX "appointment_service_salon_service_id_idx" ON "public"."appointment_service"("salon_service_id");
 
 -- CreateIndex
-CREATE INDEX "idx_appointment_service_staff" ON "public"."appointment_service"("staff_id");
+CREATE INDEX "appointment_service_staff_id_idx" ON "public"."appointment_service"("staff_id");
 
 -- CreateIndex
-CREATE INDEX "idx_appointment_service_scheduled_at" ON "public"."appointment_service"("scheduled_at");
+CREATE INDEX "appointment_service_status_idx" ON "public"."appointment_service"("status");
 
 -- CreateIndex
-CREATE INDEX "idx_appointment_service_status" ON "public"."appointment_service"("status");
-
--- CreateIndex
-CREATE UNIQUE INDEX "appointment_service_appointment_id_salon_service_id_key" ON "public"."appointment_service"("appointment_id", "salon_service_id");
-
--- CreateIndex
-CREATE INDEX "idx_review_user" ON "public"."review"("user_id");
-
--- CreateIndex
-CREATE INDEX "idx_review_customer" ON "public"."review"("customer_id");
-
--- CreateIndex
-CREATE INDEX "idx_review_tenant" ON "public"."review"("tenant_id");
-
--- CreateIndex
-CREATE INDEX "idx_review_appointment" ON "public"."review"("appointment_id");
-
--- CreateIndex
-CREATE INDEX "review_is_approved_idx" ON "public"."review"("is_approved");
-
--- CreateIndex
-CREATE INDEX "review_created_at_idx" ON "public"."review"("created_at");
+CREATE INDEX "appointment_service_start_time_idx" ON "public"."appointment_service"("start_time");
 
 -- CreateIndex
 CREATE INDEX "theme_is_active_idx" ON "public"."theme"("is_active");
@@ -740,7 +746,7 @@ CREATE INDEX "product_sale_sale_date_idx" ON "public"."product_sale"("sale_date"
 CREATE INDEX "product_sale_tenant_product_id_idx" ON "public"."product_sale"("tenant_product_id");
 
 -- CreateIndex
-CREATE INDEX "product_sale_tenant_id_idx" ON "public"."product_sale"("tenant_id");
+CREATE INDEX "product_sale_salon_tenant_id_idx" ON "public"."product_sale"("salon_tenant_id");
 
 -- CreateIndex
 CREATE INDEX "product_sale_appointment_id_idx" ON "public"."product_sale"("appointment_id");
@@ -812,7 +818,7 @@ CREATE INDEX "idx_global_service_category" ON "public"."global_service"("categor
 CREATE INDEX "idx_global_service_active" ON "public"."global_service"("is_active");
 
 -- CreateIndex
-CREATE INDEX "idx_appointment_tenant" ON "public"."appointment"("tenant_id");
+CREATE INDEX "idx_appointment_tenant" ON "public"."appointment"("salon_tenant_id");
 
 -- CreateIndex
 CREATE INDEX "idx_appointment_customer" ON "public"."appointment"("customer_id");
@@ -833,7 +839,7 @@ CREATE UNIQUE INDEX "tenant_product_sku_key" ON "public"."tenant_product"("sku")
 CREATE UNIQUE INDEX "tenant_product_barcode_key" ON "public"."tenant_product"("barcode");
 
 -- CreateIndex
-CREATE INDEX "idx_tenant_product_tenant" ON "public"."tenant_product"("tenant_id");
+CREATE INDEX "idx_tenant_product_tenant" ON "public"."tenant_product"("salon_tenant_id");
 
 -- CreateIndex
 CREATE INDEX "idx_tenant_product_global" ON "public"."tenant_product"("global_product_id");
@@ -865,6 +871,27 @@ CREATE INDEX "idx_tenant_salon_service_active" ON "public"."tenant_salon_service
 -- CreateIndex
 CREATE INDEX "idx_tenant_salon_service_added" ON "public"."tenant_salon_service"("added_at");
 
+-- CreateIndex
+CREATE INDEX "salon_service_review_customer_id_idx" ON "public"."salon_service_review"("customer_id");
+
+-- CreateIndex
+CREATE INDEX "salon_service_review_tenant_id_salon_service_id_idx" ON "public"."salon_service_review"("tenant_id", "salon_service_id");
+
+-- CreateIndex
+CREATE INDEX "salon_service_review_staff_id_idx" ON "public"."salon_service_review"("staff_id");
+
+-- CreateIndex
+CREATE INDEX "salon_service_review_status_idx" ON "public"."salon_service_review"("status");
+
+-- CreateIndex
+CREATE INDEX "salon_service_review_is_approved_idx" ON "public"."salon_service_review"("is_approved");
+
+-- CreateIndex
+CREATE INDEX "salon_service_review_is_featured_idx" ON "public"."salon_service_review"("is_featured");
+
+-- CreateIndex
+CREATE INDEX "salon_service_review_created_at_idx" ON "public"."salon_service_review"("created_at");
+
 -- AddForeignKey
 ALTER TABLE "public"."business_address" ADD CONSTRAINT "business_address_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "public"."country"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -875,10 +902,10 @@ ALTER TABLE "public"."business_address" ADD CONSTRAINT "business_address_state_i
 ALTER TABLE "public"."business_address" ADD CONSTRAINT "business_address_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "public"."city"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."tenant" ADD CONSTRAINT "tenant_business_address_id_fkey" FOREIGN KEY ("business_address_id") REFERENCES "public"."business_address"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."salon_tenant" ADD CONSTRAINT "salon_tenant_business_address_id_fkey" FOREIGN KEY ("business_address_id") REFERENCES "public"."business_address"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."user" ADD CONSTRAINT "user_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."user" ADD CONSTRAINT "user_salon_tenant_id_fkey" FOREIGN KEY ("salon_tenant_id") REFERENCES "public"."salon_tenant"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."user_role" ADD CONSTRAINT "user_role_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -902,10 +929,10 @@ ALTER TABLE "public"."salon_staff_request" ADD CONSTRAINT "salon_staff_request_s
 ALTER TABLE "public"."customer" ADD CONSTRAINT "customer_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."customer" ADD CONSTRAINT "customer_preferred_salon_id_fkey" FOREIGN KEY ("preferred_salon_id") REFERENCES "public"."salon"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."customer" ADD CONSTRAINT "customer_preferred_salon_tenant_id_fkey" FOREIGN KEY ("preferred_salon_tenant_id") REFERENCES "public"."salon_tenant"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."coupon" ADD CONSTRAINT "coupon_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."coupon" ADD CONSTRAINT "coupon_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."salon_tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."user_coupon" ADD CONSTRAINT "user_coupon_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -920,16 +947,16 @@ ALTER TABLE "public"."user_coupon" ADD CONSTRAINT "user_coupon_customer_fkey" FO
 ALTER TABLE "public"."otp" ADD CONSTRAINT "otp_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."salon" ADD CONSTRAINT "salon_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."salon" ADD CONSTRAINT "salon_business_address_id_fkey" FOREIGN KEY ("business_address_id") REFERENCES "public"."business_address"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."salon" ADD CONSTRAINT "salon_business_address_id_fkey" FOREIGN KEY ("business_address_id") REFERENCES "public"."business_address"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."salon" ADD CONSTRAINT "salon_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "public"."user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."portfolio" ADD CONSTRAINT "portfolio_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."salon" ADD CONSTRAINT "salon_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."salon_tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."portfolio" ADD CONSTRAINT "portfolio_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."salon_tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."portfolio" ADD CONSTRAINT "portfolio_salon_id_fkey" FOREIGN KEY ("salon_id") REFERENCES "public"."salon"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -953,22 +980,10 @@ ALTER TABLE "public"."appointment_service" ADD CONSTRAINT "appointment_service_s
 ALTER TABLE "public"."appointment_service" ADD CONSTRAINT "appointment_service_staff_id_fkey" FOREIGN KEY ("staff_id") REFERENCES "public"."salon_tenant_staff"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."review" ADD CONSTRAINT "review_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."review" ADD CONSTRAINT "review_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "public"."customer"("customer_id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."review" ADD CONSTRAINT "review_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."review" ADD CONSTRAINT "review_appointment_id_fkey" FOREIGN KEY ("appointment_id") REFERENCES "public"."appointment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "public"."social" ADD CONSTRAINT "social_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."product_sale" ADD CONSTRAINT "product_sale_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."product_sale" ADD CONSTRAINT "product_sale_salon_tenant_id_fkey" FOREIGN KEY ("salon_tenant_id") REFERENCES "public"."salon_tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."product_sale" ADD CONSTRAINT "product_sale_tenant_product_id_fkey" FOREIGN KEY ("tenant_product_id") REFERENCES "public"."tenant_product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -983,7 +998,7 @@ ALTER TABLE "public"."product_sale" ADD CONSTRAINT "product_sale_appointment_id_
 ALTER TABLE "public"."product_sale" ADD CONSTRAINT "product_sale_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "public"."user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."product_sale" ADD CONSTRAINT "product_sale_customer_ref_fkey" FOREIGN KEY ("customer_id") REFERENCES "public"."customer"("customer_id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."product_sale" ADD CONSTRAINT "product_sale_customer_ref_fkey" FOREIGN KEY ("customer_id") REFERENCES "public"."customer"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."state" ADD CONSTRAINT "state_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "public"."country"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -1007,19 +1022,19 @@ ALTER TABLE "public"."global_product" ADD CONSTRAINT "global_product_category_id
 ALTER TABLE "public"."global_service" ADD CONSTRAINT "global_service_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."service_category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."appointment" ADD CONSTRAINT "appointment_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."appointment" ADD CONSTRAINT "appointment_salon_tenant_id_fkey" FOREIGN KEY ("salon_tenant_id") REFERENCES "public"."salon_tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."appointment" ADD CONSTRAINT "appointment_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "public"."user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."appointment" ADD CONSTRAINT "appointment_customer_ref_fkey" FOREIGN KEY ("customer_id") REFERENCES "public"."customer"("customer_id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."appointment" ADD CONSTRAINT "appointment_customer_ref_fkey" FOREIGN KEY ("customer_id") REFERENCES "public"."customer"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."appointment" ADD CONSTRAINT "appointment_staff_id_fkey" FOREIGN KEY ("staff_id") REFERENCES "public"."salon_tenant_staff"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."tenant_product" ADD CONSTRAINT "tenant_product_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."tenant_product" ADD CONSTRAINT "tenant_product_salon_tenant_id_fkey" FOREIGN KEY ("salon_tenant_id") REFERENCES "public"."salon_tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."tenant_product" ADD CONSTRAINT "tenant_product_global_product_id_fkey" FOREIGN KEY ("global_product_id") REFERENCES "public"."global_product"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -1037,7 +1052,19 @@ ALTER TABLE "public"."salon_service" ADD CONSTRAINT "salon_service_service_categ
 ALTER TABLE "public"."salon_service" ADD CONSTRAINT "salon_service_global_service_id_fkey" FOREIGN KEY ("global_service_id") REFERENCES "public"."global_service"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."tenant_salon_service" ADD CONSTRAINT "tenant_salon_service_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."tenant_salon_service" ADD CONSTRAINT "tenant_salon_service_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "public"."salon_tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."tenant_salon_service" ADD CONSTRAINT "tenant_salon_service_salon_service_id_fkey" FOREIGN KEY ("salon_service_id") REFERENCES "public"."salon_service"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."salon_service_review" ADD CONSTRAINT "salon_service_review_appointment_service_id_fkey" FOREIGN KEY ("appointment_service_id") REFERENCES "public"."appointment_service"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."salon_service_review" ADD CONSTRAINT "salon_service_review_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "public"."customer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."salon_service_review" ADD CONSTRAINT "salon_service_review_tenant_id_salon_service_id_fkey" FOREIGN KEY ("tenant_id", "salon_service_id") REFERENCES "public"."tenant_salon_service"("tenant_id", "salon_service_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."salon_service_review" ADD CONSTRAINT "salon_service_review_staff_id_fkey" FOREIGN KEY ("staff_id") REFERENCES "public"."salon_tenant_staff"("id") ON DELETE SET NULL ON UPDATE CASCADE;
