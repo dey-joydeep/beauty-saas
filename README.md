@@ -88,14 +88,24 @@ beauty-saas/
 
 ### Run applications
 
-- **Start frontend in development mode**
+- **Start admin dashboard in development mode**
   ```bash
-  npx nx serve bsaas-front
+  npx nx serve admin
   ```
 
-- **Start backend in development mode**
+- **Start partner portal in development mode**
   ```bash
-  npx nx serve bsaas-back
+  npx nx serve partner
+  ```
+
+- **Start customer app in development mode**
+  ```bash
+  npx nx serve customer
+  ```
+
+- **Start backend API in development mode**
+  ```bash
+  npx nx serve api
   ```
 
 ### Build applications
@@ -107,8 +117,13 @@ beauty-saas/
 
 - **Build specific application**
   ```bash
-  npx nx build bsaas-front
-  npx nx build bsaas-back
+  # Frontend apps
+  npx nx build admin
+  npx nx build partner
+  npx nx build customer
+  
+  # Backend
+  npx nx build api
   ```
 
 ### Testing
@@ -120,13 +135,19 @@ beauty-saas/
 
 - **Run tests for specific project**
   ```bash
-  npx nx test bsaas-front
-  npx nx test bsaas-back
+  # Frontend apps
+  npx nx test admin
+  npx nx test partner
+  npx nx test customer
+  
+  # Backend
+  npx nx test api
   ```
 
 - **Run tests in watch mode**
   ```bash
-  npx nx test bsaas-front --watch
+  # Example for admin app
+  npx nx test admin --watch
   ```
 
 ### Linting
@@ -145,12 +166,16 @@ beauty-saas/
 
 ### Apps
 
-- **bsaas-front**: Angular-based frontend application
-- **bsaas-back**: NestJS-based backend API
+- **admin**: Admin dashboard (Angular)
+- **partner**: Partner portal (Angular)
+- **customer**: Customer application (Angular)
+- **api**: Backend API (NestJS)
 
 ### Libraries
 
 - **shared**: Code shared between frontend and backend (DTOs, interfaces, utilities)
+- **frontend**: Shared frontend components and services
+- **ui**: Shared UI components library
 
 ## 🔧 Tools
 

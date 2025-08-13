@@ -79,7 +79,7 @@
         "server": {
           "builder": "@angular-devkit/build-angular:server",
           "options": {
-            "outputPath": "dist/bsaas-front/server",
+            "outputPath": "dist/apps/web/admin/server",
             "main": "src/server.ts",
             "tsConfig": "tsconfig.server.json",
             "sourceMap": true,

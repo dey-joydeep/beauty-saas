@@ -1,13 +1,13 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../../dist/apps/bsaas-front",
+    "outDir": "../../../dist/apps/web/customer",
     "baseUrl": ".",
     "paths": {
       "@env/*": ["src/environments/*"],
       "@app/*": ["src/app/*"],
-      "@shared/*": ["../../libs/shared/src/*"],
-      "@frontend-shared/*": ["../../libs/frontend/src/app/*"]
+      "@shared/*": ["../../../libs/shared/src/*"],
+      "@frontend-shared/*": ["../../../libs/frontend/src/app/*"]
     },
     "types": ["node", "jest"]
   },

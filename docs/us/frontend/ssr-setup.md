@@ -15,10 +15,18 @@ Add these scripts to `package.json` in the project root:
 
 ```json
 "scripts": {
-  "dev:ssr": "nx serve-ssr bsaas-front",
-  "serve:ssr": "node dist/apps/bsaas-front/server/server.mjs",
-  "build:ssr": "nx build bsaas-front && nx build bsaas-front --configuration=production && nx server bsaas-front --configuration=production",
-  "prerender": "nx prerender bsaas-front"
+  "dev:ssr:admin": "nx serve-ssr admin",
+  "dev:ssr:partner": "nx serve-ssr partner",
+  "dev:ssr:customer": "nx serve-ssr customer",
+  "serve:ssr:admin": "node dist/apps/web/admin/server/server.mjs",
+  "serve:ssr:partner": "node dist/apps/web/partner/server/server.mjs",
+  "serve:ssr:customer": "node dist/apps/web/customer/server/server.mjs",
+  "build:ssr:admin": "nx build admin && nx build admin --configuration=production && nx server admin --configuration=production",
+  "build:ssr:partner": "nx build partner && nx build partner --configuration=production && nx server partner --configuration=production",
+  "build:ssr:customer": "nx build customer && nx build customer --configuration=production && nx server customer --configuration=production",
+  "prerender:admin": "nx prerender admin",
+  "prerender:partner": "nx prerender partner",
+  "prerender:customer": "nx prerender customer"
 }
 ```
 
@@ -45,10 +53,10 @@ npm run prerender
 ```
 
 ## Key Files
-- `apps/bsaas-front/src/main.server.ts` - Server entry point
-- `apps/bsaas-front/src/app/app.config.server.ts` - Server configuration
-- `apps/bsaas-front/tsconfig.server.json` - TypeScript config for server
-- `apps/bsaas-front/server.ts` - Express server implementation
+- `apps/web/[app-name]/src/main.server.ts` - Server entry point
+- `apps/web/[app-name]/src/app/app.config.server.ts` - Server configuration
+- `apps/web/[app-name]/tsconfig.server.json` - TypeScript config for server
+- `apps/web/[app-name]/server.ts` - Express server implementation
 
 ## Notes
 - SSR requires Node.js server environment
