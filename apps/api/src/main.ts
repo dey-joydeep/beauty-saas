@@ -1,28 +1,54 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
-import { ClassSerializerInterceptor, ValidationPipe, VersioningType } from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import { ConfigService } from './config/config.service';
+import { ConfigModule } from './config/config.module';
+import { useContainer } from 'class-validator';
+import { json, urlencoded } from 'express';
 import morgan from 'morgan';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { JwtAuthGuard } from './core/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './core/auth/guards/roles.guard';
 
-export async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
-    const configService = app.get(ConfigService);
-    const port = configService.get<number>('PORT', 3000);
-    const nodeEnv = configService.get<string>('NODE_ENV', 'development');
-    const corsOrigin = configService.get<string>('CORS_ORIGIN', 'http://localhost:4200');
+async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  
+  // Create the application with logging
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+    bufferLogs: true,
+  });
 
-    // Enable CORS
-    app.enableCors({
-        origin: corsOrigin.split(',').map(origin => origin.trim()),
+  // Get config service
+  const configService = app.select(ConfigModule).get(ConfigService);
+  const { port, nodeEnv, isProduction } = configService.app;
+  const { origins, methods, allowedHeaders, exposedHeaders, credentials, maxAge } = configService.cors;
+                    return callback(null, true);
+                }
+            } catch (e) {
+                // If URL parsing fails, deny the request
+                return callback(new Error('Invalid origin'));
+            }
+            
+            callback(new Error('Not allowed by CORS'));
+        },
         credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+        allowedHeaders: [
+            'Content-Type', 
+            'Authorization', 
+            'X-Requested-With', 
+            'Accept',
+            'X-XSRF-TOKEN',
+            'X-Request-Id'
+        ],
+        exposedHeaders: ['X-Request-Id'],
+        maxAge: 600, // 10 minutes
     });
 
     // Security middleware

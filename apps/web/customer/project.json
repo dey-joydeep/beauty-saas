@@ -1,5 +1,5 @@
 {
-  "name": "bsaas-front",
+  "name": "customer",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "src",
@@ -8,16 +8,16 @@
       "executor": "@nx/angular:webpack-browser",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/bsaas-front",
-        "index": "apps/bsaas-front/src/index.html",
-        "main": "apps/bsaas-front/src/main.ts",
-        "polyfills": "apps/bsaas-front/src/polyfills.ts",
-        "tsConfig": "apps/bsaas-front/tsconfig.app.json",
+        "outputPath": "dist/apps/customer",
+        "index": "src/index.html",
+        "main": "src/main.ts",
+        "polyfills": "src/polyfills.ts",
+        "tsConfig": "tsconfig.app.json",
         "assets": [
-          { "glob": "**/*", "input": "apps/bsaas-front/src/assets", "output": "/assets/" },
-          { "glob": "favicon.ico", "input": "apps/bsaas-front/src", "output": "/" }
+          { "glob": "**/*", "input": "src/assets", "output": "/assets/" },
+          { "glob": "favicon.ico", "input": "src", "output": "/" }
         ],
-        "styles": ["apps/bsaas-front/src/styles.scss"],
+        "styles": ["src/styles.scss"],
         "scripts": []
       },
       "configurations": {
@@ -26,8 +26,8 @@
           "extractLicenses": true,
           "fileReplacements": [
             {
-              "replace": "apps/bsaas-front/src/environments/environment.ts",
-              "with": "apps/bsaas-front/src/environments/environment.prod.ts"
+              "replace": "src/environments/environment.ts",
+              "with": "src/environments/environment.prod.ts"
             }
           ]
         },
@@ -42,16 +42,16 @@
     "serve": {
       "executor": "@nx/angular:dev-server",
       "options": {
-        "buildTarget": "bsaas-front:build:development",
+        "buildTarget": "customer:build:development",
         "port": 4200,
         "host": "localhost"
       },
       "configurations": {
         "production": {
-          "buildTarget": "bsaas-front:build:production"
+          "buildTarget": "customer:build:production"
         },
         "development": {
-          "buildTarget": "bsaas-front:build:development"
+          "buildTarget": "customer:build:development"
         }
       },
       "defaultConfiguration": "development"
@@ -60,7 +60,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "bsaas-front/jest.config.ts",
+        "jestConfig": "jest.config.ts",
         "passWithNoTests": true
       }
     },
@@ -68,8 +68,8 @@
       "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
-          "bsaas-front/**/*.ts",
-          "bsaas-front/**/*.html"
+          "src/**/*.ts",
+          "src/**/*.html"
         ]
       }
     }

@@ -4,37 +4,44 @@
 
 A modern, scalable beauty salon management platform built with Nx, Angular, and NestJS.
 
-> **Last Updated**: August 2, 2025
+> **Last Updated**: August 13, 2025
 
 ## 🏗️ Project Structure
 
 ```text
 beauty-saas/
 ├── apps/
-│   ├── bsaas-front/      # Frontend application (Angular)
-│   ├── bsaas-back/       # Backend API (NestJS)
-│   └── bsaas-docs/       # Documentation site
+│   ├── web/              # Frontend applications
+│   │   ├── admin/        # Admin dashboard (Angular)
+│   │   ├── partner/      # Partner portal (Angular)
+│   │   └── customer/     # Customer app (Angular)
+│   └── api/              # Backend API (NestJS)
+│
 ├── libs/                 # Shared libraries
-│   └── shared/           # Shared code between frontend and backend
-├── scripts/              # Utility scripts
-├── .github/              # GitHub workflows
-├── .husky/               # Git hooks
-└── .vscode/              # VS Code settings
+│   ├── shared/           # Shared types and utilities
+│   ├── ui/              # Shared UI components
+│   └── feature/*        # Feature libraries
+│
+├── docs/                # Project documentation
+├── scripts/             # Utility scripts
+├── .github/             # GitHub workflows
+└── .vscode/            # VS Code settings
 ```
 
 ## 🚀 Development Setup
 
 ### Prerequisites
 
-- Node.js 18+
-- npm 9+
-- Docker 20.10+ (optional, for local database)
-- Git 2.35+
-- Nx CLI (optional): `npm install -g nx`
+- Node.js 20+
+- npm 10+
+- Docker 24.0+ (for local development)
+- Git 2.40+
+- Nx CLI (recommended): `npm install -g nx`
 
 ### Getting Started
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-org/beauty-saas.git
    cd beauty-saas
@@ -48,31 +55,33 @@ beauty-saas/
 
 3. **Set up environment variables**
 
+   - Copy `.env.example` to `.env` in the `apps/api` directory
+   - Update the values in `.env` as needed for your local setup
+   - For frontend, configure environment files in `apps/web/*/src/environments/`
+
+4. **Start the development servers**
+
+   Start the backend API:
    ```bash
-   cp .env.example .env
-   # Update the .env file with your configuration
+   nx serve api
    ```
 
-4. **Start development servers**
-
-   Start the frontend:
+   In a separate terminal, start the frontend application:
    ```bash
-   npm run dev:frontend
-   ```
-
-   In a separate terminal, start the backend:
-   ```bash
-   npm run dev:api
-   ```
-
-   For documentation:
-   ```bash
-   npm run dev:docs
+   # For admin dashboard
+   nx serve web-admin
+   
+   # Or for partner portal
+   nx serve web-partner
+   
+   # Or for customer app
+   nx serve web-customer
    ```
 
 5. **Run database migrations**
+
    ```bash
-   npx nx run bsaas-back:db:migrate
+   npx nx run api:db:migrate
    ```
 
 ## 🛠 Development Commands

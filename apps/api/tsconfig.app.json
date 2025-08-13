@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/apps/bsaas-back",
+    "outDir": "../../dist/apps/api",
     "types": ["node"]
   },
   "files": ["src/main.ts"],

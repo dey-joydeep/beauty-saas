@@ -1,17 +1,17 @@
 {
-  "name": "bsaas-back",
+  "name": "api",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "apps/bsaas-back/src",
+  "sourceRoot": "apps/api/src",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/bsaas-back",
-        "main": "apps/bsaas-back/src/main.ts",
-        "tsConfig": "apps/bsaas-back/tsconfig.app.json",
-        "assets": ["apps/bsaas-back/src/assets"],
+        "outputPath": "dist/apps/api",
+        "main": "apps/api/src/main.ts",
+        "tsConfig": "apps/api/tsconfig.app.json",
+        "assets": ["apps/api/src/assets"],
         "generatePackageJson": true,
         "incremental": true
       },
@@ -22,8 +22,8 @@
           "inspect": false,
           "fileReplacements": [
             {
-              "replace": "apps/bsaas-back/src/environments/environment.ts",
-              "with": "apps/bsaas-back/src/environments/environment.prod.ts"
+              "replace": "apps/api/src/environments/environment.ts",
+              "with": "apps/api/src/environments/environment.prod.ts"
             }
           ]
         }
@@ -32,19 +32,19 @@
     "serve": {
       "executor": "@nx/js:node",
       "options": {
-        "buildTarget": "bsaas-back:build"
+        "buildTarget": "api:build"
       },
       "configurations": {
         "production": {
-          "buildTarget": "bsaas-back:build:production"
+          "buildTarget": "api:build:production"
         }
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/apps/bsaas-back"],
+      "outputs": ["{workspaceRoot}/coverage/apps/api"],
       "options": {
-        "jestConfig": "apps/bsaas-back/jest.config.ts",
+        "jestConfig": "apps/api/jest.config.ts",
         "passWithNoTests": true,
         "codeCoverage": false
       }
