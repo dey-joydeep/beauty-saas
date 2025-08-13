@@ -1,10 +1,4 @@
-// Define our local UserRole enum to be used in decorators and type checking
-export enum AppUserRole {
-  ADMIN = 'ADMIN',
-  OWNER = 'OWNER',
-  STAFF = 'STAFF',
-  CUSTOMER = 'CUSTOMER'
-}
+import { AppUserRole } from '@shared/types/user.types';
 
 export interface AuthenticatedUser {
   id: string;
