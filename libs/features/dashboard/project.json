@@ -1,0 +1,48 @@
+{
+    "name": "@beauty-saas/features-dashboard",
+    "sourceRoot": "libs/features/dashboard/src",
+    "targets": {
+        "test": {
+            "outputs": [
+                "{workspaceRoot}/coverage/libs/features/dashboard"
+            ],
+            "executor": "@nx/jest:jest",
+            "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/features/dashboard/jest.config.ts"
+            }
+        },
+        "build": {
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "executor": "@nx/js:tsc",
+            "options": {
+                "main": "libs/features/dashboard/src/index.ts",
+                "tsConfig": "libs/features/dashboard/tsconfig.lib.json",
+                "packageJson": "libs/features/dashboard/package.json",
+                "assets": [
+                    "libs/features/dashboard/*.md"
+                ],
+                "outputPath": "dist/libs/features/dashboard"
+            }
+        },
+        "lint": {
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "executor": "@nx/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/features/dashboard/**/*.ts"
+                ]
+            }
+        }
+    },
+    "projectType": "library",
+    "tags": [
+        "scope:feature",
+        "type:feature-dashboard"
+    ],
+    "prefix": "beauty-saas"
+}

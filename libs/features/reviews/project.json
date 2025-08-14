@@ -1,0 +1,48 @@
+{
+    "name": "@beauty-saas/features-reviews",
+    "sourceRoot": "libs/features/reviews/src",
+    "targets": {
+        "test": {
+            "outputs": [
+                "{workspaceRoot}/coverage/libs/features/reviews"
+            ],
+            "executor": "@nx/jest:jest",
+            "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/features/reviews/jest.config.ts"
+            }
+        },
+        "build": {
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "executor": "@nx/js:tsc",
+            "options": {
+                "main": "libs/features/reviews/src/index.ts",
+                "tsConfig": "libs/features/reviews/tsconfig.lib.json",
+                "packageJson": "libs/features/reviews/package.json",
+                "assets": [
+                    "libs/features/reviews/*.md"
+                ],
+                "outputPath": "dist/libs/features/reviews"
+            }
+        },
+        "lint": {
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "executor": "@nx/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/features/reviews/**/*.ts"
+                ]
+            }
+        }
+    },
+    "projectType": "library",
+    "tags": [
+        "scope:feature",
+        "type:feature-reviews"
+    ],
+    "prefix": "beauty-saas"
+}

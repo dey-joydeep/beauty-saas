@@ -1,0 +1,49 @@
+{
+    "name": "@beauty-saas/core",
+    "sourceRoot": "libs/core/src",
+    "targets": {
+        "lint": {
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "executor": "@nx/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/core/**/*.ts",
+                    "libs/core/**/*.html"
+                ]
+            }
+        },
+        "build": {
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "executor": "@nx/js:tsc",
+            "options": {
+                "main": "libs/core/src/index.ts",
+                "tsConfig": "libs/core/tsconfig.lib.json",
+                "packageJson": "libs/core/package.json",
+                "assets": [
+                    "libs/core/*.md"
+                ],
+                "outputPath": "dist/libs/core"
+            }
+        },
+        "test": {
+            "outputs": [
+                "{workspaceRoot}/coverage/libs/core"
+            ],
+            "executor": "@nx/jest:jest",
+            "options": {
+                "passWithNoTests": true,
+                "jestConfig": "jest.preset.ts"
+            }
+        }
+    },
+    "projectType": "library",
+    "tags": [
+        "scope:core",
+        "type:core"
+    ],
+    "prefix": "beauty-saas"
+}

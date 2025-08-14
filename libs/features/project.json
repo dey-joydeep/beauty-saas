@@ -1,8 +1,12 @@
 {
-    "name": "shared",
-    "$schema": "../../node_modules/nx/schemas/project-schema.json",
-    "sourceRoot": "libs/shared/src",
+    "name": "@beauty-saas/features",
     "projectType": "library",
+    "sourceRoot": "libs/features/src",
+    "prefix": "beauty-saas",
+    "tags": [
+        "scope:features",
+        "type:features"
+    ],
     "targets": {
         "build": {
             "executor": "@nx/js:tsc",
@@ -10,11 +14,12 @@
                 "{options.outputPath}"
             ],
             "options": {
-                "outputPath": "dist/libs/shared",
-                "main": "libs/shared/src/index.ts",
-                "tsConfig": "libs/shared/tsconfig.lib.json",
+                "outputPath": "dist/libs/features",
+                "tsConfig": "libs/features/tsconfig.lib.json",
+                "packageJson": "libs/features/package.json",
+                "main": "libs/features/src/index.ts",
                 "assets": [
-                    "libs/shared/*.md"
+                    "libs/features/*.md"
                 ]
             }
         },
@@ -25,20 +30,20 @@
             ],
             "options": {
                 "lintFilePatterns": [
-                    "libs/shared/**/*.ts"
+                    "libs/features/**/*.ts",
+                    "libs/features/**/*.html"
                 ]
             }
         },
         "test": {
             "executor": "@nx/jest:jest",
             "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
+                "{workspaceRoot}/coverage/libs/features"
             ],
             "options": {
                 "jestConfig": "jest.preset.ts",
                 "passWithNoTests": true
             }
         }
-    },
-    "tags": []
+    }
 }

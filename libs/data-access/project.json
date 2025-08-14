@@ -1,8 +1,12 @@
 {
-    "name": "shared",
-    "$schema": "../../node_modules/nx/schemas/project-schema.json",
-    "sourceRoot": "libs/shared/src",
+    "name": "@beauty-saas/data-access",
     "projectType": "library",
+    "sourceRoot": "libs/data-access/src",
+    "prefix": "beauty-saas",
+    "tags": [
+        "scope:data-access",
+        "type:data-access"
+    ],
     "targets": {
         "build": {
             "executor": "@nx/js:tsc",
@@ -10,11 +14,12 @@
                 "{options.outputPath}"
             ],
             "options": {
-                "outputPath": "dist/libs/shared",
-                "main": "libs/shared/src/index.ts",
-                "tsConfig": "libs/shared/tsconfig.lib.json",
+                "outputPath": "dist/libs/data-access",
+                "tsConfig": "libs/data-access/tsconfig.lib.json",
+                "packageJson": "libs/data-access/package.json",
+                "main": "libs/data-access/src/index.ts",
                 "assets": [
-                    "libs/shared/*.md"
+                    "libs/data-access/*.md"
                 ]
             }
         },
@@ -25,20 +30,20 @@
             ],
             "options": {
                 "lintFilePatterns": [
-                    "libs/shared/**/*.ts"
+                    "libs/data-access/**/*.ts",
+                    "libs/data-access/**/*.html"
                 ]
             }
         },
         "test": {
             "executor": "@nx/jest:jest",
             "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
+                "{workspaceRoot}/coverage/libs/data-access"
             ],
             "options": {
                 "jestConfig": "jest.preset.ts",
                 "passWithNoTests": true
             }
         }
-    },
-    "tags": []
+    }
 }

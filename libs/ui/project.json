@@ -1,0 +1,49 @@
+{
+    "name": "@beauty-saas/ui",
+    "sourceRoot": "libs/ui/src",
+    "targets": {
+        "lint": {
+            "executor": "@nx/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/ui/**/*.ts",
+                    "libs/ui/**/*.html"
+                ]
+            }
+        },
+        "build": {
+            "outputs": [
+                "{workspaceRoot}/dist/libs/ui"
+            ],
+            "defaultConfiguration": "production",
+            "executor": "@nx/angular:package",
+            "configurations": {
+                "development": {
+                    "tsConfig": "libs/ui/tsconfig.lib.json"
+                },
+                "production": {
+                    "tsConfig": "libs/ui/tsconfig.lib.prod.json"
+                }
+            },
+            "options": {
+                "project": "libs/ui/ng-package.json"
+            }
+        },
+        "test": {
+            "outputs": [
+                "{workspaceRoot}/coverage/libs/ui"
+            ],
+            "executor": "@nx/jest:jest",
+            "options": {
+                "passWithNoTests": true,
+                "jestConfig": "jest.preset.ts"
+            }
+        }
+    },
+    "projectType": "library",
+    "tags": [
+        "scope:ui",
+        "type:ui"
+    ],
+    "prefix": "beauty-saas"
+}

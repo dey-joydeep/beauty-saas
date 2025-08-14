@@ -1,0 +1,48 @@
+{
+    "name": "@beauty-saas/features-appointments",
+    "sourceRoot": "libs/features/appointments/src",
+    "targets": {
+        "test": {
+            "outputs": [
+                "{workspaceRoot}/coverage/libs/features/appointments"
+            ],
+            "executor": "@nx/jest:jest",
+            "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/features/appointments/jest.config.ts"
+            }
+        },
+        "build": {
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "executor": "@nx/js:tsc",
+            "options": {
+                "main": "libs/features/appointments/src/index.ts",
+                "tsConfig": "libs/features/appointments/tsconfig.lib.json",
+                "packageJson": "libs/features/appointments/package.json",
+                "assets": [
+                    "libs/features/appointments/*.md"
+                ],
+                "outputPath": "dist/libs/features/appointments"
+            }
+        },
+        "lint": {
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "executor": "@nx/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/features/appointments/**/*.ts"
+                ]
+            }
+        }
+    },
+    "projectType": "library",
+    "tags": [
+        "scope:feature",
+        "type:feature-appointments"
+    ],
+    "prefix": "beauty-saas"
+}

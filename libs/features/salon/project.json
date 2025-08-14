@@ -1,0 +1,48 @@
+{
+    "name": "@beauty-saas/features-salon",
+    "sourceRoot": "libs/features/salon/src",
+    "targets": {
+        "test": {
+            "outputs": [
+                "{workspaceRoot}/coverage/libs/features/salon"
+            ],
+            "executor": "@nx/jest:jest",
+            "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/features/salon/jest.config.ts"
+            }
+        },
+        "build": {
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "executor": "@nx/js:tsc",
+            "options": {
+                "main": "libs/features/salon/src/index.ts",
+                "tsConfig": "libs/features/salon/tsconfig.lib.json",
+                "packageJson": "libs/features/salon/package.json",
+                "assets": [
+                    "libs/features/salon/*.md"
+                ],
+                "outputPath": "dist/libs/features/salon"
+            }
+        },
+        "lint": {
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "executor": "@nx/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/features/salon/**/*.ts"
+                ]
+            }
+        }
+    },
+    "projectType": "library",
+    "tags": [
+        "scope:feature",
+        "type:feature-salon"
+    ],
+    "prefix": "beauty-saas"
+}
