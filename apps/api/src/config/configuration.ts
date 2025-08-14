@@ -114,7 +114,7 @@ export const configuration = registerAs('config', () => ({
   },
 }));
 
-exonst validationSchema = Joi.object<Config>({
+export const validationSchema = Joi.object<Config>({
   app: Joi.object({
     port: Joi.number().default(3000),
     nodeEnv: Joi.string().valid('development', 'production', 'test').default('development'),
