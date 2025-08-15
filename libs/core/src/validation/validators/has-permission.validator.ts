@@ -1,5 +1,5 @@
 import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments, registerDecorator, ValidationOptions } from 'class-validator';
-import { AppUserRole } from '@shared/types/user.types';
+import { AppUserRole } from '@beauty-saas/shared';
 
 /**
  * Role hierarchy definition - defines which roles can assign which other roles
@@ -26,17 +26,22 @@ const ROLE_ASSIGNMENT_PERMISSIONS: Record<AppUserRole, AppUserRole[]> = {
 export class HasPermissionToAssignRoleConstraint implements ValidatorConstraintInterface {
   validate(roleToAssign: AppUserRole, args: ValidationArguments) {
     // Get the current user's roles from the request object
-    const request = (args.object as any).request;
-    if (!request || !request.user || !Array.isArray(request.user.roles)) {
+    const request = (args.object as { request?: { user?: { roles?: Array<{ name: AppUserRole }> } } }).request;
+    if (!request?.user?.roles || !Array.isArray(request.user.roles)) {
       return false;
     }
 
-    const userRoles = request.user.roles.map((r: any) => r.name as AppUserRole);
+    const userRoles = request.user.roles
+      .map(role => role?.name)
+      .filter((role): role is AppUserRole => 
+        role !== undefined && Object.values(AppUserRole).includes(role as AppUserRole)
+      );
     
     // Check if user has permission to assign the specified role
-    return userRoles.some(userRole => 
-      ROLE_ASSIGNMENT_PERMISSIONS[userRole]?.includes(roleToAssign)
-    );
+    return userRoles.some((userRole: AppUserRole) => {
+      const allowedRoles = ROLE_ASSIGNMENT_PERMISSIONS[userRole] || [];
+      return allowedRoles.includes(roleToAssign);
+    });
   }
 
   defaultMessage(args: ValidationArguments) {

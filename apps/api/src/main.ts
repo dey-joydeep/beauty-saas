@@ -1,19 +1,20 @@
+import { JwtAuthGuard, RolesGuard } from '@beauty-saas/core/auth/guards';
+import { ConfigModule } from '@beauty-saas/core/config';
+import { ConfigService } from '@beauty-saas/core/src/config';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  ValidationPipe,
+  VersioningType
+} from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ClassSerializerInterceptor, Logger, ValidationPipe, VersioningType } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import * as cookieParser from 'cookie-parser';
-import helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
-import { ConfigService } from './config/config.service';
-import { ConfigModule } from './config/config.module';
-import { useContainer } from 'class-validator';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
-import morgan from 'morgan';
-import { JwtAuthGuard } from './core/auth/guards/jwt-auth.guard';
-import { RolesGuard } from './core/auth/guards/roles.guard';
+import helmet from 'helmet';
+import * as morgan from 'morgan';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -28,125 +29,125 @@ async function bootstrap() {
   const configService = app.select(ConfigModule).get(ConfigService);
   const { port, nodeEnv, isProduction } = configService.app;
   const { origins, methods, allowedHeaders, exposedHeaders, credentials, maxAge } = configService.cors;
-                    return callback(null, true);
-                }
-            } catch (e) {
-                // If URL parsing fails, deny the request
-                return callback(new Error('Invalid origin'));
-            }
-            
-            callback(new Error('Not allowed by CORS'));
-        },
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-        allowedHeaders: [
-            'Content-Type', 
-            'Authorization', 
-            'X-Requested-With', 
-            'Accept',
-            'X-XSRF-TOKEN',
-            'X-Request-Id'
-        ],
-        exposedHeaders: ['X-Request-Id'],
-        maxAge: 600, // 10 minutes
+
+  // Enable CORS with configuration
+  app.enableCors({
+    origin: (origin: string, callback: (error: Error | null, allow?: boolean) => void) => {
+      try {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) {
+          return callback(null, true);
+        }
+
+        // Check if origin is allowed
+        if (origins.includes('*') || origins.includes(origin)) {
+          return callback(null, true);
+        }
+      } catch (e) {
+        // If URL parsing fails, deny the request
+        return callback(new Error('Invalid origin'));
+      }
+      
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: credentials,
+    methods: methods || ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: allowedHeaders || [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'X-XSRF-TOKEN',
+      'X-Request-Id'
+    ],
+    exposedHeaders: exposedHeaders || ['X-Request-Id'],
+    maxAge: maxAge || 600 // 10 minutes
+  });
+
+  // Security middleware
+  app.use(helmet.crossOriginResourcePolicy());
+  app.use(helmet.crossOriginOpenerPolicy());
+  app.use(helmet.crossOriginEmbedderPolicy());
+  app.use(helmet.noSniff());
+  app.use(helmet.hidePoweredBy());
+  app.use(helmet.xssFilter());
+  app.use(helmet.frameguard({ action: 'deny' }));
+
+  // Request logging
+  if (nodeEnv !== 'test' && nodeEnv !== 'production') {
+    app.use(morgan('dev'));
+  }
+
+  // Cookie parser
+  app.use(cookieParser());
+
+  // Body parser
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
+
+  // Global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  // Global interceptors
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+  );
+
+  // Global guards
+  const reflector = app.get(Reflector);
+  app.useGlobalGuards(
+    new JwtAuthGuard(reflector),
+    new RolesGuard(reflector),
+  );
+
+  // API versioning
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
+
+  // Swagger documentation
+  if (nodeEnv !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Beauty SaaS API')
+      .setDescription('Beauty SaaS API documentation')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .addCookieAuth('token')
+      .addServer(process.env['API_URL'] || 'http://localhost:3000')
+      .addServer('http://localhost:3000')
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
     });
+  }
 
-    // Security middleware
-    app.use(helmet.crossOriginResourcePolicy());
-
-    // Request logging
-    if (nodeEnv !== 'test') {
-        app.use(morgan('dev'));
-    }
-
-    // Cookie parser
-    app.use(cookieParser.default());
-
-    // Global pipes, filters, guards, and interceptors
-    app.useGlobalPipes(
-        new ValidationPipe({
-            whitelist: true,
-            transform: true,
-            transformOptions: {
-                enableImplicitConversion: true,
-            },
-            forbidNonWhitelisted: true,
-        }),
-    );
-
-    // Enable versioning
-    app.enableVersioning({
-        type: VersioningType.URI,
-        defaultVersion: '1',
-    });
-
-    // Global filters
-    app.useGlobalFilters(new HttpExceptionFilter());
-
-    // Global guards
-    const reflector = app.get(Reflector);
-    app.useGlobalGuards(
-        new JwtAuthGuard(reflector),
-        new RolesGuard(reflector),
-    );
-
-    // Global interceptors
-    app.useGlobalInterceptors(
-        new ClassSerializerInterceptor(reflector),
-    );
-
-    // Set global prefix for all routes
-    app.setGlobalPrefix('api');
-
-    // Setup Swagger documentation in non-production environments
-    if (nodeEnv !== 'production') {
-        const config = new DocumentBuilder()
-            .setTitle('Beauty SaaS API')
-            .setDescription('The Beauty SaaS API documentation')
-            .setVersion('1.0')
-            .addBearerAuth(
-                {
-                    type: 'http',
-                    scheme: 'bearer',
-                    bearerFormat: 'JWT',
-                    name: 'JWT',
-                    description: 'Enter JWT token',
-                    in: 'header',
-                },
-                'JWT-auth',
-            )
-            .addApiKey(
-                {
-                    type: 'apiKey',
-                    name: 'x-api-key',
-                    in: 'header',
-                    description: 'API Key for external access',
-                },
-                'api-key',
-            )
-            .addCookieAuth('token')
-            .addServer(process.env['API_URL'] || 'http://localhost:3000')
-            .addServer('http://localhost:3000')
-            .addBearerAuth()
-            .build();
-
-        const document = SwaggerModule.createDocument(app, config);
-        SwaggerModule.setup('api/docs', app, document);
-    }
-
-    // Start the application
-    await app.listen(port);
-    console.log(`Application is running on: http://localhost:${port}`);
-
-    if (nodeEnv !== 'production') {
-        console.log(`API Documentation available at: http://localhost:${port}/api/docs`);
-    }
+  // Start the application
+  await app.listen(port);
+  logger.log(`Application is running on: http://localhost:${port}`);
+  
+  if (nodeEnv !== 'production') {
+    logger.log(`API documentation available at: http://localhost:${port}/api`);
+  }
 }
 
 // Start the application
 if (process.env.NODE_ENV !== 'test') {
-    bootstrap().catch(err => {
-        console.error('Failed to start application:', err);
-        process.exit(1);
-    });
+  bootstrap().catch(err => {
+    Logger.error('Failed to start application:', err);
+    process.exit(1);
+  });
 }

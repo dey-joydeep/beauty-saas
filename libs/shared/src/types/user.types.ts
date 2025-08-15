@@ -28,12 +28,3 @@ export interface AuthenticatedUser {
   // Allow additional properties for flexibility
   [key: string]: unknown;
 }
-
-// Extend Express Request type to include our user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: AuthenticatedUser;
-    }
-  }
-}

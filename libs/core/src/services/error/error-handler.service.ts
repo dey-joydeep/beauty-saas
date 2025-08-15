@@ -1,34 +1,33 @@
-import { isPlatformBrowser } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorHandler, Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Injectable } from '@nestjs/common';
 import { ErrorService } from './error.service';
 
-@Injectable({ providedIn: 'root' })
-export class ErrorHandlerService implements ErrorHandler {
-  private isBrowser: boolean;
+export interface HttpErrorResponse {
+  status: number;
+  statusText: string;
+  message: string;
+  error?: any;
+}
 
-  private readonly platformId: Object;
-
-  constructor(
-    platformId: Object,
-    private errorService: ErrorService
-  ) {
-    this.platformId = platformId;
-    this.isBrowser = isPlatformBrowser(this.platformId);
-  }
+@Injectable()
+export class ErrorHandlerService {
+  constructor(private errorService: ErrorService) {}
 
   handleError(error: Error | HttpErrorResponse): void {
     // Always log the error to the console
     console.error('Error occurred:', error);
 
     // Handle HTTP errors
-    if (error instanceof HttpErrorResponse) {
+    if (this.isHttpErrorResponse(error)) {
       this.handleHttpError(error);
     } 
     // Handle client-side errors
     else if (error instanceof Error) {
       this.handleClientError(error);
     }
+  }
+
+  private isHttpErrorResponse(error: any): error is HttpErrorResponse {
+    return error && typeof error.status === 'number' && error.statusText && error.message;
   }
 
   private handleHttpError(error: HttpErrorResponse): void {

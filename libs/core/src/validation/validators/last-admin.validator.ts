@@ -1,7 +1,22 @@
 import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments, registerDecorator, ValidationOptions } from 'class-validator';
-import { PrismaClient } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
-import { AppUserRole } from '@shared/types/user.types';
+import { PrismaClient } from '@prisma/client';
+import { AppUserRole } from '@beauty-saas/shared';
+
+// Local error classes since we can't import them yet
+class LastAdminValidationError extends Error {
+  constructor(message: string, public details?: any) {
+    super(message);
+    this.name = 'LastAdminValidationError';
+  }
+}
+
+class DatabaseValidationError extends Error {
+  constructor(message: string, public details?: any) {
+    super(message);
+    this.name = 'DatabaseValidationError';
+  }
+}
 
 @ValidatorConstraint({ name: 'isNotLastAdmin', async: true })
 @Injectable()
@@ -12,68 +27,97 @@ export class IsNotLastAdminConstraint implements ValidatorConstraintInterface {
         this.prisma = new PrismaClient();
     }
 
-    async validate(userId: string, args: ValidationArguments) {
-        // Get the DTO instance and the role being set (if any)
-        const dto = args.object as any;
-        const roleToSet = dto.role as AppUserRole | undefined;
+    async validate(userId: string, args: ValidationArguments): Promise<boolean> {
+        try {
+            const dto = args.object as { role?: AppUserRole };
+            const roleToSet = dto.role;
 
-        // If not setting a role or not demoting from admin, allow
-        if (!roleToSet || roleToSet === AppUserRole.ADMIN) {
-            return true;
-        }
-
-        // Get the current user's tenant ID
-        const user = await this.prisma.user.findUnique({
-            where: { id: userId },
-            include: { tenant: true }
-        });
-
-        if (!user || !user.tenantId) {
-            return true; // Not part of a tenant, can't be a tenant admin
-        }
-
-        // First, find the role ID for ADMIN
-        const adminRole = await this.prisma.role.findUnique({
-            where: { name: AppUserRole.ADMIN }
-        });
-
-        if (!adminRole) {
-            return true; // No admin role found, can't be the last admin
-        }
-
-        // Check if the user is currently an admin in this tenant
-        const userRole = await this.prisma.userRole.findFirst({
-            where: {
-                userId: userId,
-                roleId: adminRole.id,
-                user: {
-                    tenantId: user.tenantId
-                }
+            // If not setting a role or not demoting from admin, allow
+            if (!roleToSet || roleToSet === AppUserRole.ADMIN) {
+                return true;
             }
-        });
 
-        if (!userRole) {
-            return true; // Not currently an admin, so not the last admin
-        }
+            // First, check if the user is an admin
+            const userRoles = await this.prisma.userRole.findMany({
+                where: {
+                    userId,
+                    role: {
+                        name: AppUserRole.ADMIN
+                    }
+                }
+            });
 
-        // Count how many other admins exist in this tenant
-        const adminCount = await this.prisma.userRole.count({
-            where: {
-                roleId: adminRole.id,
-                user: {
-                    id: { not: userId },
+            // If user is not an admin, no need to check further
+            if (userRoles.length === 0) {
+                return true;
+            }
+
+            // Get the user's active staff record
+            const activeStaff = await this.prisma.salonTenantStaff.findFirst({
+                where: {
+                    userId,
+                    isActive: true
+                },
+                select: {
+                    salonId: true
+                }
+            });
+
+            if (!activeStaff) {
+                return true; // Not an active staff member
+            }
+
+            const { salonId } = activeStaff;
+
+            // Count other active admin staff in the same salon
+            const otherAdmins = await this.prisma.salonTenantStaff.count({
+                where: {
+                    salonId,
                     isActive: true,
-                    tenantId: user.tenantId
+                    userId: { not: userId },
+                    user: {
+                        isActive: true,
+                        roles: {
+                            some: {
+                                role: {
+                                    name: AppUserRole.ADMIN
+                                }
+                            }
+                        }
+                    }
                 }
-            }
-        });
+            });
 
-        // If there are other active admins, allow the change
-        return adminCount > 0;
+            if (otherAdmins === 0) {
+                throw new LastAdminValidationError(
+                    'Cannot remove the last admin from a tenant. Please assign another admin first.',
+                    { userId, tenantId: salonId }
+                );
+            }
+
+            return true;
+        } catch (error) {
+            if (error instanceof LastAdminValidationError) {
+                throw error; // Re-throw our custom error
+            }
+
+            throw new DatabaseValidationError(
+                'Failed to validate last admin status',
+                { 
+                    originalError: error instanceof Error ? error.message : String(error),
+                    userId,
+                    operation: 'lastAdminValidation'
+                }
+            );
+        }
     }
 
-    defaultMessage(args: ValidationArguments) {
-        return 'Cannot remove or demote the last admin of a tenant. Please assign another admin first.';
+    defaultMessage(args: ValidationArguments): string {
+        const error = args.constraints?.[0];
+        if (error instanceof LastAdminValidationError) {
+            return error.message;
+        }
+        return 'Validation failed while checking admin status';
     }
 }
 

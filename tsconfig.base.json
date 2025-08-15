@@ -27,9 +27,11 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@beauty-saas/*": ["libs/*/src/index.ts"],
-      "@app/*": ["apps/api/src/*"],
-      "@shared/*": ["libs/shared/src/*"]
+      "@beauty-saas/core": ["libs/core/src/index.ts"],
+      "@beauty-saas/core/*": ["libs/core/src/*"],
+      "@beauty-saas/shared": ["libs/shared/src/index.ts"],
+      "@beauty-saas/shared/*": ["libs/shared/src/*"],
+      "@app/*": ["apps/api/src/*"]
     },
     "types": ["node", "jest"]
   },

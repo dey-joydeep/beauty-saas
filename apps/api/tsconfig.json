@@ -2,19 +2,29 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
-    "baseUrl": "apps/api",
+    "rootDir": "../../",  // Set root to the project root
+    "baseUrl": ".",
     "paths": {
       "@app/*": ["src/*"],
-      "@shared/*": ["../../libs/shared/src/*"]
+      "@beauty-saas/core": ["libs/core/src/index.ts"],
+      "@beauty-saas/core/*": ["libs/core/src/*"],
+      "@beauty-saas/shared": ["libs/shared/src/index.ts"],
+      "@beauty-saas/shared/*": ["libs/shared/src/*"]
     },
     "typeRoots": [
-      "../../node_modules/@types",
-      "./node_modules/@types",
-      "./src/types"
+      "node_modules/@types",
+      "../../node_modules/@types"
     ],
-    "types": ["node", "express", "jest"]
+    "types": ["node", "express", "jest"],
+    "composite": true,
+    "incremental": true,
+    "preserveSymlinks": true  // Important for monorepo setups
   },
-  "include": ["src/**/*.ts", "src/**/*.spec.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.spec.ts",
+    "../../libs/core/src/**/*.ts",
+    "../../libs/shared/src/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

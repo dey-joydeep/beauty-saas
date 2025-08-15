@@ -9,13 +9,8 @@
     ],
     "targetDefaults": {
         "build": {
-            "dependsOn": [
-                "^build"
-            ],
-            "inputs": [
-                "production",
-                "^production"
-            ]
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"]
         },
         "test": {
             "inputs": [
@@ -45,6 +40,28 @@
         "production": [
             "default"
         ]
+    },
+    "tags": {
+        "rules": {
+            "scope:core": {
+                "description": "Core application functionality and shared services"
+            },
+            "scope:shared": {
+                "description": "Shared libraries and utilities used across the application"
+            },
+            "type:api": {
+                "description": "API endpoints and controllers"
+            },
+            "type:util": {
+                "description": "Utility functions and helpers"
+            },
+            "layer:domain": {
+                "description": "Business logic and domain models"
+            },
+            "layer:data": {
+                "description": "Data access and services"
+            }
+        }
     },
     "tasksRunnerOptions": {
         "default": {

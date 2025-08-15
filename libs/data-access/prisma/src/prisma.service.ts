@@ -87,7 +87,7 @@ export class PrismaService
   ): Promise<any> {
     try {
       if (Array.isArray(arg)) {
-        const { isolationLevel, ...txOptions } = options || {};
+        const { isolationLevel } = options || {};
         return await super.$transaction(arg, { isolationLevel });
       } else if (typeof arg === 'function') {
         return await super.$transaction(arg, options);

@@ -1,11 +1,18 @@
-﻿// Core library public API
+// Core library public API
 
+// Core exports
 export * from './auth';
 export * from './base';
+export * from './config';
+
 export * from './errors';
 export * from './filters';
 export * from './interceptors';
-export * from './models';
+
 export * from './services';
 export * from './translate';
 export * from './utils';
+export * from './validators';
+
+// Export models individually to avoid duplicate exports
+export * from './models/notification.model';

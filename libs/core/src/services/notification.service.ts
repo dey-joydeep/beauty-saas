@@ -1,84 +1,67 @@
-import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, throwError } from 'rxjs';
-import { catchError, finalize, map, tap } from 'rxjs/operators';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Notification } from '../models/notification.model';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class NotificationService implements OnDestroy {
-  private readonly apiUrl = '/api/notifications';
+@Injectable()
+export class NotificationService implements OnModuleDestroy {
+  private notifications: Notification[] = [];
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
-  private unreadCountSubject = new BehaviorSubject<number>(0);
   private loadingSubject = new BehaviorSubject<boolean>(false);
-  private destroy$ = new Subject<void>();
-  private isBrowser: boolean;
 
   // Public observables
   public readonly notifications$ = this.notificationsSubject.asObservable();
-  public readonly unreadCount$ = this.unreadCountSubject.asObservable();
+  public readonly unreadCount$ = this.notifications$.pipe(
+    map(notifications => notifications.filter(n => !n.read).length)
+  );
   public readonly loading$ = this.loadingSubject.asObservable();
-  public readonly hasUnread$ = this.unreadCount$.pipe(map(count => count > 0));
+  public readonly hasUnread$ = this.unreadCount$.pipe(
+    map(count => count > 0)
+  );
 
-  private readonly platformId: Object;
+  constructor() {}
 
-  constructor(
-    platformId: Object,
-    private http: HttpClient
-  ) {
-    this.platformId = platformId;
-    this.isBrowser = isPlatformBrowser(platformId);
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  onModuleDestroy() {
+    this.notificationsSubject.complete();
+    this.loadingSubject.complete();
   }
 
   // Core notification methods
-  public getNotifications(): Observable<Notification[]> {
+  async getNotifications(): Promise<Notification[]> {
     this.loadingSubject.next(true);
+    try {
+      // In a real app, you might fetch from an API here
+      // For now, return the in-memory array
+      return [...this.notifications];
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
+  async markAsRead(notificationId: string): Promise<Notification> {
+    const notification = this.notifications.find(n => n.id === notificationId);
+    if (!notification) {
+      throw new Error('Notification not found');
+    }
     
-    return this.http.get<Notification[]>(this.apiUrl).pipe(
-      tap(notifications => {
-        this.notificationsSubject.next(notifications);
-        this.updateUnreadCount(notifications);
-      }),
-      catchError(this.handleError),
-      finalize(() => this.loadingSubject.next(false))
+    const updatedNotification = { ...notification, read: true };
+    this.notifications = this.notifications.map(n => 
+      n.id === notificationId ? updatedNotification : n
     );
+    
+    this.notificationsSubject.next([...this.notifications]);
+    return updatedNotification;
   }
 
-  public markAsRead(notificationId: string): Observable<Notification> {
-    return this.http.patch<Notification>(`${this.apiUrl}/${notificationId}/read`, {}).pipe(
-      tap(updatedNotification => {
-        const notifications = this.notificationsSubject.value.map(n => 
-          n.id === notificationId ? updatedNotification : n
-        );
-        this.notificationsSubject.next(notifications);
-        this.updateUnreadCount(notifications);
-      }),
-      catchError(this.handleError)
-    );
+  async markAllAsRead(): Promise<void> {
+    this.notifications = this.notifications.map(notification => ({
+      ...notification,
+      read: true
+    }));
+    this.notificationsSubject.next([...this.notifications]);
   }
 
-  public markAllAsRead(): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/read-all`, {}).pipe(
-      tap(() => {
-        const notifications = this.notificationsSubject.value.map(n => ({
-          ...n,
-          read: true
-        }));
-        this.notificationsSubject.next(notifications);
-        this.updateUnreadCount(notifications);
-      }),
-      catchError(this.handleError)
-    );
-  }
-
-  public addNotification(notification: Partial<Notification>): void {
+  addNotification(notification: Partial<Notification>): Notification {
     const newNotification: Notification = {
       id: Math.random().toString(36).substr(2, 9),
       title: notification.title || '',
@@ -89,20 +72,10 @@ export class NotificationService implements OnDestroy {
       ...notification
     };
 
-    const currentNotifications = this.notificationsSubject.value;
-    this.notificationsSubject.next([newNotification, ...currentNotifications]);
-    this.updateUnreadCount([newNotification, ...currentNotifications]);
-  }
-
-  // Helper methods
-  private updateUnreadCount(notifications: Notification[]): void {
-    const unreadCount = notifications.filter(n => !n.read).length;
-    this.unreadCountSubject.next(unreadCount);
-  }
-
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error('NotificationService error:', error);
-    return throwError(() => new Error('Something went wrong with notifications. Please try again later.'));
+    this.notifications = [newNotification, ...this.notifications];
+    this.notificationsSubject.next([...this.notifications]);
+    
+    return newNotification;
   }
 
   /**
@@ -110,11 +83,24 @@ export class NotificationService implements OnDestroy {
    * @param message The error message to display
    * @param title Optional title for the notification (defaults to 'Error')
    */
-  public showError(message: string, title: string = 'Error'): void {
+  showError(message: string, title: string = 'Error'): void {
     this.addNotification({
       title,
       message,
       type: 'error'
+    });
+  }
+
+  /**
+   * Show a success notification
+   * @param message The success message to display
+   * @param title Optional title for the notification (defaults to 'Success')
+   */
+  showSuccess(message: string, title: string = 'Success'): void {
+    this.addNotification({
+      title,
+      message,
+      type: 'success'
     });
   }
 }

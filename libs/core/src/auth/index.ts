@@ -1,5 +1,3 @@
-// Auto-generated index file
-// Run 'npm run generate:index' to update
-
-
-
+// Core Auth Module
+export { ROLES_KEY, Roles } from './decorators';
+export * from './guards';

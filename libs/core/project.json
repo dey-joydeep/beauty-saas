@@ -1,6 +1,7 @@
 {
     "name": "@beauty-saas/core",
     "sourceRoot": "libs/core/src",
+    "tags": ["scope:core", "type:core", "layer:domain", "layer:data"],
     "targets": {
         "lint": {
             "outputs": [
@@ -30,20 +31,17 @@
             }
         },
         "test": {
-            "outputs": [
-                "{workspaceRoot}/coverage/libs/core"
-            ],
+            "outputs": ["{workspaceRoot}/coverage/libs/core"],
             "executor": "@nx/jest:jest",
             "options": {
                 "passWithNoTests": true,
-                "jestConfig": "jest.preset.ts"
+                "jestConfig": "libs/core/jest.config.ts",
+                "codeCoverage": true,
+                "coverageReporters": ["text", "lcov"],
+                "coverageDirectory": "coverage/libs/core"
             }
         }
     },
     "projectType": "library",
-    "tags": [
-        "scope:core",
-        "type:core"
-    ],
     "prefix": "beauty-saas"
 }
