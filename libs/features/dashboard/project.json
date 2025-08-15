@@ -1,0 +1,71 @@
+{
+  "name": "dashboard",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/features/dashboard/src",
+  "prefix": "app",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/features/dashboard",
+        "tsConfig": "libs/features/dashboard/tsconfig.lib.json",
+        "packageJson": "libs/features/dashboard/package.json",
+        "main": "libs/features/dashboard/src/index.ts",
+        "assets": ["libs/features/dashboard/*.md"],
+        "buildableProjectDepsInPackageJsonType": "dependencies"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/features/dashboard/tsconfig.lib.prod.json"        
+        },
+        "development": {
+          "tsConfig": "libs/features/dashboard/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/features/dashboard/**/*.ts",
+          "libs/features/dashboard/**/*.html"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/features/dashboard/jest.config.ts",
+        "passWithNoTests": true,
+        "codeCoverage": true,
+        "coverageReporters": ["text", "lcov"],
+        "coverageDirectory": "coverage/libs/features/dashboard",
+        "testMatch": ["**/+(*.)+(spec|test).+(ts|js)?(x)"],
+        "transform": {
+          "^.+\\.(ts|js|html)$": "ts-jest"
+        },
+        "moduleFileExtensions": ["ts", "js", "html"],
+        "preset": "ts-jest",
+        "testEnvironment": "node",
+        "moduleNameMapper": {
+          "^@beauty-saas/features/dashboard$": "<rootDir>/src/index.ts"
+        }
+      }
+    },
+    "deploy": {
+      "executor": "@nx/workspace:run-commands",
+      "options": {
+        "command": "npm publish {projectRoot}/dist --access public",
+        "parallel": false
+      },
+      "dependsOn": ["build"]
+    }
+  },
+  "tags": ["type:feature", "scope:dashboard"],
+  "implicitDependencies": ["core"]
+}

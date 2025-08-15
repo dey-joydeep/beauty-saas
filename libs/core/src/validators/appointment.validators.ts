@@ -1,5 +1,5 @@
 import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
-import { AppointmentStatus } from '../base-appointment.dto';
+import { AppointmentStatus } from '@beauty-saas/shared';
 
 /**
  * Validates that the appointment status is valid

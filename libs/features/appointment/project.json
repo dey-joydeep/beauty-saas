@@ -1,0 +1,61 @@
+{
+  "name": "appointment",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/features/appointment/src",
+  "prefix": "app",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/features/appointment",
+        "tsConfig": "libs/features/appointment/tsconfig.lib.json",
+        "packageJson": "libs/features/appointment/package.json",
+        "main": "libs/features/appointment/src/index.ts",
+        "assets": ["libs/features/appointment/*.md"],
+        "buildableProjectDepsInPackageJsonType": "dependencies"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/features/appointment/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/features/appointment/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/features/appointment/**/*.ts",
+          "libs/features/appointment/**/*.html"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/features/appointment/jest.config.ts",
+        "passWithNoTests": true,
+        "codeCoverage": true,
+        "coverageReporters": ["text", "lcov"],
+        "coverageDirectory": "coverage/libs/features/appointment"
+      }
+    },
+    "deploy": {
+      "executor": "@nx/workspace:run-commands",
+      "options": {
+        "command": "npm publish {projectRoot}/dist --access public",
+        "parallel": false
+      },
+      "dependsOn": ["build"]
+    }
+  },
+  "tags": ["type:feature", "scope:appointment"],
+  "implicitDependencies": ["core"]
+}

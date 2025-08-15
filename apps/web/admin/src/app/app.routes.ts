@@ -3,8 +3,8 @@ import { ForgotPasswordComponent } from './core/auth/components/forgot-password/
 import { LoginComponent } from './core/auth/components/login/login.component';
 import { RegisterComponent } from './core/auth/components/register/register.component';
 import { authGuard } from './core/auth/guards/auth.guard';
-import { AppointmentCreateComponent } from './modules/appointment/appointment-create/appointment-create.component';
-import { AppointmentListComponent } from './modules/appointment/appointment-list/appointment-list.component';
+import { AppointmentCreateComponent } from '@beauty-saas/features/appointment';
+import { AppointmentListComponent } from '@beauty-saas/features/appointment';
 import { DashboardComponent } from './modules/dashboard/dashboard.component';
 import { HomeComponent } from './modules/home/home.component';
 import { ProfileComponent } from './modules/profile/profile.component';

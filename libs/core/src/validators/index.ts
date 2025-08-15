@@ -4,3 +4,4 @@
 
 export * from './portfolio.validator';
 export * from './theme.validator';
+export * from './appointment.validators';

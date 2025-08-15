@@ -39,7 +39,7 @@ interface UserWithRoles {
  * @param roles Array of AppUserRole that are allowed to access the route
  */
 export const Roles = (...roles: AppUserRole[]) => {
-  return (target: any, key?: string, descriptor?: PropertyDescriptor) => {
+  return (target: any, descriptor?: PropertyDescriptor) => {
     if (descriptor) {
       // Method decorator
       Reflect.defineMetadata(ROLES_KEY, roles, descriptor.value);
