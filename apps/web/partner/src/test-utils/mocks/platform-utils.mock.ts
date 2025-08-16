@@ -1,4 +1,4 @@
-import { IPlatformUtils } from '../../app/core/tokens/platform-utils.token';
+import { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
 
 /**
  * Creates a mock implementation of IPlatformUtils for testing

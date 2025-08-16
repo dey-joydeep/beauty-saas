@@ -33,6 +33,8 @@
       "@beauty-saas/shared/*": ["libs/shared/src/*"],
       "@beauty-saas/data-access": ["libs/data-access/src/index.ts"],
       "@beauty-saas/data-access/*": ["libs/data-access/src/*"],
+      "@frontend-shared": ["libs/frontend/src/index.ts"],
+      "@frontend-shared/*": ["libs/frontend/src/app/*"],
       "@app/*": ["apps/api/src/*"]
     },
     "types": ["node", "jest"]
