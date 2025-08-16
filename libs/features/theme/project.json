@@ -1,0 +1,88 @@
+{
+    "name": "theme",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "library",
+    "sourceRoot": "libs/features/theme/src",
+    "prefix": "app",
+    "targets": {
+        "build": {
+            "executor": "@nx/js:tsc",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/libs/features/theme",
+                "tsConfig": "libs/features/theme/tsconfig.lib.json",
+                "packageJson": "libs/features/theme/package.json",
+                "main": "libs/features/theme/src/index.ts",
+                "assets": [],
+                "buildableProjectDepsInPackageJsonType": "dependencies"
+            },
+            "configurations": {
+                "production": {
+                    "tsConfig": "libs/features/theme/tsconfig.lib.prod.json"
+                },
+                "development": {
+                    "tsConfig": "libs/features/theme/tsconfig.lib.json"
+                }
+            },
+            "defaultConfiguration": "production"
+        },
+        "type-check": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "tsc -p libs/features/theme/tsconfig.lib.json --noEmit"
+            }
+        },
+        "lint": {
+            "executor": "@nx/linter:eslint",
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "options": {
+                "lintFilePatterns": [
+                    "libs/features/theme/**/*.ts"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+            ],
+            "options": {
+                "jestConfig": "libs/features/theme/jest.config.ts",
+                "passWithNoTests": true,
+                "codeCoverage": true,
+                "coverageReporters": [
+                    "text",
+                    "lcov"
+                ],
+                "coverageDirectory": "coverage/libs/features/theme"
+            }
+        },
+        "deploy": {
+            "executor": "@nx/workspace:run-commands",
+            "options": {
+                "command": "npm publish {projectRoot}/dist --access public",
+                "parallel": true
+            },
+            "dependsOn": [
+                "build"
+            ]
+        }
+    },
+    "tags": [
+        "type:feature",
+        "scope:theme"
+    ],
+    "implicitDependencies": [
+        "core"
+    ],
+    "dependencies": [
+        {
+            "target": "data-access",
+            "projects": "data-access"
+        }
+    ]
+}

@@ -7,18 +7,20 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/features/dashboard",
         "tsConfig": "libs/features/dashboard/tsconfig.lib.json",
         "packageJson": "libs/features/dashboard/package.json",
         "main": "libs/features/dashboard/src/index.ts",
-        "assets": ["libs/features/dashboard/*.md"],
+        "assets": [],
         "buildableProjectDepsInPackageJsonType": "dependencies"
       },
       "configurations": {
         "production": {
-          "tsConfig": "libs/features/dashboard/tsconfig.lib.prod.json"        
+          "tsConfig": "libs/features/dashboard/tsconfig.lib.prod.json"
         },
         "development": {
           "tsConfig": "libs/features/dashboard/tsconfig.lib.json"
@@ -34,44 +36,52 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
         "lintFilePatterns": [
-          "libs/features/dashboard/**/*.ts",
-          "libs/features/dashboard/**/*.html"
+          "libs/features/dashboard/**/*.ts"
         ]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "libs/features/dashboard/jest.config.ts",
         "passWithNoTests": true,
         "codeCoverage": true,
-        "coverageReporters": ["text", "lcov"],
+        "coverageReporters": [
+          "text",
+          "lcov"
+        ],
         "coverageDirectory": "coverage/libs/features/dashboard",
-        "testMatch": ["**/+(*.)+(spec|test).+(ts|js)?(x)"],
-        "transform": {
-          "^.+\\.(ts|js|html)$": "ts-jest"
-        },
-        "moduleFileExtensions": ["ts", "js", "html"],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
         "preset": "ts-jest",
-        "testEnvironment": "node",
-        "moduleNameMapper": {
-          "^@beauty-saas/features/dashboard$": "<rootDir>/src/index.ts"
-        }
+        "testEnvironment": "node"
       }
     },
     "deploy": {
       "executor": "@nx/workspace:run-commands",
       "options": {
         "command": "npm publish {projectRoot}/dist --access public",
-        "parallel": false
+        "parallel": true
       },
-      "dependsOn": ["build"]
+      "dependsOn": [
+        "build"
+      ]
     }
   },
-  "tags": ["type:feature", "scope:dashboard"],
-  "implicitDependencies": ["core"]
+  "tags": [
+    "type:feature",
+    "scope:dashboard"
+  ],
+  "implicitDependencies": [
+    "core"
+  ]
 }

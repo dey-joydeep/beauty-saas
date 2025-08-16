@@ -1,7 +1,12 @@
 {
     "name": "@beauty-saas/core",
     "sourceRoot": "libs/core/src",
-    "tags": ["scope:core", "type:core", "layer:domain", "layer:data"],
+    "tags": [
+        "scope:core",
+        "type:core",
+        "layer:domain",
+        "layer:data"
+    ],
     "targets": {
         "lint": {
             "outputs": [
@@ -10,8 +15,7 @@
             "executor": "@nx/linter:eslint",
             "options": {
                 "lintFilePatterns": [
-                    "libs/core/**/*.ts",
-                    "libs/core/**/*.html"
+                    "libs/core/**/*.ts"
                 ]
             }
         },
@@ -24,26 +28,29 @@
                 "main": "libs/core/src/index.ts",
                 "tsConfig": "libs/core/tsconfig.lib.json",
                 "packageJson": "libs/core/package.json",
-                "assets": [
-                    "libs/core/*.md"
-                ],
+                "assets": [],
                 "outputPath": "dist/libs/core"
             }
         },
         "type-check": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc -p libs/core/tsconfig.lib.json --noEmit"
-      }
-    },
-    "test": {
-            "outputs": ["{workspaceRoot}/coverage/libs/core"],
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "tsc -p libs/core/tsconfig.lib.json --noEmit"
+            }
+        },
+        "test": {
+            "outputs": [
+                "{workspaceRoot}/coverage/libs/core"
+            ],
             "executor": "@nx/jest:jest",
             "options": {
                 "passWithNoTests": true,
                 "jestConfig": "libs/core/jest.config.ts",
                 "codeCoverage": true,
-                "coverageReporters": ["text", "lcov"],
+                "coverageReporters": [
+                    "text",
+                    "lcov"
+                ],
                 "coverageDirectory": "coverage/libs/core"
             }
         }

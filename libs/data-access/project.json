@@ -1,48 +1,46 @@
 {
-    "name": "@beauty-saas/data-access",
-    "projectType": "library",
-    "sourceRoot": "libs/data-access/src",
-    "prefix": "beauty-saas",
-    "tags": [
-        "scope:data-access",
-        "type:data-access"
-    ],
-    "targets": {
-        "build": {
-            "executor": "@nx/js:tsc",
-            "outputs": [
-                "{options.outputPath}"
-            ],
-            "options": {
-                "outputPath": "dist/libs/data-access",
-                "tsConfig": "libs/data-access/tsconfig.lib.json",
-                "packageJson": "libs/data-access/package.json",
-                "main": "libs/data-access/src/index.ts",
-                "assets": [
-                    "libs/data-access/prisma/schema.prisma",
-                    "libs/data-access/prisma/migrations/**/*",
-                    "libs/data-access/*.md"
-                ],
-                "testFilePatterns": [
-                    "libs/data-access/test/**/*.ts"
-                ],
-                "generatePackageJson": true,
-                "updateBuildableProjectDepsInPackageJson": true
-            }
-        },
-        "lint": {
-            "executor": "@nx/linter:eslint",
-            "outputs": [
-                "{options.outputFile}"
-            ],
-            "options": {
-                "lintFilePatterns": [
-                    "libs/data-access/**/*.ts",
-                    "libs/data-access/**/*.html"
-                ]
-            }
-        },
-        "type-check": {
+  "name": "@beauty-saas/data-access",
+  "projectType": "library",
+  "sourceRoot": "libs/data-access/src",
+  "prefix": "beauty-saas",
+  "tags": [
+    "scope:data-access",
+    "type:data-access"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/libs/data-access",
+        "tsConfig": "libs/data-access/tsconfig.lib.json",
+        "packageJson": "libs/data-access/package.json",
+        "main": "libs/data-access/src/index.ts",
+        "assets": [
+          "libs/data-access/prisma/schema.prisma",
+          "libs/data-access/prisma/migrations/**/*"
+        ],
+        "testFilePatterns": [
+          "libs/data-access/test/**/*.ts"
+        ],
+        "generatePackageJson": true,
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "libs/data-access/**/*.ts"
+        ]
+      }
+    },
+    "type-check": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc -p libs/data-access/tsconfig.lib.json --noEmit"
@@ -50,12 +48,17 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/data-access"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/data-access"
+      ],
       "options": {
         "jestConfig": "libs/data-access/jest.config.ts",
         "passWithNoTests": true,
         "codeCoverage": true,
-        "coverageReporters": ["text", "lcov"]
+        "coverageReporters": [
+          "text",
+          "lcov"
+        ]
       },
       "configurations": {
         "ci": {
@@ -64,5 +67,5 @@
         }
       }
     }
-    }
+  }
 }

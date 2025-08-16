@@ -3,7 +3,11 @@
     "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "libs/shared/src",
     "projectType": "library",
-    "tags": ["scope:shared", "type:util", "layer:domain"],
+    "tags": [
+        "scope:shared",
+        "type:util",
+        "layer:domain"
+    ],
     "targets": {
         "build": {
             "executor": "@nx/js:tsc",
@@ -14,9 +18,7 @@
                 "outputPath": "dist/libs/shared",
                 "main": "libs/shared/src/index.ts",
                 "tsConfig": "libs/shared/tsconfig.lib.json",
-                "assets": [
-                    "libs/shared/*.md"
-                ]
+                "assets": []
             }
         },
         "lint": {
@@ -31,12 +33,12 @@
             }
         },
         "type-check": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc -p libs/shared/tsconfig.lib.json --noEmit"
-      }
-    },
-    "test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "tsc -p libs/shared/tsconfig.lib.json --noEmit"
+            }
+        },
+        "test": {
             "executor": "@nx/jest:jest",
             "outputs": [
                 "{workspaceRoot}/coverage/{projectRoot}"

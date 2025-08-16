@@ -18,9 +18,7 @@
                 "tsConfig": "libs/features/tsconfig.lib.json",
                 "packageJson": "libs/features/package.json",
                 "main": "libs/features/src/index.ts",
-                "assets": [
-                    "libs/features/*.md"
-                ]
+                "assets": []
             }
         },
         "lint": {
@@ -30,18 +28,17 @@
             ],
             "options": {
                 "lintFilePatterns": [
-                    "libs/features/**/*.ts",
-                    "libs/features/**/*.html"
+                    "libs/features/**/*.ts"
                 ]
             }
         },
         "type-check": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc -p libs/features/tsconfig.lib.json --noEmit"
-      }
-    },
-    "test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "tsc -p libs/features/tsconfig.lib.json --noEmit"
+            }
+        },
+        "test": {
             "executor": "@nx/jest:jest",
             "outputs": [
                 "{workspaceRoot}/coverage/libs/features"
