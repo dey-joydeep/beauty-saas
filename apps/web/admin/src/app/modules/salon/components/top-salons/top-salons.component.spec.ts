@@ -4,7 +4,7 @@ import { SalonService } from '../../services/salon.service';
 import { of, throwError } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { PLATFORM_ID } from '@angular/core';
-import { IPlatformUtils } from '../../../../core/tokens/platform-utils.token';
+import { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
 // Import mocks directly from the test-utils directory
 const { createBrowserPlatformUtilsMock, createServerPlatformUtilsMock } = require('../../../../test-utils/mocks/platform-utils.mock');
 

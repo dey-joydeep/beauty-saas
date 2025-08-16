@@ -179,7 +179,7 @@ global.navigator = mockWindow.navigator;
 global.location = mockWindow.location;
 
 // Mock PlatformUtils for tests
-jest.mock('../app/core/tokens/platform-utils.token', () => ({
+jest.mock('@frontend-shared/core/utils/platform-utils', () => ({
   PLATFORM_UTILS_TOKEN: 'PLATFORM_UTILS_TOKEN',
   IPlatformUtils: jest.fn().mockImplementation(() => ({
     isBrowser: true,
