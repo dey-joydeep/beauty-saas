@@ -1,16 +1,42 @@
-import { Injectable, Inject, forwardRef, NotFoundException, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { PrismaClient, User as PrismaUser, Prisma, Role as PrismaRole } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
-import { JwtService } from '@nestjs/jwt';
+import { AppUserRole } from '@beauty-saas/shared';
+import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Prisma, PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
-import { AppUserRole } from '@shared/types/user.types';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
-interface UserWithRoles extends Omit<PrismaUser, 'roles'> {
+// Define the UserRole enum if not available from @prisma/client
+enum UserRole {
+  ADMIN = 'ADMIN',
+  OWNER = 'OWNER',
+  STAFF = 'STAFF',
+  CUSTOMER = 'CUSTOMER'
+}
+
+interface UserBase {
+  id: string;
+  email: string;
+  name: string | null;
+  phone: string | null;
+  isVerified: boolean;
+  isActive: boolean;
+  avatarUrl: string | null;
+  lastLoginAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  tenantId: string | null;
+  passwordHash: string;
+}
+
+interface UserWithRoles extends UserBase {
   roles: Array<{
-    role: PrismaRole;
+    role: {
+      id: number;
+      name: UserRole;
+    };
     userId: string;
     roleId: number;
   }>;
@@ -104,7 +130,19 @@ export class UserService {
     });
   }
 
-  async getUsers(where?: Prisma.UserWhereInput): Promise<User[]> {
+  async countUsers(where?: Prisma.UserWhereInput): Promise<number> {
+    return this.prisma.user.count({
+      where,
+    });
+  }
+
+  async getUsers(params: {
+    where?: Prisma.UserWhereInput;
+    skip?: number;
+    take?: number;
+    orderBy?: Prisma.UserOrderByWithRelationInput;
+    include?: Prisma.UserInclude;
+  } = {}): Promise<User[]> {
     const users = await this.prisma.user.findMany({
       where,
       include: {

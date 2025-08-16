@@ -10,8 +10,8 @@ export type AuthUser = AuthenticatedUser;
  * Parameter decorator to get the authenticated user from the request
  */
 export const User = createParamDecorator(
-    (_: unknown, ctx: ExecutionContext): AuthenticatedUser => {
+    (data: unknown, ctx: ExecutionContext): AuthenticatedUser => {
         const request = ctx.switchToHttp().getRequest();
-        return request.user;
+        return request.user as AuthenticatedUser;
     },
 );

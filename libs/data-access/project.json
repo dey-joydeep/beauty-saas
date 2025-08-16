@@ -11,14 +11,16 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/data-access",
-        "main": "libs/data-access/src/index.ts",
+        "main": "src/index.ts",
         "tsConfig": "libs/data-access/tsconfig.lib.json",
         "assets": [
-          "libs/data-access/prisma/schema.prisma",
-          "libs/data-access/prisma/migrations/**/*"
+          "prisma/schema.prisma",
+          "prisma/migrations/**/*"
         ]
       }
     },

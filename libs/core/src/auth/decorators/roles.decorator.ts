@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { AppUserRole } from '../../../../shared/src/types/user.types';
+import { AppUserRole } from '@beauty-saas/shared';
 
 export const ROLES_KEY = 'roles';
 

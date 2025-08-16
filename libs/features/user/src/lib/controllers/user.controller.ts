@@ -46,6 +46,7 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserService } from '../services/user.service';
 
 import { UserResponseDto } from '../dto/user-response.dto';
+import { PaginatedResponse, PaginationParams } from '@beauty-saas/core';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -96,29 +97,30 @@ export class UserController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, Roles)
-  @Roles(AppUserRole.ADMIN, AppUserRole.OWNER)
-  @ApiOperation({ summary: 'Get all users (admin/owner only)' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(AppUserRole.ADMIN, AppUserRole.OWNER, AppUserRole.STAFF)
+  @ApiOperation({ summary: 'Get all users (paginated)' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page' })
   @ApiQuery({ name: 'search', required: false, type: String, description: 'Search term for name or email' })
   @ApiQuery({ name: 'role', required: false, enum: AppUserRole, description: 'Filter by user role' })
   @ApiQuery({ name: 'status', required: false, enum: ['active', 'inactive'], description: 'Filter by user status' })
   @ApiOkResponse({ 
-    description: 'List of users', 
-    type: [UserResponseDto] 
+    description: 'Paginated list of users',
+    type: PaginatedResponseDto
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   async getUsers(
-    @Query('page') _page = 1,
-    @Query('limit') _limit = 10,
-    @Query('search') _search = '',
-    @Query('role') _role?: AppUserRole,
-    @Query('status') _status?: string,
-    @User() user?: AuthenticatedUser,
-  ): Promise<UserResponseDto[]> {
+    @User() user: AuthenticatedUser,
+    @Query() query: PaginationParams & {
+      search?: string;
+      role?: AppUserRole;
+      status?: string;
+    } = {}
+  ): Promise<PaginatedResponse<UserResponseDto>> {
     try {
+      const { page = 1, limit = 10, search = '', role, status } = query;
       let tenantId: string | null = null;
 
       // If user is not an admin, they can only see users from their own tenant
@@ -129,52 +131,89 @@ export class UserController {
       // Build the where clause with optional filters
       const where: Prisma.UserWhereInput = {};
       
+      // Apply tenant filter
       if (tenantId) {
         where.tenantId = tenantId;
       }
-      
-      if (_search) {
+
+      // Apply search filter
+      if (search) {
         where.OR = [
-          { name: { contains: _search, mode: 'insensitive' } },
-          { email: { contains: _search, mode: 'insensitive' } },
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
         ];
       }
-      
-      if (_role) {
+
+      // Apply role filter
+      if (role) {
         where.roles = {
           some: {
             role: {
-              name: _role,
-            },
-          },
+              name: role
+            }
+          }
         };
       }
-      
-      if (_status) {
-        where.isActive = _status === 'active';
+
+      // Apply status filter
+      if (status) {
+        where.isActive = status === 'active';
       }
 
+      // Calculate pagination
+      const skip = (page - 1) * limit;
+      const take = limit;
+
       // Get paginated results
-      const users = await this.userService.getUsers(where);
+      const [users, total] = await Promise.all([
+        this.userService.getUsers({
+          where,
+          skip,
+          take,
+          include: {
+            roles: {
+              include: {
+                role: true
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        }),
+        this.userService.countUsers({ where })
+      ]);
       
-      // Transform the response to match the expected format
-      return users.map(user => ({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        isVerified: user.isVerified,
-        isActive: user.isActive,
-        avatarUrl: user.avatarUrl,
-        lastLoginAt: user.lastLoginAt,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        tenantId: user.tenantId,
-        roles: user.roles?.map(ur => ({
-          id: ur.roleId,
-          name: ur.role?.name || ''
-        })) || [],
-      }));
+      // Build pagination response
+      const response = {
+        data: users.map(user => ({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          phone: user.phone,
+          isVerified: user.isVerified,
+          isActive: user.isActive,
+          avatarUrl: user.avatarUrl,
+          lastLoginAt: user.lastLoginAt,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          tenantId: user.tenantId,
+          roles: user.roles?.map(ur => ({
+            id: ur.roleId,
+            name: ur.role?.name || ''
+          })) || [],
+        })),
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
+
+      // Return the paginated response with the correct structure
+      return {
+        data: response.data,
+        meta: response.meta
+      };
     } catch (error) {
       if (error instanceof ForbiddenException) {
         throw error;

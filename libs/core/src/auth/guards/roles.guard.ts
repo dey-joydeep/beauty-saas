@@ -2,7 +2,7 @@ import { ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
-import { AppUserRole } from '@beauty-saas/shared';
+import { AppUserRole, AuthenticatedUser, UserRoleInfo } from '@beauty-saas/shared';
 
 export const ROLES_KEY = 'roles';
 
@@ -26,13 +26,7 @@ const ROLE_HIERARCHY: Record<AppUserRole, AppUserRole[]> = {
   [AppUserRole.CUSTOMER]: []
 };
 
-interface UserWithRoles {
-  roles: Array<{
-    role: {
-      name: AppUserRole;
-    };
-  }>;
-}
+// Using AuthenticatedUser from @beauty-saas/shared instead of local UserWithRoles
 
 /**
  * Custom decorator to set required roles for a route handler or controller
@@ -87,16 +81,21 @@ export class RolesGuard extends AuthGuard('jwt') {
       return true;
     }
 
-    const { user } = context.switchToHttp().getRequest<{ user: UserWithRoles }>();
+    const { user } = context.switchToHttp().getRequest<{ user: AuthenticatedUser }>();
     if (!user) {
       throw new ForbiddenException('User not authenticated');
     }
 
-    // Extract role names from user roles
+    // Extract role names from user roles, handling both string and object formats
     const userRoleNames = (user.roles || [])
-      .map(role => role?.role?.name)
+      .map(role => {
+        if (typeof role === 'string') {
+          return role as AppUserRole;
+        }
+        return (role as UserRoleInfo).name;
+      })
       .filter((role): role is AppUserRole => 
-        role !== undefined && Object.values(AppUserRole).includes(role as AppUserRole)
+        role !== undefined && Object.values<string>(AppUserRole).includes(role as string)
       );
 
     // Check if user has any of the required roles
