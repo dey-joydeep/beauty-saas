@@ -1,17 +1,17 @@
 import { UserRole } from '@prisma/client';
+import { AppUserRole } from '../enums/user-role.enum';
 
-export enum AppUserRole {
-  ADMIN = 'ADMIN',
-  OWNER = 'OWNER',
-  STAFF = 'STAFF',
-  CUSTOMER = 'CUSTOMER'
-}
-
+/**
+ * Represents role information with ID and name
+ */
 export interface UserRoleInfo {
   id: number;
   name: string;
 }
 
+/**
+ * Represents the authenticated user object available in requests
+ */
 export interface AuthenticatedUser {
   // Core user information
   id: string;

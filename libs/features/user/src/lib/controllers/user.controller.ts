@@ -1,3 +1,6 @@
+import { JwtAuthGuard, Roles, User } from '@beauty-saas/core';
+import type { AuthenticatedUser } from '@beauty-saas/shared';
+import { AppUserRole } from '@beauty-saas/shared';
 import {
   BadRequestException,
   Body,
@@ -19,13 +22,24 @@ import {
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse
+} from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
-import { AppUserRole } from '@shared/types/user.types';
-import { JwtAuthGuard } from '../../../core/auth/guards/jwt-auth.guard';
-import { Roles } from '../../../core/auth/guards/roles.guard';
-import { User } from '../../../common/decorators/user.decorator';
-import type { AuthUser } from '../../../modules/dashboard/interfaces/dashboard-request.interface';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -44,13 +58,24 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Roles(AppUserRole.ADMIN)
   @ApiOperation({ summary: 'Get user statistics' })
-  @ApiResponse({ status: 200, description: 'User statistics retrieved successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiQuery({ name: 'tenant_id', required: false, type: String, description: 'Tenant ID to filter statistics' })
+  @ApiOkResponse({ 
+    description: 'User statistics retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        totalUsers: { type: 'number', example: 100 },
+        activeUsers: { type: 'number', example: 75 },
+        tenantId: { type: 'string', example: 'tenant-123' }
+      }
+    }
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   async getUserStats(
     @Query('tenant_id') tenantId: string,
-    @User() _user: AuthUser,
+    @User() _user: AuthenticatedUser,
   ) {
     try {
       // The JwtAuthGuard and RolesGuard already verify the user's authentication and authorization
@@ -74,16 +99,24 @@ export class UserController {
   @UseGuards(JwtAuthGuard, Roles)
   @Roles(AppUserRole.ADMIN, AppUserRole.OWNER)
   @ApiOperation({ summary: 'Get all users (admin/owner only)' })
-  @ApiResponse({ status: 200, description: 'List of users', type: [UserResponseDto] })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search term for name or email' })
+  @ApiQuery({ name: 'role', required: false, enum: AppUserRole, description: 'Filter by user role' })
+  @ApiQuery({ name: 'status', required: false, enum: ['active', 'inactive'], description: 'Filter by user status' })
+  @ApiOkResponse({ 
+    description: 'List of users', 
+    type: [UserResponseDto] 
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   async getUsers(
     @Query('page') _page = 1,
     @Query('limit') _limit = 10,
     @Query('search') _search = '',
     @Query('role') _role?: AppUserRole,
     @Query('status') _status?: string,
-    @User() user?: AuthUser,
+    @User() user?: AuthenticatedUser,
   ): Promise<UserResponseDto[]> {
     try {
       let tenantId: string | null = null;
@@ -153,9 +186,13 @@ export class UserController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User registered successfully', type: UserResponseDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 409, description: 'User already exists' })
+  @ApiBody({ type: CreateUserDto, description: 'User registration data' })
+  @ApiCreatedResponse({ 
+    description: 'User registered successfully', 
+    type: UserResponseDto 
+  })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiConflictResponse({ description: 'User already exists' })
   async register(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
     try {
       const user = await this.userService.createUser(createUserDto);
@@ -189,14 +226,18 @@ export class UserController {
   @Roles(AppUserRole.ADMIN, AppUserRole.OWNER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new user (admin/owner only)' })
-  @ApiResponse({ status: 201, description: 'User created successfully', type: UserResponseDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 409, description: 'User already exists' })
+  @ApiBody({ type: CreateUserDto, description: 'User creation data' })
+  @ApiCreatedResponse({ 
+    description: 'User created successfully', 
+    type: UserResponseDto 
+  })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiConflictResponse({ description: 'User already exists' })
   async create(
     @Body() createUserDto: CreateUserDto,
-    @User() currentUser: AuthUser,
+    @User() currentUser: AuthenticatedUser,
   ): Promise<UserResponseDto> {
     try {
       // Only allow ADMIN to create users with ADMIN role
@@ -249,15 +290,20 @@ export class UserController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update a user' })
-  @ApiResponse({ status: 200, description: 'User updated successfully', type: UserResponseDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiParam({ name: 'id', type: String, description: 'User ID' })
+  @ApiBody({ type: UpdateUserDto, description: 'User update data' })
+  @ApiOkResponse({ 
+    description: 'User updated successfully', 
+    type: UserResponseDto 
+  })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiNotFoundResponse({ description: 'User not found' })
   async updateUser(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @User() _user: AuthUser,
+    @User() _user: AuthenticatedUser,
   ): Promise<UserResponseDto> {
     try {
       const updatedUser = await this.userService.updateUser(id, updateUserDto);
@@ -295,10 +341,11 @@ export class UserController {
   @Roles(AppUserRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a user' })
-  @ApiResponse({ status: 204, description: 'User deleted successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiParam({ name: 'id', type: String, description: 'User ID' })
+  @ApiNoContentResponse({ description: 'User deleted successfully' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   async deleteUser(@Param('id') id: string) {
     try {
       await this.userService.deleteUser(id);
@@ -314,10 +361,36 @@ export class UserController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'User login' })
-  @ApiResponse({ status: 200, description: 'User logged in successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiBody({ type: LoginUserDto, description: 'User login credentials' })
+  @ApiOkResponse({ 
+    description: 'User logged in successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+            email: { type: 'string', example: 'user@example.com' },
+            name: { type: 'string', example: 'John Doe', nullable: true },
+            roles: { 
+              type: 'array', 
+              items: { type: 'string' },
+              example: ['CUSTOMER']
+            },
+            tenantId: { type: 'string', example: 'tenant-123', nullable: true },
+            isVerified: { type: 'boolean', example: true },
+            isActive: { type: 'boolean', example: true },
+            phone: { type: 'string', example: '+1234567890', nullable: true }
+          }
+        }
+      }
+    }
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   async login(@Body() loginUserDto: LoginUserDto) {
     try {
       // Use the service to handle login and token generation
@@ -356,9 +429,12 @@ export class UserController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'Current user profile', type: UserResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getCurrentUser(@User() user: AuthUser): Promise<UserResponseDto> {
+  @ApiOkResponse({ 
+    description: 'Current user profile', 
+    type: UserResponseDto 
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async getCurrentUser(@User() user: AuthenticatedUser): Promise<UserResponseDto> {
     try {
       const currentUser = await this.userService.getUserById(user.id);
       if (!currentUser) {
@@ -394,9 +470,17 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'User logout' })
-  @ApiResponse({ status: 200, description: 'User logged out successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOkResponse({ 
+    description: 'User logged out successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Logout successful' }
+      }
+    }
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   async logout() {
     // In a stateless JWT system, logout is handled client-side by removing the token
     // This endpoint is provided for consistency and future extensibility

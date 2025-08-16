@@ -8,13 +8,15 @@
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
+      "dependsOn": ["^build"],
       "options": {
         "outputPath": "dist/libs/features/appointment",
         "tsConfig": "libs/features/appointment/tsconfig.lib.json",
         "packageJson": "libs/features/appointment/package.json",
         "main": "libs/features/appointment/src/index.ts",
         "assets": [],
-        "buildableProjectDepsInPackageJsonType": "dependencies"
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
       },
       "configurations": {
         "production": {

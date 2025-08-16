@@ -2,3 +2,4 @@
 export * from './decorators/current-user.decorator';
 export * from './types/user.types';
 export * from './enums/appointment-status.enum';
+export * from './enums/user-role.enum';

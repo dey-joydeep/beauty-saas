@@ -1,32 +1,25 @@
 {
-  "name": "@beauty-saas/data-access",
-  "projectType": "library",
+  "name": "data-access",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/data-access/src",
-  "prefix": "beauty-saas",
+  "projectType": "library",
   "tags": [
     "scope:data-access",
-    "type:data-access"
+    "type:data-access",
+    "layer:data"
   ],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/data-access",
-        "tsConfig": "libs/data-access/tsconfig.lib.json",
-        "packageJson": "libs/data-access/package.json",
         "main": "libs/data-access/src/index.ts",
+        "tsConfig": "libs/data-access/tsconfig.lib.json",
         "assets": [
           "libs/data-access/prisma/schema.prisma",
           "libs/data-access/prisma/migrations/**/*"
-        ],
-        "testFilePatterns": [
-          "libs/data-access/test/**/*.ts"
-        ],
-        "generatePackageJson": true,
-        "updateBuildableProjectDepsInPackageJson": true
+        ]
       }
     },
     "lint": {
@@ -49,22 +42,11 @@
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": [
-        "{workspaceRoot}/coverage/libs/data-access"
+        "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "libs/data-access/jest.config.ts",
-        "passWithNoTests": true,
-        "codeCoverage": true,
-        "coverageReporters": [
-          "text",
-          "lcov"
-        ]
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "jestConfig": "jest.preset.ts",
+        "passWithNoTests": true
       }
     }
   }
