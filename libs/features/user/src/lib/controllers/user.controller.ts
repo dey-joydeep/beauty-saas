@@ -1,4 +1,5 @@
-import { JwtAuthGuard, Roles, User } from '@beauty-saas/core';
+import { JwtAuthGuard, Roles, User, RolesGuard } from '@beauty-saas/core';
+import type { PaginatedResponse, PaginationParams } from '@beauty-saas/core';
 import type { AuthenticatedUser } from '@beauty-saas/shared';
 import { AppUserRole } from '@beauty-saas/shared';
 import {
@@ -37,7 +38,8 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
-  ApiUnauthorizedResponse
+  ApiUnauthorizedResponse,
+  getSchemaPath
 } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -46,7 +48,6 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserService } from '../services/user.service';
 
 import { UserResponseDto } from '../dto/user-response.dto';
-import { PaginatedResponse, PaginationParams } from '@beauty-saas/core';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -107,11 +108,157 @@ export class UserController {
   @ApiQuery({ name: 'status', required: false, enum: ['active', 'inactive'], description: 'Filter by user status' })
   @ApiOkResponse({ 
     description: 'Paginated list of users',
-    type: PaginatedResponseDto
+    type: PaginatedResponse,
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(PaginatedResponse) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(UserResponseDto) }
+            }
+          }
+        }
+      ]
+    }
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   async getUsers(
+    @User() user: AuthenticatedUser,
+    @Query() query: PaginationParams & {
+      search?: string;
+      role?: AppUserRole;
+      status?: string;
+    } = {}
+  ): Promise<PaginatedResponse<UserResponseDto>> {
+    try {
+      const { page = 1, limit = 10, search = '', role, status } = query;
+      let tenantId: string | null = null;
+
+      // If user is not an admin, they can only see users from their own tenant
+      if (user && !user.roles.some((r) => r.name === AppUserRole.ADMIN)) {
+        tenantId = user.tenantId || null;
+      }
+
+      // Build the where clause with optional filters
+      const where: Prisma.UserWhereInput = {};
+      
+      // Apply tenant filter
+      if (tenantId) {
+        where.tenantId = tenantId;
+      }
+
+      // Apply search filter
+      if (search) {
+        where.OR = [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      // Apply role filter
+      if (role) {
+        where.roles = {
+          some: {
+            role: {
+              name: role
+            }
+          }
+        };
+      }
+
+      // Apply status filter
+      if (status) {
+        where.isActive = status === 'active';
+      }
+
+      // Calculate pagination
+      const skip = (page - 1) * limit;
+      const take = limit;
+
+      // Get paginated results
+      const [users, total] = await Promise.all([
+        this.userService.getUsers({
+          where,
+          skip,
+          take,
+          include: {
+            roles: {
+              include: {
+                role: true
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        }),
+        this.userService.countUsers({ where })
+      ]);
+      
+      // Build pagination response
+      const response = {
+        data: users.map(user => ({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          phone: user.phone,
+          isVerified: user.isVerified,
+          isActive: user.isActive,
+          avatarUrl: user.avatarUrl,
+          lastLoginAt: user.lastLoginAt,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          tenantId: user.tenantId,
+          roles: user.roles?.map(ur => ({
+            id: ur.roleId,
+            name: ur.role?.name || ''
+          })) || [],
+        })),
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
+
+      // Return the paginated response with the correct structure
+      return {
+        data: response.data,
+        meta: response.meta
+      };
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to retrieve users');
+    }
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(AppUserRole.ADMIN, AppUserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: 'List all users with pagination (Admin only)' })
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(PaginatedResponse) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(UserResponseDto) },
+            },
+          },
+        },
+      ],
+    },
+  })
+  @UseInterceptors(ClassSerializerInterceptor)
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  async getUsersAdmin(
     @User() user: AuthenticatedUser,
     @Query() query: PaginationParams & {
       search?: string;
@@ -468,10 +615,8 @@ export class UserController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiOkResponse({ 
-    description: 'Current user profile', 
-    type: UserResponseDto 
-  })
+  @ApiOkResponse({ type: UserResponseDto })
+  @UseInterceptors(ClassSerializerInterceptor)
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async getCurrentUser(@User() user: AuthenticatedUser): Promise<UserResponseDto> {
     try {

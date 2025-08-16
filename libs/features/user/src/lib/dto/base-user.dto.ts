@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsEmail, IsOptional, MinLength, IsEnum, IsNotEmpty } from 'class-validator';
-import { AppUserRole } from '@shared/types/user.types';
+import { AppUserRole } from '@beauty-saas/shared';
 
 export class BaseUserDto {
   @ApiProperty({

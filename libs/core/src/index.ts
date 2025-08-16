@@ -15,5 +15,7 @@ export * from './translate';
 export * from './utils';
 export * from './validators';
 
+export * from './types';
+
 // Export models individually to avoid duplicate exports
 export * from './models/notification.model';
