@@ -14,7 +14,7 @@ import { AuthenticatedUser } from '../types/user.types';
  * ```
  */
 export const CurrentUser = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): AuthenticatedUser => {
+  (_data: unknown, ctx: ExecutionContext): AuthenticatedUser => {
     const request = ctx.switchToHttp().getRequest<{ user?: AuthenticatedUser }>();
     
     if (!request.user) {

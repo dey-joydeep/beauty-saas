@@ -30,7 +30,13 @@
                 "outputPath": "dist/libs/core"
             }
         },
-        "test": {
+        "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/core/tsconfig.lib.json --noEmit"
+      }
+    },
+    "test": {
             "outputs": ["{workspaceRoot}/coverage/libs/core"],
             "executor": "@nx/jest:jest",
             "options": {

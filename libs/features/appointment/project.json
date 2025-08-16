@@ -26,6 +26,12 @@
       },
       "defaultConfiguration": "production"
     },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/features/appointment/tsconfig.lib.json --noEmit"
+      }
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
@@ -57,5 +63,9 @@
     }
   },
   "tags": ["type:feature", "scope:appointment"],
-  "implicitDependencies": ["core"]
+  "implicitDependencies": ["core"],
+  "dependencies": [{
+    "target": "data-access",
+    "projects": "data-access"
+  }]
 }

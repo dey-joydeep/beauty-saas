@@ -45,13 +45,13 @@ export class ErrorInterceptor implements HttpInterceptor {
     );
   }
 
-  private handleNetworkError(req: HttpRequest<unknown>): void {
+  private handleNetworkError(_req: HttpRequest<unknown>): void {
     this.notificationService.showError(
       'Unable to connect to the server. Please check your internet connection and try again.'
     );
   }
 
-  private handleClientError(error: HttpErrorResponse, req: HttpRequest<unknown>): void {
+  private handleClientError(error: HttpErrorResponse, _req: HttpRequest<unknown>): void {
     const errorResponse = error.error;
     let userMessage = 'An error occurred';
 

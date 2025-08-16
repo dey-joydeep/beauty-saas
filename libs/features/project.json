@@ -35,7 +35,13 @@
                 ]
             }
         },
-        "test": {
+        "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/features/tsconfig.lib.json --noEmit"
+      }
+    },
+    "test": {
             "executor": "@nx/jest:jest",
             "outputs": [
                 "{workspaceRoot}/coverage/libs/features"

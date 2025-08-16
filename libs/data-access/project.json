@@ -19,8 +19,15 @@
                 "packageJson": "libs/data-access/package.json",
                 "main": "libs/data-access/src/index.ts",
                 "assets": [
+                    "libs/data-access/prisma/schema.prisma",
+                    "libs/data-access/prisma/migrations/**/*",
                     "libs/data-access/*.md"
-                ]
+                ],
+                "testFilePatterns": [
+                    "libs/data-access/test/**/*.ts"
+                ],
+                "generatePackageJson": true,
+                "updateBuildableProjectDepsInPackageJson": true
             }
         },
         "lint": {
@@ -35,15 +42,27 @@
                 ]
             }
         },
-        "test": {
-            "executor": "@nx/jest:jest",
-            "outputs": [
-                "{workspaceRoot}/coverage/libs/data-access"
-            ],
-            "options": {
-                "jestConfig": "jest.preset.ts",
-                "passWithNoTests": true
-            }
+        "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/data-access/tsconfig.lib.json --noEmit"
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/data-access"],
+      "options": {
+        "jestConfig": "libs/data-access/jest.config.ts",
+        "passWithNoTests": true,
+        "codeCoverage": true,
+        "coverageReporters": ["text", "lcov"]
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
         }
+      }
+    }
     }
 }

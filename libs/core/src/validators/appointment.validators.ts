@@ -14,7 +14,7 @@ export function IsValidAppointmentStatus(validationOptions?: ValidationOptions) 
                 message: 'Invalid appointment status',
             },
             validator: {
-                validate(value: any, args: ValidationArguments) {
+                validate(value: any, _args: ValidationArguments) {
                     return (
                         typeof value === 'string' &&
                         Object.values(AppointmentStatus).includes(value as AppointmentStatus)
@@ -38,7 +38,7 @@ export function IsValidAppointmentTime(validationOptions?: ValidationOptions) {
                 message: 'Appointment time must be in the future',
             },
             validator: {
-                validate(value: any, args: ValidationArguments) {
+                validate(value: any, _args: ValidationArguments) {
                     if (typeof value === 'string') {
                         const appointmentTime = new Date(value);
                         const now = new Date();

@@ -1,0 +1,10 @@
+{
+  "name": "@beauty-saas/data-access",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
+  }
+}

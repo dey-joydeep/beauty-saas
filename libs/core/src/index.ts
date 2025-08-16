@@ -1,4 +1,5 @@
 // Core library public API
+export * from './decorators/user.decorator';
 
 // Core exports
 export * from './auth';

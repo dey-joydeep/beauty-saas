@@ -73,17 +73,26 @@ export class PrismaService
   /**
    * Helper method to handle database operations with error handling
    */
+  // Overload for array of Prisma promises
   async $transaction<P extends PrismaPromise<any>[]>(
     arg: [...P],
     options?: { isolationLevel?: Prisma.TransactionIsolationLevel }
   ): Promise<UnwrapTuple<P>>;
+
+  // Overload for transaction callback
   async $transaction<P>(
-    fn: (prisma: Omit<this, '$transaction'>) => Promise<P>,
+    fn: (prisma: Omit<PrismaClient, '$transaction' | '$on' | '$connect' | '$disconnect' | '$use' | '$extends'>) => Promise<P>,
     options?: { maxWait?: number; timeout?: number }
   ): Promise<P>;
-  async $transaction<P>(
+
+  // Implementation
+  async $transaction(
     arg: any,
-    options?: { maxWait?: number; timeout?: number; isolationLevel?: Prisma.TransactionIsolationLevel }
+    options?: { 
+      maxWait?: number;
+      timeout?: number;
+      isolationLevel?: Prisma.TransactionIsolationLevel;
+    }
   ): Promise<any> {
     try {
       if (Array.isArray(arg)) {
@@ -95,7 +104,6 @@ export class PrismaService
       throw new Error('Invalid argument type for transaction');
     } catch (error) {
       this.handlePrismaError(error);
-      throw error;
     }
   }
 

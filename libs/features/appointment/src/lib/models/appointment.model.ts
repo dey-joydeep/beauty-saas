@@ -19,11 +19,7 @@ type TenantService = Prisma.TenantSalonServiceGetPayload<{
   };
 }>;
 
-export enum AppointmentStatus {
-  BOOKED = 'booked',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
-}
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 
 export const APPOINTMENT_STATUS_VALUES = Object.values(AppointmentStatus) as AppointmentStatus[];
 export const VALID_APPOINTMENT_STATUSES = APPOINTMENT_STATUS_VALUES;
@@ -104,15 +100,14 @@ export const SALON_SELECT: Prisma.SalonSelect = {
   phone: true,
   email: true,
   website: true,
-  imageUrl: true,
+  logoUrl: true,
   coverImageUrl: true,
   isActive: true,
   isVerified: true,
   ownerId: true,
   tenantId: true,
-  rating: true,
+  averageRating: true,
   reviewCount: true,
-  amenities: true,
   createdAt: true,
   updatedAt: true
 } as const;
@@ -505,8 +500,8 @@ export interface AppointmentServiceWithDetails {
   staff: StaffWithUser | null;
 }
 
-export interface AppointmentWithDetails extends PrismaAppointment {
-  // Core appointment fields from PrismaAppointment
+// Corrected AppointmentWithDetails to match schema.prisma
+export interface AppointmentWithDetails {
   id: string;
   tenantId: string;
   customerId: string | null;
@@ -515,7 +510,7 @@ export interface AppointmentWithDetails extends PrismaAppointment {
   endTime: Date;
   status: AppointmentStatus;
   notes: string | null;
-  metadata: Prisma.JsonValue | null;
+  metadata: unknown | null;
   createdAt: Date;
   updatedAt: Date;
   cancelledAt: Date | null;
@@ -523,190 +518,17 @@ export interface AppointmentWithDetails extends PrismaAppointment {
   customerName: string | null;
   customerPhone: string | null;
   customerEmail: string | null;
-  
   // Relations
-  tenant: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string | null;
-    primaryColor: string | null;
-    secondaryColor: string | null;
-    accentColor: string | null;
-    businessAddressId: string | null;
-    businessAddress?: {
-      id: string;
-      line1: string;
-      line2: string | null;
-      buildingName: string | null;
-      floor: string | null;
-      landmark: string | null;
-      postalCode: string;
-      latitude: number | null;
-      longitude: number | null;
-      city: {
-        id: string;
-        name: string;
-        state: {
-          id: string;
-          name: string;
-          stateCode: string;
-          country: {
-            id: string;
-            name: string;
-            iso2: string;
-          };
-        };
-      };
-    } | null;
-    isActive: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-  customerUser: {
-    id: string;
-    name: string | null;
-    email: string;
-    phone: string | null;
-    isActive: boolean;
-    isVerified: boolean;
-    tenantId: string | null;
-    avatarUrl: string | null;
-    lastLoginAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
-    passwordHash: string; // Added to match Prisma User model
-  } | null;
-  customer: {
-    id: string;
-    userId: string;
-    customerId: string;
-    loyaltyPoints: number;
-    preferredSalonId: string | null;
-    registeredAt: Date;
-    updatedAt: Date;
-    user: UserWithMinimalInfo;
-  } | null;
+  customerUser: UserWithMinimalInfo | null;
+  customer: CustomerWithUser | null;
   staff: StaffWithUser | null;
   services: AppointmentServiceWithDetails[];
   salons: SalonWithMinimalInfo[];
   reviews: BaseReview[];
   productSales: BaseProductSale[];
-  
   _count: {
-    tenant: number;
-    customerUser: number;
-    customer: number;
-    staff: number;
     services: number;
     reviews: number;
     productSales: number;
   };
 }
-
-export interface AppointmentDto {
-  // Core appointment fields
-  id: string;
-  title: string;
-  description?: string;
-  startTime: string; // ISO date string
-  endTime: string; // ISO date string
-  status: AppointmentStatus;
-  notes?: string | null;
-  
-  // Customer information
-  customerId: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string | null;
-  
-  // Staff information
-  staffId: string | null;
-  staffName: string;
-  
-  // Service information
-  serviceId: string;
-  serviceName: string;
-  duration: number;
-  price: number | string; // Can be string to handle Decimal serialization
-  
-  // Salon information
-  salonId: string;
-  salonName: string;
-  salonAddress?: string | null;
-  salonPhone?: string | null;
-  
-  // Tenant information
-  tenantId: string;
-  tenantName: string;
-  
-  // Timestamps
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
-  cancelledAt?: string | null; // ISO date string
-  
-  // Counts
-  serviceCount?: number;
-  productCount?: number;
-  reviewCount?: number;
-}
-
-export interface CreateAppointmentDto {
-  // Required fields
-  tenantId: string;
-  customerId: string;
-  salonId: string;
-  serviceIds: string[];
-  startTime: string; // ISO date string
-  endTime: string; // ISO date string
-  
-  // Optional fields
-  staffId?: string | null;
-  notes?: string | null;
-  status?: AppointmentStatus;
-  
-  // Metadata and additional options
-  metadata?: Prisma.InputJsonValue | null;
-  sendNotifications?: boolean;
-  
-  // Recurring appointment options
-  isRecurring?: boolean;
-  recurrenceRule?: {
-    frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
-    interval: number;
-    count?: number;
-    until?: string; // ISO date string
-    byDay?: string[]; // e.g., ['MO', 'WE', 'FR']
-    byMonthDay?: number[]; // e.g., [1, 15]
-    byMonth?: number[]; // 1-12
-  };
-}
-
-export interface UpdateAppointmentDto {
-  // Required fields
-  id: string;
-  
-  // Optional fields that can be updated
-  staffId?: string | null;
-  status?: AppointmentStatus;
-  startTime?: string; // ISO date string
-  endTime?: string; // ISO date string
-  notes?: string | null;
-  
-  // Additional metadata and options
-  metadata?: Prisma.InputJsonValue | null;
-  cancellationReason?: string | null;
-  
-  // Options for handling the update
-  sendNotifications?: boolean;
-  updateSeries?: boolean; // For recurring appointments
-  updateThisAndFuture?: boolean; // For recurring appointments
-  
-  // For rescheduling
-  rescheduleReason?: string | null;
-  
-  // For status changes
-  statusChangeReason?: string | null;
-}
-
-// APPOINTMENT_INCLUDES is now imported from './appointment.includes'

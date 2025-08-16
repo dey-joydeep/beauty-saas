@@ -1,5 +1,6 @@
 // Export all models and types
-export * from './appointment.model';
+// Only export model types and interfaces, not DTOs
+export type { AppointmentWithDetails, RawAppointment, ServiceWithDetails, UserWithMinimalInfo, SalonWithMinimalInfo, StaffWithUser, AppointmentServiceWithDetails } from './appointment.model';
 export * from './appointment.includes';
 export * from './user-params.model';
 

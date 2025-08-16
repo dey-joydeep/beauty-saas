@@ -24,7 +24,7 @@ import {
 } from '@nestjs/swagger';
 
 // Core imports
-import type { AuthUser } from '@beauty-saas/core';
+import { AuthUser, User } from '@beauty-saas/core';
 import { JwtAuthGuard, Roles, RolesGuard } from '@beauty-saas/core';
 
 // Feature imports
@@ -38,7 +38,7 @@ import {
   AppointmentStatsDto,
   PaginatedAppointmentsDto
 } from '../dto/responses';
-import { AppUserRole } from '../models/user-params.model';
+import { AppUserRole } from '@beauty-saas/shared';
 import { AppointmentService } from '../services/appointment.service';
 
 @ApiTags('appointments')
