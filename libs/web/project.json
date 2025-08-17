@@ -1,17 +1,17 @@
 {
-  "name": "frontend",
+  "name": "web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/frontend/src",
+  "sourceRoot": "libs/web/src",
   "projectType": "library",
-  "tags": ["scope:frontend", "type:util", "layer:domain"],
+  "tags": ["scope:web", "type:util", "layer:domain"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/frontend",
-        "main": "libs/frontend/src/index.ts",
-        "tsConfig": "libs/frontend/tsconfig.lib.json",
+        "outputPath": "@beauty-saas/web",
+        "main": "libs/web/src/index.ts",
+        "tsConfig": "libs/web/tsconfig.lib.json",
         "assets": []
       }
     },
@@ -19,13 +19,13 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/frontend/**/*.ts"]
+        "lintFilePatterns": ["libs/web/**/*.ts"]
       }
     },
     "type-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p libs/frontend/tsconfig.lib.json --noEmit"
+        "command": "tsc -p libs/web/tsconfig.lib.json --noEmit"
       }
     },
     "test": {
