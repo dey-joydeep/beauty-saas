@@ -13,10 +13,10 @@
       "inputs": ["production", "^production"]
     },
     "test": {
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"]
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.cjs"]
     },
     "lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"]
+      "inputs": ["default", "{workspaceRoot}/.eslintignore", "{workspaceRoot}/eslint.config.js"]
     },
     "@nx/js:tsc": {
       "options": {
@@ -38,7 +38,7 @@
     },
     "@nx/eslint:lint": {
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore", "{workspaceRoot}/eslint.config.mjs"]
+      "inputs": ["default", "{workspaceRoot}/.eslintignore", "{workspaceRoot}/eslint.config.js", "{workspaceRoot}/eslint.config.mjs"]
     }
   },
   "namedInputs": {
@@ -96,9 +96,7 @@
     "@nx/js": {
       "analyzeSourceFiles": true,
       "analyzePackageJson": true,
-      "exclude": [
-        "docs/**"
-      ]
+      "exclude": ["docs/**"]
     }
   },
   "nxCloudId": "688d916733e08f6745766d01",
@@ -109,7 +107,7 @@
       "unitTestRunner": "jest"
     },
     "@nx/angular:component": {
-      "style": "css"
+      "style": "scss"
     }
   }
 }
