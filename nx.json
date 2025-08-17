@@ -1,88 +1,106 @@
 {
-    "plugins": [
-        {
-            "plugin": "@nx/eslint/plugin",
-            "options": {
-                "targetName": "eslint:lint"
-            }
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "eslint:lint"
+      }
+    }
+  ],
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "test": {
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"]
+    },
+    "lint": {
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"]
+    },
+    "@nx/js:tsc": {
+      "options": {
+        "generateExportsField": true
+      }
+    },
+    "@nx/jest:jest": {
+      "cache": true,
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.cjs"],
+      "options": {
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
         }
-    ],
-    "targetDefaults": {
-        "build": {
-            "dependsOn": ["^build"],
-            "inputs": ["production", "^production"]
-        },
-        "test": {
-            "inputs": [
-                "default",
-                "^production",
-                "{workspaceRoot}/jest.preset.js"
-            ]
-        },
-        "lint": {
-            "inputs": [
-                "default",
-                "{workspaceRoot}/.eslintrc.json"
-            ]
-        },
-        "@nx/js:tsc": {
-            "options": {
-                "generateExportsField": true
-            }
-        }
+      }
     },
-    "namedInputs": {
-        "default": [
-            "{projectRoot}/**/*",
-            "sharedGlobals"
-        ],
-        "sharedGlobals": [],
-        "production": [
-            "default"
-        ]
+    "@nx/eslint:lint": {
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore", "{workspaceRoot}/eslint.config.mjs"]
+    }
+  },
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "sharedGlobals": [],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/test-setup.[jt]s",
+      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/eslint.config.mjs"
+    ]
+  },
+  "tags": {
+    "rules": {
+      "scope:core": {
+        "description": "Core application functionality and shared services"
+      },
+      "scope:shared": {
+        "description": "Shared libraries and utilities used across the application"
+      },
+      "type:api": {
+        "description": "API endpoints and controllers"
+      },
+      "type:util": {
+        "description": "Utility functions and helpers"
+      },
+      "layer:domain": {
+        "description": "Business logic and domain models"
+      },
+      "layer:data": {
+        "description": "Data access and services"
+      }
+    }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "test", "lint", "e2e"]
+      }
+    }
+  },
+  "affected": {
+    "defaultBase": "main"
+  },
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "libs"
+  },
+  "nxCloudId": "688d916733e08f6745766d01",
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+  "generators": {
+    "@nx/angular:library": {
+      "linter": "eslint",
+      "unitTestRunner": "jest"
     },
-    "tags": {
-        "rules": {
-            "scope:core": {
-                "description": "Core application functionality and shared services"
-            },
-            "scope:shared": {
-                "description": "Shared libraries and utilities used across the application"
-            },
-            "type:api": {
-                "description": "API endpoints and controllers"
-            },
-            "type:util": {
-                "description": "Utility functions and helpers"
-            },
-            "layer:domain": {
-                "description": "Business logic and domain models"
-            },
-            "layer:data": {
-                "description": "Data access and services"
-            }
-        }
-    },
-    "tasksRunnerOptions": {
-        "default": {
-            "runner": "nx/tasks-runners/default",
-            "options": {
-                "cacheableOperations": [
-                    "build",
-                    "test",
-                    "lint",
-                    "e2e"
-                ]
-            }
-        }
-    },
-    "affected": {
-        "defaultBase": "main"
-    },
-    "workspaceLayout": {
-        "appsDir": "apps",
-        "libsDir": "libs"
-    },
-    "nxCloudId": "688d916733e08f6745766d01",
-    "$schema": "./node_modules/nx/schemas/workspace-schema.json"
+    "@nx/angular:component": {
+      "style": "css"
+    }
+  }
 }

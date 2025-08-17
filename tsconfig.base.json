@@ -1,12 +1,12 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "target": "es2022",
-    "module": "es2022",
+    "target": "ES2022",
+    "module": "ES2022",
     "moduleResolution": "node",
     "moduleDetection": "force",
     "useDefineForClassFields": true,
-    "lib": ["es2022", "dom"],
+    "lib": ["ES2022", "dom"],
     "allowJs": false,
     "declaration": true,
     "declarationMap": true,
@@ -27,23 +27,21 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
+      "@app/*": ["apps/api/src/*"],
       "@beauty-saas/core": ["libs/core/src/index.ts"],
       "@beauty-saas/core/*": ["libs/core/src/*"],
-      "@beauty-saas/shared": ["libs/shared/src/index.ts"],
-      "@beauty-saas/shared/*": ["libs/shared/src/*"],
       "@beauty-saas/data-access": ["libs/data-access/src/index.ts"],
       "@beauty-saas/data-access/*": ["libs/data-access/src/*"],
+      "@beauty-saas/shared": ["libs/shared/src/index.ts"],
+      "@beauty-saas/shared/*": ["libs/shared/src/*"],
       "@beauty-saas/web": ["libs/web/src/index.ts"],
       "@beauty-saas/web/*": ["libs/web/src/*"],
       "@web-shared/*": ["libs/web/src/app/*"],
-      "@app/*": ["apps/api/src/*"]
+      "auth": ["libs/web/core/auth/src/index.ts"]
     },
     "types": ["node", "jest"]
   },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
+  "exclude": ["node_modules", "dist"],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,

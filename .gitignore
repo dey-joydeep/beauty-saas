@@ -19,6 +19,7 @@ tmp/
 
 # IDE and editor files
 .vscode/
+.cursor/
 
 # Angular
 .angular/
@@ -37,3 +38,4 @@ tmp/
 
 # Coverage
 coverage/
+.angular
