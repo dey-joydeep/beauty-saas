@@ -1,5 +1,5 @@
 {
-    "name": "@beauty-saas/ui",
+    "name": "ui",
     "sourceRoot": "libs/ui/src",
     "targets": {
         "lint": {

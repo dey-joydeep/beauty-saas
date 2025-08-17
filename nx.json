@@ -92,6 +92,15 @@
     "appsDir": "apps",
     "libsDir": "libs"
   },
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": true,
+      "analyzePackageJson": true,
+      "exclude": [
+        "docs/**"
+      ]
+    }
+  },
   "nxCloudId": "688d916733e08f6745766d01",
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "generators": {
