@@ -26,20 +26,18 @@ export interface Renewal {
   status?: RenewalStatus;
 }
 
-
-
 @Component({
   selector: 'app-renewals-list-widget',
   standalone: true,
   imports: [
-    CommonModule, 
-    MatCardModule, 
-    MatIconModule, 
-    MatListModule, 
-    MatButtonModule, 
-    MatProgressSpinnerModule, 
+    CommonModule,
+    MatCardModule,
+    MatIconModule,
+    MatListModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
     MatTooltipModule,
-    TranslateModule
+    TranslateModule,
   ],
   templateUrl: './renewals-list-widget.component.html',
   styleUrls: ['./renewals-list-widget.component.scss'],
@@ -73,16 +71,16 @@ export class RenewalsListWidgetComponent extends AbstractBaseComponent {
       this.error = 'Tenant ID is required';
       return;
     }
-    
+
     this.loading = true;
     this.error = null;
-    
+
     const sub = this.dashboardService.getRenewals(this.tenantId).subscribe({
       next: (renewals: Renewal[]) => {
         this.renewals = renewals.map((renewal: Renewal) => ({
           ...renewal,
           status: this.getRenewalStatus(renewal.renewalDate),
-          renewalDate: renewal.renewalDate // Keep as string to match the interface
+          renewalDate: renewal.renewalDate, // Keep as string to match the interface
         }));
         this.loading = false;
       },
@@ -90,9 +88,9 @@ export class RenewalsListWidgetComponent extends AbstractBaseComponent {
         this.error = error instanceof Error ? error.message : 'Failed to load renewals';
         this.handleError(error);
         this.loading = false;
-      }
+      },
     });
-    
+
     this.subscriptions.add(sub);
   }
 
@@ -110,13 +108,13 @@ export class RenewalsListWidgetComponent extends AbstractBaseComponent {
     try {
       const today = new Date();
       const renewal = new Date(renewalDate);
-      
+
       // Handle invalid date strings
       if (isNaN(renewal.getTime())) {
         console.warn('Invalid renewal date:', renewalDate);
         return 'pending';
       }
-      
+
       const diffTime = renewal.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -131,10 +129,14 @@ export class RenewalsListWidgetComponent extends AbstractBaseComponent {
 
   getStatusIcon(status: RenewalStatus): string {
     switch (status) {
-      case 'pending': return 'schedule';
-      case 'completed': return 'check_circle';
-      case 'overdue': return 'warning';
-      default: return 'info';
+      case 'pending':
+        return 'schedule';
+      case 'completed':
+        return 'check_circle';
+      case 'overdue':
+        return 'warning';
+      default:
+        return 'info';
     }
   }
 

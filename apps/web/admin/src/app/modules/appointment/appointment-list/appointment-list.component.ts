@@ -74,7 +74,7 @@ export class AppointmentListComponent implements OnInit {
     private appointmentService: AppointmentService,
     private snackBar: MatSnackBar,
     private translate: TranslateService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -97,11 +97,9 @@ export class AppointmentListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading appointments:', error);
-        this.snackBar.open(
-          this.translate.instant('APPOINTMENT.LIST.LOAD_ERROR'),
-          this.translate.instant('COMMON.CLOSE'),
-          { duration: 5000 }
-        );
+        this.snackBar.open(this.translate.instant('APPOINTMENT.LIST.LOAD_ERROR'), this.translate.instant('COMMON.CLOSE'), {
+          duration: 5000,
+        });
         this.isLoading = false;
       },
     });
@@ -131,20 +129,16 @@ export class AppointmentListComponent implements OnInit {
         const reason = result.reason || '';
         this.appointmentService.cancelAppointment(appointment.id, reason).subscribe({
           next: () => {
-            this.snackBar.open(
-              this.translate.instant('APPOINTMENT.CANCEL_SUCCESS'),
-              this.translate.instant('COMMON.CLOSE'),
-              { duration: 5000 }
-            );
+            this.snackBar.open(this.translate.instant('APPOINTMENT.CANCEL_SUCCESS'), this.translate.instant('COMMON.CLOSE'), {
+              duration: 5000,
+            });
             this.loadAppointments();
           },
           error: (error) => {
             console.error('Error cancelling appointment:', error);
-            this.snackBar.open(
-              this.translate.instant('APPOINTMENT.CANCEL_ERROR'),
-              this.translate.instant('COMMON.CLOSE'),
-              { duration: 5000 }
-            );
+            this.snackBar.open(this.translate.instant('APPOINTMENT.CANCEL_ERROR'), this.translate.instant('COMMON.CLOSE'), {
+              duration: 5000,
+            });
             this.isLoading = false;
           },
         });
@@ -154,7 +148,9 @@ export class AppointmentListComponent implements OnInit {
 
   onReschedule(appointment: Appointment): void {
     // Implementation for reschedule
-    this.snackBar.open(this.translate.instant('APPOINTMENT.RESCHEDULE_MESSAGE'), this.translate.instant('COMMON.CLOSE'), { duration: 3000 });
+    this.snackBar.open(this.translate.instant('APPOINTMENT.RESCHEDULE_MESSAGE'), this.translate.instant('COMMON.CLOSE'), {
+      duration: 3000,
+    });
   }
 
   getStatusChipClass(status: AppointmentStatus): string {
@@ -176,20 +172,9 @@ export class AppointmentListComponent implements OnInit {
       AppointmentStatus.CONFIRMED,
       AppointmentStatus.COMPLETED,
       AppointmentStatus.CANCELLED,
-      AppointmentStatus.NOSHOW
+      AppointmentStatus.NOSHOW,
     ];
-    const services = [
-      'Haircut',
-      'Coloring',
-      'Manicure',
-      'Pedicure',
-      'Facial',
-      'Massage',
-      'Waxing',
-      'Makeup',
-      'Eyebrows',
-      'Hair Treatment',
-    ];
+    const services = ['Haircut', 'Coloring', 'Manicure', 'Pedicure', 'Facial', 'Massage', 'Waxing', 'Makeup', 'Eyebrows', 'Hair Treatment'];
     const now = new Date();
 
     return Array.from({ length: 10 }, (_, i) => {
@@ -197,7 +182,7 @@ export class AppointmentListComponent implements OnInit {
       const endTime = new Date(startTime);
       endTime.setHours(startTime.getHours() + 1);
       const appointmentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-      
+
       return {
         id: `A${1000 + i}`,
         customerId: 'current-user-id',

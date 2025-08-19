@@ -33,10 +33,10 @@ import { ProductParams, ProductCategoryParams, ProductImageParams } from '../../
     MatChipsModule,
     MatCardModule,
     MatTabsModule,
-    TranslateModule
+    TranslateModule,
   ],
   templateUrl: './product-management.component.html',
-  styleUrls: ['./product-management.component.scss']
+  styleUrls: ['./product-management.component.scss'],
 })
 export class ProductManagementComponent implements OnInit {
   productForm: FormGroup;
@@ -44,64 +44,69 @@ export class ProductManagementComponent implements OnInit {
   error: string | null = null;
   success: string | null = null;
   selectedTabIndex = 0;
-  
+
   // Mock data
   categories: ProductCategoryParams[] = [
     { id: '1', name: 'Hair Care' },
     { id: '2', name: 'Skincare' },
     { id: '3', name: 'Makeup' },
   ];
-  
+
   private salonId = 'salon-123';
   private currentUserId = 'user-123';
 
-  constructor(private fb: FormBuilder, private productService: ProductService) {
+  constructor(
+    private fb: FormBuilder,
+    private productService: ProductService,
+  ) {
     this.productForm = this.fb.group({
       // Basic Info
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', Validators.maxLength(1000)],
       sku: [''],
       barcode: [''],
-      
+
       // Pricing
       price: [0, [Validators.required, Validators.min(0)]],
       compareAtPrice: [0, Validators.min(0)],
       costPerItem: [0, Validators.min(0)],
-      
+
       // Inventory
       quantity: [0, [Validators.required, Validators.min(0)]],
       trackQuantity: [true],
       continueSellingWhenOutOfStock: [false],
-      
+
       // Organization
       categories: [[]],
       tags: [''],
-      
+
       // Status
       isActive: [true],
       isFeatured: [false],
-      
+
       // Images
-      images: this.fb.array([])
+      images: this.fb.array([]),
     });
   }
-  
+
   ngOnInit(): void {
     this.addNewImage();
   }
-  
+
   get images() {
     return this.productForm.get('images') as FormArray;
   }
-  
+
   addNewImage(image: Partial<ProductImageParams> = {}) {
-    this.images.push(this.fb.group({
-      url: [image.url || '', Validators.required],
-      altText: [image.altText || ''],
-      isDefault: [image.isDefault || false]
-    }));
+    this.images.push(
+      this.fb.group({
+        url: [image.url || '', Validators.required],
+        altText: [image.altText || ''],
+        isDefault: [image.isDefault || false],
+      }),
+    );
   }
-  
+
   removeImage(index: number) {
     this.images.removeAt(index);
   }
@@ -112,13 +117,13 @@ export class ProductManagementComponent implements OnInit {
       this.error = 'Please fill in all required fields.';
       return;
     }
-    
+
     this.loading = true;
     this.error = null;
     this.success = null;
-    
+
     const formValue = this.productForm.value;
-    
+
     const productData: any = {
       name: formValue.name,
       description: formValue.description,
@@ -136,13 +141,13 @@ export class ProductManagementComponent implements OnInit {
       isFeatured: formValue.isFeatured,
       images: formValue.images || [],
       salonId: this.salonId,
-      createdBy: this.currentUserId
+      createdBy: this.currentUserId,
     };
-    
-    const saveOperation = productData.id 
+
+    const saveOperation = productData.id
       ? this.productService.updateProduct({ ...productData, id: productData.id, updatedBy: this.currentUserId })
       : this.productService.createProduct(productData);
-    
+
     saveOperation.subscribe({
       next: (res: { success: boolean }) => {
         this.loading = false;
@@ -158,7 +163,7 @@ export class ProductManagementComponent implements OnInit {
               continueSellingWhenOutOfStock: false,
               categories: [],
               isActive: true,
-              isFeatured: false
+              isFeatured: false,
             });
             this.images.clear();
             this.addNewImage();
@@ -170,12 +175,12 @@ export class ProductManagementComponent implements OnInit {
       error: (err: any) => {
         this.loading = false;
         this.error = err.userMessage || 'Error saving product.';
-      }
+      },
     });
   }
-  
+
   private markFormGroupTouched(formGroup: FormGroup) {
-    Object.values(formGroup.controls).forEach(control => {
+    Object.values(formGroup.controls).forEach((control) => {
       control.markAsTouched();
       if (control instanceof FormGroup) {
         this.markFormGroupTouched(control);

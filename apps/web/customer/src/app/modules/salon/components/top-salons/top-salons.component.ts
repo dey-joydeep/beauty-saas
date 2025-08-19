@@ -115,7 +115,7 @@ export class TopSalonsComponent implements OnInit {
 
   openMap(salon: Salon): void {
     if (!this.isBrowser) return;
-    
+
     const url = this.getMapUrl(salon);
     if (url && this.platformUtils.window) {
       this.platformUtils.window.open(url, '_blank');

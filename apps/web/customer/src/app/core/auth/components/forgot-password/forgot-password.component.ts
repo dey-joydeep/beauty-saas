@@ -1,15 +1,15 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { 
-  FormBuilder, 
-  FormGroup, 
-  FormControl, 
-  Validators, 
-  ReactiveFormsModule, 
-  AbstractControl, 
+import {
+  FormBuilder,
+  FormGroup,
+  FormControl,
+  Validators,
+  ReactiveFormsModule,
+  AbstractControl,
   ValidationErrors,
   ValidatorFn,
-  FormGroupDirective
+  FormGroupDirective,
 } from '@angular/forms';
 
 // Angular Material Modules
@@ -42,15 +42,7 @@ interface ResetPasswordForm {
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
-    MatButtonModule, 
-    MatProgressBarModule, 
-    TranslateModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatProgressBarModule, TranslateModule],
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss'],
 })
@@ -102,13 +94,13 @@ export class ForgotPasswordComponent {
     this.loading = true;
     this.error = null;
     const email = this.forgotForm.get('email')?.value;
-    
+
     if (!email) {
       this.error = 'Email is required';
       this.loading = false;
       return;
     }
-    
+
     this.authService.requestPasswordReset(email).subscribe({
       next: (success: boolean) => {
         this.loading = false;
@@ -132,13 +124,13 @@ export class ForgotPasswordComponent {
     this.error = null;
     const otp = this.otpForm.get('otp')?.value;
     const newPassword = this.otpForm.get('newPassword')?.value;
-    
+
     if (!otp || !newPassword) {
       this.error = 'OTP and new password are required';
       this.loading = false;
       return;
     }
-    
+
     // Use the OTP as the token for password reset
     this.authService.resetPassword(otp, newPassword).subscribe({
       next: (success: boolean) => {

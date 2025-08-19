@@ -26,7 +26,7 @@ export class ThemeComponent implements OnInit {
     private fb: FormBuilder,
     private renderer: Renderer2,
     @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
-    @Inject(PLATFORM_ID) platformId: object
+    @Inject(PLATFORM_ID) platformId: object,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.themeForm = this.fb.group({

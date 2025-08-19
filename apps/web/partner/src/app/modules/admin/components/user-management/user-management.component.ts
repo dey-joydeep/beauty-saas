@@ -31,16 +31,16 @@ interface User {
     MatFormFieldModule,
     MatInputModule,
     MatPaginatorModule,
-    MatSortModule
+    MatSortModule,
   ],
   template: `
     <div class="p-6">
       <h2 class="text-2xl font-bold mb-6">User Management</h2>
-      
+
       <div class="mb-6">
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>Search Users</mat-label>
-          <input matInput placeholder="Search by name or email" (keyup)="applyFilter($event)">
+          <input matInput placeholder="Search by name or email" (keyup)="applyFilter($event)" />
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
       </div>
@@ -50,9 +50,7 @@ interface User {
           <!-- Name Column -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-            <td mat-cell *matCellDef="let user">
-              {{ user.firstName }} {{ user.lastName }}
-            </td>
+            <td mat-cell *matCellDef="let user">{{ user.firstName }} {{ user.lastName }}</td>
           </ng-container>
 
           <!-- Email Column -->
@@ -65,12 +63,14 @@ interface User {
           <ng-container matColumnDef="role">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
             <td mat-cell *matCellDef="let user">
-              <span class="px-2 py-1 rounded-full text-xs"
+              <span
+                class="px-2 py-1 rounded-full text-xs"
                 [ngClass]="{
                   'bg-blue-100 text-blue-800': user.role === 'admin',
                   'bg-purple-100 text-purple-800': user.role === 'salon_owner',
-                  'bg-gray-100 text-gray-800': user.role === 'customer'
-                }">
+                  'bg-gray-100 text-gray-800': user.role === 'customer',
+                }"
+              >
                 {{ user.role | titlecase }}
               </span>
             </td>
@@ -80,23 +80,25 @@ interface User {
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
             <td mat-cell *matCellDef="let user">
-              <span class="px-2 py-1 rounded-full text-xs"
+              <span
+                class="px-2 py-1 rounded-full text-xs"
                 [ngClass]="{
                   'bg-green-100 text-green-800': user.status === 'active',
                   'bg-yellow-100 text-yellow-800': user.status === 'pending',
-                  'bg-red-100 text-red-800': user.status === 'suspended'
-                }">
+                  'bg-red-100 text-red-800': user.status === 'suspended',
+                }"
+              >
                 {{ user.status | titlecase }}
               </span>
             </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
         </table>
       </div>
     </div>
-  `
+  `,
 })
 export class UserManagementComponent {
   displayedColumns: string[] = ['name', 'email', 'role', 'status'];
@@ -108,7 +110,7 @@ export class UserManagementComponent {
       lastName: 'User',
       role: 'admin',
       status: 'active',
-      lastLogin: new Date()
+      lastLogin: new Date(),
     },
     {
       id: '2',
@@ -117,7 +119,7 @@ export class UserManagementComponent {
       lastName: 'Owner',
       role: 'salon_owner',
       status: 'active',
-      lastLogin: new Date()
+      lastLogin: new Date(),
     },
     {
       id: '3',
@@ -126,8 +128,8 @@ export class UserManagementComponent {
       lastName: 'Doe',
       role: 'customer',
       status: 'active',
-      lastLogin: new Date()
-    }
+      lastLogin: new Date(),
+    },
   ];
 
   applyFilter(event: Event): void {

@@ -27,18 +27,23 @@ const bootstrap = async () => {
     const logSafeProviders = (providers: any[] | undefined) => {
       if (!providers) return [];
       try {
-        return providers.map(p => {
+        return providers.map((p) => {
           if (Array.isArray(p)) {
             return '[EnvironmentProviders]';
           }
           if (p && typeof p === 'object') {
             return {
               provide: typeof p.provide === 'string' ? p.provide : 'Symbol',
-              useValue: 'useValue' in p ? '[Object]' :
-                'useFactory' in p ? '[Factory]' :
-                  'useClass' in p ? '[Class]' :
-                    'useExisting' in p ? '[Existing]' :
-                      '[Unknown]'
+              useValue:
+                'useValue' in p
+                  ? '[Object]'
+                  : 'useFactory' in p
+                    ? '[Factory]'
+                    : 'useClass' in p
+                      ? '[Class]'
+                      : 'useExisting' in p
+                        ? '[Existing]'
+                        : '[Unknown]',
             };
           }
           return p;
@@ -49,10 +54,17 @@ const bootstrap = async () => {
       }
     };
 
-    console.log('🛠️  Server config:', JSON.stringify({
-      ...serverConfig,
-      providers: logSafeProviders(serverConfig.providers)
-    }, null, 2));
+    console.log(
+      '🛠️  Server config:',
+      JSON.stringify(
+        {
+          ...serverConfig,
+          providers: logSafeProviders(serverConfig.providers),
+        },
+        null,
+        2,
+      ),
+    );
 
     // Required for PLATFORM_ID and SSR context
     const ssrConfig = {
@@ -65,7 +77,7 @@ const bootstrap = async () => {
           useFactory: () => {
             console.log('🔧 Creating MaterialSsrHandler...');
             return materialSsrHandlerFactory('server');
-          }
+          },
         },
         // Add error handler for SSR
         {
@@ -76,9 +88,9 @@ const bootstrap = async () => {
               console.error('Stack trace:', error.stack);
             }
             // Don't rethrow here, let the error propagate for proper handling
-          }
-        }
-      ]
+          },
+        },
+      ],
     };
 
     console.log('🚀 Bootstrapping Angular application...');
@@ -109,7 +121,7 @@ const bootstrap = async () => {
       console.error('Stack trace:', error.stack);
     }
     // Add a small delay to ensure logs are flushed
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     throw error;
   }
 };

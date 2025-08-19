@@ -28,7 +28,7 @@ export class MockEventEmitter<T> extends EventEmitter<T> {
     // Override emit and subscribe with jest.fn()
     (this as any).emit = jest.fn();
     (this as any).subscribe = jest.fn((next?: any, error?: any, complete?: any) => {
-      const subscription = new Observable<T>(subscriber => {
+      const subscription = new Observable<T>((subscriber) => {
         if (next) {
           subscriber.next = next;
         }
@@ -39,11 +39,11 @@ export class MockEventEmitter<T> extends EventEmitter<T> {
           subscriber.complete = complete;
         }
       }).subscribe(next, error, complete);
-      return { 
+      return {
         unsubscribe: () => subscription.unsubscribe(),
         closed: false,
         add: () => {},
-        remove: () => {}
+        remove: () => {},
       };
     });
   }
@@ -147,7 +147,7 @@ const mockWindow = {
   cancelAnimationFrame: (id: number) => {
     clearTimeout(id);
   },
-  matchMedia: jest.fn().mockImplementation(query => ({
+  matchMedia: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -239,9 +239,11 @@ export class MockActivatedRoute {
     pathFromRoot: [],
     paramMap: new Map(),
     queryParamMap: new Map(),
-    toString(): string { return ''; }
+    toString(): string {
+      return '';
+    },
   };
-  
+
   params = createObservable({});
   queryParams = createObservable({});
   fragment = createObservable(null);
@@ -257,9 +259,9 @@ export class MockActivatedRoute {
   pathFromRoot = [];
   paramMap = createObservable(new Map());
   queryParamMap = createObservable(new Map());
-  
-  toString(): string { 
-    return ''; 
+
+  toString(): string {
+    return '';
   }
 }
 

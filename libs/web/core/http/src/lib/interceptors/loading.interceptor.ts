@@ -1,7 +1,7 @@
 import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { finalize } from 'rxjs/operators';
-import { LoadingService } from '@frontend-shared/core/services/loading.service';
+import { LoadingService } from '@beauty-saas/web-core/http';
 
 let totalRequests = 0;
 

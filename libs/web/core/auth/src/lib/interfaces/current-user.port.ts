@@ -1,8 +1,14 @@
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 
+// Minimal shape required by guards/components that need role
+export interface CurrentUserMin {
+  readonly id?: string;
+  readonly role: string;
+}
+
 export interface CurrentUserPort {
-  readonly currentUser$: Observable<unknown | null>;
+  readonly currentUser$: Observable<CurrentUserMin | null>;
   readonly isAuthenticated$: Observable<boolean>;
   redirectUrl: string | null;
 }

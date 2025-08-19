@@ -9,12 +9,7 @@ import { DashboardApiService, ProductSalesData } from '@frontend-shared/features
 @Component({
   selector: 'app-product-sales-chart',
   standalone: true,
-  imports: [
-    CommonModule, 
-    BaseChartDirective,
-    MatProgressBarModule,
-    MatError
-  ],
+  imports: [CommonModule, BaseChartDirective, MatProgressBarModule, MatError],
   templateUrl: './product-sales-chart.component.html',
   styleUrls: ['./product-sales-chart.component.scss'],
 })

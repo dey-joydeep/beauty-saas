@@ -52,7 +52,7 @@ export interface Salon {
   // Rating and review information
   rating?: number;
   reviewCount?: number;
-  
+
   // Detailed statistics
   stats?: {
     averageRating: number;

@@ -11,7 +11,7 @@ describe('AppointmentCreateComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, ReactiveFormsModule],
-      declarations: [CreateAppointmentComponent]
+      declarations: [CreateAppointmentComponent],
     }).compileComponents();
     fixture = TestBed.createComponent(CreateAppointmentComponent);
     component = fixture.componentInstance;
@@ -19,13 +19,13 @@ describe('AppointmentCreateComponent', () => {
   });
 
   it('should display error if required fields missing', () => {
-    component.appointmentForm.setValue({ 
-      salonId: '', 
-      serviceId: '', 
-      staffId: '', 
-      startTime: '', 
-      endTime: '', 
-      notes: ''
+    component.appointmentForm.setValue({
+      salonId: '',
+      serviceId: '',
+      staffId: '',
+      startTime: '',
+      endTime: '',
+      notes: '',
     });
     component.submit();
     expect(component.error).toBe('Salon, service, and time are required.');
@@ -33,13 +33,13 @@ describe('AppointmentCreateComponent', () => {
 
   it('should display error on failed appointment create', fakeAsync(() => {
     spyOn(component['http'], 'post').and.returnValue(throwError(() => ({ error: { userMessage: 'Failed to create appointment.' } })));
-    component.appointmentForm.setValue({ 
-      salonId: 'salon1', 
-      serviceId: 'svc1', 
-      staffId: 'staff1', 
-      startTime: '2023-01-01T10:00:00', 
-      endTime: '2023-01-01T11:00:00', 
-      notes: ''
+    component.appointmentForm.setValue({
+      salonId: 'salon1',
+      serviceId: 'svc1',
+      staffId: 'staff1',
+      startTime: '2023-01-01T10:00:00',
+      endTime: '2023-01-01T11:00:00',
+      notes: '',
     });
     component['userId'] = 'user1';
     component.submit();
@@ -51,14 +51,14 @@ describe('AppointmentCreateComponent', () => {
     const mockResponse = { id: 'apt1' };
     spyOn(component['http'], 'post').and.returnValue(of(mockResponse));
     spyOn(component['router'], 'navigate');
-    
-    component.appointmentForm.setValue({ 
-      salonId: 'salon1', 
-      serviceId: 'svc1', 
-      staffId: 'staff1', 
-      startTime: '2023-01-01T10:00:00', 
-      endTime: '2023-01-01T11:00:00', 
-      notes: ''
+
+    component.appointmentForm.setValue({
+      salonId: 'salon1',
+      serviceId: 'svc1',
+      staffId: 'staff1',
+      startTime: '2023-01-01T10:00:00',
+      endTime: '2023-01-01T11:00:00',
+      notes: '',
     });
     component['userId'] = 'user1';
     component.submit();

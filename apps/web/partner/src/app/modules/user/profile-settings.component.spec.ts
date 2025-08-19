@@ -11,7 +11,7 @@ describe('ProfileSettingsComponent', () => {
 
   beforeEach(async () => {
     userService = {
-      updateProfile: jest.fn()
+      updateProfile: jest.fn(),
     } as unknown as jest.Mocked<UserService>;
 
     // Provide the mock service
@@ -28,12 +28,12 @@ describe('ProfileSettingsComponent', () => {
 
   it('should display error on failed profile update', fakeAsync(() => {
     userService.updateProfile.mockReturnValue(throwError(() => new Error('Failed to update')));
-    component.profileForm.setValue({ 
-      name: 'Test', 
-      email: 'test@test.com', 
-      contact: '123', 
+    component.profileForm.setValue({
+      name: 'Test',
+      email: 'test@test.com',
+      contact: '123',
       password: '',
-      profilePicture: null 
+      profilePicture: null,
     });
     component.onSubmit();
     tick();
@@ -41,12 +41,12 @@ describe('ProfileSettingsComponent', () => {
   }));
 
   it('should display error if required fields missing', () => {
-    component.profileForm.setValue({ 
-      name: '', 
-      email: '', 
-      contact: '', 
+    component.profileForm.setValue({
+      name: '',
+      email: '',
+      contact: '',
       password: '',
-      profilePicture: null 
+      profilePicture: null,
     });
     component.onSubmit();
     expect(component.error).toBe('All fields are required.');
@@ -54,12 +54,12 @@ describe('ProfileSettingsComponent', () => {
 
   it('should call updateProfile on valid submit', fakeAsync(() => {
     userService.updateProfile.mockReturnValueOnce(of({ success: true }));
-    component.profileForm.setValue({ 
-      name: 'Test', 
-      email: 'test@test.com', 
+    component.profileForm.setValue({
+      name: 'Test',
+      email: 'test@test.com',
       contact: '123',
       password: '',
-      profilePicture: null 
+      profilePicture: null,
     });
     component.onSubmit();
     tick();

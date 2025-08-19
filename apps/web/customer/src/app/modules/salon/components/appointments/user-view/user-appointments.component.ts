@@ -7,8 +7,8 @@ import { CurrentUserService } from '../../../../../core/auth/services/current-us
 import { Appointment } from '../../../models/appointment.model';
 
 interface AppointmentWithDetails extends Omit<Appointment, 'startTime' | 'endTime' | 'salon' | 'service' | 'staff'> {
-  startTime: string | Date;  // Allow both string and Date for flexibility
-  endTime: string | Date;    // Allow both string and Date for flexibility
+  startTime: string | Date; // Allow both string and Date for flexibility
+  endTime: string | Date; // Allow both string and Date for flexibility
   salon?: {
     id: string;
     name: string;
@@ -59,27 +59,33 @@ export class UserAppointmentsComponent implements OnInit {
   loadAppointments(): void {
     this.loading = true;
     this.error = null;
-    
+
     this.http.get<AppointmentWithDetails[]>(`/api/user/${this.userId}/appointments`).subscribe({
       next: (data) => {
-        this.appointments = data.map(appt => ({
+        this.appointments = data.map((appt) => ({
           ...appt,
           // Convert string dates to Date objects if they're not already
           startTime: typeof appt.startTime === 'string' ? new Date(appt.startTime) : appt.startTime,
           endTime: typeof appt.endTime === 'string' ? new Date(appt.endTime) : appt.endTime,
           // Ensure nested objects are properly typed
-          salon: appt.salon ? {
-            id: appt.salon.id,
-            name: appt.salon.name
-          } : undefined,
-          service: appt.service ? {
-            id: appt.service.id,
-            name: appt.service.name
-          } : undefined,
-          staff: appt.staff ? {
-            id: appt.staff.id,
-            name: appt.staff.name
-          } : undefined
+          salon: appt.salon
+            ? {
+                id: appt.salon.id,
+                name: appt.salon.name,
+              }
+            : undefined,
+          service: appt.service
+            ? {
+                id: appt.service.id,
+                name: appt.service.name,
+              }
+            : undefined,
+          staff: appt.staff
+            ? {
+                id: appt.staff.id,
+                name: appt.staff.name,
+              }
+            : undefined,
         }));
         this.loading = false;
       },
@@ -92,17 +98,17 @@ export class UserAppointmentsComponent implements OnInit {
 
   getDuration(appointment: AppointmentWithDetails): string {
     if (!appointment.startTime || !appointment.endTime) return 'N/A';
-    
+
     const start = new Date(appointment.startTime);
     const end = new Date(appointment.endTime);
     const diffMs = end.getTime() - start.getTime();
-    
+
     if (isNaN(diffMs)) return 'N/A';
-    
+
     const minutes = Math.floor(diffMs / 60000);
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${remainingMinutes}m`;
     }

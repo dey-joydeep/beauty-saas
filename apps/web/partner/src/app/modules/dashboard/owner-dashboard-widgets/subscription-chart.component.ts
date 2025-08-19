@@ -21,7 +21,7 @@ import { DashboardApiService } from '@frontend-shared/features/dashboard/service
     MatError,
     MatButtonModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './subscription-chart.component.html',
   styleUrls: ['./subscription-chart.component.scss'],
@@ -29,21 +29,21 @@ import { DashboardApiService } from '@frontend-shared/features/dashboard/service
 export class SubscriptionChartComponent implements OnInit {
   @Input() tenantId = '';
   chartType = 'bar' as const;
-  data = signal<ChartData<typeof this.chartType, number[], string>>({ 
-    labels: [], 
-    datasets: [] 
+  data = signal<ChartData<typeof this.chartType, number[], string>>({
+    labels: [],
+    datasets: [],
   });
-  
+
   // Method to load subscription data
   loadData(): void {
     if (!this.tenantId) {
       this.error.set('No tenant ID provided');
       return;
     }
-    
+
     this.loading.set(true);
     this.error.set(null);
-    
+
     this.api.getSubscriptions(this.tenantId).subscribe({
       next: (res) => {
         this.data.set(res);
@@ -52,22 +52,22 @@ export class SubscriptionChartComponent implements OnInit {
       error: (err) => {
         this.error.set(err.message || 'Failed to load subscription data');
         this.loading.set(false);
-      }
+      },
     });
   }
-  
+
   // Method to export data
   exportData(): void {
     // In a real implementation, this would export the data to a file
     console.log('Exporting subscription data:', this.data());
     // You could implement actual export logic here (e.g., CSV, Excel, etc.)
   }
-  
+
   // Method to handle refresh button click
   onRefresh(): void {
     this.loadData();
   }
-  
+
   options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -80,25 +80,25 @@ export class SubscriptionChartComponent implements OnInit {
         enabled: true,
         mode: 'index',
         intersect: false,
-      }
+      },
     },
     scales: {
       x: {
         display: true,
         title: {
           display: true,
-          text: 'Subscription Plans'
-        }
+          text: 'Subscription Plans',
+        },
       },
       y: {
         display: true,
         title: {
           display: true,
-          text: 'Number of Subscribers'
+          text: 'Number of Subscribers',
         },
-        beginAtZero: true
-      }
-    }
+        beginAtZero: true,
+      },
+    },
   };
   loading = signal(true);
   error = signal<string | null>(null);

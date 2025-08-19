@@ -26,7 +26,7 @@ describe('PortfolioService', () => {
       createdBy: 'test-user',
       title: 'Test Portfolio',
       description: 'Test description',
-      imageUrl: 'test.jpg'
+      imageUrl: 'test.jpg',
     };
 
     service.createPortfolioItem(testParams).subscribe({

@@ -69,11 +69,12 @@ describe('HomeService', () => {
       service.searchSalons(query, filters).subscribe();
 
       const req = httpMock.expectOne(
-        (req) => req.url === `${apiBaseUrl}/search` && 
-                req.params.get('q') === query && 
-                req.params.get('cityId') === filters.cityId &&
-                req.params.get('page') === filters.page.toString() &&
-                req.params.get('limit') === filters.limit.toString()
+        (req) =>
+          req.url === `${apiBaseUrl}/search` &&
+          req.params.get('q') === query &&
+          req.params.get('cityId') === filters.cityId &&
+          req.params.get('page') === filters.page.toString() &&
+          req.params.get('limit') === filters.limit.toString(),
       );
 
       expect(req.request.method).toBe('GET');
@@ -101,14 +102,16 @@ describe('HomeService', () => {
 
   describe('getCities', () => {
     it('should fetch cities', () => {
-      const mockCities: ICityDto[] = [{
-        id: '1',
-        name: 'Test City',
-        state: 'Test State',
-        country: 'Test Country',
-        isActive: true,
-        salonCount: 5
-      }];
+      const mockCities: ICityDto[] = [
+        {
+          id: '1',
+          name: 'Test City',
+          state: 'Test State',
+          country: 'Test Country',
+          isActive: true,
+          salonCount: 5,
+        },
+      ];
 
       service.getCities().subscribe((cities) => {
         expect(cities).toEqual(mockCities);

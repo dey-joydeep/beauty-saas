@@ -2,7 +2,7 @@
   <mat-card>
     <mat-card-header>
       <mat-card-title>{{ 'DASHBOARD.SUBSCRIPTIONS.TITLE' | translate }}</mat-card-title>
-      
+
       <div class="chart-actions" mat-card-actions>
         <button mat-icon-button (click)="refreshChart()" matTooltip="{{ 'COMMON.REFRESH' | translate }}">
           <mat-icon>refresh</mat-icon>
@@ -16,7 +16,7 @@
         <mat-spinner diameter="40"></mat-spinner>
         <span>{{ 'DASHBOARD.LOADING' | translate }}</span>
       </div>
-      
+
       <!-- Error state -->
       <div *ngIf="error && !loading" class="error-state">
         <mat-icon color="warn">error_outline</mat-icon>
@@ -26,18 +26,13 @@
           {{ 'COMMON.RETRY' | translate }}
         </button>
       </div>
-      
+
       <!-- Chart container -->
       <div class="chart-wrapper" *ngIf="!loading && !error">
         <div class="chart-canvas-container">
-          <canvas
-            baseChart
-            [type]="lineChartType"
-            [data]="lineChartData"
-            [options]="lineChartOptions">
-          </canvas>
+          <canvas baseChart [type]="lineChartType" [data]="lineChartData" [options]="lineChartOptions"> </canvas>
         </div>
-        
+
         <!-- No data message -->
         <div *ngIf="!subscriptionData?.length" class="no-data">
           <mat-icon>info</mat-icon>

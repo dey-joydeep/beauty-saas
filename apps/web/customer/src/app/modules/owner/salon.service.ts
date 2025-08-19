@@ -19,11 +19,10 @@ export class SalonService {
     // and explicitly including required fields with proper types
     const payload: Partial<CreateSalonParams> & { id: string; updatedBy: string } = {
       ...params,
-      updatedBy: 'current-user-id' // This should be replaced with actual user ID from auth service
+      updatedBy: 'current-user-id', // This should be replaced with actual user ID from auth service
     };
-    
-    return this.http.put(`${this.apiUrl}/salons/${params.id}`, payload)
-      .pipe(catchError((err) => this.handleError(err)));
+
+    return this.http.put(`${this.apiUrl}/salons/${params.id}`, payload).pipe(catchError((err) => this.handleError(err)));
   }
 
   private handleError(err: any) {

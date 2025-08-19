@@ -10,7 +10,7 @@ import {
   AppointmentRequest,
   AppointmentResponse,
   AppointmentWithDetails,
-  TimeSlot
+  TimeSlot,
 } from '../models/appointment.model';
 import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
 
@@ -34,15 +34,15 @@ export class AppointmentService {
    */
   getAppointment(id: string): Observable<AppointmentWithDetails> {
     return this.http.get<AppointmentWithDetails>(`${this.apiUrl}/${id}`).pipe(
-      map(response => ({
+      map((response) => ({
         ...response,
         // Ensure date fields are properly formatted
         appointmentDate: response.appointmentDate,
         startTime: response.startTime,
         endTime: response.endTime,
         createdAt: response.createdAt,
-        updatedAt: response.updatedAt
-      }))
+        updatedAt: response.updatedAt,
+      })),
     );
   }
 
@@ -62,22 +62,22 @@ export class AppointmentService {
   }): Observable<{ data: Appointment[]; total: number }> {
     // Convert Date objects to ISO strings for the API
     const queryParams: any = { ...params };
-    
+
     if (params?.startDate) {
       queryParams.startDate = params.startDate.toISOString();
       delete queryParams.startDateObj;
     }
-    
+
     if (params?.endDate) {
       queryParams.endDate = params.endDate.toISOString();
       delete queryParams.endDateObj;
     }
 
     return this.http.get<AppointmentListResponse>(this.apiUrl, { params: queryParams }).pipe(
-      map(response => ({
-        data: response.data.map(appt => this.mapToAppointment(appt)),
-        total: response.total
-      }))
+      map((response) => ({
+        data: response.data.map((appt) => this.mapToAppointment(appt)),
+        total: response.total,
+      })),
     );
   }
 
@@ -86,9 +86,7 @@ export class AppointmentService {
    * @param appointment The appointment data to create
    */
   createAppointment(appointment: AppointmentRequest): Observable<Appointment> {
-    return this.http.post<AppointmentResponse>(this.apiUrl, appointment).pipe(
-      map(this.mapToAppointment)
-    );
+    return this.http.post<AppointmentResponse>(this.apiUrl, appointment).pipe(map(this.mapToAppointment));
   }
 
   /**
@@ -97,9 +95,7 @@ export class AppointmentService {
    * @param updates The fields to update
    */
   updateAppointment(id: string, updates: Partial<AppointmentRequest>): Observable<Appointment> {
-    return this.http.patch<AppointmentResponse>(`${this.apiUrl}/${id}`, updates).pipe(
-      map(this.mapToAppointment)
-    );
+    return this.http.patch<AppointmentResponse>(`${this.apiUrl}/${id}`, updates).pipe(map(this.mapToAppointment));
   }
 
   /**
@@ -108,30 +104,17 @@ export class AppointmentService {
    * @param reason Optional cancellation reason
    */
   cancelAppointment(id: string, reason: string): Observable<Appointment> {
-    return this.http.patch<AppointmentResponse>(
-      `${this.apiUrl}/${id}/cancel`, 
-      { reason }
-    ).pipe(
-      map(this.mapToAppointment)
-    );
+    return this.http.patch<AppointmentResponse>(`${this.apiUrl}/${id}/cancel`, { reason }).pipe(map(this.mapToAppointment));
   }
 
   /**
    * Get available time slots for scheduling an appointment
    * @param params Parameters for finding available time slots
    */
-  getAvailableTimeSlots(params: {
-    serviceId: string;
-    staffId?: string;
-    date: string;
-    duration: number;
-  }): Observable<TimeSlot[]> {
-    return this.http.get<{ data: TimeSlot[] }>(
-      `${this.apiUrl}/available-slots`,
-      { params: { ...params, duration: params.duration.toString() } }
-    ).pipe(
-      map(response => response.data || [])
-    );
+  getAvailableTimeSlots(params: { serviceId: string; staffId?: string; date: string; duration: number }): Observable<TimeSlot[]> {
+    return this.http
+      .get<{ data: TimeSlot[] }>(`${this.apiUrl}/available-slots`, { params: { ...params, duration: params.duration.toString() } })
+      .pipe(map((response) => response.data || []));
   }
 
   /**
@@ -141,23 +124,13 @@ export class AppointmentService {
    * @param endTime The new end time
    * @param notes Optional notes about the reschedule
    */
-  rescheduleAppointment(
-    id: string,
-    startTime: Date,
-    endTime: Date,
-    notes?: string
-  ): Observable<Appointment> {
+  rescheduleAppointment(id: string, startTime: Date, endTime: Date, notes?: string): Observable<Appointment> {
     const request: RescheduleRequest = { startTime, endTime };
     if (notes) {
       request.notes = notes;
     }
 
-    return this.http.patch<AppointmentResponse>(
-      `${this.apiUrl}/${id}/reschedule`,
-      request
-    ).pipe(
-      map(this.mapToAppointment)
-    );
+    return this.http.patch<AppointmentResponse>(`${this.apiUrl}/${id}/reschedule`, request).pipe(map(this.mapToAppointment));
   }
 
   /**

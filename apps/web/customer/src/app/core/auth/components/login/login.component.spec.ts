@@ -31,29 +31,33 @@ class MockTranslateService {
 }
 
 class MockAuthService implements Partial<AuthService> {
-  login = jest.fn().mockReturnValue(of({
-    id: '1',
-    email: 'test@example.com',
-    name: 'Test User',
-    role: 'customer',
-    accessToken: 'test-token',
-    refreshToken: 'refresh-token',
-    expiresIn: 3600,
-  }));
+  login = jest.fn().mockReturnValue(
+    of({
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+      role: 'customer',
+      accessToken: 'test-token',
+      refreshToken: 'refresh-token',
+      expiresIn: 3600,
+    }),
+  );
   isAuthenticated = jest.fn().mockReturnValue(false);
   getCurrentUser = jest.fn().mockReturnValue(null);
   logout = jest.fn().mockReturnValue(of(true));
   getToken = jest.fn().mockReturnValue('test-token');
   getRefreshToken = jest.fn().mockReturnValue('refresh-token');
-  refreshToken = jest.fn().mockReturnValue(of({
-    id: '1',
-    email: 'test@example.com',
-    name: 'Test User',
-    role: 'customer',
-    accessToken: 'new-test-token',
-    refreshToken: 'new-refresh-token',
-    expiresIn: 3600,
-  }));
+  refreshToken = jest.fn().mockReturnValue(
+    of({
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+      role: 'customer',
+      accessToken: 'new-test-token',
+      refreshToken: 'new-refresh-token',
+      expiresIn: 3600,
+    }),
+  );
 }
 
 class MockNotificationService {
@@ -112,10 +116,10 @@ describe('LoginComponent', () => {
     authService = TestBed.inject(AuthService) as unknown as MockAuthService;
     notificationService = TestBed.inject(NotificationService) as unknown as MockNotificationService;
     router = TestBed.inject(Router);
-    
+
     // Mock the login method
     authService.login.mockReturnValue(of(mockUser));
-    
+
     fixture.detectChanges();
   });
 
@@ -150,7 +154,7 @@ describe('LoginComponent', () => {
 
   it('should call authService.login and navigate on successful login', () => {
     const navigateSpy = jest.spyOn(router, 'navigateByUrl').mockImplementation(() => Promise.resolve(true));
-    
+
     component.loginForm.setValue({
       email: 'test@example.com',
       password: 'password',
@@ -178,9 +182,7 @@ describe('LoginComponent', () => {
 
     component.onSubmit();
 
-    expect(notificationService.error).toHaveBeenCalledWith(
-      'Login failed. Please check your credentials and try again.'
-    );
+    expect(notificationService.error).toHaveBeenCalledWith('Login failed. Please check your credentials and try again.');
   });
 
   it('should show loading state during form submission', () => {
@@ -188,44 +190,46 @@ describe('LoginComponent', () => {
     component.loginForm.setValue({
       email: 'test@example.com',
       password: 'password123',
-      rememberMe: false
+      rememberMe: false,
     });
-    
+
     // Trigger form submission
     component.onSubmit();
-    
+
     // Check if loading state is set
     expect(component.isSubmitting).toBe(true);
-    
+
     // Check if authService.login was called
     expect(authService.login).toHaveBeenCalledWith('test@example.com', 'password123');
   });
-  
+
   it('should handle login success', () => {
     // Set up form with valid data
     component.loginForm.setValue({
       email: 'test@example.com',
       password: 'password123',
-      rememberMe: false
+      rememberMe: false,
     });
-    
+
     // Mock successful login response
-    authService.login.mockReturnValueOnce(of({
-      id: '1',
-      email: 'test@example.com',
-      name: 'Test User',
-      role: 'customer',
-      accessToken: 'test-token',
-      refreshToken: 'refresh-token',
-      expiresIn: 3600
-    }));
-    
+    authService.login.mockReturnValueOnce(
+      of({
+        id: '1',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'customer',
+        accessToken: 'test-token',
+        refreshToken: 'refresh-token',
+        expiresIn: 3600,
+      }),
+    );
+
     // Spy on router.navigate
     const navigateSpy = jest.spyOn(router, 'navigate');
-    
+
     // Trigger form submission
     component.onSubmit();
-    
+
     // Check if navigation occurred
     expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
   });

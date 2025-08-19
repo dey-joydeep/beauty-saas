@@ -40,11 +40,9 @@ import { DashboardService } from '../../services/dashboard.service';
   imports: [
     // Angular modules
     CommonModule,
-    RouterModule.forChild([
-      { path: '', component: AppointmentsOverviewWidgetComponent }
-    ]),
+    RouterModule.forChild([{ path: '', component: AppointmentsOverviewWidgetComponent }]),
     ReactiveFormsModule,
-    
+
     // Material modules
     MatButtonModule,
     MatCardModule,
@@ -68,13 +66,11 @@ import { DashboardService } from '../../services/dashboard.service';
     MatTableModule,
     MatTabsModule,
     MatTooltipModule,
-    
+
     // Third-party modules
     TranslateModule,
-    AppointmentsOverviewWidgetComponent // Import the standalone component
+    AppointmentsOverviewWidgetComponent, // Import the standalone component
   ],
-  providers: [
-    DashboardService
-  ]
+  providers: [DashboardService],
 })
-export class AppointmentsOverviewWidgetModule { }
+export class AppointmentsOverviewWidgetModule {}

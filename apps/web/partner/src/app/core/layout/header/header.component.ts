@@ -59,8 +59,6 @@ interface Notification {
   };
 }
 
-
-
 // Mock services - these should be replaced with actual service implementations
 class CurrentUserService {
   currentUser$ = of<User | null>(null);
@@ -95,7 +93,7 @@ class NotificationService {
   static processNotification(notification: any): Notification {
     return {
       ...notification,
-      action: notification.action || {}
+      action: notification.action || {},
     };
   }
 }
@@ -105,8 +103,6 @@ class AuthService {
     return of({ success: true });
   }
 }
-
-
 
 @Component({
   selector: 'app-header',
@@ -251,10 +247,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private handleScroll() {
     if (!this.isBrowser) return;
 
-    const currentScrollPosition =
-      this.platformUtils.window?.pageYOffset ||
-      this.platformUtils.document?.documentElement.scrollTop ||
-      0;
+    const currentScrollPosition = this.platformUtils.window?.pageYOffset || this.platformUtils.document?.documentElement.scrollTop || 0;
 
     this.isVisible = currentScrollPosition < this.lastScrollPosition || currentScrollPosition < 10;
     this.lastScrollPosition = currentScrollPosition;
@@ -278,8 +271,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error loading user:', error);
           this.cdr.markForCheck();
-        }
-      })
+        },
+      }),
     );
 
     // Load saved preferences if in browser
@@ -290,7 +283,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             this.onLanguageChange(savedLanguage);
           }
         },
-        error: (error: any) => console.warn('Failed to load language preference:', error)
+        error: (error: any) => console.warn('Failed to load language preference:', error),
       });
 
       this.storageService.getItem$<string>('userCity').subscribe({
@@ -300,7 +293,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             this.cdr.markForCheck();
           }
         },
-        error: (error: any) => console.warn('Failed to load city preference:', error)
+        error: (error: any) => console.warn('Failed to load city preference:', error),
       });
     }
   }
@@ -394,25 +387,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     // Update document direction for RTL languages
     if (this.isBrowser && this.platformUtils.document?.documentElement) {
-      const selectedLang = this.languages.find(lang => lang.code === languageCode);
+      const selectedLang = this.languages.find((lang) => lang.code === languageCode);
       this.platformUtils.document.documentElement.dir = selectedLang?.rtl ? 'rtl' : 'ltr';
       this.platformUtils.document.documentElement.lang = languageCode;
     }
 
     // Show snackbar if requested
     if (showSnackbar) {
-      this.snackBar.open(
-        this.translate.instant('LANGUAGE_CHANGED'),
-        this.translate.instant('CLOSE'),
-        { duration: 3000 }
-      );
+      this.snackBar.open(this.translate.instant('LANGUAGE_CHANGED'), this.translate.instant('CLOSE'), { duration: 3000 });
     }
 
     // Emit event for other components
     if (this.isBrowser) {
-      this.platformUtils.document?.dispatchEvent(
-        new CustomEvent('languageChange', { detail: languageCode })
-      );
+      this.platformUtils.document?.dispatchEvent(new CustomEvent('languageChange', { detail: languageCode }));
     }
 
     this.cdr.markForCheck();
@@ -432,13 +419,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
 
     // Show snackbar
-    const selectedCity = this.cities.find(city => city.id === cityId);
+    const selectedCity = this.cities.find((city) => city.id === cityId);
     if (selectedCity) {
-      this.snackBar.open(
-        this.translate.instant('CITY_CHANGED', { city: selectedCity.name }),
-        this.translate.instant('CLOSE'),
-        { duration: 3000 }
-      );
+      this.snackBar.open(this.translate.instant('CITY_CHANGED', { city: selectedCity.name }), this.translate.instant('CLOSE'), {
+        duration: 3000,
+      });
     }
 
     // Close the city popup
@@ -541,12 +526,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Logout error:', error);
         this.isLoading = false;
-        this.snackBar.open(
-          this.translate.instant('AUTH.LOGOUT_ERROR'),
-          this.translate.instant('COMMON.CLOSE'),
-          { duration: 5000, panelClass: ['error-snackbar'] }
-        );
-      }
+        this.snackBar.open(this.translate.instant('AUTH.LOGOUT_ERROR'), this.translate.instant('COMMON.CLOSE'), {
+          duration: 5000,
+          panelClass: ['error-snackbar'],
+        });
+      },
     });
   }
 

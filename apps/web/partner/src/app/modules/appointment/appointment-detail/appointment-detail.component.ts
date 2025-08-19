@@ -49,7 +49,7 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
     private appointmentService: AppointmentService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private translate: TranslateService
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -58,7 +58,7 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     // Clean up all subscriptions when component is destroyed
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   onCancelAppointment(): void {
@@ -66,7 +66,7 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
 
     const dialogRef = this.dialog.open(AppointmentCancelDialogComponent, {
       width: '500px',
-      data: { 
+      data: {
         appointment: this.appointment,
         // Pass any additional data needed by the dialog
       },
@@ -77,35 +77,29 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
         this.loadAppointment();
       } else if (result?.action === 'confirmed' && this.appointment) {
         this.isUpdating = true;
-        const cancelSubscription = this.appointmentService.cancelAppointment(
-          this.appointment.id,
-          result.reason || 'No reason provided'
-        ).pipe(
-          finalize(() => this.isUpdating = false)
-        ).subscribe({
-          next: () => {
-            this.snackBar.open(
-              this.translate.instant('APPOINTMENT.CANCELLATION_SUCCESS'),
-              this.translate.instant('COMMON.CLOSE'),
-              { duration: 5000 }
-            );
-            this.loadAppointment();
-          },
-          error: (error: any) => {
-            console.error('Error cancelling appointment:', error);
-            this.snackBar.open(
-              this.translate.instant('APPOINTMENT.CANCELLATION_ERROR'),
-              this.translate.instant('COMMON.CLOSE'),
-              { duration: 5000 }
-            );
-          },
-        });
-        
+        const cancelSubscription = this.appointmentService
+          .cancelAppointment(this.appointment.id, result.reason || 'No reason provided')
+          .pipe(finalize(() => (this.isUpdating = false)))
+          .subscribe({
+            next: () => {
+              this.snackBar.open(this.translate.instant('APPOINTMENT.CANCELLATION_SUCCESS'), this.translate.instant('COMMON.CLOSE'), {
+                duration: 5000,
+              });
+              this.loadAppointment();
+            },
+            error: (error: any) => {
+              console.error('Error cancelling appointment:', error);
+              this.snackBar.open(this.translate.instant('APPOINTMENT.CANCELLATION_ERROR'), this.translate.instant('COMMON.CLOSE'), {
+                duration: 5000,
+              });
+            },
+          });
+
         // Store subscription for cleanup
         this.subscriptions.push(cancelSubscription);
       }
     });
-    
+
     // Store dialog subscription for cleanup
     this.subscriptions.push(dialogSubscription);
   }
@@ -120,34 +114,27 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.isLoading = false;
-      this.snackBar.open(
-        this.translate.instant('APPOINTMENT.INVALID_ID'),
-        this.translate.instant('COMMON.CLOSE'),
-        { duration: 5000 }
-      );
+      this.snackBar.open(this.translate.instant('APPOINTMENT.INVALID_ID'), this.translate.instant('COMMON.CLOSE'), { duration: 5000 });
       this.router.navigate(['/appointments']);
       return;
     }
 
     this.isLoading = true;
-    const subscription = this.appointmentService.getAppointment(id).pipe(
-      finalize(() => this.isLoading = false)
-    ).subscribe({
-      next: (appointment: AppointmentWithDetails) => {
-        // Use the appointment as is since the API should return it in the correct format
-        this.appointment = appointment;
-      },
-      error: (error: any) => {
-        console.error('Error loading appointment:', error);
-        this.snackBar.open(
-          this.translate.instant('APPOINTMENT.LOAD_ERROR'),
-          this.translate.instant('COMMON.CLOSE'),
-          { duration: 5000 }
-        );
-        this.router.navigate(['/appointments']);
-      },
-    });
-    
+    const subscription = this.appointmentService
+      .getAppointment(id)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: (appointment: AppointmentWithDetails) => {
+          // Use the appointment as is since the API should return it in the correct format
+          this.appointment = appointment;
+        },
+        error: (error: any) => {
+          console.error('Error loading appointment:', error);
+          this.snackBar.open(this.translate.instant('APPOINTMENT.LOAD_ERROR'), this.translate.instant('COMMON.CLOSE'), { duration: 5000 });
+          this.router.navigate(['/appointments']);
+        },
+      });
+
     // Store subscription for cleanup
     this.subscriptions.push(subscription);
   }
@@ -156,7 +143,7 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
     const now = new Date();
     const oneHourLater = new Date(now.getTime() + 3600000); // 1 hour later
     const appointmentDate = now.toISOString().split('T')[0]; // Just the date part
-    
+
     return {
       id,
       customerId: '1',
@@ -184,7 +171,7 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
       createdBy: 'system',
-      metadata: {}
+      metadata: {},
     };
   }
 

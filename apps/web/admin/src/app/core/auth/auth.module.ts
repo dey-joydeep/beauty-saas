@@ -63,7 +63,7 @@ const routes: Routes = [
     MatProgressBarModule,
     MatProgressSpinnerModule,
     TranslateModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
   ],
   providers: [
     AuthService,
@@ -71,7 +71,7 @@ const routes: Routes = [
     { provide: CURRENT_USER, useExisting: CurrentUserService },
     { provide: 'authGuard', useValue: authGuard },
     // Re-export the services to make them available to the rest of the app
-    { provide: 'authService', useClass: AuthService }
-  ]
+    { provide: 'authService', useClass: AuthService },
+  ],
 })
 export class AuthModule {}

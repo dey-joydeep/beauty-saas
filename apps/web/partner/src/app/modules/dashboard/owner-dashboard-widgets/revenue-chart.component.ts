@@ -15,7 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   selector: 'app-revenue-chart',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     BaseChartDirective,
     MatCardModule,
     MatProgressBarModule,
@@ -24,7 +24,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    MatSnackBarModule
+    MatSnackBarModule,
   ],
   templateUrl: './revenue-chart.component.html',
   styleUrls: ['./revenue-chart.component.scss'],
@@ -33,12 +33,12 @@ export class RevenueChartComponent implements OnInit {
   @Input() tenantId = '';
   private snackBar = inject(MatSnackBar);
   private dashboardService = inject(DashboardApiService);
-  
+
   // Chart configuration
   chartType = 'line' as const; // Explicitly type as 'line' literal
   loading = signal(false);
   chartError = signal<string | null>(null);
-  
+
   // Chart data with proper typing
   chartData = signal<ChartData<'line', number[], string>>({
     labels: [],
@@ -53,11 +53,11 @@ export class RevenueChartComponent implements OnInit {
         pointHoverBackgroundColor: '#fff',
         pointHoverBorderColor: '#3f51b5',
         fill: true,
-        tension: 0.4
-      }
-    ]
+        tension: 0.4,
+      },
+    ],
   });
-  
+
   // Chart options with proper typing
   options: ChartOptions<'line'> = {
     responsive: true,
@@ -76,58 +76,61 @@ export class RevenueChartComponent implements OnInit {
             const label = context.dataset.label || '';
             const value = context.parsed.y;
             return `${label}: $${value?.toLocaleString()}`;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     scales: {
       x: {
         display: true,
         title: {
           display: true,
-          text: 'Date'
-        }
+          text: 'Date',
+        },
       },
       y: {
         display: true,
         title: {
           display: true,
-          text: 'Revenue ($)'
+          text: 'Revenue ($)',
         },
         beginAtZero: true,
         ticks: {
-          callback: (value) => `$${value}`
-        }
-      }
-    }
+          callback: (value) => `$${value}`,
+        },
+      },
+    },
   };
-  
+
   // Initialize component and load data
   ngOnInit(): void {
     this.loadRevenueData();
   }
-  
+
   // Load revenue data from API
   loadRevenueData(): void {
     if (!this.tenantId) {
       this.chartError.set('Tenant ID is required');
       return;
     }
-    
+
     this.loading.set(true);
     this.chartError.set(null);
-    
+
     this.dashboardService.getRevenue(this.tenantId).subscribe({
       next: (revenueData: RevenueData) => {
         // Update chart data with the API response
         this.chartData.set({
           labels: revenueData.labels || [],
-          datasets: revenueData.datasets?.length > 0 
-            ? revenueData.datasets 
-            : [{
-                ...this.chartData().datasets[0],
-                data: []
-              }]
+          datasets:
+            revenueData.datasets?.length > 0
+              ? revenueData.datasets
+              : [
+                  {
+                    ...this.chartData().datasets[0],
+                    data: [],
+                  },
+                ],
         });
         this.loading.set(false);
       },
@@ -136,10 +139,10 @@ export class RevenueChartComponent implements OnInit {
         this.chartError.set(errorMessage);
         this.loading.set(false);
         this.showError(errorMessage);
-      }
+      },
     });
   }
-  
+
   // Export chart data
   exportData(): void {
     const data = this.chartData();
@@ -147,20 +150,20 @@ export class RevenueChartComponent implements OnInit {
     console.log('Exporting revenue data:', data);
     this.showSuccess('Export started');
   }
-  
+
   // Show success message
   private showSuccess(message: string): void {
     this.snackBar.open(message, 'Close', {
       duration: 3000,
-      panelClass: ['success-snackbar']
+      panelClass: ['success-snackbar'],
     });
   }
-  
+
   // Show error message
   private showError(message: string): void {
     this.snackBar.open(message, 'Close', {
       duration: 5000,
-      panelClass: ['error-snackbar']
+      panelClass: ['error-snackbar'],
     });
   }
 

@@ -16,9 +16,7 @@ describe('PortfolioManagementComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],
       declarations: [PortfolioManagementComponent],
-      providers: [
-        { provide: PortfolioService, useValue: portfolioService }
-      ]
+      providers: [{ provide: PortfolioService, useValue: portfolioService }],
     }).compileComponents();
     fixture = TestBed.createComponent(PortfolioManagementComponent);
     component = fixture.componentInstance;

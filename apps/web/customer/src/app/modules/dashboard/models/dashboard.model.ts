@@ -22,7 +22,6 @@ export interface AppointmentTrend {
   count: number;
 }
 
-
 export interface Renewal {
   id: string;
   customerId: string;

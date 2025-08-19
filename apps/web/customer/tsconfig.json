@@ -7,7 +7,10 @@
       "@env/*": ["src/environments/*"],
       "@app/*": ["src/app/*"],
       "@shared/*": ["../../../libs/shared/src/*"],
-      "@frontend-shared/*": ["../../../libs/frontend/src/app/*"]
+      "@beauty-saas/web-config": ["../../../libs/web/config/src/index.ts"],
+      "@beauty-saas/web-core/auth": ["../../../libs/web/core/auth/src/index.ts"],
+      "@beauty-saas/web-core/http": ["../../../libs/web/core/http/src/index.ts"],
+      "@beauty-saas/web-core/testing": ["../../../libs/web/core/testing/src/index.ts"]
     },
     "types": ["node", "jest"]
   },

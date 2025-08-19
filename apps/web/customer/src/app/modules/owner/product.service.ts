@@ -22,11 +22,11 @@ export class ProductService {
       isActive: data.isActive,
       isFeatured: data.isFeatured,
       quantity: data.quantity,
-      trackQuantity: data.trackQuantity
+      trackQuantity: data.trackQuantity,
     };
-    return this.http.post<{ success: boolean }>(`${this.apiUrl}/save`, this.mapToSnakeCase(payload)).pipe(
-      catchError((err) => this.handleError(err))
-    );
+    return this.http
+      .post<{ success: boolean }>(`${this.apiUrl}/save`, this.mapToSnakeCase(payload))
+      .pipe(catchError((err) => this.handleError(err)));
   }
 
   createProduct(params: CreateProductParams): Observable<any> {
@@ -42,11 +42,9 @@ export class ProductService {
       quantity: params.quantity,
       trackQuantity: params.trackQuantity,
       salonId: params.salonId,
-      createdBy: params.createdBy
+      createdBy: params.createdBy,
     };
-    return this.http.post(`${this.apiUrl}/products`, this.mapToSnakeCase(payload)).pipe(
-      catchError((err) => this.handleError(err))
-    );
+    return this.http.post(`${this.apiUrl}/products`, this.mapToSnakeCase(payload)).pipe(catchError((err) => this.handleError(err)));
   }
 
   updateProduct(params: UpdateProductParams): Observable<any> {
@@ -62,11 +60,11 @@ export class ProductService {
       isFeatured: params.isFeatured,
       quantity: params.quantity,
       trackQuantity: params.trackQuantity,
-      updatedBy: params.updatedBy
+      updatedBy: params.updatedBy,
     };
-    return this.http.put(`${this.apiUrl}/products/${params.id}`, this.mapToSnakeCase(payload)).pipe(
-      catchError((err) => this.handleError(err))
-    );
+    return this.http
+      .put(`${this.apiUrl}/products/${params.id}`, this.mapToSnakeCase(payload))
+      .pipe(catchError((err) => this.handleError(err)));
   }
 
   private mapToSnakeCase(obj: any): any {

@@ -20,12 +20,10 @@ export class PortfolioService {
         description: data.description,
         imageUrl: data.imageUrl,
         salonId: data.salonId,
-        createdBy: data.createdBy
+        createdBy: data.createdBy,
       };
     }
-    return this.http.post<{ success: boolean }>(`${this.apiUrl}/save`, payload).pipe(
-      catchError((err) => this.handleError(err))
-    );
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/save`, payload).pipe(catchError((err) => this.handleError(err)));
   }
 
   private handleError(err: any) {

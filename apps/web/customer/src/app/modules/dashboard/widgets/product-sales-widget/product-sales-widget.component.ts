@@ -79,7 +79,7 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
   constructor(
     @Inject(DashboardService) private dashboardService: DashboardService,
     @Inject(TranslateService) private translate: TranslateService,
-    @Inject(ErrorService) protected override errorService: ErrorService
+    @Inject(ErrorService) protected override errorService: ErrorService,
   ) {
     super(errorService);
   }
@@ -105,7 +105,7 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
     this.loading = true;
     const { start, end } = this.dateRange.value;
     const tenantId = 'default-tenant'; // TODO: Get tenant ID from auth service or config
-    
+
     // Convert date range to query params
     const params = new URLSearchParams();
     if (start) params.set('startDate', start.toISOString());
@@ -116,9 +116,10 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
     if (this.sortDirection) {
       params.set('sortDirection', this.sortDirection);
     }
-    
+
     // Call the service with the tenant ID and query params
-    this.dashboardService.getProductSales(tenantId + '?' + params.toString())
+    this.dashboardService
+      .getProductSales(tenantId + '?' + params.toString())
       .then((data: any) => {
         this.dataSource = Array.isArray(data) ? data : [];
         this.totalItems = Array.isArray(data) ? data.length : 0;
@@ -136,7 +137,7 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
   loadSummary(): void {
     const { start, end } = this.dateRange.value;
     const tenantId = 'default-tenant'; // TODO: Get tenant ID from auth service or config
-    
+
     // Convert date range to query params
     const params = new URLSearchParams();
     if (start) params.set('startDate', start.toISOString());
@@ -145,14 +146,15 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
     params.set('pageSize', '5');
     params.set('sortField', 'quantity');
     params.set('sortDirection', 'desc');
-    
+
     // Call the service with the tenant ID and query params
-    this.dashboardService.getProductSales(tenantId + '?' + params.toString())
+    this.dashboardService
+      .getProductSales(tenantId + '?' + params.toString())
       .then((items: any) => {
         const validItems = Array.isArray(items) ? items : [];
         const totalRevenue = validItems.reduce((sum: number, item: any) => sum + (item.totalAmount || 0), 0);
         const totalItems = validItems.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
-        
+
         this.summary = {
           totalSales: validItems.length,
           totalRevenue,
@@ -160,8 +162,8 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
           averageSale: validItems.length > 0 ? totalRevenue / validItems.length : 0,
           topSellingProducts: validItems.slice(0, 5).map((item: any) => ({
             name: item.productName || 'Unknown',
-            quantity: item.quantity || 0
-          }))
+            quantity: item.quantity || 0,
+          })),
         };
       })
       .catch((err: any) => {
@@ -182,7 +184,7 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
     if (sort && sort.active) {
       this.sortField = sort.active;
       // Convert empty string to undefined, otherwise use the direction
-      this.sortDirection = sort.direction === '' ? undefined : sort.direction as 'asc' | 'desc';
+      this.sortDirection = sort.direction === '' ? undefined : (sort.direction as 'asc' | 'desc');
       this.loadData();
     }
   }

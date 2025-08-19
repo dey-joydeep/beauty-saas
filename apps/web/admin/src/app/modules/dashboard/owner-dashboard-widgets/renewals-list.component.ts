@@ -9,14 +9,7 @@ import { DashboardApiService, Renewal } from '@frontend-shared/features/dashboar
 @Component({
   selector: 'app-renewals-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatProgressBarModule,
-    MatFormFieldModule,
-    MatError,
-    MatListModule
-  ],
+  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatFormFieldModule, MatError, MatListModule],
   templateUrl: './renewals-list.component.html',
   styleUrls: ['./renewals-list.component.scss'],
 })

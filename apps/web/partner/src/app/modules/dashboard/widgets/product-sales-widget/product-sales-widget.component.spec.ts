@@ -33,7 +33,7 @@ const mockProductSales: ProductSale[] = [
     totalAmount: 50,
     saleDate: new Date('2023-01-01T00:00:00.000Z'),
     soldBy: 'Test User 1',
-    customerName: 'Customer 1'
+    customerName: 'Customer 1',
   },
   {
     id: '2',
@@ -44,7 +44,7 @@ const mockProductSales: ProductSale[] = [
     totalAmount: 100,
     saleDate: new Date('2023-01-02T00:00:00.000Z'),
     soldBy: 'Test User 2',
-    customerName: 'Customer 2'
+    customerName: 'Customer 2',
   },
 ];
 
@@ -56,7 +56,7 @@ const mockSummary: ProductSalesSummary = {
   salesByProduct: [
     { productId: 'p1', productName: 'Test Product 1', quantity: 2, revenue: 50 },
     { productId: 'p2', productName: 'Test Product 2', quantity: 1, revenue: 100 },
-  ]
+  ],
 };
 
 describe('ProductSalesWidgetComponent', () => {
@@ -69,15 +69,15 @@ describe('ProductSalesWidgetComponent', () => {
   beforeEach(async () => {
     dashboardService = {
       getProductSales: jest.fn(),
-      getProductSalesSummary: jest.fn()
+      getProductSalesSummary: jest.fn(),
     } as unknown as jest.Mocked<DashboardService>;
 
     productService = {
-      getProductSales: jest.fn()
+      getProductSales: jest.fn(),
     } as unknown as jest.Mocked<ProductService>;
 
     translateService = {
-      instant: jest.fn()
+      instant: jest.fn(),
     } as unknown as jest.Mocked<TranslateService>;
 
     await TestBed.configureTestingModule({
@@ -115,33 +115,33 @@ describe('ProductSalesWidgetComponent', () => {
     // Setup mock responses
     const mockResponse: ProductSalesResponse = {
       data: [
-        { 
-          id: '1', 
-          productId: 'p1', 
-          productName: 'Product 1', 
-          quantity: 100, 
+        {
+          id: '1',
+          productId: 'p1',
+          productName: 'Product 1',
+          quantity: 100,
           unitPrice: 10,
-          totalAmount: 1000, 
+          totalAmount: 1000,
           saleDate: new Date('2023-01-01'),
           soldBy: 'user1',
-          customerName: 'Customer 1'
+          customerName: 'Customer 1',
         },
-        { 
-          id: '2', 
-          productId: 'p2', 
-          productName: 'Product 2', 
-          quantity: 50, 
+        {
+          id: '2',
+          productId: 'p2',
+          productName: 'Product 2',
+          quantity: 50,
           unitPrice: 10,
-          totalAmount: 500, 
+          totalAmount: 500,
           saleDate: new Date('2023-01-02'),
           soldBy: 'user1',
-          customerName: 'Customer 2'
-        }
+          customerName: 'Customer 2',
+        },
       ],
       total: 2,
       page: 1,
       pageSize: 10,
-      totalPages: 1
+      totalPages: 1,
     };
     dashboardService.getProductSales.mockReturnValue(of(mockResponse));
 
@@ -170,19 +170,19 @@ describe('ProductSalesWidgetComponent', () => {
       totalItemsSold: 150,
       averageSaleValue: 100,
       salesByProduct: [
-        { 
+        {
           productId: 'p1',
-          productName: 'Product 1', 
-          quantity: 100, 
-          revenue: 1000 
+          productName: 'Product 1',
+          quantity: 100,
+          revenue: 1000,
         },
-        { 
+        {
           productId: 'p2',
-          productName: 'Product 2', 
-          quantity: 50, 
-          revenue: 500 
-        }
-      ]
+          productName: 'Product 2',
+          quantity: 50,
+          revenue: 500,
+        },
+      ],
     };
     dashboardService.getProductSalesSummary.mockReturnValue(of(mockSummary));
 
@@ -228,7 +228,7 @@ describe('ProductSalesWidgetComponent', () => {
   it('should update table when sort changes', () => {
     const sortEvent: Sort = {
       active: 'productName',
-      direction: 'asc'
+      direction: 'asc',
     };
 
     component.onSortChange(sortEvent);

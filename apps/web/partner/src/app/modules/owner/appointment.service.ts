@@ -21,9 +21,7 @@ export class AppointmentService {
    * @param appointmentData The appointment data to create
    */
   createAppointment(appointmentData: CreateAppointmentParams): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(this.apiUrl, appointmentData).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.post<ApiResponse>(this.apiUrl, appointmentData).pipe(catchError(this.handleError));
   }
 
   /**
@@ -31,9 +29,7 @@ export class AppointmentService {
    * @param id The appointment ID
    */
   getAppointment(id: string): Observable<ApiResponse> {
-    return this.http.get<ApiResponse>(`${this.apiUrl}/${id}`).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.get<ApiResponse>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
   }
 
   /**
@@ -42,9 +38,7 @@ export class AppointmentService {
    * @param updateData The data to update
    */
   updateAppointment(id: string, updateData: Partial<CreateAppointmentParams>): Observable<ApiResponse> {
-    return this.http.put<ApiResponse>(`${this.apiUrl}/${id}`, updateData).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.put<ApiResponse>(`${this.apiUrl}/${id}`, updateData).pipe(catchError(this.handleError));
   }
 
   /**
@@ -52,9 +46,7 @@ export class AppointmentService {
    * @param id The appointment ID to delete
    */
   deleteAppointment(id: string): Observable<ApiResponse> {
-    return this.http.delete<ApiResponse>(`${this.apiUrl}/${id}`).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.delete<ApiResponse>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
   }
 
   /**
@@ -69,9 +61,7 @@ export class AppointmentService {
     startDate?: string;
     endDate?: string;
   }): Observable<ApiResponse> {
-    return this.http.get<ApiResponse>(this.apiUrl, { params: params as any }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.get<ApiResponse>(this.apiUrl, { params: params as any }).pipe(catchError(this.handleError));
   }
 
   /**
@@ -79,14 +69,14 @@ export class AppointmentService {
    */
   private handleError(error: any) {
     let errorMessage = 'An error occurred';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
       // Server-side error
       errorMessage = error.error?.message || error.statusText || 'Server error';
-      
+
       // Add more specific error messages based on status code
       if (error.status === 401) {
         errorMessage = 'You are not authorized. Please log in again.';
@@ -98,12 +88,12 @@ export class AppointmentService {
         errorMessage = 'A server error occurred. Please try again later.';
       }
     }
-    
+
     console.error('API Error:', error);
     return throwError(() => ({
       message: errorMessage,
       status: error.status,
-      error: error.error
+      error: error.error,
     }));
   }
 }

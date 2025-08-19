@@ -26,7 +26,7 @@ describe('StaffManagementService', () => {
   });
 
   it('should fetch staff list', () => {
-    service.getStaff(salonId).subscribe(staff => {
+    service.getStaff(salonId).subscribe((staff) => {
       expect(staff.length).toBe(2);
       expect(staff[0].name).toBe('Alice');
     });
@@ -37,7 +37,7 @@ describe('StaffManagementService', () => {
 
   it('should approve staff', () => {
     const staff = { ...staffList[1], approved: true };
-    service.approveStaff(salonId, staff.id).subscribe(result => {
+    service.approveStaff(salonId, staff.id).subscribe((result) => {
       expect(result.approved).toBeTrue();
     });
     const req = httpMock.expectOne(`/api/salons/${salonId}/staff/${staff.id}/approve`);
@@ -47,7 +47,7 @@ describe('StaffManagementService', () => {
 
   it('should revoke staff', () => {
     const staff = { ...staffList[0], approved: false };
-    service.revokeStaff(salonId, staff.id).subscribe(result => {
+    service.revokeStaff(salonId, staff.id).subscribe((result) => {
       expect(result.approved).toBeFalse();
     });
     const req = httpMock.expectOne(`/api/salons/${salonId}/staff/${staff.id}/revoke`);
@@ -57,7 +57,7 @@ describe('StaffManagementService', () => {
 
   it('should add staff', () => {
     const newStaff = { id: 'staff3', name: 'Carol', email: 'carol@example.com', role: 'masseuse', approved: false };
-    service.addStaff(salonId, newStaff).subscribe(result => {
+    service.addStaff(salonId, newStaff).subscribe((result) => {
       expect(result.name).toBe('Carol');
     });
     const req = httpMock.expectOne(`/api/salons/${salonId}/staff`);
@@ -66,7 +66,7 @@ describe('StaffManagementService', () => {
   });
 
   it('should remove staff', () => {
-    service.removeStaff(salonId, 'staff2').subscribe(result => {
+    service.removeStaff(salonId, 'staff2').subscribe((result) => {
       expect(result).toBeNull();
     });
     const req = httpMock.expectOne(`/api/salons/${salonId}/staff/staff2`);

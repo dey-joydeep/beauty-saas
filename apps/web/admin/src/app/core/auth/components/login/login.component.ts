@@ -68,7 +68,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   step: 'credentials' | 'otp' = 'credentials';
   hidePassword = true;
   isSubmitting = false;
-  
+
   // OTP related state
   showOtpForm = false;
   resendCountdown = 0;
@@ -76,7 +76,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   countdown = 30;
   email = '';
   userType: 'owner' | 'staff' | 'customer' | null = null;
-  
+
   // Private state
   private resendTimer: any;
   private returnUrl = '';
@@ -90,14 +90,14 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
       console.log(`[LoginComponent] ${message}`, data || '');
     }
   }
-  
+
   private logError(message: string, error: any) {
     if (this.ssrDebug?.error) {
       this.ssrDebug.error(`[LoginComponent] ${message}`, error);
     } else if (this.isBrowser) {
       console.error(`[LoginComponent] ${message}`, error);
     }
-    
+
     // Also log to error service if available
     try {
       if (this.errorService) {
@@ -119,17 +119,17 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     @Inject(StorageService) private storageService: StorageService,
     @Inject(AuthService) private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: object,
-    @Optional() @Inject('SSR_DEBUG') private ssrDebug: any
+    @Optional() @Inject('SSR_DEBUG') private ssrDebug: any,
   ) {
     super(errorService);
     this.isBrowser = isPlatformBrowser(this.platformId);
-    
+
     // Log constructor execution for debugging
     this.logDebug('LoginComponent constructor called', {
       isBrowser: this.isBrowser,
-      platformId: platformId.toString()
+      platformId: platformId.toString(),
     });
-    
+
     // Initialize userType to null
     this.userType = null;
 
@@ -158,7 +158,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   private startCountdown(): void {
     this.resendDisabled = true;
     this.countdown = 30;
-    
+
     const timer = setInterval(() => {
       this.countdown--;
       if (this.countdown <= 0) {
@@ -182,7 +182,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
         if (savedEmail) {
           this.loginForm.patchValue({
             email: savedEmail,
-            rememberMe: true
+            rememberMe: true,
           });
         }
       } catch (error) {
@@ -225,29 +225,32 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
       }
     }
 
-    this.authService.initLogin(this.loginForm.value).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (res: any) => {
-        this.userType = res.userType;
+    this.authService
+      .initLogin(this.loginForm.value)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: any) => {
+          this.userType = res.userType;
 
-        if (res.userType === 'owner' || res.userType === 'staff') {
-          // OTP required, move to OTP step
-          this.step = 'otp';
+          if (res.userType === 'owner' || res.userType === 'staff') {
+            // OTP required, move to OTP step
+            this.step = 'otp';
+            this.loading = false;
+          } else if (res.userType === 'customer') {
+            // No OTP required, login complete
+            this.loading = false;
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.loading = false;
+            this.error = 'Unknown user type';
+          }
+        },
+        error: (error: any) => {
           this.loading = false;
-        } else if (res.userType === 'customer') {
-          // No OTP required, login complete
-          this.loading = false;
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.loading = false;
-          this.error = 'Unknown user type';
-        }
-      },
-      error: (error: any) => {
-        this.loading = false;
-        this.error = error.error?.error || 'Login failed';
-        this.errorService.handleError(error);
-      },
-    });
+          this.error = error.error?.error || 'Login failed';
+          this.errorService.handleError(error);
+        },
+      });
   }
 
   async onOtpSubmit(): Promise<void> {
@@ -260,32 +263,35 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
 
     const otp: string = this.otpForm.value.otp || '';
 
-    this.authService.verifyOtp({ email: this.loginForm.value.email, otp, type: 'login' }).pipe(takeUntil(this.destroy$)).subscribe({
-      next: async (user: AuthUser) => {
-        if (!user) {
-          this.error = 'Login failed: No response from server.';
-          this.loading = false;
-          return;
-        }
-
-        // Store token if available (browser only)
-        if (this.isBrowser && user.accessToken) {
-          try {
-            await firstValueFrom(this.storageService.setItem$('authToken', user.accessToken));
-          } catch (error) {
-            console.warn('Failed to store auth token:', error);
+    this.authService
+      .verifyOtp({ email: this.loginForm.value.email, otp, type: 'login' })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async (user: AuthUser) => {
+          if (!user) {
+            this.error = 'Login failed: No response from server.';
+            this.loading = false;
+            return;
           }
-        }
 
-        this.loading = false;
-        this.router.navigate(['/dashboard']);
-      },
-      error: (error: any) => {
-        this.loading = false;
-        this.error = error.message || 'Invalid OTP';
-        this.errorService.handleError(error);
-      },
-    });
+          // Store token if available (browser only)
+          if (this.isBrowser && user.accessToken) {
+            try {
+              await firstValueFrom(this.storageService.setItem$('authToken', user.accessToken));
+            } catch (error) {
+              console.warn('Failed to store auth token:', error);
+            }
+          }
+
+          this.loading = false;
+          this.router.navigate(['/dashboard']);
+        },
+        error: (error: any) => {
+          this.loading = false;
+          this.error = error.message || 'Invalid OTP';
+          this.errorService.handleError(error);
+        },
+      });
   }
 
   /**
@@ -295,14 +301,14 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   private startResendCountdown(seconds: number): void {
     this.resendCountdown = seconds;
     this.resendDisabled = true;
-    
+
     if (this.resendTimer) {
       clearInterval(this.resendTimer);
     }
-    
+
     this.resendTimer = setInterval(() => {
       this.resendCountdown--;
-      
+
       if (this.resendCountdown <= 0) {
         clearInterval(this.resendTimer);
         this.resendDisabled = false;
@@ -312,22 +318,23 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
 
   resendOtp() {
     if (this.resendDisabled || this.loading) return;
-    
+
     // Reset cooldown
     this.startResendCountdown(60);
-    
+
     // Call your OTP resend API here
-    this.authService.resendOtp(this.loginForm.value.email).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: () => {
-        // OTP resent successfully
-        this.error = null;
-      },
-      error: (err) => {
-        this.error = this.errorService.getErrorMessage(err);
-      }
-    });
+    this.authService
+      .resendOtp(this.loginForm.value.email)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // OTP resent successfully
+          this.error = null;
+        },
+        error: (err) => {
+          this.error = this.errorService.getErrorMessage(err);
+        },
+      });
   }
 
   /**
@@ -335,7 +342,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
    */
   resendCode(event: Event): void {
     event.preventDefault();
-    
+
     const email = this.loginForm.get('email')?.value || this.email;
     if (!email) {
       this.error = 'No email address found. Please try logging in again.';
@@ -345,20 +352,21 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     this.loading = true;
     this.error = null;
 
-    this.authService.resendOtp(email).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: () => {
-        this.loading = false;
-        this.error = null;
-        this.startResendCountdown(60);
-      },
-      error: (err) => {
-        this.loading = false;
-        this.error = 'An error occurred while resending OTP. Please try again.';
-        this.errorService.handleError(err);
-      }
-    });
+    this.authService
+      .resendOtp(email)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.loading = false;
+          this.error = null;
+          this.startResendCountdown(60);
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = 'An error occurred while resending OTP. Please try again.';
+          this.errorService.handleError(err);
+        },
+      });
   }
 
   /**
@@ -374,46 +382,45 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     // In a real app, you would get the token from the OAuth provider's response
     const oauthToken = 'simulated-oauth-token';
 
-    this.authService.socialLogin(provider, oauthToken).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(
-      (res: any) => {
-        try {
-          if (res.token) {
-            if (this.isBrowser) {
-              localStorage.setItem('authToken', res.token);
+    this.authService
+      .socialLogin(provider, oauthToken)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        (res: any) => {
+          try {
+            if (res.token) {
+              if (this.isBrowser) {
+                localStorage.setItem('authToken', res.token);
 
-              // Store user data if available
-              if (res.user) {
-                localStorage.setItem('user', JSON.stringify(res.user));
+                // Store user data if available
+                if (res.user) {
+                  localStorage.setItem('user', JSON.stringify(res.user));
+                }
               }
+
+              // Redirect to dashboard or intended URL
+              const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'] || '/dashboard';
+              this.logDebug('Redirecting to:', returnUrl);
+              this.router.navigateByUrl(returnUrl);
+            } else {
+              this.error = 'Authentication failed. Please try again.';
+              this.logError('Authentication failed:', this.error);
             }
-
-            // Redirect to dashboard or intended URL
-            const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'] || '/dashboard';
-            this.logDebug('Redirecting to:', returnUrl);
-            this.router.navigateByUrl(returnUrl);
-          } else {
-            this.error = 'Authentication failed. Please try again.';
-            this.logError('Authentication failed:', this.error);
+          } catch (error) {
+            this.logError('Error in social login:', error);
+            this.error = 'An error occurred during login';
+          } finally {
+            this.loading = false;
           }
-        } catch (error) {
-          this.logError('Error in social login:', error);
-          this.error = 'An error occurred during login';
-        } finally {
+        },
+        (err: any) => {
           this.loading = false;
-        }
-      },
-      (err: any) => {
-        this.loading = false;
-        this.error = err.error?.error || 'Social login failed';
-        this.logError('Social login error:', this.error);
-        if (this.errorService) {
-          this.errorService.handleError(err);
-        }
-      }
-    );
+          this.error = err.error?.error || 'Social login failed';
+          this.logError('Social login error:', this.error);
+          if (this.errorService) {
+            this.errorService.handleError(err);
+          }
+        },
+      );
   }
-
-
 }

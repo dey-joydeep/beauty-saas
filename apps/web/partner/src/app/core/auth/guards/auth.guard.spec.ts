@@ -6,9 +6,10 @@ import { CurrentUserService } from '../services/current-user.service';
 
 class MockRouter {
   navigate = jasmine.createSpy('navigate');
-  createUrlTree = (commands: any[]) => ({
-    toString: () => commands.join('/')
-  } as UrlTree);
+  createUrlTree = (commands: any[]) =>
+    ({
+      toString: () => commands.join('/'),
+    }) as UrlTree;
   parseUrl = (url: string) => url;
 }
 
@@ -20,12 +21,9 @@ describe('AuthGuard', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        CurrentUserService,
-        { provide: Router, useClass: MockRouter }
-      ],
+      providers: [CurrentUserService, { provide: Router, useClass: MockRouter }],
     });
-    
+
     currentUserService = TestBed.inject(CurrentUserService);
     router = TestBed.inject(Router) as any;
   });
@@ -33,19 +31,19 @@ describe('AuthGuard', () => {
   it('should allow activation if user is authenticated', (done) => {
     // Mock the currentUser$ observable to emit a user
     spyOn(currentUserService, 'currentUser$').and.returnValue(of({ id: '1', email: 'test@example.com' } as any));
-    
+
     const result = authGuard(mockRoute, mockState);
-    
+
     if (result === true) {
       expect(result).toBeTrue();
       done();
     } else if (result instanceof Promise) {
-      result.then(res => {
+      result.then((res) => {
         expect(res).toBeTrue();
         done();
       });
     } else if (result instanceof Observable) {
-      (result as Observable<boolean | UrlTree>).subscribe(res => {
+      (result as Observable<boolean | UrlTree>).subscribe((res) => {
         if (typeof res === 'boolean') {
           expect(res).toBeTrue();
         } else {
@@ -62,14 +60,14 @@ describe('AuthGuard', () => {
   it('should redirect to /auth/login if user is not authenticated', (done) => {
     // Mock the currentUser$ observable to emit null (not authenticated)
     spyOn(currentUserService, 'currentUser$').and.returnValue(of(null));
-    
+
     const result = authGuard(mockRoute, mockState);
-    
+
     if (result === false) {
       fail('Expected UrlTree but got boolean false');
       done();
     } else if (result instanceof Promise) {
-      result.then(res => {
+      result.then((res) => {
         if (typeof res === 'boolean') {
           fail('Expected UrlTree but got boolean');
         } else {
@@ -78,7 +76,7 @@ describe('AuthGuard', () => {
         done();
       });
     } else if (result instanceof Observable) {
-      (result as Observable<boolean | UrlTree>).subscribe(res => {
+      (result as Observable<boolean | UrlTree>).subscribe((res) => {
         if (typeof res === 'boolean') {
           fail('Expected UrlTree but got boolean');
         } else {

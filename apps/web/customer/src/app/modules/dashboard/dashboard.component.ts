@@ -33,7 +33,7 @@ import { SubscriptionChartWidgetComponent } from './widgets/subscription-chart/s
     CustomerStatsWidgetComponent,
     ProductSalesWidgetComponent,
     SubscriptionChartWidgetComponent,
-    RenewalsListWidgetComponent
+    RenewalsListWidgetComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -57,16 +57,14 @@ export class DashboardComponent extends AbstractBaseComponent implements OnInit 
     @Inject(StorageService) private storageService: StorageService,
     @Inject(ErrorService) protected override errorService: ErrorService,
     @Inject(PLATFORM_ID) private platformId: Object,
-    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils
+    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
   ) {
     super(errorService);
     this.isBrowser = isPlatformBrowser(this.platformId);
     this.tenantId = DashboardComponent.tenantId; // Default value, will be updated in ngOnInit
-    
+
     // Safely get initial window width
-    const initialWidth = this.isBrowser && this.platformUtils.window 
-      ? this.platformUtils.window.innerWidth 
-      : 0;
+    const initialWidth = this.isBrowser && this.platformUtils.window ? this.platformUtils.window.innerWidth : 0;
     this.setBreakpoint(initialWidth);
   }
 
@@ -87,7 +85,7 @@ export class DashboardComponent extends AbstractBaseComponent implements OnInit 
   // Handle window resize events
   override async ngOnInit(): Promise<void> {
     super.ngOnInit();
-    
+
     // Load tenant ID from storage if in browser environment
     if (this.isBrowser) {
       try {
@@ -102,7 +100,7 @@ export class DashboardComponent extends AbstractBaseComponent implements OnInit 
         console.warn('Failed to load tenant ID:', errorMessage);
         this.errorService.handleError(error as Error);
       }
-      
+
       // Set initial breakpoint based on current window width
       if (this.platformUtils.window) {
         this.setBreakpoint(this.platformUtils.window.innerWidth);

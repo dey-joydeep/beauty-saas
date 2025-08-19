@@ -1,24 +1,17 @@
 import {
   HttpClient,
-  HTTP_INTERCEPTORS,
   provideHttpClient,
   withFetch,
   withInterceptors,
   withInterceptorsFromDi,
-  withXsrfConfiguration
+  withXsrfConfiguration,
 } from '@angular/common/http';
-import {
-  ApplicationConfig,
-  ErrorHandler,
-  importProvidersFrom,
-  PLATFORM_ID,
-  TransferState
-} from '@angular/core';
+import { ApplicationConfig, ErrorHandler, importProvidersFrom } from '@angular/core';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { TranslateLoader, TranslateModule, TranslateStore } from '@ngx-translate/core';
-import { TranslateBrowserLoader } from '@frontend-shared/core/translate/translate-ssr-loader';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -48,39 +41,26 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 // App imports
 import { AUTH_ROUTES } from './core/auth/auth.routes';
-import { ErrorHandlerService } from '@frontend-shared/core/services/error/error-handler.service';
-import { ErrorInterceptor } from '@frontend-shared/core/interceptors/error.interceptor';
-import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { ErrorHandlerService, ERROR_INTERCEPTOR_PROVIDER } from '@beauty-saas/web-core/http';
+import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 
 // AoT requires an exported function for factories
-export function httpLoaderFactory(http: HttpClient, transferState: TransferState) {
-  return new TranslateBrowserLoader(http, transferState);
+export function httpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // Provide PlatformUtils as a singleton
-    { 
-      provide: PLATFORM_UTILS_TOKEN, 
-      useFactory: (platformId: Object) => new PlatformUtils(platformId), 
-      deps: [PLATFORM_ID] 
-    },
-    
-    // Provide PLATFORM_UTILS_TOKEN for client-side
-    {
-      provide: PLATFORM_UTILS_TOKEN,
-      useFactory: (platformId: Object) => new PlatformUtils(platformId),
-      deps: [PLATFORM_ID]
-    },
-    
-    // Configure TranslateModule for client-side with SSR support
+    // PLATFORM_UTILS_TOKEN is provided in web-config at root; no extra providers needed here.
+
+    // Configure TranslateModule for client-side
     {
       provide: TranslateLoader,
       useFactory: httpLoaderFactory,
-      deps: [HttpClient, TransferState]
+      deps: [HttpClient],
     },
     TranslateStore,
-    
+
     provideRouter(AUTH_ROUTES),
     provideHttpClient(
       withInterceptorsFromDi(),
@@ -91,10 +71,10 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         // Add any HTTP interceptors here
       ]),
-      withFetch()
+      withFetch(),
     ),
     // Register global HTTP interceptors
-    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+    ERROR_INTERCEPTOR_PROVIDER,
     importProvidersFrom([
       BrowserAnimationsModule,
       MatButtonModule,
@@ -128,9 +108,9 @@ export const appConfig: ApplicationConfig = {
         loader: {
           provide: TranslateLoader,
           useFactory: httpLoaderFactory,
-          deps: [HttpClient, TransferState]
-        }
-      })
+          deps: [HttpClient],
+        },
+      }),
     ]),
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
     { provide: ErrorHandler, useClass: ErrorHandlerService },

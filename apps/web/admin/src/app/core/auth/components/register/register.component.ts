@@ -20,7 +20,7 @@ export class RegisterComponent {
 
   constructor(
     private fb: FormBuilder,
-    @Inject(AuthService) private authService: AuthService
+    @Inject(AuthService) private authService: AuthService,
   ) {
     this.registerForm = this.fb.group({
       name: ['', [Validators.required]],

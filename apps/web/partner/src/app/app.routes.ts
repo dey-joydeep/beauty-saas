@@ -14,46 +14,46 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
-  
+
   // Protected routes
-  { 
-    path: 'dashboard', 
+  {
+    path: 'dashboard',
     component: DashboardComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
-  { 
+  {
     path: 'salons',
-    loadChildren: () => import('./modules/salon/salon.module').then(m => m.SalonModule)
+    loadChildren: () => import('./modules/salon/salon.module').then((m) => m.SalonModule),
   },
-  { 
-    path: 'appointments', 
+  {
+    path: 'appointments',
     component: AppointmentListComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
-  { 
-    path: 'appointments/book', 
+  {
+    path: 'appointments/book',
     component: AppointmentCreateComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
-  { 
-    path: 'profile', 
+  {
+    path: 'profile',
     component: ProfileComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
-  
+
   // Lazy loaded modules
   {
     path: 'owner',
-    loadChildren: () => import('./modules/owner/owner.routes').then(m => m.OWNER_ROUTES),
-    canActivate: [authGuard]
+    loadChildren: () => import('./modules/owner/owner.routes').then((m) => m.OWNER_ROUTES),
+    canActivate: [authGuard],
   },
   {
     path: 'admin',
-    loadChildren: () => import('./modules/admin/admin.routes').then(m => m.ADMIN_ROUTES),
+    loadChildren: () => import('./modules/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
     canActivate: [authGuard],
-    data: { roles: ['admin'] }
+    data: { roles: ['admin'] },
   },
-  
+
   // Fallback route - redirect to home
   { path: '**', redirectTo: '' },
 ];

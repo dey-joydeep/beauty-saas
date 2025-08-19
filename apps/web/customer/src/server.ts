@@ -31,11 +31,11 @@ app.set('views', browserDistFolder);
 const globalErrorHandler: ErrorRequestHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('\n🔥 Unhandled error in request:', req.originalUrl);
   console.error('Error:', err);
-  
+
   if (err instanceof Error) {
     console.error('Error stack:', err.stack);
   }
-  
+
   // Send appropriate response based on environment
   if (process.env['NODE_ENV'] !== 'production') {
     res.status(500).json({
@@ -43,7 +43,7 @@ const globalErrorHandler: ErrorRequestHandler = (err: Error, req: Request, res: 
       message: err instanceof Error ? err.message : 'An unknown error occurred',
       stack: process.env['NODE_ENV'] !== 'production' && err instanceof Error ? err.stack : undefined,
       timestamp: new Date().toISOString(),
-      path: req.originalUrl
+      path: req.originalUrl,
     });
   } else {
     res.status(500).send('An error occurred. Please try again later.');
@@ -57,54 +57,60 @@ app.use(globalErrorHandler);
 const ssrErrorHandler = (error: unknown, req: Request): { status: number; message: string; error: any } => {
   console.error('\n🚨 SSR Error during request to:', req.originalUrl);
   console.error('Error:', error);
-  
+
   if (error instanceof Error) {
     console.error('Error name:', error.name);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
-    
+
     // Log additional error properties if they exist
     const additionalProps = Object.getOwnPropertyNames(error)
-      .filter(prop => !['name', 'message', 'stack'].includes(prop))
-      .reduce((obj, prop) => ({
-        ...obj,
-        [prop]: (error as any)[prop]
-      }), {});
-    
+      .filter((prop) => !['name', 'message', 'stack'].includes(prop))
+      .reduce(
+        (obj, prop) => ({
+          ...obj,
+          [prop]: (error as any)[prop],
+        }),
+        {},
+      );
+
     if (Object.keys(additionalProps).length > 0) {
       console.error('Additional error properties:', JSON.stringify(additionalProps, null, 2));
     }
   } else if (typeof error === 'object' && error !== null) {
     console.error('Error details:', JSON.stringify(error, null, 2));
   }
-  
+
   console.error('\n🚨 SSR Error during request to:', req.originalUrl);
   console.error('Error:', error);
-  
+
   let errorDetails: any;
-  
+
   if (error instanceof Error) {
     console.error('Error name:', error.name);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
-    
+
     // Get additional error properties
     const additionalProps = Object.getOwnPropertyNames(error)
-      .filter(prop => !['name', 'message', 'stack'].includes(prop))
-      .reduce((obj, prop) => ({
-        ...obj,
-        [prop]: (error as any)[prop]
-      }), {});
-    
+      .filter((prop) => !['name', 'message', 'stack'].includes(prop))
+      .reduce(
+        (obj, prop) => ({
+          ...obj,
+          [prop]: (error as any)[prop],
+        }),
+        {},
+      );
+
     if (Object.keys(additionalProps).length > 0) {
       console.error('Additional error properties:', JSON.stringify(additionalProps, null, 2));
     }
-    
+
     errorDetails = {
       name: error.name,
       message: error.message,
       stack: process.env['NODE_ENV'] !== 'production' ? error.stack : undefined,
-      ...additionalProps
+      ...additionalProps,
     };
   } else if (typeof error === 'object' && error !== null) {
     console.error('Error details:', JSON.stringify(error, null, 2));
@@ -112,11 +118,11 @@ const ssrErrorHandler = (error: unknown, req: Request): { status: number; messag
   } else {
     errorDetails = String(error);
   }
-  
-  return { 
-    status: 500, 
+
+  return {
+    status: 500,
     message: 'Server-side rendering error',
-    error: errorDetails
+    error: errorDetails,
   };
 };
 
@@ -134,7 +140,7 @@ const engine = new CommonEngine({
           console.error('Error stack:', error.stack);
         }
         return { status: 500, message: 'Server-side rendering error' };
-      }
+      },
     },
     // Provide empty objects for REQUEST and RESPONSE tokens
     { provide: 'REQUEST', useValue: {} },
@@ -151,8 +157,8 @@ const engine = new CommonEngine({
     // Add platform location for server-side rendering
     { provide: 'PLATFORM_ID', useValue: 'server' },
     // Mock for Dd provider (DataDog or similar analytics/monitoring service)
-    { 
-      provide: 'Dd', 
+    {
+      provide: 'Dd',
       useValue: {
         // Mock methods that might be called during SSR
         setUser: () => {},
@@ -160,7 +166,7 @@ const engine = new CommonEngine({
         pageView: () => {},
         error: (error: Error) => console.error('Analytics error:', error),
         // Add other methods as needed based on actual usage
-      } as const
+      } as const,
     },
     // Add error handler to prevent uncaught promise rejections
     { provide: 'ERROR_HANDLER', useValue: (error: any) => console.error('SSR Error:', error) },
@@ -204,22 +210,22 @@ app.use(
 app.get('*', (req, res, next) => {
   const { protocol, originalUrl, baseUrl, headers } = req;
   const startTime = Date.now();
-  
+
   // Log request for debugging
   console.log(`\n📡 [${new Date().toISOString()}] Request for: ${originalUrl}`);
   console.log('Method:', req.method);
   console.log('Headers:', JSON.stringify(headers, null, 2));
-  
+
   // Set no-cache headers for HTML to ensure fresh content on each request during development
   if (process.env['NODE_ENV'] !== 'production') {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   }
-  
+
   // Log request body if present
   if (req.body && Object.keys(req.body).length > 0) {
     console.log('Request body:', JSON.stringify(req.body, null, 2));
   }
-  
+
   // Set up SSR providers with request/response objects
   const providers = [
     { provide: 'REQUEST', useValue: req },
@@ -239,9 +245,9 @@ app.get('*', (req, res, next) => {
           if (error.stack) {
             console.error('Stack trace:', error.stack);
           }
-        }
-      }
-    }
+        },
+      },
+    },
   ];
 
   const renderOptions = {
@@ -258,13 +264,13 @@ app.get('*', (req, res, next) => {
       // Add error handler for this request
       {
         provide: 'ERROR_HANDLER',
-        useValue: (error: any) => ssrErrorHandler(error, req)
+        useValue: (error: any) => ssrErrorHandler(error, req),
       },
     ],
   };
-  
+
   console.log('Starting SSR render...');
-  
+
   engine
     .render(renderOptions)
     .then((html: string) => {

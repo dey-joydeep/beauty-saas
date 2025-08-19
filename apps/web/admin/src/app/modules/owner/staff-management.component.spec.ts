@@ -14,7 +14,7 @@ describe('StaffManagementComponent', () => {
   beforeEach(async () => {
     staffService = {
       addStaff: jest.fn(),
-      getStaffList: jest.fn()
+      getStaffList: jest.fn(),
     } as unknown as jest.Mocked<StaffService>;
 
     // Provide the mock service
@@ -24,8 +24,8 @@ describe('StaffManagementComponent', () => {
       declarations: [StaffManagementComponent],
       providers: [
         { provide: StaffService, useValue: staffService },
-        { provide: MatDialog, useValue: {} }
-      ]
+        { provide: MatDialog, useValue: {} },
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(StaffManagementComponent);
     component = fixture.componentInstance;
@@ -34,9 +34,11 @@ describe('StaffManagementComponent', () => {
 
   it('should display error on failed staff add', fakeAsync(() => {
     staffService.addStaff.mockReturnValue(throwError(() => ({ userMessage: 'Failed to add staff.' })));
-    staffService.getStaffList.mockReturnValue(of([
-      { id: '1', name: 'John Doe', email: 'john@example.com', role: 'stylist', approved: true, isActive: true, contact: '1234567890' }
-    ]));
+    staffService.getStaffList.mockReturnValue(
+      of([
+        { id: '1', name: 'John Doe', email: 'john@example.com', role: 'stylist', approved: true, isActive: true, contact: '1234567890' },
+      ]),
+    );
     component.staffForm.setValue({ name: 'Test', email: 'test@test.com', contact: '123', nickname: '', profilePicture: null });
     component.salonId = 'salon1';
     component.onSubmit();
@@ -58,7 +60,7 @@ describe('StaffManagementComponent', () => {
       contact: '123',
       role: 'stylist',
       approved: true,
-      isActive: true
+      isActive: true,
     };
     staffService.addStaff.mockReturnValue(of(mockStaff));
     component.staffForm.setValue({ name: 'Test', email: 'test@test.com', contact: '123', nickname: '', profilePicture: null });

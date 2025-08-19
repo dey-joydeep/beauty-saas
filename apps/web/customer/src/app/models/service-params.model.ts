@@ -12,7 +12,7 @@ export interface ServiceParams {
   addOns?: ServiceAddOnParams[];
   requiresStaffSelection?: boolean;
   bufferTimeBefore?: number; // in minutes
-  bufferTimeAfter?: number;  // in minutes
+  bufferTimeAfter?: number; // in minutes
   metadata?: Record<string, any>;
 }
 

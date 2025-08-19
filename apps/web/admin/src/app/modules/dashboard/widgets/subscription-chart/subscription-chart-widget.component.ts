@@ -26,10 +26,10 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
     MatProgressSpinnerModule,
     MatTooltipModule,
     TranslateModule,
-    BaseChartDirective
+    BaseChartDirective,
   ],
   templateUrl: './subscription-chart-widget.component.html',
-  styleUrls: ['./subscription-chart-widget.component.scss']
+  styleUrls: ['./subscription-chart-widget.component.scss'],
 })
 export class SubscriptionChartWidgetComponent extends AbstractBaseComponent implements OnChanges {
   @Input() subscriptionData: SubscriptionData[] = [];
@@ -121,20 +121,20 @@ export class SubscriptionChartWidgetComponent extends AbstractBaseComponent impl
   private updateChartData(): void {
     if (!this.subscriptionData?.length) return;
 
-    const chartData = this.subscriptionData.map(data => ({
+    const chartData = this.subscriptionData.map((data) => ({
       month: new Date(data.month).toLocaleDateString('en-US', { month: 'short' }),
-      retentionRate: data.retentionRate
+      retentionRate: data.retentionRate,
     }));
 
     this.lineChartData = {
       ...this.lineChartData,
-      labels: chartData.map(data => data.month),
+      labels: chartData.map((data) => data.month),
       datasets: [
         {
           ...this.lineChartData.datasets[0],
-          data: chartData.map(data => data.retentionRate)
-        }
-      ]
+          data: chartData.map((data) => data.retentionRate),
+        },
+      ],
     };
 
     // Force update the chart
@@ -151,11 +151,9 @@ export class SubscriptionChartWidgetComponent extends AbstractBaseComponent impl
   public loadData(): Observable<SubscriptionData[]> {
     this.loading = true;
     const data = this.dashboardService.getSubscriptionData();
-    
+
     // Handle both Promise and Observable return types
-    const data$ = data instanceof Promise 
-      ? from(data) 
-      : data;
+    const data$ = data instanceof Promise ? from(data) : data;
 
     return data$.pipe(
       tap((data: SubscriptionData[]) => {
@@ -169,7 +167,7 @@ export class SubscriptionChartWidgetComponent extends AbstractBaseComponent impl
         this.loading = false;
         console.error('Error loading subscription data:', error);
         return of([]); // Return empty array on error
-      })
+      }),
     );
   }
 
@@ -183,7 +181,7 @@ export class SubscriptionChartWidgetComponent extends AbstractBaseComponent impl
       },
       error: (error: Error) => {
         console.error('Error in refreshChart:', error);
-      }
+      },
     });
   }
 }

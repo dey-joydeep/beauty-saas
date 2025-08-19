@@ -31,9 +31,7 @@ import { DashboardService } from '../../services/dashboard.service';
 import { AppointmentsOverviewWidgetComponent } from './appointments-overview-widget.component';
 
 type Mocked<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any
-    ? jest.Mock<ReturnType<T[K]>, Parameters<T[K]>>
-    : T[K];
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? jest.Mock<ReturnType<T[K]>, Parameters<T[K]>> : T[K];
 };
 
 describe('AppointmentsOverviewWidgetComponent', () => {
@@ -61,7 +59,7 @@ describe('AppointmentsOverviewWidgetComponent', () => {
     salonId: 'salon1',
     salonName: 'Beauty Salon',
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 
   const mockOverview: AppointmentsOverview = {
@@ -74,29 +72,28 @@ describe('AppointmentsOverviewWidgetComponent', () => {
     totalRevenue: 500,
     averageDuration: 45,
     upcomingAppointments: [mockAppointment],
-    recentAppointments: [{
-      ...mockAppointment,
-      id: '2',
-      status: AppointmentStatus.COMPLETED,
-      startTime: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-      endTime: new Date(Date.now() - 86400000 + 3600000).toISOString() // 1 hour later
-    }],
+    recentAppointments: [
+      {
+        ...mockAppointment,
+        id: '2',
+        status: AppointmentStatus.COMPLETED,
+        startTime: new Date(Date.now() - 86400000).toISOString(), // Yesterday
+        endTime: new Date(Date.now() - 86400000 + 3600000).toISOString(), // 1 hour later
+      },
+    ],
     statusDistribution: {
       [AppointmentStatus.PENDING]: 2,
       [AppointmentStatus.CONFIRMED]: 5,
-      [AppointmentStatus.COMPLETED]: 3
+      [AppointmentStatus.COMPLETED]: 3,
     },
     dailyAppointments: {
       [new Date().toISOString().split('T')[0]]: 3,
-      [new Date(Date.now() - 86400000).toISOString().split('T')[0]]: 2
-    }
+      [new Date(Date.now() - 86400000).toISOString().split('T')[0]]: 2,
+    },
   };
 
   beforeEach(async () => {
-    const dashboardServiceSpy = jasmine.createSpyObj('DashboardService', [
-      'getAppointmentsOverview',
-      'updateAppointmentStatus'
-    ]);
+    const dashboardServiceSpy = jasmine.createSpyObj('DashboardService', ['getAppointmentsOverview', 'updateAppointmentStatus']);
 
     const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
 
@@ -118,7 +115,7 @@ describe('AppointmentsOverviewWidgetComponent', () => {
       'stream',
       'onLangChange',
       'onTranslationChange',
-      'onDefaultLangChange'
+      'onDefaultLangChange',
     ]);
 
     await TestBed.configureTestingModule({
@@ -147,29 +144,28 @@ describe('AppointmentsOverviewWidgetComponent', () => {
         MatDividerModule,
         MatListModule,
         MatDialogModule,
-        TranslateModule.forRoot()
+        TranslateModule.forRoot(),
       ],
       providers: [
         { provide: DashboardService, useValue: dashboardServiceSpy },
         { provide: TranslateService, useValue: translateServiceSpy },
-        { provide: MatSnackBar, useValue: snackBarSpy }
-      ]
-    })
-    .compileComponents();
+        { provide: MatSnackBar, useValue: snackBarSpy },
+      ],
+    }).compileComponents();
 
     // Create mock services with proper typing
     dashboardService = {
       getAppointmentsOverview: jest.fn().mockReturnValue(of(mockOverview)),
-      updateAppointmentStatus: jest.fn().mockReturnValue(of({ ...mockAppointment, status: AppointmentStatus.COMPLETED }))
+      updateAppointmentStatus: jest.fn().mockReturnValue(of({ ...mockAppointment, status: AppointmentStatus.COMPLETED })),
     } as unknown as Mocked<DashboardService>;
 
     translateService = {
-      instant: jest.fn((key: string | string[]) => typeof key === 'string' ? key : key[0]),
-      get: jest.fn().mockReturnValue(of('translated'))
+      instant: jest.fn((key: string | string[]) => (typeof key === 'string' ? key : key[0])),
+      get: jest.fn().mockReturnValue(of('translated')),
     } as unknown as Mocked<TranslateService>;
 
     snackBar = {
-      open: jest.fn()
+      open: jest.fn(),
     } as unknown as jest.Mocked<MatSnackBar>;
 
     // Provide the mock services
@@ -198,13 +194,13 @@ describe('AppointmentsOverviewWidgetComponent', () => {
   it('should handle error when loading appointments overview', () => {
     const error = new Error('Failed to load');
     dashboardService.getAppointmentsOverview.mockReturnValueOnce(throwError(() => error));
-    
+
     component.ngOnInit();
     fixture.detectChanges();
-    
+
     expect(component.error).toBe('DASHBOARD.APPOINTMENTS.ERROR_LOADING');
     expect(component.isLoading).toBeFalse();
-    
+
     const errorElement = fixture.nativeElement.querySelector('.error-container');
     expect(errorElement).toBeTruthy();
     expect(errorElement.textContent).toContain('DASHBOARD.APPOINTMENTS.ERROR_LOADING');
@@ -213,7 +209,7 @@ describe('AppointmentsOverviewWidgetComponent', () => {
   it('should filter appointments by status', () => {
     const status = AppointmentStatus.PENDING;
     component.statusFilter.setValue(status);
-    
+
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledTimes(2);
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledWith({ status });
   });
@@ -221,24 +217,24 @@ describe('AppointmentsOverviewWidgetComponent', () => {
   it('should filter appointments by date range', fakeAsync(() => {
     const startDate = new Date();
     const endDate = new Date(Date.now() + 7 * 86400000); // 7 days later
-    
+
     component.dateRange.setValue({ start: startDate, end: endDate });
     tick(300); // Debounce time
-    
+
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledTimes(2);
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledWith({
       startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0]
+      endDate: endDate.toISOString().split('T')[0],
     });
   }));
 
   it('should update appointment status', fakeAsync(() => {
     const appointment = { ...mockAppointment };
     const newStatus = AppointmentStatus.COMPLETED;
-    
+
     component.changeStatus(appointment, newStatus);
     tick(); // Wait for async operations to complete
-    
+
     expect(dashboardService.updateAppointmentStatus).toHaveBeenCalledWith(appointment.id, newStatus);
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalled();
     expect(snackBar.open).toHaveBeenCalled();
@@ -247,15 +243,14 @@ describe('AppointmentsOverviewWidgetComponent', () => {
   it('should handle error when updating appointment status', () => {
     const error = new Error('Failed to update');
     dashboardService.updateAppointmentStatus.mockReturnValueOnce(throwError(() => error));
-    
+
     component.changeStatus(mockAppointment, AppointmentStatus.COMPLETED);
-    
+
     expect(snackBar.open).toHaveBeenCalledTimes(1);
-    expect(snackBar.open).toHaveBeenCalledWith(
-      'DASHBOARD.APPOINTMENTS.STATUS_UPDATE_ERROR',
-      'COMMON.CLOSE',
-      { duration: 5000, panelClass: ['error-snackbar'] }
-    );
+    expect(snackBar.open).toHaveBeenCalledWith('DASHBOARD.APPOINTMENTS.STATUS_UPDATE_ERROR', 'COMMON.CLOSE', {
+      duration: 5000,
+      panelClass: ['error-snackbar'],
+    });
   });
 
   it('should format duration correctly', () => {
@@ -267,7 +262,7 @@ describe('AppointmentsOverviewWidgetComponent', () => {
   it('should check if date is today', () => {
     const today = new Date().toISOString();
     const yesterday = new Date(Date.now() - 86400000).toISOString();
-    
+
     expect(component.isToday(today)).toBeTrue();
     expect(component.isToday(yesterday)).toBeFalse();
   });
@@ -275,7 +270,7 @@ describe('AppointmentsOverviewWidgetComponent', () => {
   it('should check if date is in the past', () => {
     const yesterday = new Date(Date.now() - 86400000).toISOString();
     const tomorrow = new Date(Date.now() + 86400000).toISOString();
-    
+
     expect(component.isPast(yesterday)).toBeTrue();
     expect(component.isPast(tomorrow)).toBeFalse();
   });
@@ -287,7 +282,7 @@ describe('AppointmentsOverviewWidgetComponent', () => {
     const cancelledBadge = component.getStatusBadge(AppointmentStatus.CANCELLED);
     const noshowBadge = component.getStatusBadge(AppointmentStatus.NOSHOW);
     const unknownBadge = component.getStatusBadge('UNKNOWN' as any);
-    
+
     expect(pendingBadge.text).toBe('STATUS.PENDING');
     expect(confirmedBadge.text).toBe('STATUS.CONFIRMED');
     expect(completedBadge.text).toBe('STATUS.COMPLETED');
@@ -299,13 +294,13 @@ describe('AppointmentsOverviewWidgetComponent', () => {
   it('should get correct appointment icon based on status and date', () => {
     const pastAppointment = { ...mockAppointment, startTime: new Date(Date.now() - 86400000).toISOString() };
     const todayAppointment = { ...mockAppointment, startTime: new Date().toISOString() };
-    
+
     // Past appointment that's not completed or cancelled
     expect(component.getAppointmentIcon({ ...pastAppointment, status: AppointmentStatus.CONFIRMED })).toBe('warning');
-    
+
     // Today's appointment
     expect(component.getAppointmentIcon(todayAppointment)).toBe('today');
-    
+
     // Status-based icons
     expect(component.getAppointmentIcon({ ...mockAppointment, status: AppointmentStatus.PENDING })).toBe('schedule');
     expect(component.getAppointmentIcon({ ...mockAppointment, status: AppointmentStatus.CONFIRMED })).toBe('event_available');
@@ -326,9 +321,9 @@ describe('AppointmentsOverviewWidgetComponent', () => {
     pageEvent.pageIndex = 1;
     pageEvent.pageSize = 5;
     component.onPageChange(pageEvent);
-    
+
     tick();
-    
+
     expect(component.dataSource.paginator).toBeDefined();
     expect(component.dataSource.paginator?.pageIndex).toBe(1);
     expect(component.dataSource.paginator?.pageSize).toBe(5);
@@ -337,23 +332,23 @@ describe('AppointmentsOverviewWidgetComponent', () => {
       page: 2, // pageIndex + 1
       pageSize: 5,
       sortField: 'saleDate',
-      sortDirection: 'desc'
+      sortDirection: 'desc',
     });
   }));
 
   it('should handle sort change', () => {
     const sortEvent: Sort = {
       active: 'customerName',
-      direction: 'asc'
+      direction: 'asc',
     };
-    
+
     component.onSortChange(sortEvent);
-    
+
     expect(component.filters.sortField).toBe('customerName');
     expect(component.filters.sortDirection).toBe('asc');
     expect(dashboardService.getAppointmentsOverview).toHaveBeenCalledWith({
       sortField: 'customerName',
-      sortDirection: 'asc'
+      sortDirection: 'asc',
     });
   });
 });

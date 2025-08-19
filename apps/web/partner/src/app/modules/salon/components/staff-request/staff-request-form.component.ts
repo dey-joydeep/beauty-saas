@@ -22,7 +22,7 @@ export class StaffRequestFormComponent extends AbstractBaseComponent {
   constructor(
     private fb: FormBuilder,
     private staffRequestService: StaffRequestService,
-    @Inject(ErrorService) protected override errorService: ErrorService
+    @Inject(ErrorService) protected override errorService: ErrorService,
   ) {
     super(errorService);
     this.form = this.fb.group({

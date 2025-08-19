@@ -5,7 +5,7 @@ export interface Staff {
   email?: string;
   phone?: string;
   imageUrl?: string;
-  portfolioUrl?: string;  // Added missing property
+  portfolioUrl?: string; // Added missing property
   bio?: string;
   specialties?: string[];
   isActive?: boolean;

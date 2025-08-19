@@ -49,7 +49,7 @@ export class SalonManagementComponent {
     'Massage',
     'Waxing',
     'Makeup',
-    'Other'
+    'Other',
   ];
 
   constructor(
@@ -57,7 +57,7 @@ export class SalonManagementComponent {
     private salonService: SalonService,
   ) {
     // In a real app, you would get this from your auth service
-    this.currentUser = { 
+    this.currentUser = {
       id: 'current-user-id',
       firstName: 'Owner',
       lastName: 'User',
@@ -66,9 +66,9 @@ export class SalonManagementComponent {
       role: UserRole.OWNER,
       isActive: true,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
-    
+
     this.salonForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(1000)]],
@@ -90,7 +90,7 @@ export class SalonManagementComponent {
       isActive: [true],
       isVerified: [false],
       amenities: [[]],
-      staffIds: [[]]
+      staffIds: [[]],
     });
   }
 
@@ -104,7 +104,7 @@ export class SalonManagementComponent {
 
   onRemoveService(service: string): void {
     const services = this.salonForm.get('services')?.value as string[];
-    this.salonForm.get('services')?.setValue(services.filter(s => s !== service));
+    this.salonForm.get('services')?.setValue(services.filter((s) => s !== service));
   }
 
   onUseCurrentLocation(): void {
@@ -113,13 +113,13 @@ export class SalonManagementComponent {
         (position) => {
           this.salonForm.patchValue({
             latitude: position.coords.latitude,
-            longitude: position.coords.longitude
+            longitude: position.coords.longitude,
           });
         },
         (error) => {
           console.error('Error getting location', error);
           this.error = 'Could not get your current location. Please enter it manually.';
-        }
+        },
       );
     } else {
       this.error = 'Geolocation is not supported by this browser.';
@@ -152,7 +152,7 @@ export class SalonManagementComponent {
       ownerId: this.currentUser.id,
       logoUrl: formValue.imageUrl,
       isActive: true,
-      isVerified: false
+      isVerified: false,
     };
 
     this.salonService.saveSalon(formData).subscribe({

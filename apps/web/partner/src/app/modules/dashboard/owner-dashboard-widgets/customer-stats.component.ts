@@ -8,13 +8,7 @@ import { DashboardApiService } from '@frontend-shared/features/dashboard/service
 @Component({
   selector: 'app-customer-stats',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatProgressBarModule,
-    MatFormFieldModule,
-    MatError
-  ],
+  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatFormFieldModule, MatError],
   templateUrl: './customer-stats.component.html',
   styleUrls: ['./customer-stats.component.scss'],
 })
