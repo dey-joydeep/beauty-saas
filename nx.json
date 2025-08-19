@@ -16,11 +16,7 @@
       "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.cjs"]
     },
     "lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/eslint.config.js",
-        "{workspaceRoot}/eslint.base.js"
-      ]
+      "inputs": ["default", "{workspaceRoot}/eslint.config.js", "{workspaceRoot}/eslint.base.js"]
     },
     "@nx/js:tsc": {
       "options": {
@@ -42,12 +38,7 @@
     },
     "@nx/eslint:lint": {
       "cache": true,
-      "inputs": [
-        "default",
-        "{workspaceRoot}/eslint.config.js",
-        "{workspaceRoot}/eslint.base.js",
-        "{workspaceRoot}/.eslintrc.json"
-      ]
+      "inputs": ["default", "{workspaceRoot}/eslint.config.js", "{workspaceRoot}/eslint.base.js", "{workspaceRoot}/.eslintrc.json"]
     }
   },
   "namedInputs": {
