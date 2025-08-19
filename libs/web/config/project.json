@@ -1,0 +1,13 @@
+{
+  "name": "web-config",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/web/config/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:web", "layer:config"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

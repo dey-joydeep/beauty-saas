@@ -12,9 +12,7 @@ export const ssrInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
   if (platformUtils?.isServer) {
     // Clone the request and modify it for server-side rendering
     const serverReq = req.clone({
-      headers: req.headers
-        .set('X-Requested-With', 'XMLHttpRequest')
-        .set('ngsw-bypass', 'true'), // Bypass service worker if used
+      headers: req.headers.set('X-Requested-With', 'XMLHttpRequest').set('ngsw-bypass', 'true'), // Bypass service worker if used
     });
 
     return next(serverReq);

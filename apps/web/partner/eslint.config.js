@@ -1,7 +1,9 @@
 import js from '@eslint/js';
 import ts from 'typescript-eslint';
+import base from '../../../eslint.base.js';
 
 export default [
+  ...base,
   // Base JavaScript configuration
   {
     files: ['**/*.js'],

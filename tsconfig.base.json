@@ -34,8 +34,11 @@
       "@beauty-saas/data-access/*": ["libs/data-access/src/*"],
       "@beauty-saas/shared": ["libs/shared/src/index.ts"],
       "@beauty-saas/shared/*": ["libs/shared/src/*"],
+      "@beauty-saas/web-config": ["libs/web/config/src/index.ts"],
       "@beauty-saas/web-core/auth": ["libs/web/core/auth/src/index.ts"],
-      "@beauty-saas/web-core/http": ["libs/web/core/http/src/index.ts"]
+      "@beauty-saas/web-core/http": ["libs/web/core/http/src/index.ts"],
+      "@beauty-saas/web-core/testing": ["libs/web/core/testing/src/index.ts"],
+
     },
     "types": ["node", "jest"]
   },

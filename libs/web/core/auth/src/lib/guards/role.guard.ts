@@ -1,14 +1,14 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { map, take } from 'rxjs/operators';
-import { CurrentUserService } from '../services/current-user.service';
+import { CURRENT_USER, CurrentUserPort } from '../interfaces/current-user.port';
 
 /**
  * Role guard that checks if user has required roles
  * Redirects to unauthorized page if user doesn't have required roles
  */
 export const roleGuard: CanActivateFn = (route, state) => {
-  const currentUserService = inject(CurrentUserService);
+  const currentUserService = inject(CURRENT_USER) as CurrentUserPort;
   const router = inject(Router);
 
   return currentUserService.currentUser$.pipe(
@@ -37,6 +37,6 @@ export const roleGuard: CanActivateFn = (route, state) => {
 
       // User doesn't have required role, redirect to unauthorized
       return router.createUrlTree(['/unauthorized']);
-    })
+    }),
   );
 };

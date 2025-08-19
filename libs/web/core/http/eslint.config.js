@@ -1,5 +1,5 @@
 import nx from '@nx/eslint-plugin';
-import baseConfig from '../../../../eslint.config.js';
+import baseConfig from '../../../../eslint.base.js';
 
 export default [
   ...baseConfig,

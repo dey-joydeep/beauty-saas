@@ -1,14 +1,14 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { map, take } from 'rxjs/operators';
-import { CurrentUserService } from '../services/current-user.service';
+import { CURRENT_USER, CurrentUserPort } from '../interfaces/current-user.port';
 
 /**
  * Auth guard that checks if user is authenticated
  * Redirects to login page if not authenticated
  */
 export const authGuard: CanActivateFn = (route, state) => {
-  const currentUserService = inject(CurrentUserService);
+  const currentUserService = inject(CURRENT_USER) as CurrentUserPort;
   const router = inject(Router);
 
   return currentUserService.currentUser$.pipe(
@@ -32,7 +32,7 @@ export const authGuard: CanActivateFn = (route, state) => {
  * Redirects to home if already authenticated
  */
 export const publicGuard: CanActivateFn = (route, state) => {
-  const currentUserService = inject(CurrentUserService);
+  const currentUserService = inject(CURRENT_USER) as CurrentUserPort;
   const router = inject(Router);
 
   return currentUserService.currentUser$.pipe(

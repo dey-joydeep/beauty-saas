@@ -16,7 +16,7 @@ const USER_STORAGE_KEY = 'current_user';
 export class CurrentUserService implements OnDestroy {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private destroy$ = new Subject<void>();
-  
+
   // Store the URL to redirect to after login
   public redirectUrl: string | null = null;
 
@@ -49,11 +49,11 @@ export class CurrentUserService implements OnDestroy {
   );
 
   private _authService: AuthService | null = null;
-  
+
   constructor(
     private injector: Injector,
     private storage: StorageService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
   ) {
     // Only run in browser environment
     if (isPlatformBrowser(this.platformId)) {
@@ -121,7 +121,7 @@ export class CurrentUserService implements OnDestroy {
     this.currentUserSubject.next(updatedUser);
     // Use setItem$ which returns an Observable and handle subscription
     this.storage.setItem$(USER_STORAGE_KEY, updatedUser).subscribe({
-      error: (error) => console.error('Error saving user to storage:', error)
+      error: (error) => console.error('Error saving user to storage:', error),
     });
   }
 
@@ -132,7 +132,7 @@ export class CurrentUserService implements OnDestroy {
     this.currentUserSubject.next(null);
     // Use removeItem$ which returns an Observable and handle subscription
     this.storage.removeItem$(USER_STORAGE_KEY).subscribe({
-      error: (error) => console.error('Error removing user from storage:', error)
+      error: (error) => console.error('Error removing user from storage:', error),
     });
   }
 
@@ -153,24 +153,22 @@ export class CurrentUserService implements OnDestroy {
   private setupAuthState(): void {
     // Initial check
     this.checkAuthState();
-    
+
     // Set up polling for auth state changes
     const POLLING_INTERVAL = 30000; // 30 seconds
-    
+
     // Use timer to create a polling interval
     timer(0, POLLING_INTERVAL)
-      .pipe(
-        takeUntil(this.destroy$)
-      )
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => this.checkAuthState(),
         error: (error: any) => {
           console.error('Error in auth state polling:', error);
           this.clearUser();
-        }
+        },
       });
   }
-  
+
   /**
    * Check the current authentication state and update the user accordingly
    */
@@ -183,7 +181,7 @@ export class CurrentUserService implements OnDestroy {
 
   private checkAuthState(): void {
     const isAuthenticated = this.authService.isAuthenticated();
-    
+
     if (!isAuthenticated) {
       this.clearUser();
     } else if (!this.currentUser) {
@@ -196,10 +194,11 @@ export class CurrentUserService implements OnDestroy {
    * Load the current user from storage
    */
   private loadUserFromStorage(): void {
-    this.storage.getItem$<User>(USER_STORAGE_KEY)
+    this.storage
+      .getItem$<User>(USER_STORAGE_KEY)
       .pipe(
         filter((user: User | null): user is User => user !== null),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe({
         next: (user: User) => {
