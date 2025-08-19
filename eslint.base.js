@@ -38,16 +38,86 @@ const typeCheckedScoped = ts.configs.recommendedTypeChecked.map((cfg) => ({
 export default [
     {
         plugins: { '@nx': nxEslintPlugin },
+        files: ['**/*.{ts,tsx,js,jsx,mts,cts}'],
         rules: {
             '@nx/enforce-module-boundaries': [
                 'error',
                 {
-                    enforceBuildableLibDependency: true,
+                    // Stricter boundary rules per workspace proposal
+                    enforceBuildableLibDependency: false,
                     allow: [],
                     depConstraints: [
+                        // Apps may only depend on libs
+                        { sourceTag: 'type:app', onlyDependOnLibsWithTags: ['type:lib'] },
+
+                        // Web code must not depend on server code
                         {
-                            sourceTag: '*',
-                            onlyDependOnLibsWithTags: ['*'],
+                            sourceTag: 'platform:web',
+                            onlyDependOnLibsWithTags: [
+                                'platform:web',
+                                'scope:ui',
+                                'scope:shared',
+                                'scope:web-config',
+                            ],
+                        },
+
+                        // Server code must not depend on web code
+                        {
+                            sourceTag: 'platform:server',
+                            onlyDependOnLibsWithTags: [
+                                'platform:server',
+                                'scope:shared',
+                                'scope:server-core',
+                                'scope:server-data',
+                                'scope:server-feature',
+                            ],
+                        },
+
+                        // UI should stay presentational / neutral
+                        { sourceTag: 'scope:ui', onlyDependOnLibsWithTags: ['scope:shared'] },
+
+                        // Web core & feature libs may use other web core, UI, shared, and web-config
+                        {
+                            sourceTag: 'scope:web-core',
+                            onlyDependOnLibsWithTags: [
+                                'scope:web-core',
+                                'scope:ui',
+                                'scope:shared',
+                                'scope:web-config',
+                            ],
+                        },
+                        {
+                            sourceTag: 'scope:web-feature-auth',
+                            onlyDependOnLibsWithTags: [
+                                'scope:web-core',
+                                'scope:ui',
+                                'scope:shared',
+                                'scope:web-config',
+                            ],
+                        },
+
+                        // Shared should only depend on itself (keeps it framework-agnostic)
+                        { sourceTag: 'scope:shared', onlyDependOnLibsWithTags: ['scope:shared'] },
+
+                        // Server layering constraints
+                        {
+                            sourceTag: 'scope:server-feature',
+                            onlyDependOnLibsWithTags: [
+                                'scope:server-core',
+                                'scope:server-data',
+                                'scope:shared',
+                            ],
+                        },
+                        {
+                            sourceTag: 'scope:server-core',
+                            onlyDependOnLibsWithTags: [
+                                'scope:server-data',
+                                'scope:shared',
+                            ],
+                        },
+                        {
+                            sourceTag: 'scope:server-data',
+                            onlyDependOnLibsWithTags: ['scope:shared'],
                         },
                     ],
                 },
@@ -74,10 +144,9 @@ export default [
     ...compat.extends('prettier'),
     // Type-aware rules only for source files; auto-discover tsconfig via project service
     ...typeCheckedScoped,
-    // Non-source TS (configs, tests, scripts) use non-type-aware parsing to avoid tsconfig requirement
+    // Non-source TS (tests, scripts) use non-type-aware parsing to avoid tsconfig requirement
     {
         files: [
-            '**/*.{config,configs}.ts',
             '**/*.{spec,test}.ts',
             '**/jest*.ts',
             '**/*.scripts.ts',

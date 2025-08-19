@@ -1,7 +1,7 @@
-import baseConfig from '../../../eslint.base.js';
+import webBase from '../../../eslint.base.web.js';
 
 export default [
-    ...baseConfig,
+    ...webBase,
     {
         files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
         rules: {},

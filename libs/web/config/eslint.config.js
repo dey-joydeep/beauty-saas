@@ -1,5 +1,5 @@
-import base from '../../../eslint.base.js';
+import webBase from '../../../eslint.base.web.js';
 
 export default [
-  ...base,
+  ...webBase,
 ];

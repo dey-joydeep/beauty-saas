@@ -1,19 +1,8 @@
 import js from '@eslint/js';
-import base from '../../../eslint.base.js';
-import nx from '@nx/eslint-plugin';
+import webBase from '../../../eslint.base.web.js';
 
 export default [
-  ...base,
-  // Angular presets (TS + HTML templates)
-  ...nx.configs['flat/angular'],
-  ...nx.configs['flat/angular-template'],
-  // HTML templates: disable TS-only comments rule
-  {
-    files: ['**/*.html'],
-    rules: {
-      '@typescript-eslint/ban-ts-comment': 'off',
-    },
-  },
+  ...webBase,
   // Base JavaScript configuration
   {
     files: ['**/*.js'],

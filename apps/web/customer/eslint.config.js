@@ -1,8 +1,8 @@
 import js from '@eslint/js';
-import base from '../../../eslint.base.js';
+import webBase from '../../../eslint.base.web.js';
 
 export default [
-  ...base,
+  ...webBase,
   // Base JavaScript configuration
   {
     files: ['**/*.js'],
