@@ -4,9 +4,8 @@
     "sourceRoot": "libs/shared/src",
     "projectType": "library",
     "tags": [
-        "scope:shared",
-        "type:util",
-        "layer:domain"
+        "type:lib",
+        "scope:shared"
     ],
     "targets": {
         "build": {
@@ -22,7 +21,7 @@
             }
         },
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "outputs": [
                 "{options.outputFile}"
             ],

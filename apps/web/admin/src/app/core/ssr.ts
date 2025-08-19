@@ -38,7 +38,7 @@ const _setImmediate = (callback: () => void): any => {
 export class MaterialSsrHandler {
   private static initialized = false;
 
-  constructor(private platformId: Object) { }
+  constructor(private platformId: object) { }
 
   /**
    * Initialize Material components for server-side rendering
@@ -215,7 +215,7 @@ export class MaterialSsrHandler {
 /**
  * Factory function to create MaterialSsrHandler
  */
-export function materialSsrHandlerFactory(platformId: Object): MaterialSsrHandler {
+export function materialSsrHandlerFactory(platformId: object): MaterialSsrHandler {
   const handler = new MaterialSsrHandler(platformId);
   handler.initialize();
   return handler;

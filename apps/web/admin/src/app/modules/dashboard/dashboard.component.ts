@@ -56,7 +56,7 @@ export class DashboardComponent extends AbstractBaseComponent implements OnInit 
   constructor(
     @Inject(StorageService) private storageService: StorageService,
     @Inject(ErrorService) protected override errorService: ErrorService,
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
     @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils
   ) {
     super(errorService);

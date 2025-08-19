@@ -35,7 +35,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": [
         "{options.outputFile}"
       ],
@@ -78,8 +78,9 @@
     }
   },
   "tags": [
-    "type:feature",
-    "scope:dashboard"
+    "type:lib",
+    "platform:server",
+    "scope:server-feature"
   ],
   "implicitDependencies": [
     "core"

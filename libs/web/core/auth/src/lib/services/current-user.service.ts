@@ -53,7 +53,7 @@ export class CurrentUserService implements OnDestroy {
   constructor(
     private injector: Injector,
     private storage: StorageService,
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
   ) {
     // Only run in browser environment
     if (isPlatformBrowser(this.platformId)) {

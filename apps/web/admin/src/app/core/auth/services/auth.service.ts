@@ -83,7 +83,7 @@ export class AuthService {
   private refreshTokenInterval: any = null;
 
   constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
     private http: HttpClient,
     private router: Router,
     private storage: StorageService,

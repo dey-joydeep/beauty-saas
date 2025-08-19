@@ -1,18 +1,11 @@
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
+import baseConfig from '../../eslint.base.js';
 
 export default [
+  ...baseConfig,
+  // API-specific tweaks (optional)
   {
-    files: ['**/*.ts', '**/*.js'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: { ecmaVersion: 2021, sourceType: 'module', project: './tsconfig.json' },
-    },
-    plugins: {
-      '@typescript-eslint': tseslint,
-    },
+    files: ['**/*.ts'],
     rules: {
-      ...tseslint.configs.recommended.rules,
       quotes: ['error', 'single'],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'warn',

@@ -4,7 +4,7 @@
   "sourceRoot": "libs/web/core/testing/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": [],
+  "tags": ["type:lib", "platform:web", "scope:web-core"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

@@ -35,7 +35,7 @@
             }
         },
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "outputs": ["{options.outputFile}"],
             "options": {
                 "lintFilePatterns": ["libs/features/salon-staff-request/**/*.ts"]
@@ -69,8 +69,9 @@
         }
     },
     "tags": [
-        "type:feature",
-        "scope:salon-staff-request"
+        "type:lib",
+        "platform:server",
+        "scope:server-feature"
     ],
     "implicitDependencies": [
         "core"

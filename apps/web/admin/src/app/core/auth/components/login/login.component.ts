@@ -118,7 +118,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     protected override errorService: ErrorService,
     @Inject(StorageService) private storageService: StorageService,
     @Inject(AuthService) private authService: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
     @Optional() @Inject('SSR_DEBUG') private ssrDebug: any
   ) {
     super(errorService);

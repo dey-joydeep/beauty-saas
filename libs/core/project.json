@@ -2,17 +2,16 @@
     "name": "core",
     "sourceRoot": "libs/core/src",
     "tags": [
-        "scope:core",
-        "type:core",
-        "layer:domain",
-        "layer:data"
+        "type:lib",
+        "platform:server",
+        "scope:server-core"
     ],
     "targets": {
         "lint": {
             "outputs": [
                 "{options.outputFile}"
             ],
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "options": {
                 "lintFilePatterns": [
                     "libs/core/**/*.ts"

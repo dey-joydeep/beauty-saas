@@ -3,7 +3,7 @@
     "sourceRoot": "libs/ui/src",
     "targets": {
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "options": {
                 "lintFilePatterns": [
                     "libs/ui/**/*.ts",
@@ -47,9 +47,6 @@
         }
     },
     "projectType": "library",
-    "tags": [
-        "scope:ui",
-        "type:ui"
-    ],
+    "tags": ["type:lib", "platform:web", "scope:ui"],
     "prefix": "beauty-saas"
 }

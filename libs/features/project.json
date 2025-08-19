@@ -4,8 +4,9 @@
     "sourceRoot": "libs/features/src",
     "prefix": "beauty-saas",
     "tags": [
-        "scope:features",
-        "type:features"
+        "type:lib",
+        "platform:server",
+        "scope:server-feature"
     ],
     "targets": {
         "build": {
@@ -22,7 +23,7 @@
             }
         },
         "lint": {
-            "executor": "@nx/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "outputs": [
                 "{options.outputFile}"
             ],

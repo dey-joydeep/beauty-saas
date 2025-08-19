@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -20,7 +20,7 @@ import { DashboardApiService, Renewal } from '@frontend-shared/features/dashboar
   templateUrl: './renewals-list.component.html',
   styleUrls: ['./renewals-list.component.scss'],
 })
-export class RenewalsListComponent {
+export class RenewalsListComponent implements OnInit {
   @Input() tenantId = '';
   renewals = signal<Renewal[]>([]);
   loading = signal(true);

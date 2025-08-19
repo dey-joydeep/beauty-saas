@@ -1,12 +1,6 @@
 import js from '@eslint/js';
-import ts from 'typescript-eslint';
 import base from '../../../eslint.base.js';
 import nx from '@nx/eslint-plugin';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export default [
   ...base,
@@ -39,13 +33,6 @@ export default [
   {
     files: ['**/*.ts'],
     ignores: ['node_modules/**', 'dist/**', 'coverage/**'],
-    languageOptions: {
-      parser: ts.parser,
-      parserOptions: {
-        project: './tsconfig.json',
-        tsconfigRootDir: __dirname,
-      },
-    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'warn',

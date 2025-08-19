@@ -62,14 +62,14 @@ export const appConfig: ApplicationConfig = {
     // Provide PlatformUtils as a singleton
     { 
       provide: PLATFORM_UTILS_TOKEN, 
-      useFactory: (platformId: Object) => new PlatformUtils(platformId), 
+      useFactory: (platformId: object) => new PlatformUtils(platformId), 
       deps: [PLATFORM_ID] 
     },
     
     // Provide PLATFORM_UTILS_TOKEN for client-side
     {
       provide: PLATFORM_UTILS_TOKEN,
-      useFactory: (platformId: Object) => new PlatformUtils(platformId),
+      useFactory: (platformId: object) => new PlatformUtils(platformId),
       deps: [PLATFORM_ID]
     },
     

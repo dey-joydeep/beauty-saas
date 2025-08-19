@@ -50,7 +50,7 @@ export class TopSalonsComponent implements OnInit {
   constructor(
     private salonService: SalonService,
     @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }

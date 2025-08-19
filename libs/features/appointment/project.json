@@ -35,7 +35,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/features/appointment/**/*.ts"]
@@ -61,7 +61,7 @@
       "dependsOn": ["build"]
     }
   },
-  "tags": ["type:feature", "scope:appointment"],
+  "tags": ["type:lib", "platform:server", "scope:server-feature"],
   "implicitDependencies": ["core"],
   "dependencies": [{
     "target": "data-access",

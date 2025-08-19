@@ -2,6 +2,7 @@ import nx from '@nx/eslint-plugin';
 
 export default [
     {
+        files: ['**/*.{js,ts,tsx,jsx,html}'],
         plugins: { '@nx': nx },
         rules: {
             '@nx/enforce-module-boundaries': [
@@ -10,9 +11,15 @@ export default [
                     enforceBuildableLibDependency: true,
                     allow: [],
                     depConstraints: [
+                        // Frontend code can depend only on other web libs and shared
                         {
-                            sourceTag: '*',
-                            onlyDependOnLibsWithTags: ['*'],
+                            sourceTag: 'platform:web',
+                            onlyDependOnLibsWithTags: ['platform:web', 'scope:shared'],
+                        },
+                        // Server-side code can depend only on other server libs and shared
+                        {
+                            sourceTag: 'platform:server',
+                            onlyDependOnLibsWithTags: ['platform:server', 'scope:shared'],
                         },
                     ],
                 },

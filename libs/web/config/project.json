@@ -4,7 +4,7 @@
   "sourceRoot": "libs/web/config/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:web", "layer:config"],
+  "tags": ["type:lib", "platform:web", "scope:web-config"],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"

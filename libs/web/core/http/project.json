@@ -4,7 +4,7 @@
   "sourceRoot": "libs/web/core/http/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": ["scope:web", "layer:core"],
+  "tags": ["type:lib", "platform:web", "scope:web-core"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

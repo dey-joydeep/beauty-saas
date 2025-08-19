@@ -31,7 +31,7 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
   templateUrl: './subscription-chart-widget.component.html',
   styleUrls: ['./subscription-chart-widget.component.scss']
 })
-export class SubscriptionChartWidgetComponent extends AbstractBaseComponent {
+export class SubscriptionChartWidgetComponent extends AbstractBaseComponent implements OnChanges {
   @Input() subscriptionData: SubscriptionData[] = [];
   @ViewChild(BaseChartDirective) chart!: BaseChartDirective;
 

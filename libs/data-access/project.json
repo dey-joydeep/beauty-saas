@@ -4,9 +4,9 @@
   "sourceRoot": "libs/data-access/src",
   "projectType": "library",
   "tags": [
-    "scope:data-access",
-    "type:data-access",
-    "layer:data"
+    "type:lib",
+    "platform:server",
+    "scope:server-data"
   ],
   "targets": {
     "build": {
@@ -25,7 +25,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": [
         "{options.outputFile}"
       ],

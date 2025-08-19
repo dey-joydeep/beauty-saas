@@ -14,6 +14,27 @@ const compat = new FlatCompat({
     recommendedConfig: js.configs.recommended,
 });
 
+// Scope type-aware TS-ESLint rules to source files by mapping configs
+const typeCheckedScoped = ts.configs.recommendedTypeChecked.map((cfg) => ({
+    ...cfg,
+    files: ['**/src/**/*.{ts,tsx}'],
+    // Do not apply type-aware rules to test/spec/e2e files; they are handled below
+    ignores: [
+        '**/*.{spec,test}.ts',
+        '**/*.e2e-spec.ts',
+        '**/jest*.ts',
+    ],
+    languageOptions: {
+        ...(cfg.languageOptions ?? {}),
+        parser: tsParser,
+        parserOptions: {
+            ...((cfg.languageOptions && cfg.languageOptions.parserOptions) || {}),
+            // Use a single root project for reliable association across the monorepo
+            project: [path.join(__dirname, 'tsconfig.eslint.json')],
+        },
+    },
+}));
+
 export default [
     {
         plugins: { '@nx': nxEslintPlugin },
@@ -48,27 +69,39 @@ export default [
             '**/eslint.config.mjs',
         ],
     },
-    // Typescript-ESLint recommended rules (define plugin once globally)
+    // Typescript-ESLint base (not type-aware) globally
     ...ts.configs.recommended,
     ...compat.extends('prettier'),
-    // TypeScript support
+    // Type-aware rules only for source files; auto-discover tsconfig via project service
+    ...typeCheckedScoped,
+    // Non-source TS (configs, tests, scripts) use non-type-aware parsing to avoid tsconfig requirement
     {
-        files: ['**/*.ts', '**/*.tsx'],
+        files: [
+            '**/*.{config,configs}.ts',
+            '**/*.{spec,test}.ts',
+            '**/jest*.ts',
+            '**/*.scripts.ts',
+            '**/*.e2e-spec.ts',
+            '**/*.migration.ts',
+            '**/tools/**/*.ts',
+            '**/scripts/**/*.ts',
+        ],
         languageOptions: {
             parser: tsParser,
             parserOptions: {
-                project: './tsconfig.base.json',
-                tsconfigRootDir: __dirname,
+                project: false,
             },
-        },
-        rules: {},
-    },
-    // Avoid requiring a TS project for declaration files
-    {
-        files: ['**/*.d.ts'],
-        languageOptions: {
-            parser: tsParser,
-            parserOptions: { project: null },
+            globals: {
+                afterAll: true,
+                afterEach: true,
+                beforeAll: true,
+                beforeEach: true,
+                describe: true,
+                expect: true,
+                it: true,
+                jest: true,
+                test: true,
+            },
         },
         rules: {},
     },

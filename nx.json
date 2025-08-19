@@ -19,8 +19,7 @@
       "inputs": [
         "default",
         "{workspaceRoot}/eslint.config.js",
-        "{workspaceRoot}/eslint.base.js",
-        "{workspaceRoot}/.eslintrc.json"
+        "{workspaceRoot}/eslint.base.js"
       ]
     },
     "@nx/js:tsc": {
@@ -61,7 +60,6 @@
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s",
-      "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/eslint.config.mjs"
     ]
   },

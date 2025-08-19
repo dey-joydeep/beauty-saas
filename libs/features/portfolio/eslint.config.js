@@ -8,9 +8,6 @@ export default [
     },
     {
         files: ['**/*.spec.ts', '**/*.test.ts'],
-        env: {
-            jest: true,
-        },
         rules: {},
     },
 ];

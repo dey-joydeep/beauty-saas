@@ -1,4 +1,4 @@
-import baseConfig from '../../../eslint.config.js';
+import baseConfig from '../../eslint.base.js';
 
 export default [
     ...baseConfig,
@@ -8,9 +8,6 @@ export default [
     },
     {
         files: ['**/*.spec.ts', '**/*.test.ts'],
-        env: {
-            jest: true,
-        },
         rules: {},
     },
 ];
