@@ -170,5 +170,3 @@ export class PortfolioComponent extends AbstractBaseComponent {
     return item.imagePath || 'assets/default-portfolio.png';
   }
 }
-
-

@@ -234,4 +234,3 @@ describe('LoginComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
   });
 });
-

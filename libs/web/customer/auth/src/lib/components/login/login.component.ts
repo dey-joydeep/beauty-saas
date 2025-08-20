@@ -424,8 +424,3 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
       );
   }
 }
-
-
-
-
-

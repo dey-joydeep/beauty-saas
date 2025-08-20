@@ -137,4 +137,3 @@ const serverProviders: (Provider | EnvironmentProviders)[] = [
 export const config: ApplicationConfig = mergeApplicationConfig(appConfig, {
   providers: serverProviders,
 });
-

@@ -169,4 +169,3 @@ export class RevenueChartComponent implements OnInit {
 
   // Using dashboardService injected in the constructor
 }
-

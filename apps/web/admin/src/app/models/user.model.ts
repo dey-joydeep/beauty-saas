@@ -97,4 +97,3 @@ export interface UserSession {
   createdAt: string | Date;
   updatedAt: string | Date;
 }
-

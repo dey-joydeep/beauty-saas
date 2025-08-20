@@ -26,15 +26,16 @@ export function createPlatformUtilsMock(overrides: Partial<PlatformUtils> = {}):
     isBrowser: true,
     isServer: false,
     documentRef: typeof document !== 'undefined' ? document : null,
-    windowRef: typeof window !== 'undefined'
-      ? ({
-          ...window,
-          navigator: {
-            ...((window as any).navigator ?? {}),
-            geolocation: defaultGeolocation,
-          },
-        } as unknown as Window)
-      : ({ navigator: { geolocation: defaultGeolocation } } as unknown as Window),
+    windowRef:
+      typeof window !== 'undefined'
+        ? ({
+            ...window,
+            navigator: {
+              ...((window as any).navigator ?? {}),
+              geolocation: defaultGeolocation,
+            },
+          } as unknown as Window)
+        : ({ navigator: { geolocation: defaultGeolocation } } as unknown as Window),
     ...overrides,
   };
 

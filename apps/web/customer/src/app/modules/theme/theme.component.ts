@@ -118,5 +118,3 @@ export class ThemeComponent implements OnInit {
     }
   }
 }
-
-

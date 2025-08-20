@@ -184,7 +184,7 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
     if (sort && sort.active) {
       this.sortField = sort.active;
       // Convert empty string to undefined, otherwise use the direction
-      this.sortDirection = sort.direction === '' ? undefined : (sort.direction);
+      this.sortDirection = sort.direction === '' ? undefined : sort.direction;
       this.loadData();
     }
   }
@@ -209,5 +209,3 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
     // Implementation would go here
   }
 }
-
-

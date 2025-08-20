@@ -25,5 +25,3 @@ export class StatsWidgetComponent extends AbstractBaseComponent {
     // No additional initialization needed
   }
 }
-
-

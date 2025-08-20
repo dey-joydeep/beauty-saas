@@ -172,5 +172,3 @@ export class RenewalsListWidgetComponent extends AbstractBaseComponent {
     return colorMap[status];
   }
 }
-
-

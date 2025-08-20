@@ -149,5 +149,3 @@ export class SalonSearchComponent implements OnInit {
     // For production, consider using a proper map component or backend-generated map with markers
   }
 }
-
-

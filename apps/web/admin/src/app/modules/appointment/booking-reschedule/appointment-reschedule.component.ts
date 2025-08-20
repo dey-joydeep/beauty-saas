@@ -398,4 +398,3 @@ export class AppointmentRescheduleComponent implements OnInit, OnDestroy {
     return `APPOINTMENT.STATUS.${status.toUpperCase()}`;
   }
 }
-

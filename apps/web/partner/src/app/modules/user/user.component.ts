@@ -56,5 +56,3 @@ export class UserComponent extends AbstractBaseComponent implements OnInit {
     });
   }
 }
-
-

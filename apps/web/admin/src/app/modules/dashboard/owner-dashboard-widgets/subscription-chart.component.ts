@@ -109,4 +109,3 @@ export class SubscriptionChartComponent implements OnInit {
     this.loadData();
   }
 }
-

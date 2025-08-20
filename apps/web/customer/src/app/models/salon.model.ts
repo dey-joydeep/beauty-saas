@@ -187,4 +187,3 @@ export interface SalonListResponse {
   limit: number;
   totalPages: number;
 }
-

@@ -38,4 +38,3 @@ export class ProductSalesChartComponent implements OnInit {
     });
   }
 }
-

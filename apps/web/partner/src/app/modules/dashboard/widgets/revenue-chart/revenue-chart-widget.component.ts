@@ -191,4 +191,3 @@ export class RevenueChartWidgetComponent implements OnInit, OnDestroy {
     this.loadData();
   }
 }
-

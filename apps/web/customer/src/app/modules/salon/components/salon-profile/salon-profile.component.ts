@@ -165,5 +165,3 @@ export class SalonProfileComponent implements OnInit {
     });
   }
 }
-
-

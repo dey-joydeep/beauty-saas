@@ -121,4 +121,3 @@ export interface SalonStatusParams {
   updatedBy: string;
   reason?: string;
 }
-

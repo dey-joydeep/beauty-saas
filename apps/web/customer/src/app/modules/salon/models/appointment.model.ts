@@ -57,4 +57,3 @@ export interface AppointmentCalendar {
   totalPages: number;
   currentPage: number;
 }
-

@@ -78,5 +78,3 @@ export class CustomerStatsWidgetComponent extends AbstractBaseComponent {
     this.loadStats();
   }
 }
-
-

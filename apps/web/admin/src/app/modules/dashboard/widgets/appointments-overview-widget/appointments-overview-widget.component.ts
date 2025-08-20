@@ -423,4 +423,3 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
     return statusIcons[appointment.status] || 'event';
   }
 }
-

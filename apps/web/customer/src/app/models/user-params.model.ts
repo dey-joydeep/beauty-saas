@@ -114,4 +114,3 @@ export interface UserSessionParams {
   lastActivityAt?: Date | string;
   metadata?: Record<string, any>;
 }
-

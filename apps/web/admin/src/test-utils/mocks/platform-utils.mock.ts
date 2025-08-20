@@ -14,10 +14,10 @@ export function createPlatformUtilsMock(overrides: Partial<PlatformUtils> = {}):
       altitudeAccuracy: null,
       heading: null,
       speed: null,
-      toJSON: (): unknown => ({})
+      toJSON: (): unknown => ({}),
     },
     timestamp: Date.now(),
-    toJSON: (): unknown => ({})
+    toJSON: (): unknown => ({}),
   };
 
   const defaultGeolocation: Geolocation = {
@@ -32,15 +32,16 @@ export function createPlatformUtilsMock(overrides: Partial<PlatformUtils> = {}):
     isBrowser: true,
     isServer: false,
     documentRef: typeof document !== 'undefined' ? document : null,
-    windowRef: typeof window !== 'undefined'
-      ? ({
-          ...window,
-          navigator: {
-            ...(window.navigator ?? {}),
-            geolocation: defaultGeolocation,
-          } as Navigator,
-        } as unknown as Window)
-      : ({ navigator: { geolocation: defaultGeolocation } } as unknown as Window),
+    windowRef:
+      typeof window !== 'undefined'
+        ? ({
+            ...window,
+            navigator: {
+              ...(window.navigator ?? {}),
+              geolocation: defaultGeolocation,
+            } as Navigator,
+          } as unknown as Window)
+        : ({ navigator: { geolocation: defaultGeolocation } } as unknown as Window),
     ...overrides,
   };
 

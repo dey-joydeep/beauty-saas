@@ -25,5 +25,3 @@ export class RevenueChartComponent extends AbstractBaseComponent {
     // No additional initialization needed
   }
 }
-
-

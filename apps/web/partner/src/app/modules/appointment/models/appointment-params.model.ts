@@ -10,4 +10,3 @@ export interface CreateAppointmentParams {
   status?: AppointmentStatus;
   notes?: string;
 }
-

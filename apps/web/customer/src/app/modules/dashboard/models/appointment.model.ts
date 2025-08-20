@@ -57,4 +57,3 @@ export interface AppointmentsPageableResponse {
   pageSize: number;
   totalPages: number;
 }
-

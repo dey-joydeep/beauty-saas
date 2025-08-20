@@ -72,4 +72,3 @@ export interface AppointmentConfirmationParams {
   sendSms?: boolean;
   additionalNotes?: string;
 }
-

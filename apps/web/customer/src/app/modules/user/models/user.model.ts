@@ -34,4 +34,3 @@ export interface UserProfile extends Omit<User, 'password'> {
     };
   };
 }
-

@@ -42,4 +42,3 @@ export interface AppointmentQueryParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
-

@@ -157,4 +157,3 @@ export interface AppointmentFeedback {
   createdAt: string | Date;
   updatedAt: string | Date;
 }
-

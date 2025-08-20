@@ -200,4 +200,3 @@ export class AppointmentListComponent implements OnInit {
     });
   }
 }
-

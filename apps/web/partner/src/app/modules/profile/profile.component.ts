@@ -121,11 +121,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.isEditing = false;
       this.profileForm.disable();
 
-      this.snackBar.open(
-        this.translate.instant('PROFILE.UPDATE_SUCCESS'),
-        this.translate.instant('COMMON.CLOSE'),
-        { duration: 3000 },
-      );
+      this.snackBar.open(this.translate.instant('PROFILE.UPDATE_SUCCESS'), this.translate.instant('COMMON.CLOSE'), { duration: 3000 });
     }, 1000);
   }
 

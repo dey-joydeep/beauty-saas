@@ -38,4 +38,3 @@ export interface TimeSlot {
   slotStart: Date;
   slotEnd: Date;
 }
-

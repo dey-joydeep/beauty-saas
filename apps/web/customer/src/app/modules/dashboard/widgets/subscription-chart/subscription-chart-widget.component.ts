@@ -185,5 +185,3 @@ export class SubscriptionChartWidgetComponent extends AbstractBaseComponent impl
     });
   }
 }
-
-

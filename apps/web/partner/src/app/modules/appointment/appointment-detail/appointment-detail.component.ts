@@ -228,4 +228,3 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
     }
   }
 }
-

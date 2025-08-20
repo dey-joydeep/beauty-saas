@@ -37,4 +37,3 @@ export class RenewalsListComponent implements OnInit {
     });
   }
 }
-
