@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -9,7 +9,18 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { CurrentUserService, User } from '../../core/auth/services/current-user.service';
+import { CURRENT_USER } from '@beauty-saas/web-core/auth';
+import type { CurrentUserPort } from '@beauty-saas/web-core/auth';
+import { Subscription } from 'rxjs';
+
+type MaybeUser = {
+  id?: string;
+  role?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+};
 
 @Component({
   selector: 'app-profile',
@@ -29,15 +40,16 @@ import { CurrentUserService, User } from '../../core/auth/services/current-user.
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   profileForm: FormGroup;
   isLoading = false;
-  currentUser: User | null = null;
+  currentUser: Partial<MaybeUser> | null = null;
   isEditing = false;
+  private sub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
-    private currentUserService: CurrentUserService,
+    @Inject(CURRENT_USER) private currentUserPort: CurrentUserPort,
     private snackBar: MatSnackBar,
     private translate: TranslateService,
   ) {
@@ -49,23 +61,24 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.loadUserProfile();
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 
-  loadUserProfile(): void {
-    const user = this.currentUserService.currentUser;
-    if (user) {
-      this.currentUser = user;
-      this.profileForm.patchValue({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone || '',
-      });
-      // Disable form initially
-      this.profileForm.disable();
-    }
+  ngOnInit(): void {
+    this.sub = this.currentUserPort.currentUser$.subscribe((user) => {
+      const u = (user || null) as Partial<MaybeUser> | null;
+      this.currentUser = u;
+      if (u) {
+        this.profileForm.patchValue({
+          firstName: u.firstName || '',
+          lastName: u.lastName || '',
+          email: u.email || '',
+          phone: u.phone || '',
+        });
+        this.profileForm.disable();
+      }
+    });
   }
 
   onEdit(): void {
@@ -77,7 +90,17 @@ export class ProfileComponent implements OnInit {
 
   onCancel(): void {
     this.isEditing = false;
-    this.loadUserProfile();
+    // Reset to current user values
+    const u = this.currentUser;
+    if (u) {
+      this.profileForm.patchValue({
+        firstName: u.firstName || '',
+        lastName: u.lastName || '',
+        email: u.email || '',
+        phone: u.phone || '',
+      });
+      this.profileForm.disable();
+    }
   }
 
   onSubmit(): void {
@@ -93,12 +116,16 @@ export class ProfileComponent implements OnInit {
 
     // Simulate API call
     setTimeout(() => {
-      this.currentUserService.updateUser(updatedUser);
+      // TODO: integrate with actual user update port/service
       this.isLoading = false;
       this.isEditing = false;
       this.profileForm.disable();
 
-      this.snackBar.open(this.translate.instant('PROFILE.UPDATE_SUCCESS'), this.translate.instant('COMMON.CLOSE'), { duration: 3000 });
+      this.snackBar.open(
+        this.translate.instant('PROFILE.UPDATE_SUCCESS'),
+        this.translate.instant('COMMON.CLOSE'),
+        { duration: 3000 },
+      );
     }, 1000);
   }
 

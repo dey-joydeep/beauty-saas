@@ -19,7 +19,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntil } from 'rxjs';
 
 import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
-import { DateRange } from '@beauty-saas/ui/models/date-range.model';
+import { DateRange } from '@beauty-saas/ui';
 import { ErrorService } from '@beauty-saas/web-core/http';
 import { DashboardService } from '../../dashboard.service';
 import { ProductSale } from '../../models/dashboard.model';

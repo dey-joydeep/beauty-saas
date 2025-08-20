@@ -17,7 +17,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './services/auth.service';
 
 // Guards
-import { authGuard, publicGuard } from './guards/auth.guard';
+import { authGuard, publicGuard } from '@beauty-saas/web-core/auth';
 
 // Components
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';

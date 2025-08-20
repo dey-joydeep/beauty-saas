@@ -1,7 +1,5 @@
-import { PLATFORM_ID, inject, Provider } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
-
-type Immediate = any; // Using any as a workaround for NodeJS.Immediate
+import { PLATFORM_ID, Provider } from '@angular/core';
 
 // Type-safe global access
 declare const global: typeof globalThis & {

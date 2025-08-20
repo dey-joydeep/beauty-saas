@@ -13,17 +13,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from './core/auth/services/auth.service';
-import { CurrentUserService } from './core/auth/services/current-user.service';
+import { Inject } from '@angular/core';
+import { CURRENT_USER } from '@beauty-saas/web-core/auth';
+import type { CurrentUserPort, CurrentUserMin } from '@beauty-saas/web-core/auth';
 
-// Define a User interface with roles
-export interface User {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  roles?: string[];
-  [key: string]: any; // Allow for additional properties
-}
+// Using CurrentUserMin from shared auth port
 
 @Component({
   selector: 'app-root',
@@ -51,7 +45,7 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'BeautySaaS';
   error: string | null = null;
   // Public properties for template binding
-  currentUser: User | null = null;
+  currentUser: CurrentUserMin | null = null;
   isLoggedIn = false;
   pendingApprovalsCount = 0; // Will be populated from a service
 
@@ -59,7 +53,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * Check if the current user has admin role
    */
   get isAdmin(): boolean {
-    return this.currentUser?.roles?.includes('admin') || false;
+    return (this.currentUser?.role || '') === 'admin';
   }
 
   private authSubscription?: Subscription;
@@ -67,7 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private currentUserService: CurrentUserService,
+    @Inject(CURRENT_USER) private currentUserService: CurrentUserPort,
     private snackBar: MatSnackBar,
   ) {}
 
@@ -76,8 +70,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private initializeAuthSubscription(): void {
-    this.authSubscription = this.currentUserService.currentUser$.subscribe({
-      next: (user: User | null) => {
+    this.authSubscription = this.currentUserService.currentUser$.subscribe(
+      (user: CurrentUserMin | null) => {
         this.currentUser = user;
         this.isLoggedIn = !!user;
 
@@ -85,13 +79,13 @@ export class AppComponent implements OnInit, OnDestroy {
           this.loadAdminData();
         }
       },
-      error: (error: Error) => {
+      (error: unknown) => {
         console.error('Error in user subscription:', error);
         this.showError('Failed to load user data');
         this.isLoggedIn = false;
         this.currentUser = null;
       },
-    });
+    );
   }
 
   private loadAdminData(): void {
