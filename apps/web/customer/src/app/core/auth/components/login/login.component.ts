@@ -23,14 +23,14 @@ import { takeUntil } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 // Services
-import { ErrorService } from '@beauty-saas/core';
+import { ErrorService } from '@beauty-saas/web-core/http';
 import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 import { StorageService } from '@beauty-saas/web-core/http';
 import type { PlatformUtils } from '@beauty-saas/web-config';
 import type { AuthUser } from '../../services/auth.service';
 import { AuthService } from '../../services/auth.service';
 
-import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
+import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
 
 @Component({
   standalone: true,
@@ -118,7 +118,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     protected override errorService: ErrorService,
     @Inject(StorageService) private storageService: StorageService,
     @Inject(AuthService) private authService: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
     @Optional() @Inject('SSR_DEBUG') private ssrDebug: any,
   ) {
     super(errorService);

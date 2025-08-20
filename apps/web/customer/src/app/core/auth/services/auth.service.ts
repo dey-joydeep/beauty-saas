@@ -82,7 +82,7 @@ export class AuthService {
   private refreshTokenInterval: any = null;
 
   constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
     private http: HttpClient,
     private router: Router,
     private storage: StorageService,
@@ -109,7 +109,7 @@ export class AuthService {
         if (!response.success) {
           throw new Error(response.error || 'Login initialization failed');
         }
-        return response.data!;
+        return response.data;
       }),
     );
   }

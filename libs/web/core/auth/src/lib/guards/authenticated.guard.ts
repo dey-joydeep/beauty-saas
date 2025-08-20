@@ -4,10 +4,10 @@ import { map, take } from 'rxjs/operators';
 import { CURRENT_USER, CurrentUserPort } from '../interfaces/current-user.port';
 
 /**
- * Base authentication guard that checks if a user is authenticated.
- * Can be used as a base class for more specific guards.
+ * Authenticated guard: allows only authenticated users.
+ * Stores attempted URL and redirects unauthenticated users to login.
  */
-export const authBaseGuard: CanActivateFn = (route, state) => {
+export const authenticatedGuard: CanActivateFn = (route, state) => {
   const currentUserService = inject(CURRENT_USER) as CurrentUserPort;
   const router = inject(Router);
 

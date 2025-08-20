@@ -20,7 +20,7 @@ import {
 } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { provideServerRendering, ɵSERVER_CONTEXT as SERVER_CONTEXT } from '@angular/platform-server';
-import { ErrorService } from '@beauty-saas/core';
+import { ErrorService } from '@beauty-saas/web-core/http';
 import { TranslateServerLoader } from '@beauty-saas/web-core/http';
 import { TranslateLoader, TranslateStore } from '@ngx-translate/core';
 import { appConfig } from './app.config';

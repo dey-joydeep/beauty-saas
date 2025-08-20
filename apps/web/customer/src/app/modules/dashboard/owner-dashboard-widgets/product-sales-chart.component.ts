@@ -13,7 +13,7 @@ import { DashboardApiService, ProductSalesData } from '@beauty-saas/features/das
   templateUrl: './product-sales-chart.component.html',
   styleUrls: ['./product-sales-chart.component.scss'],
 })
-export class ProductSalesChartComponent {
+export class ProductSalesChartComponent implements OnInit {
   @Input() tenantId = '';
   data = signal<ChartData<'bar'>>({ labels: [], datasets: [] });
   options: ChartOptions<'bar'> = { responsive: true };

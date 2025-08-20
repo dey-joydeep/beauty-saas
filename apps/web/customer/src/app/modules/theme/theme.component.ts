@@ -26,7 +26,7 @@ export class ThemeComponent implements OnInit {
     private fb: FormBuilder,
     private renderer: Renderer2,
     @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: PlatformUtils,
-    @Inject(PLATFORM_ID) platformId: Object,
+    @Inject(PLATFORM_ID) platformId: object,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.themeForm = this.fb.group({
@@ -93,7 +93,7 @@ export class ThemeComponent implements OnInit {
     }
 
     try {
-      const doc = this.platformUtils.documentRef as Document;
+      const doc = this.platformUtils.documentRef;
       const rootElement = doc.documentElement;
 
       // Batch style updates to minimize reflows

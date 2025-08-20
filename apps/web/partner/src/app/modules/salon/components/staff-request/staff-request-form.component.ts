@@ -3,8 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StaffRequestService, CreateLeaveRequestPayload } from '../../services/staff-request.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
-import { ErrorService } from '@beauty-saas/core';
+import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
+import { ErrorService } from '@beauty-saas/web-core/http';
 
 @Component({
   selector: 'app-staff-request-form',

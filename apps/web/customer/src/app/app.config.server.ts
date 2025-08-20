@@ -20,7 +20,7 @@ import {
 } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { provideServerRendering, ɵSERVER_CONTEXT as SERVER_CONTEXT } from '@angular/platform-server';
-import { ErrorService } from '@beauty-saas/core';
+import { ErrorService } from '@beauty-saas/web-core/http';
 import { TranslateServerLoader } from '@beauty-saas/web-core/http';
 import { TranslateLoader, TranslateStore } from '@ngx-translate/core';
 import { appConfig } from './app.config';
@@ -58,12 +58,7 @@ const mockWindow = {
   },
 };
 
-// Create a server-side translate loader
-function serverTranslateLoader() {
-  const http = inject(HttpClient);
-  const transferState = inject(TransferState);
-  return new TranslateServerLoader(transferState, http, './assets/i18n/', '.json');
-}
+// (removed unused serverTranslateLoader)
 
 // Server-side providers
 const serverProviders: (Provider | EnvironmentProviders)[] = [

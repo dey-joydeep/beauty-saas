@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -18,9 +18,9 @@ import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntil } from 'rxjs';
 
-import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
-import { DateRange } from '@beauty-saas/shared/models/date-range.model';
-import { ErrorService } from '@beauty-saas/core';
+import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
+import { DateRange } from '@beauty-saas/ui/models/date-range.model';
+import { ErrorService } from '@beauty-saas/web-core/http';
 import { DashboardService } from '../../dashboard.service';
 import { ProductSale } from '../../models/dashboard.model';
 

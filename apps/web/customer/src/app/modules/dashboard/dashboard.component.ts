@@ -2,8 +2,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
-import { ErrorService } from '@beauty-saas/core';
+import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
+import { ErrorService } from '@beauty-saas/web-core/http';
 import { StorageService } from '@beauty-saas/web-core/http';
 import type { PlatformUtils } from '@beauty-saas/web-config';
 import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
@@ -56,7 +56,7 @@ export class DashboardComponent extends AbstractBaseComponent implements OnInit 
   constructor(
     @Inject(StorageService) private storageService: StorageService,
     @Inject(ErrorService) protected override errorService: ErrorService,
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
     @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: PlatformUtils,
   ) {
     super(errorService);

@@ -69,11 +69,11 @@ export class ServiceManagementComponent {
     }
 
     const service = {
-      name: name as string,
+      name: name,
       description: (description as string) || '',
       duration: Number(duration),
       price: Number(price),
-      salonId: salonId as string,
+      salonId: salonId,
       createdBy: this.currentUser.id,
     };
     this.serviceService.saveService(service).subscribe({

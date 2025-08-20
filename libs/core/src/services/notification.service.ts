@@ -3,6 +3,18 @@ import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Notification } from '../models/notification.model';
 
+/**
+ * Server-only NotificationService (NestJS)
+ *
+ * This implementation is intended for backend usage only and should not be
+ * imported by Angular/web apps. Frontend clients must use the web version at:
+ * `@beauty-saas/web-core/http` → `libs/web/core/http/src/lib/services/notification.service.ts`.
+ *
+ * Notes:
+ * - Uses NestJS `@Injectable` and lifecycle hook `OnModuleDestroy`.
+ * - Maintains in-memory notifications suitable for server-side flows.
+ * - Not exported from `libs/core/src/index.ts` to avoid accidental web usage.
+ */
 @Injectable()
 export class NotificationService implements OnModuleDestroy {
   private notifications: Notification[] = [];

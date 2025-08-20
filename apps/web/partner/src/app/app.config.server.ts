@@ -20,17 +20,13 @@ import {
 } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { provideServerRendering, ɵSERVER_CONTEXT as SERVER_CONTEXT } from '@angular/platform-server';
-import { ErrorService } from '@beauty-saas/core';
-import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
-import { StorageService } from '@beauty-saas/web-core/http';
+import { ErrorService } from '@beauty-saas/web-core/http';
 import { TranslateServerLoader } from '@beauty-saas/web-core/http';
-import { TranslateLoader, TranslateService, TranslateStore } from '@ngx-translate/core';
+import { TranslateLoader, TranslateStore } from '@ngx-translate/core';
 import { appConfig } from './app.config';
 
-// Import interceptors
-import { loadingInterceptor } from './core/interceptors/loading.interceptor';
-import { ssrInterceptor } from './core/interceptors/ssr-interceptor';
-import { ssrTranslateInterceptor } from './core/interceptors/ssr-translate.interceptor';
+// Import interceptors from shared web-core/http
+import { loadingInterceptor, ssrInterceptor, ssrTranslateInterceptor } from '@beauty-saas/web-core/http';
 
 // Server-side interceptors
 const serverInterceptors: HttpInterceptorFn[] = [ssrInterceptor, ssrTranslateInterceptor, loadingInterceptor];
@@ -62,12 +58,7 @@ const mockWindow = {
   },
 };
 
-// Create a server-side translate loader
-function serverTranslateLoader() {
-  const http = inject(HttpClient);
-  const transferState = inject(TransferState);
-  return new TranslateServerLoader(transferState, http, './assets/i18n/', '.json');
-}
+// (removed unused serverTranslateLoader)
 
 // Server-side providers
 const serverProviders: (Provider | EnvironmentProviders)[] = [

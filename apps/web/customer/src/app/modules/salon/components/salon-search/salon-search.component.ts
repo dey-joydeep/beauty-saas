@@ -1,4 +1,4 @@
-import { Component, inject, PLATFORM_ID } from '@angular/core';
+import { Component, inject, PLATFORM_ID, OnInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -17,7 +17,7 @@ import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
   templateUrl: './salon-search.component.html',
   styleUrls: ['./salon-search.component.scss'],
 })
-export class SalonSearchComponent {
+export class SalonSearchComponent implements OnInit {
   salons: Salon[] = [];
   total = 0;
   loading = false;

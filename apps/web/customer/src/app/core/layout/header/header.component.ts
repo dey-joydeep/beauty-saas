@@ -137,7 +137,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private storageService = inject(StorageService);
   private platformId = inject(PLATFORM_ID);
-  private platformUtils = inject(PLATFORM_UTILS_TOKEN) as PlatformUtils;
+  private platformUtils = inject(PLATFORM_UTILS_TOKEN);
   private destroy$ = new Subject<void>();
   private isBrowser: boolean = false;
 

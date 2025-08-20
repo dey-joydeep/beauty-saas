@@ -1,6 +1,6 @@
 import { Directive, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { ErrorService } from '../services/error/error.service';
+import { ErrorService } from '../services/error.service';
 
 @Directive()
 export abstract class AbstractBaseComponent implements OnInit, OnDestroy {
