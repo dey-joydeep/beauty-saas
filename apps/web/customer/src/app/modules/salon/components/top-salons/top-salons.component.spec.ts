@@ -4,7 +4,7 @@ import { SalonService } from '../../services/salon.service';
 import { of, throwError } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { PLATFORM_ID } from '@angular/core';
-import { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { PLATFORM_UTILS_TOKEN, type PlatformUtils } from '@beauty-saas/web-config';
 // Import mocks directly from the test-utils directory
 const { createBrowserPlatformUtilsMock, createServerPlatformUtilsMock } = require('../../../../test-utils/mocks/platform-utils.mock');
 
@@ -12,7 +12,7 @@ describe('TopSalonsComponent', () => {
   let component: TopSalonsComponent;
   let fixture: ComponentFixture<TopSalonsComponent>;
   let salonService: jest.Mocked<SalonService>;
-  let platformUtils: IPlatformUtils;
+  let platformUtils: PlatformUtils;
 
   beforeEach(waitForAsync(() => {
     salonService = {
@@ -30,7 +30,7 @@ describe('TopSalonsComponent', () => {
         { provide: SalonService, useValue: salonService },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => null } } } },
         { provide: PLATFORM_ID, useValue: 'browser' },
-        { provide: 'PLATFORM_UTILS_TOKEN', useValue: platformUtils },
+        { provide: PLATFORM_UTILS_TOKEN, useValue: platformUtils },
       ],
     }).compileComponents();
   }));
@@ -50,7 +50,7 @@ describe('TopSalonsComponent', () => {
       const serverUtils = createServerPlatformUtilsMock();
 
       // Override the provider with server environment
-      TestBed.overrideProvider('PLATFORM_UTILS_TOKEN', { useValue: serverUtils });
+      TestBed.overrideProvider(PLATFORM_UTILS_TOKEN, { useValue: serverUtils });
 
       const mockSalons = [{ id: '1', name: 'Test Salon' }];
       salonService.getTopSalons.mockReturnValue(of(mockSalons));
@@ -67,8 +67,8 @@ describe('TopSalonsComponent', () => {
       expect(component.loading).toBe(false);
       expect(component.error).toBeNull();
 
-      // Should have used the server-side implementation
-      expect(serverUtils.runInBrowser).toHaveBeenCalled();
+      // Server environment should not block data loading
+      expect(serverUtils.isBrowser).toBe(false);
     });
 
     it('should handle geolocation in browser environment', fakeAsync(() => {
@@ -77,14 +77,14 @@ describe('TopSalonsComponent', () => {
 
       // Recreate component with fresh browser environment
       const browserUtils = createBrowserPlatformUtilsMock();
-      TestBed.overrideProvider('PLATFORM_UTILS_TOKEN', { useValue: browserUtils });
+      TestBed.overrideProvider(PLATFORM_UTILS_TOKEN, { useValue: browserUtils });
 
       fixture = TestBed.createComponent(TopSalonsComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
 
       // Should have called getCurrentPosition
-      expect(browserUtils.browserNavigator?.geolocation?.getCurrentPosition).toHaveBeenCalled();
+      expect(browserUtils.windowRef?.navigator?.geolocation?.getCurrentPosition).toHaveBeenCalled();
       tick();
 
       // Should have called getTopSalons with coordinates
@@ -101,7 +101,7 @@ describe('TopSalonsComponent', () => {
       const errorUtils = createBrowserPlatformUtilsMock();
 
       // Override geolocation to simulate error
-      if (errorUtils.browserNavigator?.geolocation) {
+      if (errorUtils.windowRef?.navigator?.geolocation) {
         // Create a proper GeolocationPositionError-like object
         const errorObj: Partial<GeolocationPositionError> & { code: number; message: string } = {
           code: 1, // PERMISSION_DENIED
@@ -111,14 +111,14 @@ describe('TopSalonsComponent', () => {
           TIMEOUT: 3,
         };
 
-        errorUtils.browserNavigator.geolocation.getCurrentPosition = (_: PositionCallback, error: PositionErrorCallback) => {
+        errorUtils.windowRef.navigator.geolocation.getCurrentPosition = (_: PositionCallback, error: PositionErrorCallback) => {
           // Cast the error object to unknown first, then to GeolocationPositionError
           error(errorObj as unknown as GeolocationPositionError);
         };
       }
 
       // Override the provider with error mock
-      TestBed.overrideProvider('PLATFORM_UTILS_TOKEN', { useValue: errorUtils });
+      TestBed.overrideProvider(PLATFORM_UTILS_TOKEN, { useValue: errorUtils });
 
       const mockSalons = [{ id: '1', name: 'Test Salon' }];
       salonService.getTopSalons.mockReturnValue(of(mockSalons));

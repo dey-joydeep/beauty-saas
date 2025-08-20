@@ -43,6 +43,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AUTH_ROUTES } from './core/auth/auth.routes';
 import { ErrorHandlerService, ERROR_INTERCEPTOR_PROVIDER } from '@beauty-saas/web-core/http';
 import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
+import { AUTH_STATE_PORT } from '@beauty-saas/web-core/auth';
+import { AuthService } from './core/auth/services/auth.service';
 
 // AoT requires an exported function for factories
 export function httpLoaderFactory(http: HttpClient) {
@@ -114,5 +116,6 @@ export const appConfig: ApplicationConfig = {
     ]),
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
     { provide: ErrorHandler, useClass: ErrorHandlerService },
+    { provide: AUTH_STATE_PORT, useExisting: AuthService },
   ],
 };

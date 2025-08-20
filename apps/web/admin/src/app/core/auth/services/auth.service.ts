@@ -2,11 +2,11 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, forkJoin, Observable, firstValueFrom, from, of, throwError } from 'rxjs';
-import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, forkJoin, from, Observable, of, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
-import { NotificationService } from '@frontend-shared/core/services/notification.service';
-import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
+import { NotificationService } from '@beauty-saas/core/services/notification.service';
+import { StorageService } from '@beauty-saas/web-core/http';
 
 export interface AuthUser {
   id: string;
@@ -109,7 +109,7 @@ export class AuthService {
         if (!response.success) {
           throw new Error(response.error || 'Login initialization failed');
         }
-        return response.data!;
+        return response.data;
       }),
     );
   }
@@ -384,3 +384,5 @@ export class AuthService {
     );
   }
 }
+
+

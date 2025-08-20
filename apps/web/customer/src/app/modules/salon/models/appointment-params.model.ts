@@ -1,4 +1,4 @@
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 
 export interface CreateAppointmentParams {
   salonId: string;
@@ -42,3 +42,4 @@ export interface AppointmentQueryParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+

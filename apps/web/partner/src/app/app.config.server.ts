@@ -20,10 +20,10 @@ import {
 } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { provideServerRendering, ɵSERVER_CONTEXT as SERVER_CONTEXT } from '@angular/platform-server';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
-import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@frontend-shared/core/utils/platform-utils';
-import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
-import { TranslateServerLoader } from '@frontend-shared/core/translate/translate-server.loader';
+import { ErrorService } from '@beauty-saas/core';
+import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
+import { StorageService } from '@beauty-saas/web-core/http';
+import { TranslateServerLoader } from '@beauty-saas/core';
 import { TranslateLoader, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { appConfig } from './app.config';
 
@@ -78,26 +78,8 @@ const serverProviders: (Provider | EnvironmentProviders)[] = [
     useValue: isDevMode(),
   },
 
-  // Platform utilities with SSR support
-  {
-    provide: PLATFORM_UTILS_TOKEN,
-    useFactory: () => {
-      console.log('🔧 Initializing PlatformUtils for SSR');
-      const platformId = inject(PLATFORM_ID);
-      return new PlatformUtils(platformId);
-    },
-  },
-
-  // Storage service with SSR support
-  {
-    provide: StorageService,
-    useFactory: () => {
-      console.log('🔧 Initializing StorageService for SSR');
-      const platformId = inject(PLATFORM_ID);
-      const platformUtils = inject(PLATFORM_UTILS_TOKEN);
-      return new StorageService(platformId, platformUtils);
-    },
-  },
+  // Platform utilities provided in root by token factory (no manual factory needed)
+  // StorageService is SSR-safe and provided in root
 
   // Error handling with SSR support
   {
@@ -164,3 +146,4 @@ const serverProviders: (Provider | EnvironmentProviders)[] = [
 export const config: ApplicationConfig = mergeApplicationConfig(appConfig, {
   providers: serverProviders,
 });
+

@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 import { environment } from '@env/environment';
 import { DashboardStats, ProductSale, ProductSalesFilter, ProductSalesResponse, ProductSalesSummary } from '../models/dashboard.model';
 import { AppointmentsFilter, AppointmentsOverview, AppointmentsPageableResponse, Appointment } from '../models/appointment.model';
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -191,3 +191,4 @@ export class DashboardService {
     });
   }
 }
+

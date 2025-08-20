@@ -13,7 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { CreateAppointmentParams } from '../../models/appointment-params.model';
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 import { AppointmentService } from './appointment.service';
 
 @Component({
@@ -151,3 +151,4 @@ export class AppointmentManagementComponent implements OnInit {
     });
   }
 }
+

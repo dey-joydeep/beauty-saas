@@ -178,21 +178,7 @@ global.sessionStorage = mockWindow.sessionStorage;
 global.navigator = mockWindow.navigator;
 global.location = mockWindow.location;
 
-// Mock PlatformUtils for tests
-jest.mock('@frontend-shared/core/utils/platform-utils', () => ({
-  PLATFORM_UTILS_TOKEN: 'PLATFORM_UTILS_TOKEN',
-  IPlatformUtils: jest.fn().mockImplementation(() => ({
-    isBrowser: true,
-    isServer: false,
-    browserLocalStorage: mockWindow.localStorage,
-    browserSessionStorage: mockWindow.sessionStorage,
-    browserNavigator: mockWindow.navigator,
-    browserLocation: mockWindow.location,
-    document: mockWindow.document,
-    window: mockWindow,
-    runInBrowser: jest.fn((fn) => fn()),
-  })),
-}));
+// Note: PlatformUtils is provided via app-level providers in specs; no module mocking here.
 
 // Mock for TranslateService
 export class MockTranslateService {

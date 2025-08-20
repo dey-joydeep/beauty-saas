@@ -8,7 +8,7 @@ import { MatError, MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { DashboardApiService, RevenueData } from '@frontend-shared/features/dashboard/services/dashboard-api.service';
+import { DashboardApiService, RevenueData } from '@beauty-saas/features/dashboard/services/dashboard-api.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
@@ -169,3 +169,4 @@ export class RevenueChartComponent implements OnInit {
 
   // Using dashboardService injected in the constructor
 }
+

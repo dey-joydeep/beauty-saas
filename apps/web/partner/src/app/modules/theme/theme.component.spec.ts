@@ -11,7 +11,7 @@ import { of } from 'rxjs';
 describe('ThemeComponent', () => {
   let component: ThemeComponent;
   let fixture: any;
-  let themeService = {
+  const themeService = {
     getTheme: jest.fn(),
     updateTheme: jest.fn(),
   };

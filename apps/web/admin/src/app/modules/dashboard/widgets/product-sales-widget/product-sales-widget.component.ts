@@ -18,9 +18,9 @@ import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntil } from 'rxjs';
 
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { DateRange } from '@frontend-shared/shared/models/date-range.model';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
+import { DateRange } from '@beauty-saas/shared/models/date-range.model';
+import { ErrorService } from '@beauty-saas/core';
 import { DashboardService } from '../../dashboard.service';
 import { ProductSale } from '../../models/dashboard.model';
 
@@ -184,7 +184,7 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
     if (sort && sort.active) {
       this.sortField = sort.active;
       // Convert empty string to undefined, otherwise use the direction
-      this.sortDirection = sort.direction === '' ? undefined : (sort.direction as 'asc' | 'desc');
+      this.sortDirection = sort.direction === '' ? undefined : (sort.direction);
       this.loadData();
     }
   }
@@ -209,3 +209,5 @@ export class ProductSalesWidgetComponent extends AbstractBaseComponent implement
     // Implementation would go here
   }
 }
+
+

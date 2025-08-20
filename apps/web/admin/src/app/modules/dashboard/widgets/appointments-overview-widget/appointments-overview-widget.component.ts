@@ -29,7 +29,7 @@ import { formatDate } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Appointment, AppointmentsFilter, AppointmentsOverview } from '../../models/appointment.model';
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 import { DashboardService } from '../../services/dashboard.service';
 
 interface StatusBadgeConfig {
@@ -423,3 +423,4 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
     return statusIcons[appointment.status] || 'event';
   }
 }
+

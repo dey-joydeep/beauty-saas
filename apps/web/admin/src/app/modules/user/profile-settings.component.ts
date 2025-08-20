@@ -84,11 +84,11 @@ export class ProfileSettingsComponent implements OnInit {
       return;
     }
     const formData = new FormData();
-    formData.append('name', name as string);
-    formData.append('email', email as string);
-    formData.append('contact', contact as string);
-    if (password) formData.append('password', password as string);
-    if (profilePicture) formData.append('profilePicture', profilePicture as File);
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('contact', contact);
+    if (password) formData.append('password', password);
+    if (profilePicture) formData.append('profilePicture', profilePicture);
     this.userService.updateProfile(formData).subscribe({
       next: (res: { success: boolean }) => {
         this.loading = false;

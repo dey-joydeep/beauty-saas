@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
+import { ErrorService } from '@beauty-saas/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { CurrentUserService } from '../../core/auth/services/current-user.service';
 import { UserService, UserStats } from './user.service';
@@ -56,3 +56,5 @@ export class UserComponent extends AbstractBaseComponent implements OnInit {
     });
   }
 }
+
+

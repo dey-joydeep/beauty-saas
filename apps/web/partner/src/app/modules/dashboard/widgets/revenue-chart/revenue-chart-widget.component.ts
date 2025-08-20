@@ -11,7 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DashboardService } from '../../../dashboard/dashboard.service';
 import { RevenueData } from '../../../dashboard/models/dashboard.model';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { ErrorService } from '@beauty-saas/core';
 
 @Component({
   selector: 'app-revenue-chart-widget',
@@ -191,3 +191,4 @@ export class RevenueChartWidgetComponent implements OnInit, OnDestroy {
     this.loadData();
   }
 }
+

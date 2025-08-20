@@ -4,7 +4,7 @@ import { ChartData, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatError } from '@angular/material/form-field';
-import { DashboardApiService, ProductSalesData } from '@frontend-shared/features/dashboard/services/dashboard-api.service';
+import { DashboardApiService, ProductSalesData } from '@beauty-saas/features/dashboard/services/dashboard-api.service';
 
 @Component({
   selector: 'app-product-sales-chart',
@@ -38,3 +38,4 @@ export class ProductSalesChartComponent {
     });
   }
 }
+

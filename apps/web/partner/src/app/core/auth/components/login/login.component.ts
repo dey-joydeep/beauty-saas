@@ -23,14 +23,14 @@ import { takeUntil } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 // Services
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
-import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
-import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
-import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { ErrorService } from '@beauty-saas/core';
+import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
+import { StorageService } from '@beauty-saas/web-core/http';
+import type { PlatformUtils } from '@beauty-saas/web-config';
 import type { AuthUser } from '../../services/auth.service';
 import { AuthService } from '../../services/auth.service';
 
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
+import { AbstractBaseComponent } from '@beauty-saas/core';
 
 @Component({
   standalone: true,
@@ -110,7 +110,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   // User type for multi-role support
 
   constructor(
-    @Inject(PLATFORM_UTILS_TOKEN) protected platformUtils: IPlatformUtils,
+    @Inject(PLATFORM_UTILS_TOKEN) protected platformUtils: PlatformUtils,
     @Inject(FormBuilder) private fb: FormBuilder,
     @Inject(Router) private router: Router,
     @Inject(ActivatedRoute) private route: ActivatedRoute,
@@ -118,7 +118,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     protected override errorService: ErrorService,
     @Inject(StorageService) private storageService: StorageService,
     @Inject(AuthService) private authService: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
     @Optional() @Inject('SSR_DEBUG') private ssrDebug: any,
   ) {
     super(errorService);

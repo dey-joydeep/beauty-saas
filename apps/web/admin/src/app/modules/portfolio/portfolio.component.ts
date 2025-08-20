@@ -4,8 +4,8 @@ import { PortfolioService, PortfolioItem } from './portfolio.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
+import { ErrorService } from '@beauty-saas/core';
 
 @Component({
   selector: 'app-portfolio',
@@ -170,3 +170,5 @@ export class PortfolioComponent extends AbstractBaseComponent {
     return item.imagePath || 'assets/default-portfolio.png';
   }
 }
+
+

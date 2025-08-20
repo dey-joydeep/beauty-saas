@@ -19,9 +19,9 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
 import { Appointment, TimeSlot } from '../models/appointment.model';
-import { LoadingService } from '@frontend-shared/core/services/loading.service';
+import { LoadingService } from '@beauty-saas/core/services/loading.service';
 import { AppointmentService } from '../services/appointment.service';
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 // Using the base Appointment model which already has startTime and endTime
@@ -398,3 +398,4 @@ export class AppointmentRescheduleComponent implements OnInit, OnDestroy {
     return `APPOINTMENT.STATUS.${status.toUpperCase()}`;
   }
 }
+

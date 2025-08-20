@@ -3,8 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ThemeService, Theme } from './theme.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
-import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
+import type { PlatformUtils } from '@beauty-saas/web-config';
+import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 
 @Component({
   selector: 'app-theme',
@@ -25,7 +25,7 @@ export class ThemeComponent implements OnInit {
     private themeService: ThemeService,
     private fb: FormBuilder,
     private renderer: Renderer2,
-    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
+    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: PlatformUtils,
     @Inject(PLATFORM_ID) platformId: Object,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -88,12 +88,12 @@ export class ThemeComponent implements OnInit {
    * Safe to call in both server and browser environments
    */
   applyTheme(theme: Theme) {
-    if (!this.isBrowser || !this.platformUtils.document) {
+    if (!this.isBrowser || !this.platformUtils.documentRef) {
       return;
     }
 
     try {
-      const doc = this.platformUtils.document;
+      const doc = this.platformUtils.documentRef as Document;
       const rootElement = doc.documentElement;
 
       // Batch style updates to minimize reflows
@@ -118,3 +118,5 @@ export class ThemeComponent implements OnInit {
     }
   }
 }
+
+

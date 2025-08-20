@@ -12,7 +12,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { SalonService } from './salon.service';
 import { CreateSalonParams } from '../../models/salon-params.model';
 import { User } from '../../models/user.model';
-import { UserRole } from '@frontend-shared/shared/enums/user-role.enum';
+import { UserRole } from '@beauty-saas/shared/enums/user-role.enum';
 
 @Component({
   selector: 'app-salon-management',
@@ -173,3 +173,4 @@ export class SalonManagementComponent {
     });
   }
 }
+

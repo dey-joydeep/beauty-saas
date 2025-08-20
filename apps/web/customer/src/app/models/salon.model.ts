@@ -1,4 +1,4 @@
-import { DayOfWeek } from '@frontend-shared/shared/models/day-of-week.enum';
+import { DayOfWeek } from '@beauty-saas/shared/models/day-of-week.enum';
 
 export interface Salon {
   id: string;
@@ -187,3 +187,4 @@ export interface SalonListResponse {
   limit: number;
   totalPages: number;
 }
+

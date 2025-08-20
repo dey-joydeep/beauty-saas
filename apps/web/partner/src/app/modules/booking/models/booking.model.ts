@@ -1,4 +1,4 @@
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 
 export interface Appointment {
   id: string;
@@ -38,3 +38,4 @@ export interface TimeSlot {
   slotStart: Date;
   slotEnd: Date;
 }
+

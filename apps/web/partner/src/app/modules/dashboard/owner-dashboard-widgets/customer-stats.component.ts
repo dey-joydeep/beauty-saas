@@ -1,9 +1,9 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatError, MatFormFieldModule } from '@angular/material/form-field';
-import { DashboardApiService } from '@frontend-shared/features/dashboard/services/dashboard-api.service';
+import { DashboardApiService } from '@beauty-saas/features/dashboard/services/dashboard-api.service';
 
 @Component({
   selector: 'app-customer-stats',
@@ -12,7 +12,7 @@ import { DashboardApiService } from '@frontend-shared/features/dashboard/service
   templateUrl: './customer-stats.component.html',
   styleUrls: ['./customer-stats.component.scss'],
 })
-export class CustomerStatsComponent {
+export class CustomerStatsComponent implements OnInit {
   @Input() tenantId = '';
   active = signal(0);
   passive = signal(0);
@@ -38,3 +38,4 @@ export class CustomerStatsComponent {
     });
   }
 }
+

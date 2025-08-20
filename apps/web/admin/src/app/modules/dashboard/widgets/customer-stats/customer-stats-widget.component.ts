@@ -5,8 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
+import { ErrorService } from '@beauty-saas/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../dashboard.service';
@@ -78,3 +78,5 @@ export class CustomerStatsWidgetComponent extends AbstractBaseComponent {
     this.loadStats();
   }
 }
+
+

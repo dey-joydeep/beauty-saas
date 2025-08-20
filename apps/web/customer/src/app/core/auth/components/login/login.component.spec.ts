@@ -14,7 +14,7 @@ import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 
 // Services
-import { NotificationService } from '@frontend-shared/core/services/notification.service';
+import { NotificationService } from '@beauty-saas/core/services/notification.service';
 import { AuthService } from '../../services/auth.service';
 
 // Mocks
@@ -234,3 +234,4 @@ describe('LoginComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
   });
 });
+

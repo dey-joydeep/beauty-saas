@@ -7,8 +7,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
+import { ErrorService } from '@beauty-saas/core';
 import { DashboardService } from '../../services/dashboard.service';
 import { Subscription } from 'rxjs';
 
@@ -172,3 +172,5 @@ export class RenewalsListWidgetComponent extends AbstractBaseComponent {
     return colorMap[status];
   }
 }
+
+

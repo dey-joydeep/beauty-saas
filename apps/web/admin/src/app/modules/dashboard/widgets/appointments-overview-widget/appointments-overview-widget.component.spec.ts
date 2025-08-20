@@ -24,7 +24,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Appointment, AppointmentsOverview } from '../../models/appointment.model';
 import { DashboardService } from '../../services/dashboard.service';
@@ -352,3 +352,4 @@ describe('AppointmentsOverviewWidgetComponent', () => {
     });
   });
 });
+

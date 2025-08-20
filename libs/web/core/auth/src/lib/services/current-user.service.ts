@@ -1,10 +1,10 @@
 import { isPlatformBrowser } from '@angular/common';
-import { Inject, Injectable, Injector, OnDestroy, PLATFORM_ID } from '@angular/core';
-import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
+import { Inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { StorageService } from '@beauty-saas/web-core/http';
 import { BehaviorSubject, Subject, timer } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, takeUntil } from 'rxjs/operators';
 import { User } from '../../../models/user.model';
-import { AuthService } from './auth.service';
+import { AUTH_STATE_PORT, type AuthStatePort } from '../ports/auth-state.port';
 
 export type { User }; // Re-export User type for isolatedModules
 
@@ -48,12 +48,10 @@ export class CurrentUserService implements OnDestroy {
     distinctUntilChanged(),
   );
 
-  private _authService: AuthService | null = null;
-
   constructor(
-    private injector: Injector,
     private storage: StorageService,
     @Inject(PLATFORM_ID) private platformId: object,
+    @Inject(AUTH_STATE_PORT) private authState: AuthStatePort,
   ) {
     // Only run in browser environment
     if (isPlatformBrowser(this.platformId)) {
@@ -172,21 +170,18 @@ export class CurrentUserService implements OnDestroy {
   /**
    * Check the current authentication state and update the user accordingly
    */
-  private get authService(): AuthService {
-    if (!this._authService) {
-      this._authService = this.injector.get(AuthService);
-    }
-    return this._authService;
-  }
-
-  private checkAuthState(): void {
-    const isAuthenticated = this.authService.isAuthenticated();
-
-    if (!isAuthenticated) {
+  private async checkAuthState(): Promise<void> {
+    try {
+      const isAuthenticated = await this.authState.isAuthenticated();
+      if (!isAuthenticated) {
+        this.clearUser();
+      } else if (!this.currentUser) {
+        // If authenticated but no user data, try to load from storage
+        this.loadUserFromStorage();
+      }
+    } catch (error) {
+      console.error('Error checking authentication state:', error);
       this.clearUser();
-    } else if (!this.currentUser) {
-      // If authenticated but no user data, try to load from storage
-      this.loadUserFromStorage();
     }
   }
 

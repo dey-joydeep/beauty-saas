@@ -4,7 +4,7 @@ import { ChartData, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatError } from '@angular/material/form-field';
-import { DashboardApiService, ProductSalesData } from '@frontend-shared/features/dashboard/services/dashboard-api.service';
+import { DashboardApiService, ProductSalesData } from '@beauty-saas/features/dashboard/services/dashboard-api.service';
 
 @Component({
   selector: 'app-product-sales-chart',
@@ -13,7 +13,7 @@ import { DashboardApiService, ProductSalesData } from '@frontend-shared/features
   templateUrl: './product-sales-chart.component.html',
   styleUrls: ['./product-sales-chart.component.scss'],
 })
-export class ProductSalesChartComponent {
+export class ProductSalesChartComponent implements OnInit {
   @Input() tenantId = '';
   data = signal<ChartData<'bar'>>({ labels: [], datasets: [] });
   options: ChartOptions<'bar'> = { responsive: true };
@@ -38,3 +38,4 @@ export class ProductSalesChartComponent {
     });
   }
 }
+

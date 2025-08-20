@@ -1,4 +1,4 @@
-import { DayOfWeek } from '@frontend-shared/shared/models/day-of-week.enum';
+import { DayOfWeek } from '@beauty-saas/shared/models/day-of-week.enum';
 
 export interface CreateSalonParams {
   name: string;
@@ -121,3 +121,4 @@ export interface SalonStatusParams {
   updatedBy: string;
   reason?: string;
 }
+

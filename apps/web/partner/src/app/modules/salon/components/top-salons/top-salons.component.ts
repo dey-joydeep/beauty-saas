@@ -4,8 +4,8 @@ import { SalonService } from '../../services/salon.service';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ISalonDto } from '../../../home/home.models';
-import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
-import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
+import type { PlatformUtils } from '@beauty-saas/web-config';
+import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 
 // Extend ISalonDto with any additional properties needed for this component
 export type Salon = ISalonDto & {
@@ -49,8 +49,8 @@ export class TopSalonsComponent implements OnInit {
 
   constructor(
     private salonService: SalonService,
-    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: PlatformUtils,
+    @Inject(PLATFORM_ID) private platformId: object,
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
@@ -58,8 +58,8 @@ export class TopSalonsComponent implements OnInit {
   ngOnInit(): void {
     // Only fetch salons if none were provided via input
     if (this.salons.length === 0) {
-      if (this.isBrowser && this.platformUtils.browserNavigator?.geolocation) {
-        this.platformUtils.browserNavigator.geolocation.getCurrentPosition(
+      if (this.isBrowser && this.platformUtils.windowRef?.navigator?.geolocation) {
+        this.platformUtils.windowRef.navigator.geolocation.getCurrentPosition(
           (pos: GeolocationPosition) => {
             this.fetchTopSalons(pos.coords.latitude, pos.coords.longitude);
           },
@@ -117,8 +117,8 @@ export class TopSalonsComponent implements OnInit {
     if (!this.isBrowser) return;
 
     const url = this.getMapUrl(salon);
-    if (url && this.platformUtils.window) {
-      this.platformUtils.window.open(url, '_blank');
+    if (url && this.platformUtils.windowRef) {
+      this.platformUtils.windowRef.open(url, '_blank');
     }
   }
 }

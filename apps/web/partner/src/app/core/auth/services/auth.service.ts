@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, forkJoin, Observable, firstValueFrom, from, of, throwError } from 'rxjs';
 import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { NotificationService } from '@frontend-shared/core/services/notification.service';
-import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
+import { NotificationService } from '@beauty-saas/core/services/notification.service';
+import { StorageService } from '@beauty-saas/web-core/http';
 
 export interface AuthUser {
   id: string;
@@ -82,7 +82,7 @@ export class AuthService {
   private refreshTokenInterval: any = null;
 
   constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
     private http: HttpClient,
     private router: Router,
     private storage: StorageService,
@@ -109,7 +109,7 @@ export class AuthService {
         if (!response.success) {
           throw new Error(response.error || 'Login initialization failed');
         }
-        return response.data!;
+        return response.data;
       }),
     );
   }
@@ -384,3 +384,5 @@ export class AuthService {
     );
   }
 }
+
+

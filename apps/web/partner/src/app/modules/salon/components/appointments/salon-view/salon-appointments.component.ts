@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
@@ -11,7 +11,7 @@ import { RouterModule } from '@angular/router';
   templateUrl: './salon-appointments.component.html',
   styleUrls: ['./salon-appointments.component.scss'],
 })
-export class SalonAppointmentsComponent {
+export class SalonAppointmentsComponent implements OnInit {
   @Input() salonId?: string;
   appointments: any[] = [];
   loading = true;

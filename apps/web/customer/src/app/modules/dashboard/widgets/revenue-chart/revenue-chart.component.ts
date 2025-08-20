@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
+import { ErrorService } from '@beauty-saas/core';
 import { RevenueData } from '../../models/dashboard.model';
 
 @Component({
@@ -25,3 +25,5 @@ export class RevenueChartComponent extends AbstractBaseComponent {
     // No additional initialization needed
   }
 }
+
+

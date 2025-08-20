@@ -13,9 +13,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterModule } from '@angular/router';
-import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
-import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
-import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
+import { PLATFORM_UTILS_TOKEN, type PlatformUtils } from '@beauty-saas/web-config';
+import { StorageService } from '@beauty-saas/web-core/http';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, Subscription, firstValueFrom, of, timer } from 'rxjs';
 import { catchError, switchMap, takeUntil, tap } from 'rxjs/operators';
@@ -138,7 +137,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private storageService = inject(StorageService);
   private platformId = inject(PLATFORM_ID);
-  private platformUtils = inject<IPlatformUtils>(PLATFORM_UTILS_TOKEN);
+  private platformUtils = inject(PLATFORM_UTILS_TOKEN) as PlatformUtils;
   private destroy$ = new Subject<void>();
   private isBrowser: boolean = false;
 
@@ -210,10 +209,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.checkIfMobile();
 
       // Subscribe to scroll events
-      this.platformUtils.window?.addEventListener('scroll', this.handleScroll.bind(this));
+      this.platformUtils.windowRef?.addEventListener('scroll', this.handleScroll.bind(this));
 
       // Subscribe to window resize events
-      this.platformUtils.window?.addEventListener('resize', this.onResize);
+      this.platformUtils.windowRef?.addEventListener('resize', this.onResize);
 
       // Load initial scroll position
       this.handleScroll();
@@ -232,8 +231,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     // Clean up event listeners
     if (this.isBrowser) {
-      this.platformUtils.window?.removeEventListener('scroll', this.handleScroll);
-      this.platformUtils.window?.removeEventListener('resize', this.onResize);
+      this.platformUtils.windowRef?.removeEventListener('scroll', this.handleScroll);
+      this.platformUtils.windowRef?.removeEventListener('resize', this.onResize);
     }
 
     // Unsubscribe from all subscriptions
@@ -247,7 +246,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private handleScroll() {
     if (!this.isBrowser) return;
 
-    const currentScrollPosition = this.platformUtils.window?.pageYOffset || this.platformUtils.document?.documentElement.scrollTop || 0;
+    const currentScrollPosition =
+      this.platformUtils.windowRef?.pageYOffset || this.platformUtils.documentRef?.documentElement.scrollTop || 0;
 
     this.isVisible = currentScrollPosition < this.lastScrollPosition || currentScrollPosition < 10;
     this.lastScrollPosition = currentScrollPosition;
@@ -299,7 +299,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   private checkIfMobile() {
-    this.isMobile = this.isBrowser ? (this.platformUtils.window?.innerWidth || 0) < 768 : false;
+    this.isMobile = this.isBrowser ? (this.platformUtils.windowRef?.innerWidth || 0) < 768 : false;
   }
 
   private loadNotifications(): void {
@@ -386,10 +386,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
 
     // Update document direction for RTL languages
-    if (this.isBrowser && this.platformUtils.document?.documentElement) {
+    if (this.isBrowser && this.platformUtils.documentRef?.documentElement) {
       const selectedLang = this.languages.find((lang) => lang.code === languageCode);
-      this.platformUtils.document.documentElement.dir = selectedLang?.rtl ? 'rtl' : 'ltr';
-      this.platformUtils.document.documentElement.lang = languageCode;
+      this.platformUtils.documentRef.documentElement.dir = selectedLang?.rtl ? 'rtl' : 'ltr';
+      this.platformUtils.documentRef.documentElement.lang = languageCode;
     }
 
     // Show snackbar if requested
@@ -399,7 +399,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     // Emit event for other components
     if (this.isBrowser) {
-      this.platformUtils.document?.dispatchEvent(new CustomEvent('languageChange', { detail: languageCode }));
+      this.platformUtils.documentRef?.dispatchEvent(new CustomEvent('languageChange', { detail: languageCode }));
     }
 
     this.cdr.markForCheck();

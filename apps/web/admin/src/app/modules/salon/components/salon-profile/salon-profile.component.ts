@@ -7,7 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 // Core services
 import { CurrentUserService } from '../../../../core/auth/services/current-user.service';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { ErrorService } from '@beauty-saas/core';
 
 // Models from salon module
 import { Appointment } from '../../models/appointment.model';
@@ -16,7 +16,7 @@ import { Salon } from '../../models/salon.model';
 import { Staff } from '../../models/staff.model';
 
 // Models from other modules
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 import { Review } from '../../../reviews/models/review.model';
 
 // Pipes
@@ -167,3 +167,5 @@ export class SalonProfileComponent implements OnInit {
     });
   }
 }
+
+

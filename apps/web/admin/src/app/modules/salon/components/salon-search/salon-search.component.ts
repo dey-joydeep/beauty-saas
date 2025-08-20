@@ -7,8 +7,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Salon } from '../../models/salon.model';
 import { SalonServiceItem } from '../../models/salon-service-item.model';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
-import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
-import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
+import type { PlatformUtils } from '@beauty-saas/web-config';
+import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 
 @Component({
   selector: 'app-salon-search',
@@ -113,10 +113,10 @@ export class SalonSearchComponent implements OnInit {
 
   openMap(salon: Salon): void {
     const url = `https://www.google.com/maps?q=${encodeURIComponent(salon.address)}`;
-    if (this.isBrowser && this.platformUtils.window) {
-      this.platformUtils.window.open(url, '_blank');
+    if (this.isBrowser && this.platformUtils.windowRef) {
+      this.platformUtils.windowRef.open(url, '_blank');
     } else if (this.isBrowser) {
-      // Fallback for browser environment if platformUtils.window is not available
+      // Fallback for browser environment if windowRef is not available
       window.open(url, '_blank');
     }
   }
@@ -149,3 +149,5 @@ export class SalonSearchComponent implements OnInit {
     // For production, consider using a proper map component or backend-generated map with markers
   }
 }
+
+

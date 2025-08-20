@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, forkJoin, Observable, firstValueFrom, from, of, throwError } from 'rxjs';
 import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { NotificationService } from '@frontend-shared/core/services/notification.service';
-import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
+import { NotificationService } from '@beauty-saas/core/services/notification.service';
+import { StorageService } from '@beauty-saas/web-core/http';
 
 export interface AuthUser {
   id: string;
@@ -384,3 +384,5 @@ export class AuthService {
     );
   }
 }
+
+

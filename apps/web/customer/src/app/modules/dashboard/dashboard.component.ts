@@ -2,11 +2,11 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
-import { StorageService } from '@frontend-shared/core/services/storage/storage.service';
-import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
-import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
+import { AbstractBaseComponent } from '@beauty-saas/core/base/abstract-base.component';
+import { ErrorService } from '@beauty-saas/core';
+import { StorageService } from '@beauty-saas/web-core/http';
+import type { PlatformUtils } from '@beauty-saas/web-config';
+import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
@@ -57,14 +57,14 @@ export class DashboardComponent extends AbstractBaseComponent implements OnInit 
     @Inject(StorageService) private storageService: StorageService,
     @Inject(ErrorService) protected override errorService: ErrorService,
     @Inject(PLATFORM_ID) private platformId: Object,
-    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
+    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: PlatformUtils,
   ) {
     super(errorService);
     this.isBrowser = isPlatformBrowser(this.platformId);
     this.tenantId = DashboardComponent.tenantId; // Default value, will be updated in ngOnInit
 
     // Safely get initial window width
-    const initialWidth = this.isBrowser && this.platformUtils.window ? this.platformUtils.window.innerWidth : 0;
+    const initialWidth = this.isBrowser && this.platformUtils.windowRef ? this.platformUtils.windowRef.innerWidth : 0;
     this.setBreakpoint(initialWidth);
   }
 
@@ -102,17 +102,22 @@ export class DashboardComponent extends AbstractBaseComponent implements OnInit 
       }
 
       // Set initial breakpoint based on current window width
-      if (this.platformUtils.window) {
-        this.setBreakpoint(this.platformUtils.window.innerWidth);
+      if (this.platformUtils.windowRef) {
+        this.setBreakpoint(this.platformUtils.windowRef.innerWidth);
       }
     }
   }
 
   @HostListener('window:resize', ['$event'])
   onResize(event: Event): void {
-    if (this.isBrowser && this.platformUtils.window) {
+    if (this.isBrowser && this.platformUtils.windowRef) {
       const target = event.target as Window;
       this.setBreakpoint(target.innerWidth);
     }
   }
 }
+
+
+
+
+

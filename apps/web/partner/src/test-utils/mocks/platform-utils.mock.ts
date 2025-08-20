@@ -1,10 +1,10 @@
-import { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import type { PlatformUtils } from '@beauty-saas/web-config';
 
 /**
- * Creates a mock implementation of IPlatformUtils for testing
+ * Creates a mock implementation of PlatformUtils for testing
  * @param overrides Optional overrides for the default mock values
  */
-export function createPlatformUtilsMock(overrides: Partial<IPlatformUtils> = {}): IPlatformUtils {
+export function createPlatformUtilsMock(overrides: Partial<PlatformUtils> = {}): PlatformUtils {
   const defaultGeolocation = {
     getCurrentPosition: jest.fn((success) => {
       success({
@@ -22,20 +22,19 @@ export function createPlatformUtilsMock(overrides: Partial<IPlatformUtils> = {})
     }),
   };
 
-  const mock: IPlatformUtils = {
+  const mock: PlatformUtils = {
     isBrowser: true,
     isServer: false,
-    browserLocalStorage: null,
-    browserSessionStorage: null,
-    browserNavigator: {
-      geolocation: defaultGeolocation,
-    } as any,
-    browserLocation: null,
-    document: typeof document !== 'undefined' ? document : null,
-    window: typeof window !== 'undefined' ? window : null,
-    runInBrowser: jest.fn(<T, F = undefined>(fn: () => T, fallback?: () => F) => {
-      return mock.isBrowser ? fn() : fallback ? fallback() : undefined;
-    }),
+    documentRef: typeof document !== 'undefined' ? document : null,
+    windowRef: typeof window !== 'undefined'
+      ? ({
+          ...window,
+          navigator: {
+            ...((window as any).navigator ?? {}),
+            geolocation: defaultGeolocation,
+          },
+        } as unknown as Window)
+      : ({ navigator: { geolocation: defaultGeolocation } } as unknown as Window),
     ...overrides,
   };
 
@@ -43,22 +42,21 @@ export function createPlatformUtilsMock(overrides: Partial<IPlatformUtils> = {})
 }
 
 /**
- * Creates a server-side mock implementation of IPlatformUtils
+ * Creates a server-side mock implementation of PlatformUtils
  */
-export function createServerPlatformUtilsMock(): IPlatformUtils {
+export function createServerPlatformUtilsMock(): PlatformUtils {
   return createPlatformUtilsMock({
     isBrowser: false,
     isServer: true,
-    browserNavigator: null,
-    document: null,
-    window: null,
+    documentRef: null,
+    windowRef: null as unknown as Window,
   });
 }
 
 /**
- * Creates a browser mock implementation of IPlatformUtils
+ * Creates a browser mock implementation of PlatformUtils
  */
-export function createBrowserPlatformUtilsMock(): IPlatformUtils {
+export function createBrowserPlatformUtilsMock(): PlatformUtils {
   return createPlatformUtilsMock({
     isBrowser: true,
     isServer: false,

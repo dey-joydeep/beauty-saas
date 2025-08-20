@@ -10,8 +10,8 @@ export default {
     '^@env/(.*)$': '<rootDir>/src/environments/$1',
     '^@shared/(.*)$': '<rootDir>/../../libs/shared/src/$1',
     '^@frontend/(.*)$': '<rootDir>/../../libs/frontend/src/$1',
-    '^@frontend-shared/(.*)$': '<rootDir>/../../libs/frontend/src/app/$1',
-    '^@frontend-shared/shared/(.*)$': '<rootDir>/../../libs/frontend/src/app/shared/$1',
+    '^@beauty-saas/(.*)$': '<rootDir>/../../libs/frontend/src/app/$1',
+    '^@beauty-saas/shared/(.*)$': '<rootDir>/../../libs/frontend/src/app/shared/$1',
   },
   globals: {
     'ts-jest': {
@@ -26,3 +26,4 @@ export default {
     'jest-preset-angular/build/serializers/html-comment',
   ],
 };
+
