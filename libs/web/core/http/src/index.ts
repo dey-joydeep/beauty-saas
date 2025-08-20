@@ -6,3 +6,4 @@ export * from './lib/services/loading.service';
 export * from './lib/services/notification.service';
 export * from './lib/services/error-handler.service';
 export * from './lib/services/storage.service';
+export * from './lib/i18n/translate-server.loader';

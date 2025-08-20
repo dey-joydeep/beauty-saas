@@ -14,7 +14,7 @@ import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 
 // Services
-import { NotificationService } from '@beauty-saas/core/services/notification.service';
+import { NotificationService } from '@beauty-saas/web-core/http';
 import { AuthService } from '../../services/auth.service';
 
 // Mocks

@@ -3,9 +3,9 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, forkJoin, Observable, firstValueFrom, from, of, throwError } from 'rxjs';
-import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
-import { NotificationService } from '@beauty-saas/core/services/notification.service';
+import { NotificationService } from '@beauty-saas/web-core/http';
 import { StorageService } from '@beauty-saas/web-core/http';
 
 export interface AuthUser {

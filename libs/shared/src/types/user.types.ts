@@ -1,5 +1,4 @@
 import { UserRole } from '@prisma/client';
-import { AppUserRole } from '../enums/user-role.enum';
 
 /**
  * Represents role information with ID and name

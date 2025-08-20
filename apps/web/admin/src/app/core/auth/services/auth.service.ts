@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, firstValueFrom, forkJoin, from, Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
-import { NotificationService } from '@beauty-saas/core/services/notification.service';
+import { NotificationService } from '@beauty-saas/web-core/http';
 import { StorageService } from '@beauty-saas/web-core/http';
 
 export interface AuthUser {

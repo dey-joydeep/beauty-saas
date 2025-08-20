@@ -1,14 +1,13 @@
-import { Component, inject, PLATFORM_ID, OnInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
+import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
-import { Salon } from '../../models/salon.model';
-import { SalonServiceItem } from '../../models/salon-service-item.model';
-import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
-import type { PlatformUtils } from '@beauty-saas/web-config';
+import { RouterModule } from '@angular/router';
 import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
+import { TranslateModule } from '@ngx-translate/core';
+import { SalonServiceItem } from '../../models/salon-service-item.model';
+import { Salon } from '../../models/salon.model';
+import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
 
 @Component({
   selector: 'app-salon-search',

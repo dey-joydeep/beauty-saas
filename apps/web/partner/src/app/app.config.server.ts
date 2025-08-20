@@ -23,7 +23,7 @@ import { provideServerRendering, ɵSERVER_CONTEXT as SERVER_CONTEXT } from '@ang
 import { ErrorService } from '@beauty-saas/core';
 import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 import { StorageService } from '@beauty-saas/web-core/http';
-import { TranslateServerLoader } from '@beauty-saas/core';
+import { TranslateServerLoader } from '@beauty-saas/web-core/http';
 import { TranslateLoader, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { appConfig } from './app.config';
 
