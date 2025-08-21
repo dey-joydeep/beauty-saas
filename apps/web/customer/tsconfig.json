@@ -15,7 +15,8 @@
       "@beauty-saas/web-core/http": ["../../../libs/web/core/http/src/index.ts"],
       "@beauty-saas/web-core/testing": ["../../../libs/web/core/testing/src/index.ts"]
     },
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "esModuleInterop": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

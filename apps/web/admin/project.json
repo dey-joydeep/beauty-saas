@@ -3,22 +3,33 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "src",
+  "tags": ["type:app", "platform:web"],
   "targets": {
     "build": {
-      "executor": "@nx/angular:webpack-browser",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/angular:application",
+      "outputs": ["{options.outputPath.base}"],
       "options": {
-        "outputPath": "dist/apps/admin",
+        "outputPath": {
+          "base": "dist/apps/admin"
+        },
         "index": "src/index.html",
-        "main": "src/main.ts",
-        "polyfills": "src/polyfills.ts",
+        "polyfills": ["src/polyfills.ts"],
         "tsConfig": "tsconfig.app.json",
         "assets": [
-          { "glob": "**/*", "input": "src/assets", "output": "/assets/" },
-          { "glob": "favicon.ico", "input": "src", "output": "/" }
+          {
+            "glob": "**/*",
+            "input": "src/assets",
+            "output": "/assets/"
+          },
+          {
+            "glob": "favicon.ico",
+            "input": "src",
+            "output": "/"
+          }
         ],
         "styles": ["src/styles.scss"],
-        "scripts": []
+        "scripts": [],
+        "browser": "src/main.ts"
       },
       "configurations": {
         "production": {
@@ -70,6 +81,5 @@
         "lintFilePatterns": ["{projectRoot}/src/**/*.ts", "{projectRoot}/src/**/*.html"]
       }
     }
-  },
-  "tags": ["type:app", "platform:web"]
+  }
 }

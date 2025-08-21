@@ -9,7 +9,7 @@
       }
     },
     "build": {
-      "outputs": ["{workspaceRoot}/dist/libs/ui"],
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "defaultConfiguration": "production",
       "executor": "@nx/angular:package",
       "configurations": {

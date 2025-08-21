@@ -20,15 +20,12 @@ type StorageType = 'local' | 'session' | 'memory';
 export class StorageService {
   private storage: Storage | null = null;
   private readonly platformUtils: PlatformUtils | null = null;
-  private readonly platformId: Object;
   private readonly isBrowser: boolean;
   private readonly memoryStore = new Map<string, string>();
   private initialized = false;
   private storageType: StorageType = 'memory';
-  private length = 0; // Track the number of items in storage
 
   constructor(@Inject(PLATFORM_ID) platformId: Object, @Optional() @Inject(PLATFORM_UTILS_TOKEN) platformUtils: PlatformUtils | null) {
-    this.platformId = platformId;
     this.isBrowser = isPlatformBrowser(platformId);
     this.platformUtils = platformUtils;
 
@@ -75,11 +72,13 @@ export class StorageService {
    */
   private createMemoryStorage(): Storage {
     // Create a proxy to handle the Storage interface requirements
+    const self = this;
     const storage: Storage = {
-      length: this.memoryStore.size,
+      get length() {
+        return self.memoryStore.size;
+      },
       clear: (): void => {
         this.memoryStore.clear();
-        this.length = 0;
       },
       getItem: (key: string): string | null => {
         return this.memoryStore.get(key) || null;
@@ -90,12 +89,10 @@ export class StorageService {
       removeItem: (key: string): void => {
         if (this.memoryStore.has(key)) {
           this.memoryStore.delete(key);
-          this.length = this.memoryStore.size;
         }
       },
       setItem: (key: string, value: string): void => {
         this.memoryStore.set(key, value);
-        this.length = this.memoryStore.size;
       },
     };
 
