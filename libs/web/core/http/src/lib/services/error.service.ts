@@ -27,7 +27,7 @@ export class ErrorService {
 
   handleError(error: any, context: string = 'App'): void {
     console.error(`[${context}] Error:`, error);
-    
+
     let errorState: ErrorState = {
       type: ErrorType.UNKNOWN,
       message: 'An unknown error occurred',

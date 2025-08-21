@@ -10,7 +10,7 @@ export class AppointmentsFilterDto {
   @ApiPropertyOptional({
     type: String,
     format: 'date-time',
-    description: 'Start date for filtering appointments'
+    description: 'Start date for filtering appointments',
   })
   @IsOptional()
   @IsDateString()
@@ -19,7 +19,7 @@ export class AppointmentsFilterDto {
   @ApiPropertyOptional({
     type: String,
     format: 'date-time',
-    description: 'End date for filtering appointments'
+    description: 'End date for filtering appointments',
   })
   @IsOptional()
   @IsDateString()
@@ -28,7 +28,7 @@ export class AppointmentsFilterDto {
   @ApiPropertyOptional({
     enum: AppointmentStatus,
     enumName: 'AppointmentStatus',
-    description: 'Filter by appointment status'
+    description: 'Filter by appointment status',
   })
   @IsOptional()
   @IsEnum(AppointmentStatus)
@@ -37,7 +37,7 @@ export class AppointmentsFilterDto {
   @ApiPropertyOptional({
     type: String,
     format: 'uuid',
-    description: 'Filter by salon ID'
+    description: 'Filter by salon ID',
   })
   @IsOptional()
   @IsUUID()
@@ -46,7 +46,7 @@ export class AppointmentsFilterDto {
   @ApiPropertyOptional({
     type: String,
     format: 'uuid',
-    description: 'Filter by staff member ID'
+    description: 'Filter by staff member ID',
   })
   @IsOptional()
   @IsUUID()
@@ -55,7 +55,7 @@ export class AppointmentsFilterDto {
   @ApiPropertyOptional({
     type: String,
     format: 'uuid',
-    description: 'Filter by customer ID'
+    description: 'Filter by customer ID',
   })
   @IsOptional()
   @IsUUID()
@@ -64,7 +64,7 @@ export class AppointmentsFilterDto {
   @ApiPropertyOptional({
     type: String,
     format: 'uuid',
-    description: 'Filter by service ID'
+    description: 'Filter by service ID',
   })
   @IsOptional()
   @IsUUID()
@@ -75,7 +75,7 @@ export class AppointmentsFilterDto {
     minimum: 1,
     maximum: 100,
     default: 10,
-    description: 'Maximum number of results to return'
+    description: 'Maximum number of results to return',
   })
   @IsOptional()
   @IsNumber()
@@ -88,7 +88,7 @@ export class AppointmentsFilterDto {
     type: Number,
     minimum: 0,
     default: 0,
-    description: 'Number of results to skip'
+    description: 'Number of results to skip',
   })
   @IsOptional()
   @IsNumber()

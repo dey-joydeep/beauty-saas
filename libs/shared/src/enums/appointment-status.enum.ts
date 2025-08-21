@@ -8,7 +8,7 @@ export enum AppointmentStatus {
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
   NOSHOW = 'NOSHOW',
-  RESCHEDULED = 'RESCHEDULED'
+  RESCHEDULED = 'RESCHEDULED',
 }
 
 /**
@@ -32,8 +32,8 @@ export function getAppointmentStatusLabel(status: AppointmentStatus): string {
     [AppointmentStatus.COMPLETED]: 'Completed',
     [AppointmentStatus.CANCELLED]: 'Cancelled',
     [AppointmentStatus.NOSHOW]: 'No Show',
-    [AppointmentStatus.RESCHEDULED]: 'Rescheduled'
+    [AppointmentStatus.RESCHEDULED]: 'Rescheduled',
   };
-  
+
   return labels[status] || status;
 }

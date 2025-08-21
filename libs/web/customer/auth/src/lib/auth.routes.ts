@@ -35,4 +35,3 @@ export const AUTH_ROUTES: Routes = [
     redirectTo: 'login',
   },
 ];
-

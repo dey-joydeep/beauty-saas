@@ -8,7 +8,7 @@ export enum DayOfWeek {
   WEDNESDAY = 3,
   THURSDAY = 4,
   FRIDAY = 5,
-  SATURDAY = 6
+  SATURDAY = 6,
 }
 
 /**
@@ -42,7 +42,7 @@ export function getAllDaysOfWeek(): DayOfWeek[] {
     DayOfWeek.WEDNESDAY,
     DayOfWeek.THURSDAY,
     DayOfWeek.FRIDAY,
-    DayOfWeek.SATURDAY
+    DayOfWeek.SATURDAY,
   ];
 }
 
@@ -50,23 +50,14 @@ export function getAllDaysOfWeek(): DayOfWeek[] {
  * Gets an array of weekdays (Monday-Friday)
  */
 export function getWeekdays(): DayOfWeek[] {
-  return [
-    DayOfWeek.MONDAY,
-    DayOfWeek.TUESDAY,
-    DayOfWeek.WEDNESDAY,
-    DayOfWeek.THURSDAY,
-    DayOfWeek.FRIDAY
-  ];
+  return [DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY];
 }
 
 /**
  * Gets an array of weekend days (Saturday-Sunday)
  */
 export function getWeekendDays(): DayOfWeek[] {
-  return [
-    DayOfWeek.SATURDAY,
-    DayOfWeek.SUNDAY
-  ];
+  return [DayOfWeek.SATURDAY, DayOfWeek.SUNDAY];
 }
 
 /**

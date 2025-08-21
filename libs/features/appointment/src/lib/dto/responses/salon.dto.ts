@@ -1,26 +1,26 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SalonDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Salon ID',
     format: 'uuid',
     example: '423e4567-e89b-12d3-a456-426614174000',
-    required: true
+    required: true,
   })
   id!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Salon name',
     example: 'Elegant Cuts',
-    required: true
+    required: true,
   })
   name!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Salon address',
     example: '123 Beauty St, City',
     nullable: true,
-    required: false
+    required: false,
   })
   address: string | null = null;
 }

@@ -38,7 +38,7 @@ export class NotFoundError extends AppError {
   constructor(entity: string, details?: Record<string, unknown>) {
     super(`${entity} not found`, 'NOT_FOUND', 404, {
       entity,
-      ...details
+      ...details,
     });
   }
 }
@@ -79,12 +79,6 @@ export class InternalServerError extends AppError {
  */
 export class ServiceUnavailableError extends AppError {
   constructor(service: string, details?: Record<string, unknown>) {
-    super(
-      `${service} service is currently unavailable`,
-      'SERVICE_UNAVAILABLE',
-      503,
-      { service, ...details },
-      false
-    );
+    super(`${service} service is currently unavailable`, 'SERVICE_UNAVAILABLE', 503, { service, ...details }, false);
   }
 }

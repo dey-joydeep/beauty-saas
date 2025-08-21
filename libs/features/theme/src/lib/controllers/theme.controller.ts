@@ -12,7 +12,7 @@ import {
   Post,
   Query,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from '../../../common/decorators/api-paginated-response.decorator';
@@ -65,10 +65,7 @@ export class ThemeController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Theme not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden - Admin access required' })
-  async update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateThemeDto: UpdateThemeDto,
-  ): Promise<ThemeResponseDto> {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateThemeDto: UpdateThemeDto): Promise<ThemeResponseDto> {
     return this.themeService.update(id, updateThemeDto);
   }
 

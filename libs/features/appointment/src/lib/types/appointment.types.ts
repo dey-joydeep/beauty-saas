@@ -85,13 +85,13 @@ export interface AppointmentWithRelations {
   cancellationDate?: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Relations
   customer: CustomerWithUser;
   staff?: StaffWithUser | null;
   services: AppointmentServiceWithDetails[];
   salon: SalonWithAddress;
-  
+
   // Optional metadata
   metadata?: Prisma.JsonValue;
 }

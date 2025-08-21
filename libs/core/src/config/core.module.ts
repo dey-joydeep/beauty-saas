@@ -17,4 +17,4 @@ import { I18nModule } from '../i18n/i18n.module';
   ],
   exports: [I18nModule],
 })
-export class CoreModule { }
+export class CoreModule {}

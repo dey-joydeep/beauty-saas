@@ -48,7 +48,7 @@ describe('PortfolioService Edge Cases', () => {
       imagePaths: [],
       images: [],
     };
-    
+
     await expect(service.createPortfolio(dto)).rejects.toThrow('Image(s) required');
   });
 
@@ -61,7 +61,7 @@ describe('PortfolioService Edge Cases', () => {
       images: [{ imagePath: 'http://test/image.jpg' }],
       description: '',
     };
-    
+
     await expect(service.createPortfolio(dto)).rejects.toThrow('Description required');
   });
 });

@@ -13,7 +13,7 @@ export class ServiceDto {
   @ApiProperty({
     description: 'Unique identifier for the service',
     format: 'uuid',
-    example: '323e4567-e89b-12d3-a456-426614174000'
+    example: '323e4567-e89b-12d3-a456-426614174000',
   })
   @IsUUID(4, { message: 'ID must be a valid UUID v4' })
   @IsNotEmpty({ message: 'ID is required' })
@@ -26,7 +26,7 @@ export class ServiceDto {
   @ApiProperty({
     description: 'Name of the service',
     example: 'Haircut and Styling',
-    maxLength: 100
+    maxLength: 100,
   })
   @IsString({ message: 'Name must be a string' })
   @IsNotEmpty({ message: 'Name is required' })
@@ -40,7 +40,7 @@ export class ServiceDto {
     description: 'Duration of the service in minutes',
     example: 60,
     minimum: 1,
-    maximum: 1440 // 24 hours
+    maximum: 1440, // 24 hours
   })
   @IsNumber({}, { message: 'Duration must be a number' })
   @IsPositive({ message: 'Duration must be a positive number' })
@@ -54,9 +54,9 @@ export class ServiceDto {
    */
   @ApiProperty({
     description: 'Price of the service in the local currency',
-    example: 75.50,
+    example: 75.5,
     minimum: 0,
-    maximum: 100000 // $100,000
+    maximum: 100000, // $100,000
   })
   @IsNumber({}, { message: 'Price must be a number' })
   @Min(0, { message: 'Price cannot be negative' })
@@ -71,7 +71,7 @@ export class ServiceDto {
     description: 'Optional description of the service',
     example: 'A complete haircut and styling service including wash and blow dry',
     required: false,
-    nullable: true
+    nullable: true,
   })
   @IsString({ message: 'Description must be a string' })
   readonly description?: string | null;

@@ -18,26 +18,18 @@ export abstract class BaseService {
   }
 
   protected get<T>(url: string): Observable<T> {
-    return this.http.get<T>(this.getFullUrl(url)).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.get<T>(this.getFullUrl(url)).pipe(catchError(this.handleError));
   }
 
   protected post<T>(url: string, body: any): Observable<T> {
-    return this.http.post<T>(this.getFullUrl(url), body).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.post<T>(this.getFullUrl(url), body).pipe(catchError(this.handleError));
   }
 
   protected put<T>(url: string, body: any): Observable<T> {
-    return this.http.put<T>(this.getFullUrl(url), body).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.put<T>(this.getFullUrl(url), body).pipe(catchError(this.handleError));
   }
 
   protected delete<T>(url: string): Observable<T> {
-    return this.http.delete<T>(this.getFullUrl(url)).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.delete<T>(this.getFullUrl(url)).pipe(catchError(this.handleError));
   }
 }

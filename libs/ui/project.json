@@ -1,52 +1,45 @@
 {
-    "name": "ui",
-    "sourceRoot": "libs/ui/src",
-    "targets": {
-        "lint": {
-            "executor": "@nx/eslint:lint",
-            "options": {
-                "lintFilePatterns": [
-                    "libs/ui/**/*.ts",
-                    "libs/ui/**/*.html"
-                ]
-            }
+  "name": "ui",
+  "sourceRoot": "libs/ui/src",
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["libs/ui/**/*.ts", "libs/ui/**/*.html"]
+      }
+    },
+    "build": {
+      "outputs": ["{workspaceRoot}/dist/libs/ui"],
+      "defaultConfiguration": "production",
+      "executor": "@nx/angular:package",
+      "configurations": {
+        "development": {
+          "tsConfig": "libs/ui/tsconfig.lib.json"
         },
-        "build": {
-            "outputs": [
-                "{workspaceRoot}/dist/libs/ui"
-            ],
-            "defaultConfiguration": "production",
-            "executor": "@nx/angular:package",
-            "configurations": {
-                "development": {
-                    "tsConfig": "libs/ui/tsconfig.lib.json"
-                },
-                "production": {
-                    "tsConfig": "libs/ui/tsconfig.lib.prod.json"
-                }
-            },
-            "options": {
-                "project": "libs/ui/ng-package.json"
-            }
-        },
-        "type-check": {
+        "production": {
+          "tsConfig": "libs/ui/tsconfig.lib.prod.json"
+        }
+      },
+      "options": {
+        "project": "libs/ui/ng-package.json"
+      }
+    },
+    "type-check": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc -p libs/ui/tsconfig.lib.json --noEmit"
       }
     },
     "test": {
-            "outputs": [
-                "{workspaceRoot}/coverage/libs/ui"
-            ],
-            "executor": "@nx/jest:jest",
-            "options": {
-                "passWithNoTests": true,
-                "jestConfig": "jest.preset.ts"
-            }
-        }
-    },
-    "projectType": "library",
-    "tags": ["type:lib", "platform:web", "scope:ui"],
-    "prefix": "beauty-saas"
+      "outputs": ["{workspaceRoot}/coverage/libs/ui"],
+      "executor": "@nx/jest:jest",
+      "options": {
+        "passWithNoTests": true,
+        "jestConfig": "jest.preset.ts"
+      }
+    }
+  },
+  "projectType": "library",
+  "tags": ["type:lib", "platform:web", "scope:ui"],
+  "prefix": "beauty-saas"
 }

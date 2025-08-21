@@ -1,33 +1,33 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CustomerDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Customer ID',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
-    required: true
+    required: true,
   })
   id!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Customer full name',
     example: 'John Doe',
-    required: true
+    required: true,
   })
   name!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Customer email address',
     example: 'john.doe@example.com',
-    required: true
+    required: true,
   })
   email!: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Customer phone number',
     example: '+1234567890',
     nullable: true,
-    required: false
+    required: false,
   })
   phone: string | null = null;
 }

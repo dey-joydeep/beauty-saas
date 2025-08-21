@@ -11,19 +11,10 @@ export const ROLES_KEY = 'roles';
  * Each role inherits permissions from roles to its right
  */
 const ROLE_HIERARCHY: Record<AppUserRole, AppUserRole[]> = {
-  [AppUserRole.ADMIN]: [
-    AppUserRole.OWNER,
-    AppUserRole.STAFF,
-    AppUserRole.CUSTOMER
-  ],
-  [AppUserRole.OWNER]: [
-    AppUserRole.STAFF,
-    AppUserRole.CUSTOMER
-  ],
-  [AppUserRole.STAFF]: [
-    AppUserRole.CUSTOMER
-  ],
-  [AppUserRole.CUSTOMER]: []
+  [AppUserRole.ADMIN]: [AppUserRole.OWNER, AppUserRole.STAFF, AppUserRole.CUSTOMER],
+  [AppUserRole.OWNER]: [AppUserRole.STAFF, AppUserRole.CUSTOMER],
+  [AppUserRole.STAFF]: [AppUserRole.CUSTOMER],
+  [AppUserRole.CUSTOMER]: [],
 };
 
 // Using AuthenticatedUser from @beauty-saas/shared instead of local UserWithRoles
@@ -57,24 +48,19 @@ export class RolesGuard extends AuthGuard('jwt') {
    * @param requiredRoles - Array of required roles
    */
   private hasRequiredRole(userRoles: AppUserRole[], requiredRoles: AppUserRole[]): boolean {
-    return userRoles.some(userRole => {
+    return userRoles.some((userRole) => {
       // Check direct match
       if (requiredRoles.includes(userRole)) {
         return true;
       }
-      
+
       // Check role hierarchy
-      return ROLE_HIERARCHY[userRole]?.some(higherRole => 
-        requiredRoles.includes(higherRole)
-      ) || false;
+      return ROLE_HIERARCHY[userRole]?.some((higherRole) => requiredRoles.includes(higherRole)) || false;
     });
   }
 
   override canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const requiredRoles = this.reflector.getAllAndOverride<AppUserRole[]>(
-      ROLES_KEY,
-      [context.getHandler(), context.getClass()]
-    );
+    const requiredRoles = this.reflector.getAllAndOverride<AppUserRole[]>(ROLES_KEY, [context.getHandler(), context.getClass()]);
 
     // If no roles are required, allow access
     if (!requiredRoles || requiredRoles.length === 0) {
@@ -88,21 +74,17 @@ export class RolesGuard extends AuthGuard('jwt') {
 
     // Extract role names from user roles, handling both string and object formats
     const userRoleNames = (user.roles || [])
-      .map(role => {
+      .map((role) => {
         if (typeof role === 'string') {
           return role as AppUserRole;
         }
         return (role as UserRoleInfo).name;
       })
-      .filter((role): role is AppUserRole => 
-        role !== undefined && Object.values<string>(AppUserRole).includes(role as string)
-      );
+      .filter((role): role is AppUserRole => role !== undefined && Object.values<string>(AppUserRole).includes(role as string));
 
     // Check if user has any of the required roles
     if (userRoleNames.length === 0 || !this.hasRequiredRole(userRoleNames, requiredRoles)) {
-      throw new ForbiddenException(
-        `Insufficient permissions. Required roles: ${requiredRoles.join(', ')}`
-      );
+      throw new ForbiddenException(`Insufficient permissions. Required roles: ${requiredRoles.join(', ')}`);
     }
 
     return true;

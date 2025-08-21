@@ -23,13 +23,9 @@ export class NotificationService implements OnModuleDestroy {
 
   // Public observables
   public readonly notifications$ = this.notificationsSubject.asObservable();
-  public readonly unreadCount$ = this.notifications$.pipe(
-    map(notifications => notifications.filter(n => !n.read).length)
-  );
+  public readonly unreadCount$ = this.notifications$.pipe(map((notifications) => notifications.filter((n) => !n.read).length));
   public readonly loading$ = this.loadingSubject.asObservable();
-  public readonly hasUnread$ = this.unreadCount$.pipe(
-    map(count => count > 0)
-  );
+  public readonly hasUnread$ = this.unreadCount$.pipe(map((count) => count > 0));
 
   constructor() {}
 
@@ -51,24 +47,22 @@ export class NotificationService implements OnModuleDestroy {
   }
 
   async markAsRead(notificationId: string): Promise<Notification> {
-    const notification = this.notifications.find(n => n.id === notificationId);
+    const notification = this.notifications.find((n) => n.id === notificationId);
     if (!notification) {
       throw new Error('Notification not found');
     }
-    
+
     const updatedNotification = { ...notification, read: true };
-    this.notifications = this.notifications.map(n => 
-      n.id === notificationId ? updatedNotification : n
-    );
-    
+    this.notifications = this.notifications.map((n) => (n.id === notificationId ? updatedNotification : n));
+
     this.notificationsSubject.next([...this.notifications]);
     return updatedNotification;
   }
 
   async markAllAsRead(): Promise<void> {
-    this.notifications = this.notifications.map(notification => ({
+    this.notifications = this.notifications.map((notification) => ({
       ...notification,
-      read: true
+      read: true,
     }));
     this.notificationsSubject.next([...this.notifications]);
   }
@@ -81,12 +75,12 @@ export class NotificationService implements OnModuleDestroy {
       type: notification.type || 'info',
       read: false,
       createdAt: new Date(),
-      ...notification
+      ...notification,
     };
 
     this.notifications = [newNotification, ...this.notifications];
     this.notificationsSubject.next([...this.notifications]);
-    
+
     return newNotification;
   }
 
@@ -99,7 +93,7 @@ export class NotificationService implements OnModuleDestroy {
     this.addNotification({
       title,
       message,
-      type: 'error'
+      type: 'error',
     });
   }
 
@@ -112,7 +106,7 @@ export class NotificationService implements OnModuleDestroy {
     this.addNotification({
       title,
       message,
-      type: 'success'
+      type: 'success',
     });
   }
 }

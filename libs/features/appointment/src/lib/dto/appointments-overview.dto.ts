@@ -1,13 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AppointmentStatus } from '@beauty-saas/shared';
 import { Type } from 'class-transformer';
-import {
-  IsArray,
-  IsNotEmpty,
-  IsNumber,
-  Min,
-  ValidateNested
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, Min, ValidateNested } from 'class-validator';
 import { AppointmentDto } from './appointment.dto';
 
 /**
@@ -16,76 +10,76 @@ import { AppointmentDto } from './appointment.dto';
  * @description Contains aggregated statistics and metrics about appointments
  */
 export class AppointmentsOverviewDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Total number of appointments',
     example: 150,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Total appointments must be a number' })
   @IsNotEmpty({ message: 'Total appointments is required' })
   @Min(0, { message: 'Total appointments cannot be negative' })
   totalAppointments!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Number of booked appointments',
     example: 75,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Booked appointments must be a number' })
   @IsNotEmpty({ message: 'Booked appointments is required' })
   @Min(0, { message: 'Booked appointments cannot be negative' })
   bookedAppointments!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Number of completed appointments',
     example: 60,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Completed appointments must be a number' })
   @IsNotEmpty({ message: 'Completed appointments is required' })
   @Min(0, { message: 'Completed appointments cannot be negative' })
   completedAppointments!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Number of cancelled appointments',
     example: 15,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Cancelled appointments must be a number' })
   @IsNotEmpty({ message: 'Cancelled appointments is required' })
   @Min(0, { message: 'Cancelled appointments cannot be negative' })
   cancelledAppointments!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Total revenue from all appointments',
     example: 12500.75,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Total revenue must be a number' })
   @IsNotEmpty({ message: 'Total revenue is required' })
   @Min(0, { message: 'Total revenue cannot be negative' })
   totalRevenue!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Average duration of appointments in minutes',
     example: 60,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Average duration must be a number' })
   @IsNotEmpty({ message: 'Average duration is required' })
   @Min(0, { message: 'Average duration cannot be negative' })
   averageDuration!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     type: [AppointmentDto],
     description: 'List of upcoming appointments',
-    required: true
+    required: true,
   })
   @IsArray({ message: 'Upcoming appointments must be an array' })
   @ValidateNested({ each: true })
@@ -93,10 +87,10 @@ export class AppointmentsOverviewDto {
   @IsNotEmpty({ message: 'Upcoming appointments are required' })
   upcomingAppointments!: AppointmentDto[];
 
-  @ApiProperty({ 
+  @ApiProperty({
     type: [AppointmentDto],
     description: 'List of recent appointments',
-    required: true
+    required: true,
   })
   @IsArray({ message: 'Recent appointments must be an array' })
   @ValidateNested({ each: true })
@@ -107,32 +101,38 @@ export class AppointmentsOverviewDto {
   @Type(() => Object)
   @ApiProperty({
     type: 'object',
-    additionalProperties: { 
+    additionalProperties: {
       type: 'number',
       minimum: 0,
-      description: 'Count of appointments for this status'
+      description: 'Count of appointments for this status',
     },
     description: 'Distribution of appointments by status',
-    example: Object.entries(AppointmentStatus).reduce((acc, [_, status]) => ({
-      ...acc,
-      [status]: 0
-    }), {})
+    example: Object.entries(AppointmentStatus).reduce(
+      (acc, [_, status]) => ({
+        ...acc,
+        [status]: 0,
+      }),
+      {},
+    ),
   })
-  statusDistribution: Record<AppointmentStatus, number> = Object.values(AppointmentStatus).reduce((acc, status) => ({
-    ...acc,
-    [status]: 0
-  }), {} as Record<AppointmentStatus, number>);
+  statusDistribution: Record<AppointmentStatus, number> = Object.values(AppointmentStatus).reduce(
+    (acc, status) => ({
+      ...acc,
+      [status]: 0,
+    }),
+    {} as Record<AppointmentStatus, number>,
+  );
 
   @Type(() => Object)
   @ApiProperty({
     type: 'object',
-    additionalProperties: { 
+    additionalProperties: {
       type: 'number',
       minimum: 0,
-      description: 'Number of appointments for the date'
+      description: 'Number of appointments for the date',
     },
     description: 'Number of appointments per day',
-    example: {}
+    example: {},
   })
   dailyAppointments: Record<string, number> = {};
 
@@ -150,7 +150,7 @@ export class AppointmentsOverviewDto {
     this.recentAppointments = [];
     // Initialize status distribution with all possible statuses set to 0
     const initialStatusDistribution = {} as Record<AppointmentStatus, number>;
-    Object.values(AppointmentStatus).forEach(status => {
+    Object.values(AppointmentStatus).forEach((status) => {
       initialStatusDistribution[status] = 0;
     });
     this.statusDistribution = initialStatusDistribution;
@@ -164,7 +164,7 @@ export class AppointmentsOverviewDto {
    */
   static fromRawData(data: any): AppointmentsOverviewDto {
     const overview = new AppointmentsOverviewDto();
-    
+
     if (!data) return overview;
 
     overview.totalAppointments = data.totalAppointments || 0;
@@ -173,32 +173,32 @@ export class AppointmentsOverviewDto {
     overview.cancelledAppointments = data.cancelledAppointments || 0;
     overview.totalRevenue = data.totalRevenue || 0;
     overview.averageDuration = data.averageDuration || 0;
-    
+
     if (Array.isArray(data.upcomingAppointments)) {
-      overview.upcomingAppointments = data.upcomingAppointments.map((appt: any) => 
-        appt instanceof AppointmentDto ? appt : AppointmentDto.fromPrisma(appt)
+      overview.upcomingAppointments = data.upcomingAppointments.map((appt: any) =>
+        appt instanceof AppointmentDto ? appt : AppointmentDto.fromPrisma(appt),
       );
     }
-    
+
     if (Array.isArray(data.recentAppointments)) {
-      overview.recentAppointments = data.recentAppointments.map((appt: any) => 
-        appt instanceof AppointmentDto ? appt : AppointmentDto.fromPrisma(appt)
+      overview.recentAppointments = data.recentAppointments.map((appt: any) =>
+        appt instanceof AppointmentDto ? appt : AppointmentDto.fromPrisma(appt),
       );
     }
-    
+
     if (data.statusDistribution && typeof data.statusDistribution === 'object') {
       // Only copy status values that are valid AppointmentStatus keys
-      (Object.keys(data.statusDistribution) as Array<keyof typeof data.statusDistribution>).forEach(key => {
+      (Object.keys(data.statusDistribution) as Array<keyof typeof data.statusDistribution>).forEach((key) => {
         if (Object.values(AppointmentStatus).includes(key as AppointmentStatus)) {
           overview.statusDistribution[key as AppointmentStatus] = Number(data.statusDistribution[key]) || 0;
         }
       });
     }
-    
+
     if (data.dailyAppointments) {
       overview.dailyAppointments = { ...data.dailyAppointments };
     }
-    
+
     return overview;
   }
 }

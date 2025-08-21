@@ -45,9 +45,7 @@ describe('Theme API', () => {
       return;
     }
     diagnostics.push('200/404 test started.');
-    const res = await request(app)
-      .get('/api/theme/test-tenant')
-      .set('Authorization', `Bearer ${token}`);
+    const res = await request(app).get('/api/theme/test-tenant').set('Authorization', `Bearer ${token}`);
     diagnostics.push('200/404 test got status: ' + res.status);
     expect([200, 404, 401]).toContain(res.status);
   });

@@ -1,6 +1,6 @@
 import { LoginComponent, RegisterComponent, ForgotPasswordComponent } from '@beauty-saas/web-partner/auth';
 import { Routes } from '@angular/router';
-import { authGuard } from "@beauty-saas/web-core/auth";
+import { authGuard } from '@beauty-saas/web-core/auth';
 import { AppointmentCreateComponent } from '@beauty-saas/features/appointment';
 import { AppointmentListComponent } from '@beauty-saas/features/appointment';
 import { DashboardComponent } from './modules/dashboard/dashboard.component';
@@ -55,8 +55,3 @@ export const routes: Routes = [
   // Fallback route - redirect to home
   { path: '**', redirectTo: '' },
 ];
-
-
-
-
-

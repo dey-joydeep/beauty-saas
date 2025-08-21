@@ -22,7 +22,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message = exception.message;
       code = exception.code;
       details = exception.details;
-      
+
       // Log operational errors (not 5xx) at a lower level
       if (status >= 500) {
         console.error('Server Error:', {
@@ -41,13 +41,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           details,
         });
       }
-    } 
+    }
     // Handle NestJS HTTP exceptions
     else if (exception instanceof Error) {
       message = exception.message;
       code = 'UNHANDLED_ERROR';
       stack = process.env['NODE_ENV'] !== 'production' ? exception.stack : undefined;
-      
+
       console.error('Unhandled Error:', {
         timestamp: new Date().toISOString(),
         path: request.url,

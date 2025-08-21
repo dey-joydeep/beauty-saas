@@ -12,10 +12,7 @@ describe('PortfolioService', () => {
   const mockPortfolioData = {
     description: 'Test portfolio',
     imagePaths: ['uploads/portfolios/image1.jpg', 'uploads/portfolios/image2.jpg'],
-    images: [
-      { imagePath: 'uploads/portfolios/image1.jpg' },
-      { imagePath: 'uploads/portfolios/image2.jpg' },
-    ],
+    images: [{ imagePath: 'uploads/portfolios/image1.jpg' }, { imagePath: 'uploads/portfolios/image2.jpg' }],
     userId: 'test-user',
     tenantId: 'test-tenant',
     salonId: 'test-salon',
@@ -76,9 +73,9 @@ describe('PortfolioService', () => {
       };
 
       mockPrismaService.portfolio.create.mockResolvedValueOnce(mockPortfolioResponse);
-      
+
       const result = await service.createPortfolio(createDto);
-      
+
       expect(result).toBeDefined();
       expect(result.description).toBe(createDto.description);
       expect(result.images).toHaveLength(2);
@@ -86,8 +83,8 @@ describe('PortfolioService', () => {
         data: {
           ...createDto,
           images: {
-            create: createDto.imagePaths.map(path => ({ imagePath: path }))
-          }
+            create: createDto.imagePaths.map((path) => ({ imagePath: path })),
+          },
         },
         include: {
           images: true,
@@ -104,7 +101,7 @@ describe('PortfolioService', () => {
         tenantId: 'test-tenant',
         salonId: 'test-salon',
       };
-      
+
       await expect(service.createPortfolio(createDto)).rejects.toThrow(BadRequestException);
     });
 
@@ -117,7 +114,7 @@ describe('PortfolioService', () => {
         tenantId: 'test-tenant',
         salonId: 'test-salon',
       };
-      
+
       await expect(service.createPortfolio(createDto)).rejects.toThrow(BadRequestException);
     });
   });
@@ -131,7 +128,7 @@ describe('PortfolioService', () => {
       images: [{ imagePath: 'http://test/image.jpg' }],
       description: '   ',
     };
-    
+
     await expect(service.createPortfolio(createDto)).rejects.toThrow('Description required');
   });
 
@@ -139,10 +136,8 @@ describe('PortfolioService', () => {
     const updateDto: UpdatePortfolioDto = {
       description: '  ',
     };
-    
-    await expect(service.updatePortfolio('test-id', updateDto)).rejects.toThrow(
-      'Description required',
-    );
+
+    await expect(service.updatePortfolio('test-id', updateDto)).rejects.toThrow('Description required');
   });
 
   afterAll(async () => {

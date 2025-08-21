@@ -28,6 +28,7 @@ import { API_BASE_URL, HTTP_STATUS } from '@beauty-saas/shared';
 ### Available Exports
 
 #### Models
+
 - `User`: Base user interface
 - `UserRole`: Union type for user roles
 - `ApiResponse`: Standard API response wrapper
@@ -36,6 +37,7 @@ import { API_BASE_URL, HTTP_STATUS } from '@beauty-saas/shared';
 - `BaseEntity`: Base interface for all entities
 
 #### Utils
+
 - `formatDate`: Format dates consistently
 - `debounce`: Debounce function calls
 - `generateId`: Generate unique IDs
@@ -43,6 +45,7 @@ import { API_BASE_URL, HTTP_STATUS } from '@beauty-saas/shared';
 - `isServer`: Check if running on a server
 
 #### Constants
+
 - `API_BASE_URL`: Base URL for API requests
 - `HTTP_STATUS`: Common HTTP status codes
 - `ERROR_MESSAGES`: Common error messages

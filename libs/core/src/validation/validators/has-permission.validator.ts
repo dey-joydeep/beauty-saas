@@ -1,4 +1,10 @@
-import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments, registerDecorator, ValidationOptions } from 'class-validator';
+import {
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+  registerDecorator,
+  ValidationOptions,
+} from 'class-validator';
 import { AppUserRole } from '@beauty-saas/shared';
 
 /**
@@ -7,19 +13,10 @@ import { AppUserRole } from '@beauty-saas/shared';
  * Value: Array of roles that can be assigned by the key role
  */
 const ROLE_ASSIGNMENT_PERMISSIONS: Record<AppUserRole, AppUserRole[]> = {
-  [AppUserRole.ADMIN]: [
-    AppUserRole.OWNER,
-    AppUserRole.STAFF,
-    AppUserRole.CUSTOMER
-  ],
-  [AppUserRole.OWNER]: [
-    AppUserRole.STAFF,
-    AppUserRole.CUSTOMER
-  ],
-  [AppUserRole.STAFF]: [
-    AppUserRole.CUSTOMER
-  ],
-  [AppUserRole.CUSTOMER]: []
+  [AppUserRole.ADMIN]: [AppUserRole.OWNER, AppUserRole.STAFF, AppUserRole.CUSTOMER],
+  [AppUserRole.OWNER]: [AppUserRole.STAFF, AppUserRole.CUSTOMER],
+  [AppUserRole.STAFF]: [AppUserRole.CUSTOMER],
+  [AppUserRole.CUSTOMER]: [],
 };
 
 @ValidatorConstraint({ name: 'hasPermissionToAssignRole', async: false })
@@ -32,11 +29,9 @@ export class HasPermissionToAssignRoleConstraint implements ValidatorConstraintI
     }
 
     const userRoles = request.user.roles
-      .map(role => role?.name)
-      .filter((role): role is AppUserRole => 
-        role !== undefined && Object.values(AppUserRole).includes(role as AppUserRole)
-      );
-    
+      .map((role) => role?.name)
+      .filter((role): role is AppUserRole => role !== undefined && Object.values(AppUserRole).includes(role as AppUserRole));
+
     // Check if user has permission to assign the specified role
     return userRoles.some((userRole: AppUserRole) => {
       const allowedRoles = ROLE_ASSIGNMENT_PERMISSIONS[userRole] || [];

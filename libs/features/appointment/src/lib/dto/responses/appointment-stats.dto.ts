@@ -15,7 +15,7 @@ import {
   Max,
   MaxLength,
   Min,
-  ValidateNested
+  ValidateNested,
 } from 'class-validator';
 
 /**
@@ -30,10 +30,10 @@ class StatusCountDto {
     enum: AppointmentStatus,
     enumName: 'AppointmentStatus',
     example: AppointmentStatus.CONFIRMED,
-    required: true
+    required: true,
   })
-  @IsEnum(AppointmentStatus, { 
-    message: `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}` 
+  @IsEnum(AppointmentStatus, {
+    message: `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}`,
   })
   @IsNotEmpty({ message: 'Status is required' })
   status!: AppointmentStatus;
@@ -42,7 +42,7 @@ class StatusCountDto {
     description: 'Number of appointments with this status',
     example: 10,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Count must be a number' })
   @IsNotEmpty({ message: 'Count is required' })
@@ -54,7 +54,7 @@ class StatusCountDto {
     example: 25.5,
     minimum: 0,
     maximum: 100,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Percentage must be a number' })
   @IsNotEmpty({ message: 'Percentage is required' })
@@ -73,7 +73,7 @@ class TimeSlotDto {
     description: 'Time slot identifier (e.g., hour of day, day of week)',
     example: '10:00 AM',
     maxLength: 50,
-    required: true
+    required: true,
   })
   @IsString({ message: 'Slot must be a string' })
   @IsNotEmpty({ message: 'Slot is required' })
@@ -84,7 +84,7 @@ class TimeSlotDto {
     description: 'Number of appointments in this time slot',
     example: 5,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Count must be a number' })
   @IsNotEmpty({ message: 'Count is required' })
@@ -102,7 +102,7 @@ class RevenueMetricsDto {
     description: 'Total revenue from all appointments',
     example: 12500.75,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Total revenue must be a number' })
   @IsNotEmpty({ message: 'Total revenue is required' })
@@ -113,7 +113,7 @@ class RevenueMetricsDto {
     description: 'Average revenue per appointment',
     example: 85.25,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Average revenue must be a number' })
   @IsNotEmpty({ message: 'Average revenue is required' })
@@ -123,7 +123,7 @@ class RevenueMetricsDto {
   @ApiPropertyOptional({
     description: 'Percentage change from previous period',
     example: 12.5,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsNumber({}, { message: 'Growth rate must be a number' })
@@ -133,8 +133,8 @@ class RevenueMetricsDto {
     description: 'Revenue by payment method',
     type: 'object',
     additionalProperties: { type: 'number' },
-    example: { 'CREDIT_CARD': 7500.50, 'CASH': 5000.25 },
-    required: true
+    example: { CREDIT_CARD: 7500.5, CASH: 5000.25 },
+    required: true,
   })
   @IsObject({ message: 'Revenue by payment method must be an object' })
   @IsNotEmptyObject({}, { message: 'Revenue by payment method cannot be empty' })
@@ -151,7 +151,7 @@ class ServiceMetricsDto {
     description: 'Service ID',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
-    required: true
+    required: true,
   })
   @IsUUID(4, { message: 'Service ID must be a valid UUID v4' })
   @IsNotEmpty({ message: 'Service ID is required' })
@@ -161,7 +161,7 @@ class ServiceMetricsDto {
     description: 'Service name',
     example: 'Haircut and Styling',
     maxLength: 200,
-    required: true
+    required: true,
   })
   @IsString({ message: 'Service name must be a string' })
   @IsNotEmpty({ message: 'Service name is required' })
@@ -172,7 +172,7 @@ class ServiceMetricsDto {
     description: 'Number of appointments for this service',
     example: 25,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Appointment count must be a number' })
   @IsNotEmpty({ message: 'Appointment count is required' })
@@ -181,15 +181,15 @@ class ServiceMetricsDto {
 
   @ApiProperty({
     description: 'Total revenue from this service',
-    example: 1875.50,
-    required: true
+    example: 1875.5,
+    required: true,
   })
   totalRevenue!: number;
 
   @ApiProperty({
     description: 'Percentage of total appointments',
     example: 35.7,
-    required: true
+    required: true,
   })
   percentage!: number;
 }
@@ -204,7 +204,7 @@ export class AppointmentStatsDto {
     description: 'Total number of appointments',
     example: 150,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Total appointments must be a number' })
   @IsNotEmpty({ message: 'Total appointments is required' })
@@ -214,7 +214,7 @@ export class AppointmentStatsDto {
   @ApiProperty({
     description: 'Appointment counts by status',
     type: [StatusCountDto],
-    required: true
+    required: true,
   })
   @IsArray({ message: 'Status distribution must be an array' })
   @ValidateNested({ each: true })
@@ -225,7 +225,7 @@ export class AppointmentStatsDto {
   @ApiProperty({
     description: 'Appointment distribution by time slots',
     type: [TimeSlotDto],
-    required: true
+    required: true,
   })
   @IsArray({ message: 'Time distribution must be an array' })
   @ValidateNested({ each: true })
@@ -235,7 +235,7 @@ export class AppointmentStatsDto {
 
   @ApiProperty({
     description: 'Revenue metrics and statistics',
-    required: true
+    required: true,
   })
   @ValidateNested()
   @Type(() => RevenueMetricsDto)
@@ -245,7 +245,7 @@ export class AppointmentStatsDto {
   @ApiProperty({
     description: 'Top performing services',
     type: [ServiceMetricsDto],
-    required: true
+    required: true,
   })
   @IsArray({ message: 'Top services must be an array' })
   @ValidateNested({ each: true })
@@ -256,7 +256,7 @@ export class AppointmentStatsDto {
   @ApiProperty({
     description: 'Date range start for the statistics',
     example: '2023-01-01T00:00:00Z',
-    required: true
+    required: true,
   })
   @IsDateString({}, { message: 'Start date must be a valid ISO 8601 date string' })
   @IsNotEmpty({ message: 'Start date is required' })
@@ -265,7 +265,7 @@ export class AppointmentStatsDto {
   @ApiProperty({
     description: 'Date range end for the statistics',
     example: '2023-12-31T23:59:59Z',
-    required: true
+    required: true,
   })
   @IsDateString({}, { message: 'End date must be a valid ISO 8601 date string' })
   @IsNotEmpty({ message: 'End date is required' })

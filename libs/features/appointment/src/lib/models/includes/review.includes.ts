@@ -7,8 +7,8 @@ import { BASIC_USER_SELECT } from '@beauty-saas/features/appointment';
 export const REVIEW_INCLUDE = {
   user: {
     select: {
-      ...BASIC_USER_SELECT
-    }
+      ...BASIC_USER_SELECT,
+    },
   },
   customer: {
     select: {
@@ -17,10 +17,10 @@ export const REVIEW_INCLUDE = {
       registeredAt: true,
       user: {
         select: {
-          ...BASIC_USER_SELECT
-        }
+          ...BASIC_USER_SELECT,
+        },
       },
-      preferredSalonId: true
-    }
-  }
+      preferredSalonId: true,
+    },
+  },
 } as const satisfies Prisma.ReviewSelect;

@@ -3,7 +3,7 @@ import { PrismaClient, Prisma, PrismaPromise } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
 type UnwrapTuple<T extends any[]> = {
-  [K in keyof T]: T[K] extends Promise<infer U> ? U : T[K]
+  [K in keyof T]: T[K] extends Promise<infer U> ? U : T[K];
 };
 
 type QueryEvent = {
@@ -15,10 +15,7 @@ type QueryEvent = {
 };
 
 @Injectable()
-export class PrismaService
-  extends PrismaClient<Prisma.PrismaClientOptions, 'query' | 'error'>
-  implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, 'query' | 'error'> implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
   private readonly isDevelopment: boolean;
 
@@ -76,23 +73,23 @@ export class PrismaService
   // Overload for array of Prisma promises
   async $transaction<P extends PrismaPromise<any>[]>(
     arg: [...P],
-    options?: { isolationLevel?: Prisma.TransactionIsolationLevel }
+    options?: { isolationLevel?: Prisma.TransactionIsolationLevel },
   ): Promise<UnwrapTuple<P>>;
 
   // Overload for transaction callback
   async $transaction<P>(
     fn: (prisma: Omit<PrismaClient, '$transaction' | '$on' | '$connect' | '$disconnect' | '$use' | '$extends'>) => Promise<P>,
-    options?: { maxWait?: number; timeout?: number }
+    options?: { maxWait?: number; timeout?: number },
   ): Promise<P>;
 
   // Implementation
   async $transaction(
     arg: any,
-    options?: { 
+    options?: {
       maxWait?: number;
       timeout?: number;
       isolationLevel?: Prisma.TransactionIsolationLevel;
-    }
+    },
   ): Promise<any> {
     try {
       if (Array.isArray(arg)) {
@@ -114,7 +111,7 @@ export class PrismaService
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // Handle known request errors
       this.logger.error(`Prisma Known Request Error (${error.code}): ${error.message}`, error.meta);
-      
+
       // Add custom error handling for specific error codes
       switch (error.code) {
         case 'P2002':

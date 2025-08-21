@@ -12,7 +12,7 @@ export const createJestConfig = (config: JestConfig): JestConfig => ({
   },
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
-  
+
   // Merge with the provided config
   ...config,
 });

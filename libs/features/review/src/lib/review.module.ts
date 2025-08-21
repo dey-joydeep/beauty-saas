@@ -8,4 +8,4 @@ import { PrismaService } from '../../prisma/prisma.service';
   providers: [ReviewService, PrismaService],
   exports: [ReviewService],
 })
-export class ReviewModule { }
+export class ReviewModule {}

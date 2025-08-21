@@ -18,7 +18,7 @@ const mapToDto = (portfolio: any): PortfolioResponseDto => ({
     createdAt: img.createdAt.toISOString(),
   })),
   createdAt: portfolio.createdAt.toISOString(),
-  updatedAt: portfolio.updatedAt.toISOString()
+  updatedAt: portfolio.updatedAt.toISOString(),
 });
 
 @Injectable()
@@ -34,45 +34,45 @@ export class PortfolioService {
       where: { id },
       include: { images: true },
     });
-    
+
     if (!portfolio) {
       throw new NotFoundException('Portfolio not found');
     }
-    
+
     return mapToDto(portfolio);
   }
-  
+
   async getPortfoliosByUserId(userId: string): Promise<PortfolioResponseDto[]> {
     const portfolios = await this.prisma.portfolio.findMany({
       where: { userId },
       include: { images: true },
       orderBy: { createdAt: 'desc' },
     });
-    
+
     return portfolios.map(mapToDto);
   }
-  
+
   async getPortfolios(filters: { userId?: string; salonId?: string } = {}): Promise<PortfolioResponseDto[]> {
     const where: any = {};
-    
+
     if (filters.userId) where.userId = filters.userId;
     if (filters.salonId) where.salonId = filters.salonId;
-    
+
     const portfolios = await this.prisma.portfolio.findMany({
       where,
       include: { images: true },
       orderBy: { createdAt: 'desc' },
     });
-    
+
     return portfolios.map(mapToDto);
   }
-  
+
   async getAllPortfolios(): Promise<PortfolioResponseDto[]> {
     const portfolios = await this.prisma.portfolio.findMany({
       include: { images: true },
       orderBy: { createdAt: 'desc' },
     });
-    
+
     return portfolios.map(mapToDto);
   }
 
@@ -86,38 +86,38 @@ export class PortfolioService {
     if (!createPortfolioDto.imagePaths || createPortfolioDto.imagePaths.length === 0) {
       throw new BadRequestException('At least one image is required');
     }
-    
+
     // Ensure required fields are provided
     if (!createPortfolioDto.userId) {
       throw new BadRequestException('User ID is required');
     }
-    
+
     if (!createPortfolioDto.salonId) {
       throw new BadRequestException('Salon ID is required');
     }
-    
+
     // Create the portfolio with its images
     const portfolioData: any = {
       userId: createPortfolioDto.userId,
       salonId: createPortfolioDto.salonId,
       description: createPortfolioDto.description || '',
       images: {
-        create: createPortfolioDto.imagePaths.map(imagePath => ({
-          imagePath
+        create: createPortfolioDto.imagePaths.map((imagePath) => ({
+          imagePath,
         })),
       },
     };
-    
+
     // Add tenantId if provided
     if (createPortfolioDto.tenantId) {
       portfolioData.tenantId = createPortfolioDto.tenantId;
     }
-    
+
     const portfolio = await this.prisma.portfolio.create({
       data: portfolioData,
       include: { images: true },
     });
-    
+
     return mapToDto(portfolio);
   }
 
@@ -130,55 +130,55 @@ export class PortfolioService {
     // Get the existing portfolio
     const existingPortfolio = await this.prisma.portfolio.findUnique({
       where: { id },
-      select: { userId: true }
+      select: { userId: true },
     });
-    
+
     if (!existingPortfolio) {
       throw new NotFoundException('Portfolio not found');
     }
-    
+
     // Handle image additions and removals in a transaction
     const operations: any[] = [];
-    
+
     // Add image additions if any
     if (updatePortfolioDto.addImagePaths?.length) {
       operations.push(
         this.prisma.portfolioImage.createMany({
-          data: updatePortfolioDto.addImagePaths.map(imagePath => ({
+          data: updatePortfolioDto.addImagePaths.map((imagePath) => ({
             portfolioId: id,
-            imagePath
-          }))
-        })
+            imagePath,
+          })),
+        }),
       );
     }
-    
+
     // Add image deletions if any
     if (updatePortfolioDto.removeImageIds?.length) {
       operations.push(
         this.prisma.portfolioImage.deleteMany({
           where: {
             id: { in: updatePortfolioDto.removeImageIds },
-            portfolioId: id
-          }
-        })
+            portfolioId: id,
+          },
+        }),
       );
     }
-    
+
     // If there are operations to perform, execute them in a transaction
     if (operations.length > 0) {
       await this.prisma.$transaction(operations);
     }
-    
+
     // Create update data from the DTO, excluding undefined values
     const updateData: any = {};
-    
+
     // Add any provided fields to update
     Object.entries(updatePortfolioDto).forEach(([key, value]) => {
       if (value !== undefined && !['addImagePaths', 'removeImageIds'].includes(key)) {
         updateData[key] = value;
       }
     });
-    
+
     // If we have update data, perform the update
     if (Object.keys(updateData).length > 0) {
       await this.prisma.portfolio.update({
@@ -186,17 +186,17 @@ export class PortfolioService {
         data: updateData,
       });
     }
-    
+
     // Fetch the updated portfolio with images
     const portfolio = await this.prisma.portfolio.findUnique({
       where: { id },
       include: { images: true },
     });
-    
+
     if (!portfolio) {
       throw new NotFoundException('Portfolio not found after update');
     }
-    
+
     return mapToDto(portfolio);
   }
 
@@ -208,9 +208,9 @@ export class PortfolioService {
   async deletePortfolio(id: string): Promise<void> {
     // Using deleteMany with the ID to avoid extra query
     const result = await this.prisma.portfolio.deleteMany({
-      where: { id }
+      where: { id },
     });
-    
+
     if (result.count === 0) {
       throw new NotFoundException('Portfolio not found');
     }

@@ -7,11 +7,10 @@ import { JwtAuthGuard } from '../../../core/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../core/auth/guards/roles.guard';
 import { SocialResponseDto } from '../dto/responses/social-response.dto';
 
-
 describe('SocialController (e2e)', () => {
   let app: INestApplication;
   let moduleFixture: TestingModule;
-  
+
   // Mock data
   const testSocialId = 'test-social-id';
   const testUserId = 'test-user-id';
@@ -72,15 +71,15 @@ describe('SocialController (e2e)', () => {
     it('should return an array of socials', async () => {
       mockSocialService.getSocials.mockResolvedValue([testSocial]);
 
-      const response = await request(app.getHttpServer())
-        .get('/social')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/social').expect(200);
 
-      expect(response.body).toEqual([{
-        ...testSocial,
-        createdAt: testSocial.createdAt.toISOString(),
-        updatedAt: testSocial.updatedAt.toISOString(),
-      }]);
+      expect(response.body).toEqual([
+        {
+          ...testSocial,
+          createdAt: testSocial.createdAt.toISOString(),
+          updatedAt: testSocial.updatedAt.toISOString(),
+        },
+      ]);
       expect(mockSocialService.getSocials).toHaveBeenCalled();
     });
   });
@@ -89,9 +88,7 @@ describe('SocialController (e2e)', () => {
     it('should return a social by id', async () => {
       mockSocialService.getSocialById.mockResolvedValue(testSocial);
 
-      const response = await request(app.getHttpServer())
-        .get(`/social/${testSocialId}`)
-        .expect(200);
+      const response = await request(app.getHttpServer()).get(`/social/${testSocialId}`).expect(200);
 
       expect(response.body).toEqual({
         ...testSocial,
@@ -104,9 +101,7 @@ describe('SocialController (e2e)', () => {
     it('should return 404 if social not found', async () => {
       mockSocialService.getSocialById.mockResolvedValue(null);
 
-      await request(app.getHttpServer())
-        .get(`/social/non-existent-id`)
-        .expect(404);
+      await request(app.getHttpServer()).get(`/social/non-existent-id`).expect(404);
     });
   });
 
@@ -114,15 +109,15 @@ describe('SocialController (e2e)', () => {
     it('should return socials for a user', async () => {
       mockSocialService.getSocialsForUser.mockResolvedValue([testSocial]);
 
-      const response = await request(app.getHttpServer())
-        .get(`/user/${testUserId}/social`)
-        .expect(200);
+      const response = await request(app.getHttpServer()).get(`/user/${testUserId}/social`).expect(200);
 
-      expect(response.body).toEqual([{
-        ...testSocial,
-        createdAt: testSocial.createdAt.toISOString(),
-        updatedAt: testSocial.updatedAt.toISOString(),
-      }]);
+      expect(response.body).toEqual([
+        {
+          ...testSocial,
+          createdAt: testSocial.createdAt.toISOString(),
+          updatedAt: testSocial.updatedAt.toISOString(),
+        },
+      ]);
       expect(mockSocialService.getSocialsForUser).toHaveBeenCalledWith(testUserId);
     });
   });
@@ -137,10 +132,7 @@ describe('SocialController (e2e)', () => {
     it('should create a social', async () => {
       mockSocialService.createSocial.mockResolvedValue(testSocial);
 
-      const response = await request(app.getHttpServer())
-        .post('/social')
-        .send(createDto)
-        .expect(201);
+      const response = await request(app.getHttpServer()).post('/social').send(createDto).expect(201);
 
       expect(response.body).toEqual({
         ...testSocial,
@@ -162,10 +154,7 @@ describe('SocialController (e2e)', () => {
     it('should update a social', async () => {
       mockSocialService.updateSocial.mockResolvedValue(updatedSocial);
 
-      const response = await request(app.getHttpServer())
-        .patch(`/social/${testSocialId}`)
-        .send(updateDto)
-        .expect(200);
+      const response = await request(app.getHttpServer()).patch(`/social/${testSocialId}`).send(updateDto).expect(200);
 
       expect(response.body).toEqual({
         ...updatedSocial,
@@ -180,9 +169,7 @@ describe('SocialController (e2e)', () => {
     it('should delete a social', async () => {
       mockSocialService.deleteSocial.mockResolvedValue(testSocial);
 
-      await request(app.getHttpServer())
-        .delete(`/social/${testSocialId}`)
-        .expect(200);
+      await request(app.getHttpServer()).delete(`/social/${testSocialId}`).expect(200);
 
       expect(mockSocialService.deleteSocial).toHaveBeenCalledWith(testSocialId);
     });

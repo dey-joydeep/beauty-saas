@@ -1,59 +1,44 @@
 {
-    "name": "core",
-    "sourceRoot": "libs/core/src",
-    "tags": [
-        "type:lib",
-        "platform:server",
-        "scope:server-core"
-    ],
-    "targets": {
-        "lint": {
-            "outputs": [
-                "{options.outputFile}"
-            ],
-            "executor": "@nx/eslint:lint",
-            "options": {
-                "lintFilePatterns": [
-                    "libs/core/**/*.ts"
-                ]
-            }
-        },
-        "build": {
-            "outputs": [
-                "{options.outputPath}"
-            ],
-            "executor": "@nx/js:tsc",
-            "options": {
-                "main": "libs/core/src/index.ts",
-                "tsConfig": "libs/core/tsconfig.lib.json",
-                "packageJson": "libs/core/package.json",
-                "assets": [],
-                "outputPath": "dist/libs/core"
-            }
-        },
-        "type-check": {
-            "executor": "nx:run-commands",
-            "options": {
-                "command": "tsc -p libs/core/tsconfig.lib.json --noEmit"
-            }
-        },
-        "test": {
-            "outputs": [
-                "{workspaceRoot}/coverage/libs/core"
-            ],
-            "executor": "@nx/jest:jest",
-            "options": {
-                "passWithNoTests": true,
-                "jestConfig": "libs/core/jest.config.ts",
-                "codeCoverage": true,
-                "coverageReporters": [
-                    "text",
-                    "lcov"
-                ],
-                "coverageDirectory": "coverage/libs/core"
-            }
-        }
+  "name": "core",
+  "sourceRoot": "libs/core/src",
+  "tags": ["type:lib", "platform:server", "scope:server-core"],
+  "targets": {
+    "lint": {
+      "outputs": ["{options.outputFile}"],
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["libs/core/**/*.ts"]
+      }
     },
-    "projectType": "library",
-    "prefix": "beauty-saas"
+    "build": {
+      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/js:tsc",
+      "options": {
+        "main": "libs/core/src/index.ts",
+        "tsConfig": "libs/core/tsconfig.lib.json",
+        "packageJson": "libs/core/package.json",
+        "assets": [],
+        "outputPath": "dist/libs/core"
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/core/tsconfig.lib.json --noEmit"
+      }
+    },
+    "test": {
+      "outputs": ["{workspaceRoot}/coverage/libs/core"],
+      "executor": "@nx/jest:jest",
+      "options": {
+        "passWithNoTests": true,
+        "jestConfig": "libs/core/jest.config.ts",
+        "codeCoverage": true,
+        "coverageReporters": ["text", "lcov"],
+        "coverageDirectory": "coverage/libs/core"
+      }
+    }
+  },
+  "projectType": "library",
+  "prefix": "beauty-saas"
 }

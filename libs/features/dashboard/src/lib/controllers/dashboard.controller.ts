@@ -11,7 +11,7 @@ import type { AuthUser } from '../interfaces/dashboard-request.interface';
 @Controller('dashboard')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DashboardController {
-  constructor(private readonly dashboardService: DashboardService) { }
+  constructor(private readonly dashboardService: DashboardService) {}
 
   @Get('stats')
   @Roles(AppUserRole.ADMIN, AppUserRole.OWNER)
@@ -27,14 +27,11 @@ export class DashboardController {
 
   @Get('revenue')
   @Roles(AppUserRole.ADMIN, AppUserRole.OWNER)
-  async getRevenue(
-    @User() _user: AuthUser,
-    @Query() filter: { startDate?: string; endDate?: string }
-  ) {
+  async getRevenue(@User() _user: AuthUser, @Query() filter: { startDate?: string; endDate?: string }) {
     // TODO: Use the user parameter for authorization if needed
     return this.dashboardService.getRevenue({
       startDate: filter.startDate,
-      endDate: filter.endDate
+      endDate: filter.endDate,
     });
   }
 

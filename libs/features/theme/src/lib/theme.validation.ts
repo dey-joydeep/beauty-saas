@@ -3,9 +3,7 @@ import { isISODateString } from '../../utils/validators';
 
 export const createThemeSchema = z.object({
   name: z.string().min(1, 'Theme name is required'),
-  colors: z
-    .record(z.string(), z.string())
-    .refine((obj) => Object.keys(obj).length > 0, { message: 'At least one color is required' }),
+  colors: z.record(z.string(), z.string()).refine((obj) => Object.keys(obj).length > 0, { message: 'At least one color is required' }),
   isActive: z.boolean(),
   createdAt: z
     .string()

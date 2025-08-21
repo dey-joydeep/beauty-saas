@@ -21,7 +21,7 @@ import {
   Query,
   UnauthorizedException,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -39,7 +39,7 @@ import {
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
-  getSchemaPath
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -61,24 +61,21 @@ export class UserController {
   @Roles(AppUserRole.ADMIN)
   @ApiOperation({ summary: 'Get user statistics' })
   @ApiQuery({ name: 'tenant_id', required: false, type: String, description: 'Tenant ID to filter statistics' })
-  @ApiOkResponse({ 
+  @ApiOkResponse({
     description: 'User statistics retrieved successfully',
     schema: {
       type: 'object',
       properties: {
         totalUsers: { type: 'number', example: 100 },
         activeUsers: { type: 'number', example: 75 },
-        tenantId: { type: 'string', example: 'tenant-123' }
-      }
-    }
+        tenantId: { type: 'string', example: 'tenant-123' },
+      },
+    },
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  async getUserStats(
-    @Query('tenant_id') tenantId: string,
-    @User() _user: AuthenticatedUser,
-  ) {
+  async getUserStats(@Query('tenant_id') tenantId: string, @User() _user: AuthenticatedUser) {
     try {
       // The JwtAuthGuard and RolesGuard already verify the user's authentication and authorization
       // For now, we'll return a simple object since getUserStats is not implemented
@@ -106,7 +103,7 @@ export class UserController {
   @ApiQuery({ name: 'search', required: false, type: String, description: 'Search term for name or email' })
   @ApiQuery({ name: 'role', required: false, enum: AppUserRole, description: 'Filter by user role' })
   @ApiQuery({ name: 'status', required: false, enum: ['active', 'inactive'], description: 'Filter by user status' })
-  @ApiOkResponse({ 
+  @ApiOkResponse({
     description: 'Paginated list of users',
     type: PaginatedResponse,
     schema: {
@@ -116,22 +113,23 @@ export class UserController {
           properties: {
             data: {
               type: 'array',
-              items: { $ref: getSchemaPath(UserResponseDto) }
-            }
-          }
-        }
-      ]
-    }
+              items: { $ref: getSchemaPath(UserResponseDto) },
+            },
+          },
+        },
+      ],
+    },
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   async getUsers(
     @User() user: AuthenticatedUser,
-    @Query() query: PaginationParams & {
+    @Query()
+    query: PaginationParams & {
       search?: string;
       role?: AppUserRole;
       status?: string;
-    } = {}
+    } = {},
   ): Promise<PaginatedResponse<UserResponseDto>> {
     try {
       const { page = 1, limit = 10, search = '', role, status } = query;
@@ -144,7 +142,7 @@ export class UserController {
 
       // Build the where clause with optional filters
       const where: Prisma.UserWhereInput = {};
-      
+
       // Apply tenant filter
       if (tenantId) {
         where.tenantId = tenantId;
@@ -152,10 +150,7 @@ export class UserController {
 
       // Apply search filter
       if (search) {
-        where.OR = [
-          { name: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
-        ];
+        where.OR = [{ name: { contains: search, mode: 'insensitive' } }, { email: { contains: search, mode: 'insensitive' } }];
       }
 
       // Apply role filter
@@ -163,9 +158,9 @@ export class UserController {
         where.roles = {
           some: {
             role: {
-              name: role
-            }
-          }
+              name: role,
+            },
+          },
         };
       }
 
@@ -187,18 +182,18 @@ export class UserController {
           include: {
             roles: {
               include: {
-                role: true
-              }
-            }
+                role: true,
+              },
+            },
           },
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'desc' },
         }),
-        this.userService.countUsers({ where })
+        this.userService.countUsers({ where }),
       ]);
-      
+
       // Build pagination response
       const response = {
-        data: users.map(user => ({
+        data: users.map((user) => ({
           id: user.id,
           email: user.email,
           name: user.name,
@@ -210,23 +205,24 @@ export class UserController {
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
           tenantId: user.tenantId,
-          roles: user.roles?.map(ur => ({
-            id: ur.roleId,
-            name: ur.role?.name || ''
-          })) || [],
+          roles:
+            user.roles?.map((ur) => ({
+              id: ur.roleId,
+              name: ur.role?.name || '',
+            })) || [],
         })),
         meta: {
           total,
           page,
           limit,
-          totalPages: Math.ceil(total / limit)
-        }
+          totalPages: Math.ceil(total / limit),
+        },
       };
 
       // Return the paginated response with the correct structure
       return {
         data: response.data,
-        meta: response.meta
+        meta: response.meta,
       };
     } catch (error) {
       if (error instanceof ForbiddenException) {
@@ -260,11 +256,12 @@ export class UserController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   async getUsersAdmin(
     @User() user: AuthenticatedUser,
-    @Query() query: PaginationParams & {
+    @Query()
+    query: PaginationParams & {
       search?: string;
       role?: AppUserRole;
       status?: string;
-    } = {}
+    } = {},
   ): Promise<PaginatedResponse<UserResponseDto>> {
     try {
       const { page = 1, limit = 10, search = '', role, status } = query;
@@ -277,7 +274,7 @@ export class UserController {
 
       // Build the where clause with optional filters
       const where: Prisma.UserWhereInput = {};
-      
+
       // Apply tenant filter
       if (tenantId) {
         where.tenantId = tenantId;
@@ -285,10 +282,7 @@ export class UserController {
 
       // Apply search filter
       if (search) {
-        where.OR = [
-          { name: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
-        ];
+        where.OR = [{ name: { contains: search, mode: 'insensitive' } }, { email: { contains: search, mode: 'insensitive' } }];
       }
 
       // Apply role filter
@@ -296,9 +290,9 @@ export class UserController {
         where.roles = {
           some: {
             role: {
-              name: role
-            }
-          }
+              name: role,
+            },
+          },
         };
       }
 
@@ -320,18 +314,18 @@ export class UserController {
           include: {
             roles: {
               include: {
-                role: true
-              }
-            }
+                role: true,
+              },
+            },
           },
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'desc' },
         }),
-        this.userService.countUsers({ where })
+        this.userService.countUsers({ where }),
       ]);
-      
+
       // Build pagination response
       const response = {
-        data: users.map(user => ({
+        data: users.map((user) => ({
           id: user.id,
           email: user.email,
           name: user.name,
@@ -343,23 +337,24 @@ export class UserController {
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
           tenantId: user.tenantId,
-          roles: user.roles?.map(ur => ({
-            id: ur.roleId,
-            name: ur.role?.name || ''
-          })) || [],
+          roles:
+            user.roles?.map((ur) => ({
+              id: ur.roleId,
+              name: ur.role?.name || '',
+            })) || [],
         })),
         meta: {
           total,
           page,
           limit,
-          totalPages: Math.ceil(total / limit)
-        }
+          totalPages: Math.ceil(total / limit),
+        },
       };
 
       // Return the paginated response with the correct structure
       return {
         data: response.data,
-        meta: response.meta
+        meta: response.meta,
       };
     } catch (error) {
       if (error instanceof ForbiddenException) {
@@ -373,9 +368,9 @@ export class UserController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: CreateUserDto, description: 'User registration data' })
-  @ApiCreatedResponse({ 
-    description: 'User registered successfully', 
-    type: UserResponseDto 
+  @ApiCreatedResponse({
+    description: 'User registered successfully',
+    type: UserResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiConflictResponse({ description: 'User already exists' })
@@ -394,10 +389,11 @@ export class UserController {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         tenantId: user.tenantId,
-        roles: user.roles?.map(ur => ({
-          id: ur.roleId,
-          name: ur.role?.name || ''
-        })) || []
+        roles:
+          user.roles?.map((ur) => ({
+            id: ur.roleId,
+            name: ur.role?.name || '',
+          })) || [],
       };
     } catch (error) {
       if (error instanceof ConflictException) {
@@ -413,28 +409,20 @@ export class UserController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new user (admin/owner only)' })
   @ApiBody({ type: CreateUserDto, description: 'User creation data' })
-  @ApiCreatedResponse({ 
-    description: 'User created successfully', 
-    type: UserResponseDto 
+  @ApiCreatedResponse({
+    description: 'User created successfully',
+    type: UserResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiConflictResponse({ description: 'User already exists' })
-  async create(
-    @Body() createUserDto: CreateUserDto,
-    @User() currentUser: AuthenticatedUser,
-  ): Promise<UserResponseDto> {
+  async create(@Body() createUserDto: CreateUserDto, @User() currentUser: AuthenticatedUser): Promise<UserResponseDto> {
     try {
       // Only allow ADMIN to create users with ADMIN role
       // OWNER can only create CUSTOMER and STAFF users
-      if (
-        !currentUser.roles.some((r) => r.name === AppUserRole.ADMIN) &&
-        createUserDto.role === AppUserRole.ADMIN
-      ) {
-        throw new ForbiddenException(
-          'You do not have permission to create users with ADMIN role',
-        );
+      if (!currentUser.roles.some((r) => r.name === AppUserRole.ADMIN) && createUserDto.role === AppUserRole.ADMIN) {
+        throw new ForbiddenException('You do not have permission to create users with ADMIN role');
       }
 
       // Set the tenant ID from the current user if not provided
@@ -443,7 +431,7 @@ export class UserController {
       }
 
       const newUser = await this.userService.createUser(createUserDto);
-      
+
       return {
         id: newUser.id,
         email: newUser.email,
@@ -456,10 +444,11 @@ export class UserController {
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
         tenantId: newUser.tenantId,
-        roles: newUser.roles?.map(ur => ({
-          id: ur.roleId,
-          name: ur.role?.name || ''
-        })) || []
+        roles:
+          newUser.roles?.map((ur) => ({
+            id: ur.roleId,
+            name: ur.role?.name || '',
+          })) || [],
       };
     } catch (error) {
       if (error instanceof ConflictException) {
@@ -478,9 +467,9 @@ export class UserController {
   @ApiOperation({ summary: 'Update a user' })
   @ApiParam({ name: 'id', type: String, description: 'User ID' })
   @ApiBody({ type: UpdateUserDto, description: 'User update data' })
-  @ApiOkResponse({ 
-    description: 'User updated successfully', 
-    type: UserResponseDto 
+  @ApiOkResponse({
+    description: 'User updated successfully',
+    type: UserResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -505,10 +494,11 @@ export class UserController {
         createdAt: updatedUser.createdAt,
         updatedAt: updatedUser.updatedAt,
         tenantId: updatedUser.tenantId,
-        roles: updatedUser.roles?.map(ur => ({
-          id: ur.roleId,
-          name: ur.role?.name || ''
-        })) || []
+        roles:
+          updatedUser.roles?.map((ur) => ({
+            id: ur.roleId,
+            name: ur.role?.name || '',
+          })) || [],
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -548,7 +538,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'User login' })
   @ApiBody({ type: LoginUserDto, description: 'User login credentials' })
-  @ApiOkResponse({ 
+  @ApiOkResponse({
     description: 'User logged in successfully',
     schema: {
       type: 'object',
@@ -560,19 +550,19 @@ export class UserController {
             id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
             email: { type: 'string', example: 'user@example.com' },
             name: { type: 'string', example: 'John Doe', nullable: true },
-            roles: { 
-              type: 'array', 
+            roles: {
+              type: 'array',
               items: { type: 'string' },
-              example: ['CUSTOMER']
+              example: ['CUSTOMER'],
             },
             tenantId: { type: 'string', example: 'tenant-123', nullable: true },
             isVerified: { type: 'boolean', example: true },
             isActive: { type: 'boolean', example: true },
-            phone: { type: 'string', example: '+1234567890', nullable: true }
-          }
-        }
-      }
-    }
+            phone: { type: 'string', example: '+1234567890', nullable: true },
+          },
+        },
+      },
+    },
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -581,7 +571,7 @@ export class UserController {
     try {
       // Use the service to handle login and token generation
       const loginResult = await this.userService.login(loginUserDto);
-      
+
       // Get the full user with roles
       const user = await this.userService.getUserByEmail(loginUserDto.email);
       if (!user) {
@@ -637,10 +627,10 @@ export class UserController {
         createdAt: currentUser.createdAt,
         updatedAt: currentUser.updatedAt,
         tenantId: currentUser.tenantId,
-        roles: (currentUser.roles || []).map(ur => ({
+        roles: (currentUser.roles || []).map((ur) => ({
           id: ur.roleId,
-          name: ur.role?.name || ''
-        }))
+          name: ur.role?.name || '',
+        })),
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -654,14 +644,14 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'User logout' })
-  @ApiOkResponse({ 
+  @ApiOkResponse({
     description: 'User logged out successfully',
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'Logout successful' }
-      }
-    }
+        message: { type: 'string', example: 'Logout successful' },
+      },
+    },
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })

@@ -3,10 +3,7 @@ import { isEmail, isPhoneNumber } from '../../utils/validators';
 
 export const registerUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z
-    .string()
-    .email('Invalid email address')
-    .refine(isEmail, { message: 'Invalid email format' }),
+  email: z.string().email('Invalid email address').refine(isEmail, { message: 'Invalid email format' }),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   tenantId: z.string().min(1, 'tenantId is required'),
   phone: z

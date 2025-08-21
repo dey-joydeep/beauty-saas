@@ -40,9 +40,7 @@ export class SalonStaffRequestController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid request data' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Insufficient permissions' })
-  async create(
-    @Body() createSalonStaffRequestDto: CreateSalonStaffRequestDto,
-  ): Promise<SalonStaffRequestResponseDto> {
+  async create(@Body() createSalonStaffRequestDto: CreateSalonStaffRequestDto): Promise<SalonStaffRequestResponseDto> {
     return this.salonStaffRequestService.createRequest(createSalonStaffRequestDto);
   }
 

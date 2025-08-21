@@ -30,7 +30,7 @@ export class UpdatePortfolioDto extends PartialType(BasePortfolioDto) {
 
   // Override the images property to make it optional in the request
   @ApiProperty({
-    description: 'Array of portfolio images (auto-managed by the service)', 
+    description: 'Array of portfolio images (auto-managed by the service)',
     type: [PortfolioImageDto],
     readOnly: true,
     required: false,

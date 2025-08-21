@@ -1,19 +1,7 @@
 import { IsValidAppointmentStatus, IsValidAppointmentTime } from '@beauty-saas/core/validators/appointment.validators';
 import { AppointmentStatus } from '@beauty-saas/shared';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUUID,
-  Max,
-  MaxLength,
-  Min
-} from 'class-validator';
+import { IsDateString, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 
 /**
  * DTO representing an appointment
@@ -29,7 +17,7 @@ export class AppointmentDto {
     description: 'Unique identifier for the appointment',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
-    required: true
+    required: true,
   })
   @IsUUID(4, { message: 'ID must be a valid UUID v4' })
   @IsNotEmpty({ message: 'ID is required' })
@@ -39,7 +27,7 @@ export class AppointmentDto {
     description: 'Title of the appointment',
     example: 'Haircut and Styling',
     maxLength: 200,
-    required: true
+    required: true,
   })
   @IsString({ message: 'Title must be a string' })
   @IsNotEmpty({ message: 'Title is required' })
@@ -50,7 +38,7 @@ export class AppointmentDto {
     description: 'Optional description of the appointment',
     example: 'Please arrive 10 minutes early for a consultation',
     maxLength: 1000,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString({ message: 'Description must be a string' })
@@ -60,7 +48,7 @@ export class AppointmentDto {
   @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment starts',
     example: '2023-12-25T14:00:00.000Z',
-    required: true
+    required: true,
   })
   @IsValidAppointmentTime({ message: 'Appointment start time must be in the future' })
   @IsDateString({}, { message: 'Start time must be a valid ISO 8601 date string' })
@@ -70,7 +58,7 @@ export class AppointmentDto {
   @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment ends',
     example: '2023-12-25T15:00:00.000Z',
-    required: true
+    required: true,
   })
   @IsDateString({}, { message: 'End time must be a valid ISO 8601 date string' })
   @IsNotEmpty({ message: 'End time is required' })
@@ -81,11 +69,11 @@ export class AppointmentDto {
     enumName: 'AppointmentStatus',
     example: AppointmentStatus.CONFIRMED,
     description: 'Current status of the appointment',
-    required: true
+    required: true,
   })
   @IsValidAppointmentStatus()
   @IsEnum(AppointmentStatus, {
-    message: `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}`
+    message: `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}`,
   })
   @IsNotEmpty({ message: 'Status is required' })
   status!: AppointmentStatus;
@@ -94,7 +82,7 @@ export class AppointmentDto {
     description: 'ID of the customer',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
-    required: true
+    required: true,
   })
   @IsUUID(4, { message: 'Customer ID must be a valid UUID v4' })
   @IsNotEmpty({ message: 'Customer ID is required' })
@@ -104,7 +92,7 @@ export class AppointmentDto {
     description: 'Name of the customer',
     example: 'John Doe',
     maxLength: 100,
-    required: true
+    required: true,
   })
   @IsString({ message: 'Customer name must be a string' })
   @IsNotEmpty({ message: 'Customer name is required' })
@@ -115,7 +103,7 @@ export class AppointmentDto {
     description: 'Email of the customer',
     example: 'customer@example.com',
     maxLength: 255,
-    required: true
+    required: true,
   })
   @IsEmail({}, { message: 'Customer email must be a valid email address' })
   @IsNotEmpty({ message: 'Customer email is required' })
@@ -127,7 +115,7 @@ export class AppointmentDto {
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
     nullable: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsUUID(4, { message: 'Staff ID must be a valid UUID v4' })
@@ -137,7 +125,7 @@ export class AppointmentDto {
     description: 'Name of the staff member',
     example: 'Jane Smith',
     maxLength: 100,
-    required: true
+    required: true,
   })
   @IsString({ message: 'Staff name must be a string' })
   @IsNotEmpty({ message: 'Staff name is required' })
@@ -148,7 +136,7 @@ export class AppointmentDto {
     description: 'ID of the service',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
-    required: true
+    required: true,
   })
   @IsUUID(4, { message: 'Service ID must be a valid UUID v4' })
   @IsNotEmpty({ message: 'Service ID is required' })
@@ -158,7 +146,7 @@ export class AppointmentDto {
     description: 'Name of the service',
     example: 'Haircut and Styling',
     maxLength: 200,
-    required: true
+    required: true,
   })
   @IsString({ message: 'Service name must be a string' })
   @IsNotEmpty({ message: 'Service name is required' })
@@ -170,7 +158,7 @@ export class AppointmentDto {
     example: 60,
     minimum: 1,
     maximum: 1440, // 24 hours in minutes
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Duration must be a number' })
   @IsNotEmpty({ message: 'Duration is required' })
@@ -180,9 +168,9 @@ export class AppointmentDto {
 
   @ApiProperty({
     description: 'Price of the appointment',
-    example: 50.00,
+    example: 50.0,
     minimum: 0,
-    required: true
+    required: true,
   })
   @IsNumber({}, { message: 'Price must be a number' })
   @IsNotEmpty({ message: 'Price is required' })
@@ -193,7 +181,7 @@ export class AppointmentDto {
     description: 'ID of the salon',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
-    required: true
+    required: true,
   })
   @IsUUID(4, { message: 'Salon ID must be a valid UUID v4' })
   @IsNotEmpty({ message: 'Salon ID is required' })
@@ -203,7 +191,7 @@ export class AppointmentDto {
     description: 'Name of the salon',
     example: 'Beauty & Style Salon',
     maxLength: 200,
-    required: true
+    required: true,
   })
   @IsString({ message: 'Salon name must be a string' })
   @IsNotEmpty({ message: 'Salon name is required' })
@@ -213,7 +201,7 @@ export class AppointmentDto {
   @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment was created',
     example: '2023-12-20T10:00:00.000Z',
-    required: true
+    required: true,
   })
   @IsDateString({}, { message: 'Created at must be a valid ISO 8601 date string' })
   @IsNotEmpty({ message: 'Created at timestamp is required' })
@@ -222,7 +210,7 @@ export class AppointmentDto {
   @ApiProperty({
     description: 'ISO 8601 timestamp when the appointment was last updated',
     example: '2023-12-20T10:00:00.000Z',
-    required: true
+    required: true,
   })
   @IsDateString({}, { message: 'Updated at must be a valid ISO 8601 date string' })
   @IsNotEmpty({ message: 'Updated at timestamp is required' })

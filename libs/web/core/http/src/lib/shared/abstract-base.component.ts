@@ -8,7 +8,7 @@ export abstract class AbstractBaseComponent implements OnInit, OnDestroy {
   private _error: string | null = null;
   private _loading = false;
 
-  constructor(protected errorService: ErrorService) { }
+  constructor(protected errorService: ErrorService) {}
 
   ngOnInit(): void {
     this.setupErrorSubscription();

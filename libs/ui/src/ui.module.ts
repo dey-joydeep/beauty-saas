@@ -5,17 +5,7 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
 import { MaterialModule } from './material/material.module';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    MaterialModule,
-    TranslateModule,
-    ConfirmDialogComponent
-  ],
-  exports: [
-    CommonModule,
-    MaterialModule,
-    TranslateModule,
-    ConfirmDialogComponent
-  ]
+  imports: [CommonModule, MaterialModule, TranslateModule, ConfirmDialogComponent],
+  exports: [CommonModule, MaterialModule, TranslateModule, ConfirmDialogComponent],
 })
 export class SharedModule {}

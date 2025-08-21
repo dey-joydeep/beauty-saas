@@ -1,4 +1,3 @@
-
 import { Prisma } from '@prisma/client';
 
 /**
@@ -21,12 +20,12 @@ export const ADDRESS_INCLUDE = {
             select: {
               id: true,
               name: true,
-              iso2: true
-            }
-          }
-        }
-      }
-    }
+              iso2: true,
+            },
+          },
+        },
+      },
+    },
   },
-  postalCode: true
+  postalCode: true,
 } as const;
