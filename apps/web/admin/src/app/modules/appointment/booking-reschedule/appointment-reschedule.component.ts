@@ -19,7 +19,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
 import { Appointment, TimeSlot } from '../models/appointment.model';
-import { LoadingService } from '@beauty-saas/core/services/loading.service';
+import { LoadingService } from '@beauty-saas/web-core/http';
 import { AppointmentService } from '../services/appointment.service';
 import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';

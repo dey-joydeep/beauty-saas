@@ -81,7 +81,7 @@ export const configuration = registerAs('config', () => ({
     refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
   },
   cors: {
-    origins: process.env.CORS_ORIGINS?.split(',').map(origin => origin.trim()) || [],
+    origins: process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) || [],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     allowedHeaders: [
       'Content-Type',
@@ -129,7 +129,9 @@ export const validationSchema = Joi.object<Config>({
   }),
   cors: Joi.object({
     origins: Joi.array().items(Joi.string().uri()).default([]),
-    methods: Joi.array().items(Joi.string()).default(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD']),
+    methods: Joi.array()
+      .items(Joi.string())
+      .default(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD']),
     allowedHeaders: Joi.array().items(Joi.string()).default(['Content-Type', 'Authorization']),
     exposedHeaders: Joi.array().items(Joi.string()).default([]),
     credentials: Joi.boolean().default(true),
@@ -138,7 +140,9 @@ export const validationSchema = Joi.object<Config>({
   file: Joi.object({
     uploadDir: Joi.string().default('uploads'),
     maxFileSize: Joi.number().default(10 * 1024 * 1024),
-    allowedFileTypes: Joi.array().items(Joi.string()).default(['image/jpeg', 'image/png', 'image/webp']),
+    allowedFileTypes: Joi.array()
+      .items(Joi.string())
+      .default(['image/jpeg', 'image/png', 'image/webp']),
   }),
   rateLimit: Joi.object({
     windowMs: Joi.number().default(900000),

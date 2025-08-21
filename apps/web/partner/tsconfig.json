@@ -9,6 +9,7 @@
       "@shared/*": ["../../../libs/shared/src/*"],
       "@beauty-saas/ui": ["../../../libs/ui/src/index.ts"],
       "@beauty-saas/ui/*": ["../../../libs/ui/src/*"],
+      "@beauty-saas/web-partner/auth": ["../../../libs/web/partner/auth/src/index.ts"],
       "@beauty-saas/shared": ["../../../libs/shared/src/index.ts"],
       "@beauty-saas/shared/*": ["../../../libs/shared/src/*"],
       "@beauty-saas/web-config": ["../../../libs/web/config/src/index.ts"],

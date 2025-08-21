@@ -7,7 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 // Core services
 import { CurrentUserService } from '../../../../core/auth/services/current-user.service';
-import { ErrorService } from '@beauty-saas/core';
+import { ErrorService } from '@beauty-saas/web-core/http';
 
 // Models from salon module
 import { Appointment } from '../../models/appointment.model';

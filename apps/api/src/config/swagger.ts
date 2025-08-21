@@ -35,10 +35,7 @@ const generateSwaggerSpecs = () => {
         },
       ],
     },
-    apis: [
-      path.join(__dirname, '../routes/*.ts'),
-      path.join(__dirname, '../routes/**/*.ts'),
-    ],
+    apis: [path.join(__dirname, '../routes/*.ts'), path.join(__dirname, '../routes/**/*.ts')],
   };
 
   return swaggerJsdoc(options);
@@ -59,7 +56,7 @@ export const setupSwagger = (app: Express): { specs: any } => {
 
   // Serve Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-  
+
   // Serve Swagger JSON
   app.get('/api-docs.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
@@ -67,6 +64,6 @@ export const setupSwagger = (app: Express): { specs: any } => {
   });
 
   console.log(`📚 Swagger docs available at /api-docs`);
-  
+
   return { specs };
 };

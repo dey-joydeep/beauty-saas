@@ -10,15 +10,15 @@ import { configuration, validateConfig } from './configuration';
       envFilePath: ['.env', `.env.${process.env.NODE_ENV || 'development'}`],
       load: [configuration],
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string()
-          .valid('development', 'production', 'test')
-          .default('development'),
+        NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
         PORT: Joi.number().default(3000),
         DATABASE_URL: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRES_IN: Joi.string().default('1h'),
         REFRESH_TOKEN_EXPIRES_IN: Joi.string().default('7d'),
-        CORS_ORIGINS: Joi.string().default('http://localhost:4200,http://localhost:4201,http://localhost:4202'),
+        CORS_ORIGINS: Joi.string().default(
+          'http://localhost:4200,http://localhost:4201,http://localhost:4202',
+        ),
         UPLOAD_DIR: Joi.string().default('uploads'),
         RATE_LIMIT_WINDOW_MS: Joi.number().default(900000), // 15 minutes
         RATE_LIMIT_MAX: Joi.number().default(100),
