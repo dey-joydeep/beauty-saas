@@ -9,7 +9,7 @@ import {
 import { ApplicationConfig, ErrorHandler, importProvidersFrom } from '@angular/core';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
 import { TranslateLoader, TranslateModule, TranslateStore } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
@@ -40,8 +40,14 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 // App imports
-import { AUTH_ROUTES } from './core/auth/auth.routes';
-import { ErrorHandlerService, ERROR_INTERCEPTOR_PROVIDER } from '@beauty-saas/web-core/http';
+import { routes } from './app.routes';
+import {
+  ErrorHandlerService,
+  ERROR_INTERCEPTOR_PROVIDER,
+  loadingInterceptor,
+  ssrInterceptor,
+  ssrTranslateInterceptor,
+} from '@beauty-saas/web-core/http';
 import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 import { AUTH_STATE_PORT } from '@beauty-saas/web-core/auth';
 import { AuthService } from './core/auth/services/auth.service';
@@ -63,16 +69,14 @@ export const appConfig: ApplicationConfig = {
     },
     TranslateStore,
 
-    provideRouter(AUTH_ROUTES),
+    provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(
       withInterceptorsFromDi(),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN',
       }),
-      withInterceptors([
-        // Add any HTTP interceptors here
-      ]),
+      withInterceptors([loadingInterceptor, ssrInterceptor, ssrTranslateInterceptor]),
       withFetch(),
     ),
     // Register global HTTP interceptors

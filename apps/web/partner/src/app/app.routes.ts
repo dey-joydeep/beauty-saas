@@ -1,22 +1,19 @@
-import { LoginComponent, RegisterComponent, ForgotPasswordComponent } from '@beauty-saas/web-partner/auth';
 import { Routes } from '@angular/router';
 import { authGuard } from '@beauty-saas/web-core/auth';
-import { AppointmentCreateComponent } from '@beauty-saas/features/appointment';
-import { AppointmentListComponent } from '@beauty-saas/features/appointment';
-import { DashboardComponent } from './modules/dashboard/dashboard.component';
 import { HomeComponent } from './modules/home/home.component';
-import { ProfileComponent } from './modules/profile/profile.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'forgot-password', component: ForgotPasswordComponent },
+  {
+    path: 'auth',
+    canActivate: [authGuard],
+    loadChildren: () => import('@beauty-saas/web-partner/auth').then((m) => m.AUTH_ROUTES),
+  },
 
   // Protected routes
   {
     path: 'dashboard',
-    component: DashboardComponent,
+    loadComponent: () => import('./modules/dashboard/dashboard.component').then((m) => m.DashboardComponent),
     canActivate: [authGuard],
   },
   {
@@ -25,17 +22,19 @@ export const routes: Routes = [
   },
   {
     path: 'appointments',
-    component: AppointmentListComponent,
+    loadComponent: () =>
+      import('./modules/appointment/appointment-list/appointment-list.component').then((m) => m.AppointmentListComponent),
     canActivate: [authGuard],
   },
   {
     path: 'appointments/book',
-    component: AppointmentCreateComponent,
+    loadComponent: () =>
+      import('./modules/appointment/appointment-create/appointment-create.component').then((m) => m.AppointmentCreateComponent),
     canActivate: [authGuard],
   },
   {
     path: 'profile',
-    component: ProfileComponent,
+    loadComponent: () => import('./modules/profile/profile.component').then((m) => m.ProfileComponent),
     canActivate: [authGuard],
   },
 
