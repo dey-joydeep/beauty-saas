@@ -52,11 +52,9 @@
                 "libs/web/admin/auth/src/index.ts"
             ],
             "@beauty-saas/web-config": [
-                "libs/web/config/src/index.ts",
-                "libs/web/config/dist"
+                "libs/web/config/src/index.ts"
             ],
             "@beauty-saas/web-config/*": [
-                "libs/web/config/dist/*",
                 "libs/web/config/src/*"
             ],
             "@beauty-saas/web-core/auth": [

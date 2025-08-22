@@ -2,7 +2,7 @@
   "name": "@beauty-saas/web-core-http",
   "version": "0.0.1",
   "sideEffects": false,
-  "dependencies": {
+  "peerDependencies": {
     "@beauty-saas/web-config": "0.0.1"
   },
   "type": "module"
