@@ -4,11 +4,10 @@
  * Provides a consistent API for storage operations with SSR support
  * and memory fallback when localStorage is not available.
  */
-import { Injectable, Inject, PLATFORM_ID, Optional } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { Inject, Injectable, Optional, PLATFORM_ID } from '@angular/core';
+import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@beauty-saas/web-config';
 import { Observable, of } from 'rxjs';
-import { PlatformUtils, PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
-
 type StorageType = 'local' | 'session' | 'memory';
 
 /**
@@ -236,3 +235,6 @@ export class StorageService {
     return this.storageType;
   }
 }
+
+
+

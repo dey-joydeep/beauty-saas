@@ -1,3 +1,4 @@
+﻿import { PlatformUtils } from '@beauty-saas/web-config';
 // Core
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, Optional, PLATFORM_ID } from '@angular/core';
@@ -424,3 +425,4 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
       );
   }
 }
+

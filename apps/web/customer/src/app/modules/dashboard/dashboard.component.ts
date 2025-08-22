@@ -1,3 +1,4 @@
+﻿import { PlatformUtils } from '@beauty-saas/web-config';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
@@ -116,3 +117,4 @@ export class DashboardComponent extends AbstractBaseComponent implements OnInit 
     }
   }
 }
+

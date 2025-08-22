@@ -1,3 +1,4 @@
+﻿import { PlatformUtils } from '@beauty-saas/web-config';
 import { Component, Input, OnInit, Inject, PLATFORM_ID, Type } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SalonService } from '../../services/salon.service';
@@ -122,3 +123,4 @@ export class TopSalonsComponent implements OnInit {
     }
   }
 }
+

@@ -1,3 +1,4 @@
+﻿import { PlatformUtils } from '@beauty-saas/web-config';
 import { Component, OnInit, Inject, PLATFORM_ID, Renderer2 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ThemeService, Theme } from './theme.service';
@@ -118,3 +119,4 @@ export class ThemeComponent implements OnInit {
     }
   }
 }
+

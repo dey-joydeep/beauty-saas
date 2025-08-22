@@ -1,3 +1,4 @@
+﻿import { PlatformUtils } from '@beauty-saas/web-config';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
@@ -36,7 +37,7 @@ export class SalonSearchComponent implements OnInit {
   sort = '';
   showMap = false;
 
-  private readonly platformUtils = inject(PLATFORM_UTILS_TOKEN);
+  private readonly platformUtils = inject<PlatformUtils>(PLATFORM_UTILS_TOKEN);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
@@ -148,3 +149,4 @@ export class SalonSearchComponent implements OnInit {
     // For production, consider using a proper map component or backend-generated map with markers
   }
 }
+

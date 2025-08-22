@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -137,7 +137,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private storageService = inject(StorageService);
   private platformId = inject(PLATFORM_ID);
-  private platformUtils = inject(PLATFORM_UTILS_TOKEN);
+  private platformUtils = inject<PlatformUtils>(PLATFORM_UTILS_TOKEN);
   private destroy$ = new Subject<void>();
   private isBrowser: boolean = false;
 
@@ -546,3 +546,4 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.showUserMenu = false;
   }
 }
+

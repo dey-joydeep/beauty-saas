@@ -1,12 +1,12 @@
 import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
+import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@beauty-saas/web-config';
 
 /**
  * Interceptor to handle server-side rendering of HTTP requests
  */
 export const ssrInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
-  const platformUtils = inject(PLATFORM_UTILS_TOKEN);
+  const platformUtils = inject<PlatformUtils>(PLATFORM_UTILS_TOKEN);
 
   // Skip for non-browser environments
   if (platformUtils?.isServer) {
@@ -21,3 +21,4 @@ export const ssrInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
   // For browser environment, pass through the request
   return next(req);
 };
+
