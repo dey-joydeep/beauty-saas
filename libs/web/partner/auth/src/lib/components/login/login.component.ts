@@ -1,4 +1,4 @@
-﻿import { PlatformUtils } from '@beauty-saas/web-config';
+import { PlatformUtils } from '@beauty-saas/web-config';
 // Core
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, Optional, PLATFORM_ID } from '@angular/core';
@@ -28,8 +28,8 @@ import { ErrorService } from '@beauty-saas/web-core/http';
 import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 import { StorageService } from '@beauty-saas/web-core/http';
 import type { PlatformUtils } from '@beauty-saas/web-config';
-import type { AuthUser } from '../../services/auth.service';
-import { AuthService } from '../../services/auth.service';
+import { LoginService } from './login.service';
+import type { PartnerAuthUser } from '../../tokens/login.tokens';
 
 import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
 
@@ -108,7 +108,6 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
       console.error('Error logging to error service:', e);
     }
   }
-  // User type for multi-role support
 
   constructor(
     @Inject(PLATFORM_UTILS_TOKEN) protected platformUtils: PlatformUtils,
@@ -118,7 +117,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     @Optional() @Inject(TranslateService) private translate: TranslateService,
     protected override errorService: ErrorService,
     @Inject(StorageService) private storageService: StorageService,
-    @Inject(AuthService) private authService: AuthService,
+    @Inject(LoginService) private loginService: LoginService,
     @Inject(PLATFORM_ID) private platformId: object,
     @Optional() @Inject('SSR_DEBUG') private ssrDebug: any,
   ) {
@@ -226,7 +225,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
       }
     }
 
-    this.authService
+    this.loginService
       .initLogin(this.loginForm.value)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -264,11 +263,11 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
 
     const otp: string = this.otpForm.value.otp || '';
 
-    this.authService
+    this.loginService
       .verifyOtp({ email: this.loginForm.value.email, otp, type: 'login' })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: async (user: AuthUser) => {
+        next: async (user: PartnerAuthUser) => {
           if (!user) {
             this.error = 'Login failed: No response from server.';
             this.loading = false;
@@ -278,7 +277,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           // Store token if available (browser only)
           if (this.isBrowser && user.accessToken) {
             try {
-              await firstValueFrom(this.storageService.setItem$('authToken', user.accessToken));
+              await firstValueFrom(this.storageService.setItem$('access_token', user.accessToken));
             } catch (error) {
               console.warn('Failed to store auth token:', error);
             }
@@ -324,7 +323,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     this.startResendCountdown(60);
 
     // Call your OTP resend API here
-    this.authService
+    this.loginService
       .resendOtp(this.loginForm.value.email)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -353,7 +352,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     this.loading = true;
     this.error = null;
 
-    this.authService
+    this.loginService
       .resendOtp(email)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -383,7 +382,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     // In a real app, you would get the token from the OAuth provider's response
     const oauthToken = 'simulated-oauth-token';
 
-    this.authService
+    this.loginService
       .socialLogin(provider, oauthToken)
       .pipe(takeUntil(this.destroy$))
       .subscribe(
@@ -391,7 +390,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           try {
             if (res.token) {
               if (this.isBrowser) {
-                localStorage.setItem('authToken', res.token);
+                localStorage.setItem('access_token', res.token);
 
                 // Store user data if available
                 if (res.user) {
