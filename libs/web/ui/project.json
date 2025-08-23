@@ -1,11 +1,15 @@
 {
   "name": "ui",
-  "sourceRoot": "libs/ui/src",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/web/ui/src",
+  "projectType": "library",
+  "prefix": "beauty-saas",
+  "tags": ["type:lib", "platform:web", "scope:ui"],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["libs/ui/**/*.ts", "libs/ui/**/*.html"]
+        "lintFilePatterns": ["libs/web/ui/**/*.ts", "libs/web/ui/**/*.html"]
       }
     },
     "build": {
@@ -14,32 +18,29 @@
       "executor": "@nx/angular:package",
       "configurations": {
         "development": {
-          "tsConfig": "libs/ui/tsconfig.lib.json"
+          "tsConfig": "libs/web/ui/tsconfig.lib.json"
         },
         "production": {
-          "tsConfig": "libs/ui/tsconfig.lib.prod.json"
+          "tsConfig": "libs/web/ui/tsconfig.lib.prod.json"
         }
       },
       "options": {
-        "project": "libs/ui/ng-package.json"
+        "project": "libs/web/ui/ng-package.json"
       }
     },
     "type-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p libs/ui/tsconfig.lib.json --noEmit"
+        "command": "tsc -p libs/web/ui/tsconfig.lib.json --noEmit"
       }
     },
     "test": {
-      "outputs": ["{workspaceRoot}/coverage/libs/ui"],
+      "outputs": ["{workspaceRoot}/coverage/libs/web/ui"],
       "executor": "@nx/jest:jest",
       "options": {
         "passWithNoTests": true,
         "jestConfig": "jest.preset.ts"
       }
     }
-  },
-  "projectType": "library",
-  "tags": ["type:lib", "platform:web", "scope:ui"],
-  "prefix": "beauty-saas"
+  }
 }
