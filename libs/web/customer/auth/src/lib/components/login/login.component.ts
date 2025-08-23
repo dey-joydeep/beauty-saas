@@ -1,4 +1,3 @@
-import { PlatformUtils } from '@beauty-saas/web-config';
 // Core
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, Optional, PLATFORM_ID } from '@angular/core';
@@ -21,7 +20,7 @@ import { firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 // Translate
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 // Services
 import { ErrorService } from '@beauty-saas/web-core/http';
@@ -81,7 +80,6 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   // Private state
   private resendTimer: any;
   private returnUrl = '';
-  private countdownInterval: any;
 
   // Debug logging helper methods
   private logDebug(message: string, data?: any) {
@@ -114,7 +112,6 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     @Inject(FormBuilder) private fb: FormBuilder,
     @Inject(Router) private router: Router,
     @Inject(ActivatedRoute) private route: ActivatedRoute,
-    @Optional() @Inject(TranslateService) private translate: TranslateService,
     protected override errorService: ErrorService,
     @Inject(StorageService) private storageService: StorageService,
     @Inject(LoginService) private loginService: LoginService,
@@ -171,9 +168,8 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   public override async ngOnInit(): Promise<void> {
     super.ngOnInit();
 
-    // Check for redirect URL
-    const navigation = this.router.getCurrentNavigation();
-    this.returnUrl = navigation?.extras?.state?.['returnUrl'] || '/dashboard';
+    // Read returnUrl from query params (set by guards)
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
 
     // Load saved email if in browser environment
     if (this.isBrowser) {
@@ -210,7 +206,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     this.loading = true;
     this.error = null;
 
-    const { email, password, rememberMe } = this.loginForm.value;
+    const { email, rememberMe } = this.loginForm.value as { email: string; rememberMe: boolean };
 
     // Save email to storage if rememberMe is checked (browser only)
     if (this.isBrowser) {
@@ -239,7 +235,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           } else if (res.userType === 'customer') {
             // No OTP required, login complete
             this.loading = false;
-            this.router.navigate(['/dashboard']);
+            this.router.navigateByUrl(this.returnUrl);
           } else {
             this.loading = false;
             this.error = 'Unknown user type';
@@ -284,7 +280,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           }
 
           this.loading = false;
-          this.router.navigate(['/dashboard']);
+          this.router.navigateByUrl(this.returnUrl);
         },
         error: (error: any) => {
           this.loading = false;
@@ -322,17 +318,17 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     // Reset cooldown
     this.startResendCountdown(60);
 
-    // Call your OTP resend API here
+    // Re-initiate login to trigger OTP resend
     this.loginService
-      .resendOtp(this.loginForm.value.email)
+      .initLogin(this.loginForm.value)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           // OTP resent successfully
           this.error = null;
         },
-        error: (err) => {
-          this.error = this.errorService.getErrorMessage(err);
+        error: (err: unknown) => {
+          this.error = this.errorService.getErrorMessage(err as any);
         },
       });
   }
@@ -352,8 +348,9 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     this.loading = true;
     this.error = null;
 
+    // Re-initiate login to trigger OTP resend
     this.loginService
-      .resendOtp(email)
+      .initLogin(this.loginForm.value)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -361,10 +358,10 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           this.error = null;
           this.startResendCountdown(60);
         },
-        error: (err) => {
+        error: (err: unknown) => {
           this.loading = false;
           this.error = 'An error occurred while resending OTP. Please try again.';
-          this.errorService.handleError(err);
+          this.errorService.handleError(err as any);
         },
       });
   }
@@ -399,9 +396,9 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
               }
 
               // Redirect to dashboard or intended URL
-              const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'] || '/dashboard';
-              this.logDebug('Redirecting to:', returnUrl);
-              this.router.navigateByUrl(returnUrl);
+              const target = this.returnUrl || '/dashboard';
+              this.logDebug('Redirecting to:', target);
+              this.router.navigateByUrl(target);
             } else {
               this.error = 'Authentication failed. Please try again.';
               this.logError('Authentication failed:', this.error);

@@ -1,4 +1,3 @@
-import { PlatformUtils } from '@beauty-saas/web-config';
 // Core
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, Optional, PLATFORM_ID } from '@angular/core';
@@ -21,7 +20,7 @@ import { firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 // Translate
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 // Services
 import { ErrorService } from '@beauty-saas/web-core/http';
@@ -81,7 +80,6 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   // Private state
   private resendTimer: any;
   private returnUrl = '';
-  private countdownInterval: any;
 
   // Debug logging helper methods
   private logDebug(message: string, data?: any) {
@@ -92,29 +90,18 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     }
   }
 
-  private logError(message: string, error: any) {
-    if (this.ssrDebug?.error) {
-      this.ssrDebug.error(`[LoginComponent] ${message}`, error);
-    } else if (this.isBrowser) {
-      console.error(`[LoginComponent] ${message}`, error);
-    }
-
-    // Also log to error service if available
-    try {
-      if (this.errorService) {
-        this.errorService.handleError(error);
-      }
-    } catch (e) {
-      console.error('Error logging to error service:', e);
-    }
+  // Social login handler (stub). Replace with real token retrieval and API call when available.
+  loginWithSocial(_provider: 'google' | 'facebook'): void {
+    this.error = 'Social login is not implemented yet.';
   }
+
+  // Removed unused logError() to satisfy noUnusedLocals
 
   constructor(
     @Inject(PLATFORM_UTILS_TOKEN) protected platformUtils: PlatformUtils,
     @Inject(FormBuilder) private fb: FormBuilder,
     @Inject(Router) private router: Router,
     @Inject(ActivatedRoute) private route: ActivatedRoute,
-    @Optional() @Inject(TranslateService) private translate: TranslateService,
     protected override errorService: ErrorService,
     @Inject(StorageService) private storageService: StorageService,
     @Inject(LoginService) private loginService: LoginService,
@@ -171,9 +158,8 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   public override async ngOnInit(): Promise<void> {
     super.ngOnInit();
 
-    // Check for redirect URL
-    const navigation = this.router.getCurrentNavigation();
-    this.returnUrl = navigation?.extras?.state?.['returnUrl'] || '/dashboard';
+    // Read returnUrl from query params (set by guards)
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
 
     // Load saved email if in browser environment
     if (this.isBrowser) {
@@ -210,7 +196,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     this.loading = true;
     this.error = null;
 
-    const { email, password, rememberMe } = this.loginForm.value;
+    const { email, rememberMe } = this.loginForm.value as { email: string; rememberMe: boolean };
 
     // Save email to storage if rememberMe is checked (browser only)
     if (this.isBrowser) {
@@ -239,7 +225,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           } else if (res.userType === 'customer') {
             // No OTP required, login complete
             this.loading = false;
-            this.router.navigate(['/dashboard']);
+            this.router.navigateByUrl(this.returnUrl);
           } else {
             this.loading = false;
             this.error = 'Unknown user type';
@@ -284,7 +270,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           }
 
           this.loading = false;
-          this.router.navigate(['/dashboard']);
+          this.router.navigateByUrl(this.returnUrl);
         },
         error: (error: any) => {
           this.loading = false;
@@ -322,17 +308,17 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     // Reset cooldown
     this.startResendCountdown(60);
 
-    // Call your OTP resend API here
+    // Re-initiate login to trigger OTP resend
     this.loginService
-      .resendOtp(this.loginForm.value.email)
+      .initLogin(this.loginForm.value)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           // OTP resent successfully
           this.error = null;
         },
-        error: (err) => {
-          this.error = this.errorService.getErrorMessage(err);
+        error: (err: unknown) => {
+          this.error = this.errorService.getErrorMessage(err as any);
         },
       });
   }
@@ -352,8 +338,9 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     this.loading = true;
     this.error = null;
 
+    // Re-initiate login to trigger OTP resend
     this.loginService
-      .resendOtp(email)
+      .initLogin(this.loginForm.value)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -361,67 +348,12 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           this.error = null;
           this.startResendCountdown(60);
         },
-        error: (err) => {
+        error: (err: unknown) => {
           this.loading = false;
           this.error = 'An error occurred while resending OTP. Please try again.';
-          this.errorService.handleError(err);
+          this.errorService.handleError(err as any);
         },
       });
-  }
-
-  /**
-   * Handle social login button clicks
-   * @param provider The social provider to use for login
-   */
-  loginWithSocial(provider: 'google' | 'facebook'): void {
-    this.loading = true;
-    this.error = null;
-
-    // In a real implementation, this would open a popup or redirect to the provider's OAuth page
-    // and return an OAuth token. For now, we'll simulate the OAuth flow with a delay
-    // In a real app, you would get the token from the OAuth provider's response
-    const oauthToken = 'simulated-oauth-token';
-
-    this.loginService
-      .socialLogin(provider, oauthToken)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (res: any) => {
-          try {
-            if (res.token) {
-              if (this.isBrowser) {
-                localStorage.setItem('access_token', res.token);
-
-                // Store user data if available
-                if (res.user) {
-                  localStorage.setItem('user', JSON.stringify(res.user));
-                }
-              }
-
-              // Redirect to dashboard or intended URL
-              const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'] || '/dashboard';
-              this.logDebug('Redirecting to:', returnUrl);
-              this.router.navigateByUrl(returnUrl);
-            } else {
-              this.error = 'Authentication failed. Please try again.';
-              this.logError('Authentication failed:', this.error);
-            }
-          } catch (error) {
-            this.logError('Error in social login:', error);
-            this.error = 'An error occurred during login';
-          } finally {
-            this.loading = false;
-          }
-        },
-        (err: any) => {
-          this.loading = false;
-          this.error = err.error?.error || 'Social login failed';
-          this.logError('Social login error:', this.error);
-          if (this.errorService) {
-            this.errorService.handleError(err);
-          }
-        },
-      );
   }
 }
 
