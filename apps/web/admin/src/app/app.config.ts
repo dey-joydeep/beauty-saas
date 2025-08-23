@@ -48,8 +48,9 @@ import {
   ssrInterceptor,
   ssrTranslateInterceptor,
 } from '@beauty-saas/web-core/http';
-import { AUTH_STATE_PORT } from '@beauty-saas/web-core/auth';
+import { AUTH_STATE_PORT, CURRENT_USER } from '@beauty-saas/web-core/auth';
 import { AuthService } from './core/auth/services/auth.service';
+import { CurrentUserAdapter } from './core/auth/services/current-user.adapter';
 
 // AoT requires an exported function for factories
 export function httpLoaderFactory(http: HttpClient) {
@@ -118,5 +119,6 @@ export const appConfig: ApplicationConfig = {
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
     { provide: ErrorHandler, useClass: ErrorHandlerService },
     { provide: AUTH_STATE_PORT, useExisting: AuthService },
+    { provide: CURRENT_USER, useExisting: CurrentUserAdapter },
   ],
 };

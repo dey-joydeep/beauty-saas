@@ -3,10 +3,7 @@ import { Inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { StorageService } from '@beauty-saas/web-core/http';
 import { BehaviorSubject, Subject, timer } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, takeUntil } from 'rxjs/operators';
-import { User } from '../../../models/user.model';
-import { AUTH_STATE_PORT, type AuthStatePort } from '../ports/auth-state.port';
-
-export type { User }; // Re-export User type for isolatedModules
+import { AUTH_STATE_PORT, type AuthStatePort, type BaseAuthUser } from '../ports/auth-state.port';
 
 const USER_STORAGE_KEY = 'current_user';
 
@@ -14,7 +11,7 @@ const USER_STORAGE_KEY = 'current_user';
   providedIn: 'root',
 })
 export class CurrentUserService implements OnDestroy {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private currentUserSubject = new BehaviorSubject<BaseAuthUser | null>(null);
   private destroy$ = new Subject<void>();
 
   // Store the URL to redirect to after login
@@ -36,11 +33,7 @@ export class CurrentUserService implements OnDestroy {
     distinctUntilChanged(),
   );
 
-  // Public observable of the current user's role
-  public currentUserRole$ = this.currentUser$.pipe(
-    map((user) => user?.role || null),
-    distinctUntilChanged(),
-  );
+  // Role helpers are app-specific and not part of core BaseAuthUser
 
   // Public observable of the current user's authentication status
   public isAuthenticated$ = this.currentUser$.pipe(
@@ -58,6 +51,45 @@ export class CurrentUserService implements OnDestroy {
       // Load user from storage on init
       this.loadUserFromStorage();
 
+      // Prefer app-provided current user stream if available
+      if (this.authState.currentUser$) {
+        this.authState.currentUser$
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (user: BaseAuthUser | null) => {
+              this.currentUserSubject.next(user);
+              if (user) {
+                this.storage.setItem$(USER_STORAGE_KEY, user).subscribe({
+                  error: (error) => console.error('Error saving user to storage:', error),
+                });
+              } else {
+                this.storage.removeItem$(USER_STORAGE_KEY).subscribe({
+                  error: (error) => console.error('Error removing user from storage:', error),
+                });
+              }
+            },
+            error: (error: any) => console.error('Error in currentUser$ stream:', error),
+          });
+      } else {
+        // Fallback: if authenticated and getCurrentUser available, hydrate once
+        Promise.resolve(this.authState.isAuthenticated())
+          .then((authed) => {
+            if (authed && this.authState.getCurrentUser) {
+              return this.authState.getCurrentUser();
+            }
+            return null;
+          })
+          .then((user) => {
+            if (user) {
+              this.currentUserSubject.next(user);
+              this.storage.setItem$(USER_STORAGE_KEY, user).subscribe({
+                error: (error) => console.error('Error saving user to storage:', error),
+              });
+            }
+          })
+          .catch((error) => console.error('Error hydrating current user:', error));
+      }
+
       // Set up authentication state subscription
       this.setupAuthState();
     }
@@ -71,7 +103,7 @@ export class CurrentUserService implements OnDestroy {
   /**
    * Get the current user synchronously
    */
-  get currentUser(): User | null {
+  get currentUser(): BaseAuthUser | null {
     return this.currentUserSubject.value;
   }
 
@@ -83,39 +115,16 @@ export class CurrentUserService implements OnDestroy {
   }
 
   /**
-   * Get the current user's role synchronously
-   */
-  get currentUserRole(): string | null {
-    return this.currentUser?.role || null;
-  }
-
-  /**
-   * Check if the current user has a specific role
-   * @param role The role to check for
-   */
-  hasRole(role: string): boolean {
-    return this.currentUser?.role === role;
-  }
-
-  /**
-   * Check if the current user has any of the specified roles
-   * @param roles The roles to check for
-   */
-  hasAnyRole(roles: string[]): boolean {
-    return roles.some((role) => this.hasRole(role));
-  }
-
-  /**
    * Update the current user
    * @param user The updated user object
    */
-  updateUser(user: Partial<User>): void {
+  updateUser(user: Partial<BaseAuthUser>): void {
     if (!this.currentUser) {
       console.warn('Cannot update user: no user is currently logged in');
       return;
     }
 
-    const updatedUser = { ...this.currentUser, ...user } as User;
+    const updatedUser = { ...this.currentUser, ...user } as BaseAuthUser;
     this.currentUserSubject.next(updatedUser);
     // Use setItem$ which returns an Observable and handle subscription
     this.storage.setItem$(USER_STORAGE_KEY, updatedUser).subscribe({
@@ -176,7 +185,17 @@ export class CurrentUserService implements OnDestroy {
       if (!isAuthenticated) {
         this.clearUser();
       } else if (!this.currentUser) {
-        // If authenticated but no user data, try to load from storage
+        // If authenticated but no user data, prefer port accessors then storage
+        if (this.authState.getCurrentUser) {
+          const user = await this.authState.getCurrentUser();
+          if (user) {
+            this.currentUserSubject.next(user);
+            this.storage.setItem$(USER_STORAGE_KEY, user).subscribe({
+              error: (error) => console.error('Error saving user to storage:', error),
+            });
+            return;
+          }
+        }
         this.loadUserFromStorage();
       }
     } catch (error) {
@@ -190,13 +209,13 @@ export class CurrentUserService implements OnDestroy {
    */
   private loadUserFromStorage(): void {
     this.storage
-      .getItem$<User>(USER_STORAGE_KEY)
+      .getItem$<BaseAuthUser>(USER_STORAGE_KEY)
       .pipe(
-        filter((user: User | null): user is User => user !== null),
+        filter((user: BaseAuthUser | null): user is BaseAuthUser => user !== null),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (user: User) => {
+        next: (user: BaseAuthUser) => {
           if (user) {
             this.currentUserSubject.next(user);
           }

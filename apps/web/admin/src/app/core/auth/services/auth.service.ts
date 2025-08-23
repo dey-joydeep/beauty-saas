@@ -7,9 +7,9 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 import { NotificationService } from '@beauty-saas/web-core/http';
 import { StorageService } from '@beauty-saas/web-core/http';
+import type { AuthStatePort, BaseAuthUser } from '@beauty-saas/web-core/auth';
 
-export interface AuthUser {
-  id: string;
+export interface AuthUser extends BaseAuthUser {
   email: string;
   name: string;
   role: string;
@@ -69,7 +69,7 @@ export interface ApiResponse<T = any> {
 }
 
 @Injectable({ providedIn: 'root' })
-export class AuthService {
+export class AuthService implements AuthStatePort {
   private readonly apiUrl = '/api/auth';
   private readonly TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
@@ -78,7 +78,7 @@ export class AuthService {
 
   private readonly isBrowser: boolean;
   private currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
-  public readonly currentUser$ = this.currentUserSubject.asObservable();
+  public readonly currentUser$: Observable<AuthUser | null> = this.currentUserSubject.asObservable();
   private refreshTokenInterval: any = null;
 
   constructor(
@@ -94,6 +94,13 @@ export class AuthService {
       this.initializeAuthState();
       this.setupTokenRefresh();
     }
+  }
+
+  // Expose minimal current user to core via AuthStatePort
+  getCurrentUser(): BaseAuthUser | null {
+    const u = this.currentUserSubject.value;
+    if (!u) return null;
+    return { id: u.id };
   }
 
   login(credentials: LoginCredentials): Observable<AuthUser> {

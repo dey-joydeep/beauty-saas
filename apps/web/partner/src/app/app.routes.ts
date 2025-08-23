@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '@beauty-saas/web-core/auth';
+import { authGuard, roleGuard } from '@beauty-saas/web-core/auth';
 import { HomeComponent } from './modules/home/home.component';
 
 export const routes: Routes = [
@@ -47,7 +47,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () => import('./modules/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
     data: { roles: ['admin'] },
   },
 

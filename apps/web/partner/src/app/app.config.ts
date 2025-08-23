@@ -9,7 +9,7 @@ import {
 import { ApplicationConfig, ErrorHandler, importProvidersFrom } from '@angular/core';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
 import { TranslateLoader, TranslateModule, TranslateStore } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
@@ -40,17 +40,17 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 // App imports
-import { routes } from './app.routes';
+import { AUTH_STATE_PORT, CURRENT_USER } from '@beauty-saas/web-core/auth';
 import {
-  ErrorHandlerService,
   ERROR_INTERCEPTOR_PROVIDER,
+  ErrorHandlerService,
   loadingInterceptor,
   ssrInterceptor,
   ssrTranslateInterceptor,
 } from '@beauty-saas/web-core/http';
-import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
-import { AUTH_STATE_PORT } from '@beauty-saas/web-core/auth';
+import { routes } from './app.routes';
 import { AuthService } from './core/auth/services/auth.service';
+import { CurrentUserAdapter } from './core/auth/services/current-user.adapter';
 
 // AoT requires an exported function for factories
 export function httpLoaderFactory(http: HttpClient) {
@@ -121,5 +121,6 @@ export const appConfig: ApplicationConfig = {
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
     { provide: ErrorHandler, useClass: ErrorHandlerService },
     { provide: AUTH_STATE_PORT, useExisting: AuthService },
+    { provide: CURRENT_USER, useExisting: CurrentUserAdapter },
   ],
 };
