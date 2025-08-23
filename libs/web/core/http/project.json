@@ -36,14 +36,17 @@
             }
         },
         "build": {
-            "outputs": [
-                "{workspaceRoot}/dist/{projectRoot}"
-            ],
             "executor": "@nx/angular:package",
+            "outputs": [
+                "{projectRoot}/dist"
+            ],
             "options": {
                 "tsConfig": "libs/web/core/http/tsconfig.lib.json",
                 "project": "libs/web/core/http/ng-package.json"
-            }
+            },
+            "dependsOn": [
+                "^build"
+            ]
         }
     }
 }

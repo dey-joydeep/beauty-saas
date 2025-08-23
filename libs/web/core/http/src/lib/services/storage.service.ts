@@ -24,7 +24,7 @@ export class StorageService {
   private initialized = false;
   private storageType: StorageType = 'memory';
 
-  constructor(@Inject(PLATFORM_ID) platformId: Object, @Optional() @Inject(PLATFORM_UTILS_TOKEN) platformUtils: PlatformUtils | null) {
+  constructor(@Inject(PLATFORM_ID) platformId: object, @Optional() @Inject(PLATFORM_UTILS_TOKEN) platformUtils: PlatformUtils | null) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.platformUtils = platformUtils;
 

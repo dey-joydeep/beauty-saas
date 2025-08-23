@@ -2,19 +2,14 @@
     "extends": "../../../../tsconfig.base.json",
     "compilerOptions": {
         "baseUrl": "../../../../",
-        "paths": {
-            "@beauty-saas/web-config": [
-                "libs/web/config/dist/index.d.ts"
-            ],
-            "@beauty-saas/web-config/*": [
-                "libs/web/config/dist/*"
-            ]
-        },
         "outDir": "../../../../dist/out-tsc/libs/web/core/http",
         "declaration": true,
         "declarationMap": true,
         "inlineSources": true,
         "types": []
+    },
+    "angularCompilerOptions": {
+        "compilationMode": "partial"
     },
     "exclude": [
         "src/test-setup.ts",

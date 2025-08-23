@@ -19,13 +19,16 @@
         },
         "build": {
             "outputs": [
-                "{workspaceRoot}/dist/{projectRoot}"
+                "{projectRoot}/dist"
             ],
             "executor": "@nx/angular:package",
             "options": {
                 "tsConfig": "libs/web/customer/auth/tsconfig.lib.json",
                 "project": "libs/web/customer/auth/ng-package.json"
-            }
+            },
+            "dependsOn": [
+                "^build"
+            ]
         }
     },
     "tags": [

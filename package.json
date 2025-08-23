@@ -7,6 +7,7 @@
         "apps/*",
         "libs/*"
     ],
+    "packageManager": "npm@10.8.2",
     "scripts": {
         "postinstall": "node scripts/check-versions/node-version.js",
         "dev:admin": "nx serve admin",
@@ -14,6 +15,7 @@
         "dev:partner": "nx serve partner",
         "dev:api": "nx serve api",
         "build": "nx run-many --target=build --all",
+        "build:libs": "nx run-many -t build -p web-config,web-core-http,web-core-auth,admin-auth,customer-auth,partner-auth --skip-nx-cache",
         "build:prod": "nx run-many --target=build --all --configuration=production",
         "build:affected": "nx affected:build",
         "build:admin": "nx build admin",
@@ -115,6 +117,12 @@
         "@angular/ssr": "^20.2.0"
     },
     "dependencies": {
+        "@beauty-saas/web-config": "file:dist/libs/web/config",
+        "@beauty-saas/web-core-http": "file:dist/libs/web/core/http",
+        "@beauty-saas/web-core-auth": "file:dist/libs/web/core/auth",
+        "@beauty-saas/web-admin-auth": "file:dist/libs/web/admin/auth",
+        "@beauty-saas/web-customer-auth": "file:dist/libs/web/customer/auth",
+        "@beauty-saas/web-partner-auth": "file:dist/libs/web/partner/auth",
         "@angular/animations": "20.1.6",
         "@angular/cdk": "20.1.5",
         "@angular/common": "20.1.6",

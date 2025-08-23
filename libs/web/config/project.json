@@ -14,10 +14,10 @@
             "executor": "@nx/eslint:lint"
         },
         "build": {
-            "outputs": [
-                "{workspaceRoot}/dist/{projectRoot}"
-            ],
             "executor": "@nx/angular:package",
+            "outputs": [
+                "{projectRoot}/dist"
+            ],
             "options": {
                 "tsConfig": "libs/web/config/tsconfig.lib.json",
                 "project": "libs/web/config/ng-package.json"

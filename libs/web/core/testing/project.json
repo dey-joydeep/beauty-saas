@@ -24,13 +24,16 @@
         },
         "build": {
             "outputs": [
-                "{workspaceRoot}/dist/{projectRoot}"
+                "{projectRoot}/dist"
             ],
             "executor": "@nx/angular:package",
             "options": {
                 "tsConfig": "libs/web/core/testing/tsconfig.lib.json",
                 "project": "libs/web/core/testing/ng-package.json"
-            }
+            },
+            "dependsOn": [
+                "^build"
+            ]
         }
     }
 }
