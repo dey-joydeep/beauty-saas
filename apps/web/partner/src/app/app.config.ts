@@ -49,6 +49,8 @@ import {
   ssrTranslateInterceptor,
 } from '@beauty-saas/web-core/http';
 import { routes } from './app.routes';
+import { LOGIN_API, AUTH_STATE_SETTER } from '@beauty-saas/web-partner-auth';
+import { LoginApiService } from '@beauty-saas/web-partner-auth';
 import { AuthService } from './core/auth/services/auth.service';
 import { CurrentUserAdapter } from './core/auth/services/current-user.adapter';
 
@@ -121,6 +123,8 @@ export const appConfig: ApplicationConfig = {
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
     { provide: ErrorHandler, useClass: ErrorHandlerService },
     { provide: AUTH_STATE_PORT, useExisting: AuthService },
+    { provide: LOGIN_API, useClass: LoginApiService },
+    { provide: AUTH_STATE_SETTER, useExisting: AuthService },
     { provide: CURRENT_USER, useExisting: CurrentUserAdapter },
   ],
 };
