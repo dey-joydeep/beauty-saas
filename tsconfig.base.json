@@ -49,28 +49,25 @@
                 "libs/ui/src/*"
             ],
             "@beauty-saas/web-admin/auth": [
-                "libs/web/admin/auth/src/index.ts"
+                "libs/web/admin/auth/dist"
             ],
             "@beauty-saas/web-config": [
                 "libs/web/config/dist"
             ],
-            "@beauty-saas/web-config/*": [
-                "libs/web/config/dist/*"
-            ],
             "@beauty-saas/web-core/auth": [
-                "libs/web/core/auth/src/index.ts"
+                "libs/web/core/auth/dist"
             ],
             "@beauty-saas/web-core/http": [
-                "libs/web/core/http/src/index.ts"
+                "libs/web/core/http/dist"
             ],
             "@beauty-saas/web-core/testing": [
-                "libs/web/core/testing/src/index.ts"
+                "libs/web/core/testing/dist"
             ],
             "@beauty-saas/web-customer/auth": [
-                "libs/web/customer/auth/src/index.ts"
+                "libs/web/customer/auth/dist"
             ],
             "@beauty-saas/web-partner/auth": [
-                "libs/web/partner/auth/src/index.ts"
+                "libs/web/partner/auth/dist"
             ]
         },
         "types": [
