@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -9,7 +9,6 @@ import {
   AbstractControl,
   ValidationErrors,
   ValidatorFn,
-  FormGroupDirective,
 } from '@angular/forms';
 
 // Angular Material Modules
@@ -21,8 +20,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 // Translation
 import { TranslateModule } from '@ngx-translate/core';
 
-// Services
-import { AuthService } from '../../services/auth.service';
+// Tokens
+import { FORGOT_PASSWORD_API, type ForgotPasswordApiPort } from '../../tokens/password.tokens';
 
 // Interfaces
 interface ForgotPasswordForm {
@@ -58,7 +57,7 @@ export class ForgotPasswordComponent {
 
   constructor(
     private fb: FormBuilder,
-    @Inject(AuthService) private authService: AuthService,
+    @Optional() @Inject(FORGOT_PASSWORD_API) private forgotApi: ForgotPasswordApiPort | null,
   ) {
     // Initialize Forgot Password Form
     this.forgotForm = this.fb.group<ForgotPasswordForm>({
@@ -101,7 +100,13 @@ export class ForgotPasswordComponent {
       return;
     }
 
-    this.authService.requestPasswordReset(email).subscribe({
+    if (!this.forgotApi) {
+      this.loading = false;
+      this.error = 'Password reset service not configured.';
+      return;
+    }
+
+    this.forgotApi.requestPasswordReset(email).subscribe({
       next: (success: boolean) => {
         this.loading = false;
         if (success) {
@@ -111,9 +116,10 @@ export class ForgotPasswordComponent {
           this.error = 'Failed to send reset instructions.';
         }
       },
-      error: (err) => {
+      error: (err: unknown) => {
         this.loading = false;
-        this.error = err.message || 'An error occurred. Please try again.';
+        const msg = (err as any)?.message || 'An error occurred. Please try again.';
+        this.error = msg;
       },
     });
   }
@@ -132,7 +138,13 @@ export class ForgotPasswordComponent {
     }
 
     // Use the OTP as the token for password reset
-    this.authService.resetPassword(otp, newPassword).subscribe({
+    if (!this.forgotApi) {
+      this.loading = false;
+      this.error = 'Password reset service not configured.';
+      return;
+    }
+
+    this.forgotApi.resetPassword(otp, newPassword).subscribe({
       next: (success: boolean) => {
         this.loading = false;
         if (success) {
@@ -143,9 +155,10 @@ export class ForgotPasswordComponent {
           this.error = 'Failed to reset password. The OTP may be invalid or expired.';
         }
       },
-      error: (err) => {
+      error: (err: unknown) => {
         this.loading = false;
-        this.error = err.message || 'Invalid OTP or password.';
+        const msg = (err as any)?.message || 'Invalid OTP or password.';
+        this.error = msg;
       },
     });
   }

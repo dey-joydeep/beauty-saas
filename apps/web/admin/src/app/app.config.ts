@@ -10,6 +10,7 @@ import { ApplicationConfig, ErrorHandler, importProvidersFrom } from '@angular/c
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { map } from 'rxjs/operators';
 import { TranslateLoader, TranslateModule, TranslateStore } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
@@ -49,7 +50,7 @@ import {
   ssrTranslateInterceptor,
 } from '@beauty-saas/web-core/http';
 import { AUTH_STATE_PORT, CURRENT_USER } from '@beauty-saas/web-core/auth';
-import { LOGIN_API, AUTH_STATE_SETTER } from '@beauty-saas/web-admin/auth';
+import { LOGIN_API, AUTH_STATE_SETTER, FORGOT_PASSWORD_API, REGISTER_API, type ForgotPasswordApiPort, type RegisterApiPort } from '@beauty-saas/web-admin/auth';
 import { AuthService } from './core/auth/services/auth.service';
 import { AuthApiService } from './core/auth/services/auth-api.service';
 import { CurrentUserAdapter } from './core/auth/services/current-user.adapter';
@@ -124,5 +125,22 @@ export const appConfig: ApplicationConfig = {
     { provide: CURRENT_USER, useExisting: CurrentUserAdapter },
     { provide: LOGIN_API, useExisting: AuthApiService },
     { provide: AUTH_STATE_SETTER, useExisting: AuthService },
+    // Bridge library tokens to app services
+    {
+      provide: FORGOT_PASSWORD_API,
+      useFactory: (api: AuthApiService): ForgotPasswordApiPort => ({
+        requestPasswordReset: (email: string) => api.requestPasswordReset(email).pipe(map((r) => !!r?.success)),
+        resetPassword: (token: string, newPassword: string) => api.resetPassword(token, newPassword).pipe(map((r) => !!r?.success)),
+      }),
+      deps: [AuthApiService],
+    },
+    {
+      provide: REGISTER_API,
+      useFactory: (): RegisterApiPort => ({
+        // TODO: Replace with real registration API when available
+        register: async () => Promise.resolve(),
+      }),
+      deps: [],
+    },
   ],
 };

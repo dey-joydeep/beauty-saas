@@ -1,7 +1,6 @@
-﻿import { PlatformUtils } from '@beauty-saas/web-config';
-// Core
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, Optional, PLATFORM_ID } from '@angular/core';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
@@ -21,14 +20,14 @@ import { firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 // Translate
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 // Services
 import { ErrorService } from '@beauty-saas/web-core/http';
 import { PLATFORM_UTILS_TOKEN, type PlatformUtils } from '@beauty-saas/web-config';
 import { StorageService } from '@beauty-saas/web-core/http';
-import type { AuthUser } from '../../services/auth.service';
-import { AuthService } from '../../services/auth.service';
+import type { AdminAuthUser } from '../../tokens/login.tokens';
+import { LoginService } from './login.service';
 
 import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
 
@@ -75,12 +74,10 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
   resendDisabled = false;
   countdown = 30;
   email = '';
-  userType: 'owner' | 'staff' | 'customer' | null = null;
 
   // Private state
   private resendTimer: any;
   private returnUrl = '';
-  private countdownInterval: any;
 
   // Debug logging helper methods
   private logDebug(message: string, data?: any) {
@@ -107,17 +104,15 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
       console.error('Error logging to error service:', e);
     }
   }
-  // User type for multi-role support
 
   constructor(
     @Inject(PLATFORM_UTILS_TOKEN) protected platformUtils: PlatformUtils,
     @Inject(FormBuilder) private fb: FormBuilder,
     @Inject(Router) private router: Router,
     @Inject(ActivatedRoute) private route: ActivatedRoute,
-    @Optional() @Inject(TranslateService) private translate: TranslateService,
     protected override errorService: ErrorService,
     @Inject(StorageService) private storageService: StorageService,
-    @Inject(AuthService) private authService: AuthService,
+    @Inject(LoginService) private loginService: LoginService,
     @Inject(PLATFORM_ID) private platformId: object,
     @Optional() @Inject('SSR_DEBUG') private ssrDebug: any,
   ) {
@@ -129,9 +124,6 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
       isBrowser: this.isBrowser,
       platformId: platformId.toString(),
     });
-
-    // Initialize userType to null
-    this.userType = null;
 
     // Initialize forms with default values
     this.loginForm = this.fb.group({
@@ -145,35 +137,11 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     });
   }
 
-  /**
-   * Initialize forms
-   */
-  private initForms(): void {
-    // Forms are already initialized in the constructor
-  }
-
-  /**
-   * Start OTP resend countdown
-   */
-  private startCountdown(): void {
-    this.resendDisabled = true;
-    this.countdown = 30;
-
-    const timer = setInterval(() => {
-      this.countdown--;
-      if (this.countdown <= 0) {
-        clearInterval(timer);
-        this.resendDisabled = false;
-      }
-    }, 1000);
-  }
-
   public override async ngOnInit(): Promise<void> {
     super.ngOnInit();
 
-    // Check for redirect URL
-    const navigation = this.router.getCurrentNavigation();
-    this.returnUrl = navigation?.extras?.state?.['returnUrl'] || '/dashboard';
+    // Read returnUrl from query params (set by guards)
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
 
     // Load saved email if in browser environment
     if (this.isBrowser) {
@@ -189,9 +157,6 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
         console.warn('Failed to load saved email:', error);
       }
     }
-
-    this.initForms();
-    this.startCountdown();
   }
 
   override ngOnDestroy() {
@@ -210,7 +175,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     this.loading = true;
     this.error = null;
 
-    const { email, password, rememberMe } = this.loginForm.value;
+    const { email, rememberMe } = this.loginForm.value as { email: string; rememberMe: boolean };
 
     // Save email to storage if rememberMe is checked (browser only)
     if (this.isBrowser) {
@@ -225,13 +190,11 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
       }
     }
 
-    this.authService
+    this.loginService
       .initLogin(this.loginForm.value)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: any) => {
-          this.userType = res.userType;
-
           if (res.userType === 'owner' || res.userType === 'staff') {
             // OTP required, move to OTP step
             this.step = 'otp';
@@ -239,7 +202,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           } else if (res.userType === 'customer') {
             // No OTP required, login complete
             this.loading = false;
-            this.router.navigate(['/dashboard']);
+            this.router.navigateByUrl(this.returnUrl);
           } else {
             this.loading = false;
             this.error = 'Unknown user type';
@@ -263,11 +226,11 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
 
     const otp: string = this.otpForm.value.otp || '';
 
-    this.authService
+    this.loginService
       .verifyOtp({ email: this.loginForm.value.email, otp, type: 'login' })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: async (user: AuthUser) => {
+        next: async (user: AdminAuthUser) => {
           if (!user) {
             this.error = 'Login failed: No response from server.';
             this.loading = false;
@@ -284,7 +247,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           }
 
           this.loading = false;
-          this.router.navigate(['/dashboard']);
+          this.router.navigateByUrl(this.returnUrl);
         },
         error: (error: any) => {
           this.loading = false;
@@ -322,17 +285,17 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     // Reset cooldown
     this.startResendCountdown(60);
 
-    // Call your OTP resend API here
-    this.authService
-      .resendOtp(this.loginForm.value.email)
+    // Re-initiate login to trigger OTP resend
+    this.loginService
+      .initLogin(this.loginForm.value)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           // OTP resent successfully
           this.error = null;
         },
-        error: (err) => {
-          this.error = this.errorService.getErrorMessage(err);
+        error: (err: unknown) => {
+          this.error = this.errorService.getErrorMessage(err as any);
         },
       });
   }
@@ -352,8 +315,9 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     this.loading = true;
     this.error = null;
 
-    this.authService
-      .resendOtp(email)
+    // Re-initiate login to trigger OTP resend
+    this.loginService
+      .initLogin(this.loginForm.value)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -361,10 +325,10 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
           this.error = null;
           this.startResendCountdown(60);
         },
-        error: (err) => {
+        error: (err: unknown) => {
           this.loading = false;
           this.error = 'An error occurred while resending OTP. Please try again.';
-          this.errorService.handleError(err);
+          this.errorService.handleError(err as any);
         },
       });
   }
@@ -382,7 +346,7 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
     // In a real app, you would get the token from the OAuth provider's response
     const oauthToken = 'simulated-oauth-token';
 
-    this.authService
+    this.loginService
       .socialLogin(provider, oauthToken)
       .pipe(takeUntil(this.destroy$))
       .subscribe(
@@ -399,9 +363,9 @@ export class LoginComponent extends AbstractBaseComponent implements OnInit, OnD
               }
 
               // Redirect to dashboard or intended URL
-              const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'] || '/dashboard';
-              this.logDebug('Redirecting to:', returnUrl);
-              this.router.navigateByUrl(returnUrl);
+              const target = this.returnUrl || '/dashboard';
+              this.logDebug('Redirecting to:', target);
+              this.router.navigateByUrl(target);
             } else {
               this.error = 'Authentication failed. Please try again.';
               this.logError('Authentication failed:', this.error);

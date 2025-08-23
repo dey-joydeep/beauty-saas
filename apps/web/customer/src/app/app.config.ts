@@ -12,6 +12,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
 import { TranslateLoader, TranslateModule, TranslateStore } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { of } from 'rxjs';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -43,6 +44,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { routes } from './app.routes';
 import { LOGIN_API, AUTH_STATE_SETTER } from '@beauty-saas/web-customer-auth';
 import { LoginApiService } from '@beauty-saas/web-customer-auth';
+import {
+  FORGOT_PASSWORD_API,
+  REGISTER_API,
+  type ForgotPasswordApiPort,
+  type RegisterApiPort,
+} from '@beauty-saas/web-customer-auth';
 import {
   ErrorHandlerService,
   ERROR_INTERCEPTOR_PROVIDER,
@@ -122,5 +129,32 @@ export const appConfig: ApplicationConfig = {
     { provide: AUTH_STATE_PORT, useExisting: AuthService },
     { provide: LOGIN_API, useClass: LoginApiService },
     { provide: AUTH_STATE_SETTER, useExisting: AuthService },
+    // Token-based auth APIs (temporary placeholder implementations)
+    {
+      provide: FORGOT_PASSWORD_API,
+      useFactory: (http: HttpClient): ForgotPasswordApiPort => {
+        // TODO: Replace with real API integration using a dedicated AuthApiService
+        return {
+          requestPasswordReset: () => {
+            // return http.post<ApiResponse<any>>('/api/auth/password/forgot', { email }).pipe(map(r => !!r.success));
+            return of(true);
+          },
+          resetPassword: () => {
+            // return http.post<ApiResponse<any>>('/api/auth/password/reset', { token, newPassword }).pipe(map(r => !!r.success));
+            return of(true);
+          },
+        } as ForgotPasswordApiPort;
+      },
+      deps: [HttpClient],
+    },
+    {
+      provide: REGISTER_API,
+      useFactory: (): RegisterApiPort => {
+        // TODO: Replace with real registration API integration
+        return {
+          register: async () => Promise.resolve(),
+        } as RegisterApiPort;
+      },
+    },
   ],
 };

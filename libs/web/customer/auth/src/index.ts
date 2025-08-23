@@ -6,3 +6,4 @@ export * from './lib/tokens/login.tokens';
 export * from './lib/models/auth.models';
 export * from './lib/components/login/login.service';
 export * from './lib/services/login.api';
+export * from './lib/tokens/password.tokens';

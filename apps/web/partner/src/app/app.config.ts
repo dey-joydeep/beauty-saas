@@ -12,6 +12,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
 import { TranslateLoader, TranslateModule, TranslateStore } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { of } from 'rxjs';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -51,6 +52,12 @@ import {
 import { routes } from './app.routes';
 import { LOGIN_API, AUTH_STATE_SETTER } from '@beauty-saas/web-partner-auth';
 import { LoginApiService } from '@beauty-saas/web-partner-auth';
+import {
+  FORGOT_PASSWORD_API,
+  REGISTER_API,
+  type ForgotPasswordApiPort,
+  type RegisterApiPort,
+} from '@beauty-saas/web-partner-auth';
 import { AuthService } from './core/auth/services/auth.service';
 import { CurrentUserAdapter } from './core/auth/services/current-user.adapter';
 
@@ -126,5 +133,30 @@ export const appConfig: ApplicationConfig = {
     { provide: LOGIN_API, useClass: LoginApiService },
     { provide: AUTH_STATE_SETTER, useExisting: AuthService },
     { provide: CURRENT_USER, useExisting: CurrentUserAdapter },
+    // Token-based auth APIs (temporary placeholder implementations)
+    {
+      provide: FORGOT_PASSWORD_API,
+      useFactory: (http: HttpClient): ForgotPasswordApiPort => {
+        // TODO: Replace with real API integration using a dedicated AuthApiService
+        return {
+          requestPasswordReset: () => {
+            return of(true);
+          },
+          resetPassword: () => {
+            return of(true);
+          },
+        } as ForgotPasswordApiPort;
+      },
+      deps: [HttpClient],
+    },
+    {
+      provide: REGISTER_API,
+      useFactory: (): RegisterApiPort => {
+        // TODO: Replace with real registration API integration
+        return {
+          register: async () => Promise.resolve(),
+        } as RegisterApiPort;
+      },
+    },
   ],
 };

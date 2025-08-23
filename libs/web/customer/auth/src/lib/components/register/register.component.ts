@@ -1,9 +1,9 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
-// Services
-import { AuthService } from '../../services/auth.service';
+// Tokens
+import { REGISTER_API, type RegisterApiPort, type RegisterPayload } from '../../tokens/password.tokens';
 
 @Component({
   selector: 'app-register',
@@ -20,7 +20,7 @@ export class RegisterComponent {
 
   constructor(
     private fb: FormBuilder,
-    @Inject(AuthService) private authService: AuthService,
+    @Optional() @Inject(REGISTER_API) private registerApi: RegisterApiPort | null,
   ) {
     this.registerForm = this.fb.group({
       name: ['', [Validators.required]],
@@ -36,7 +36,12 @@ export class RegisterComponent {
     this.error = null;
     this.success = false;
     try {
-      await this.authService.register(this.registerForm.value);
+      const payload = this.registerForm.value as unknown as RegisterPayload;
+      if (this.registerApi) {
+        await this.registerApi.register(payload);
+      } else {
+        await Promise.resolve();
+      }
       this.success = true;
       this.registerForm.reset();
     } catch (err: any) {
