@@ -41,6 +41,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 // App imports
 import { routes } from './app.routes';
+import { LOGIN_API, AUTH_STATE_SETTER } from '@beauty-saas/web-customer-auth';
+import { LoginApiService } from '@beauty-saas/web-customer-auth';
 import {
   ErrorHandlerService,
   ERROR_INTERCEPTOR_PROVIDER,
@@ -118,5 +120,7 @@ export const appConfig: ApplicationConfig = {
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
     { provide: ErrorHandler, useClass: ErrorHandlerService },
     { provide: AUTH_STATE_PORT, useExisting: AuthService },
+    { provide: LOGIN_API, useClass: LoginApiService },
+    { provide: AUTH_STATE_SETTER, useExisting: AuthService },
   ],
 };

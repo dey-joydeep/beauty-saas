@@ -24,6 +24,8 @@ import { ErrorService } from '@beauty-saas/web-core/http';
 import { TranslateServerLoader } from '@beauty-saas/web-core/http';
 import { TranslateLoader, TranslateStore } from '@ngx-translate/core';
 import { appConfig } from './app.config';
+import { LOGIN_API, AUTH_STATE_SETTER, LoginApiService } from '@beauty-saas/web-customer-auth';
+import { AuthService } from './core/auth/services/auth.service';
 
 // Import interceptors from shared web-core/http
 import { loadingInterceptor, ssrInterceptor, ssrTranslateInterceptor } from '@beauty-saas/web-core/http';
@@ -131,6 +133,9 @@ const serverProviders: (Provider | EnvironmentProviders)[] = [
 
   { provide: 'SSR', useValue: true },
   { provide: 'BROWSER', useValue: false },
+  // Auth tokens/providers mirrored for SSR
+  { provide: LOGIN_API, useClass: LoginApiService },
+  { provide: AUTH_STATE_SETTER, useExisting: AuthService },
 ];
 
 // Combine with base app config
