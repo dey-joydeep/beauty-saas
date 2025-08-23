@@ -7,7 +7,7 @@ import { CURRENT_USER, CurrentUserPort } from '../interfaces/current-user.port';
  * Authenticated guard: allows only authenticated users.
  * Stores attempted URL and redirects unauthenticated users to login.
  */
-export const authenticatedGuard: CanActivateFn = (route, state) => {
+export const authenticatedGuard: CanActivateFn = (_route, state) => {
   const currentUserService = inject(CURRENT_USER) as CurrentUserPort;
   const router = inject(Router);
 
@@ -22,7 +22,7 @@ export const authenticatedGuard: CanActivateFn = (route, state) => {
       currentUserService.redirectUrl = state.url;
 
       // Navigate to the login page
-      return router.createUrlTree(['/auth/login']);
+      return router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } });
     }),
   );
 };
