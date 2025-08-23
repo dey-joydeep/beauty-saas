@@ -7,5 +7,3 @@ export * from './utils/platform-utils';
 export * as adminEnvironments from './environments/admin/environment';
 export * as adminEnvironmentsProd from './environments/admin/environment.prod';
 export * as adminEnvironmentsDebug from './environments/admin/environment.debug';
-export { PLATFORM_UTILS_TOKEN } from './utils/platform-utils';
-export type { PlatformUtils } from './utils/platform-utils';
