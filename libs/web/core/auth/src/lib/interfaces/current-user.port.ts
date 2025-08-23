@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export interface CurrentUserMin {
   readonly id?: string;
   readonly role: string;
+  readonly isVerified?: boolean;
 }
 
 export interface CurrentUserPort {
