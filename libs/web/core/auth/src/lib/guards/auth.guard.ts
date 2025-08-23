@@ -11,10 +11,24 @@ export const authGuard: CanActivateFn = (route, state) => {
   const currentUserService = inject(CURRENT_USER) as CurrentUserPort;
   const router = inject(Router);
 
+  const requiredRoles = (route.data?.['roles'] as string[] | undefined) ?? null;
+  const requiresVerified = (route.data?.['requiresVerified'] as boolean | undefined) ?? false;
+
   return currentUserService.currentUser$.pipe(
     take(1),
     map((user) => {
       if (user) {
+        // Role-based authorization (optional via route data)
+        if (requiredRoles && !requiredRoles.includes(user.role)) {
+          return router.createUrlTree(['/']);
+        }
+
+        // Verification requirement (optional via route data)
+        const isVerified = (user as any)?.is_verified === true || (user as any)?.isVerified === true;
+        if (requiresVerified && !isVerified) {
+          return router.createUrlTree(['/auth/verify']);
+        }
+
         return true;
       }
 
@@ -22,7 +36,7 @@ export const authGuard: CanActivateFn = (route, state) => {
       currentUserService.redirectUrl = state.url;
 
       // Navigate to login page
-      return router.createUrlTree(['/auth/login']);
+      return router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } });
     }),
   );
 };
@@ -31,7 +45,7 @@ export const authGuard: CanActivateFn = (route, state) => {
  * Public guard that checks if user is not authenticated
  * Redirects to home if already authenticated
  */
-export const publicGuard: CanActivateFn = (route, state) => {
+export const publicGuard: CanActivateFn = (_route, _state) => {
   const currentUserService = inject(CURRENT_USER) as CurrentUserPort;
   const router = inject(Router);
 
@@ -43,7 +57,10 @@ export const publicGuard: CanActivateFn = (route, state) => {
       }
 
       // User is already logged in, redirect to home
-      return router.createUrlTree(['/']);
+      const target = currentUserService.redirectUrl || '/';
+      // Clear redirect to avoid stale navigation loops
+      currentUserService.redirectUrl = null;
+      return router.createUrlTree([target]);
     }),
   );
 };
