@@ -5,7 +5,7 @@
     "prefix": "lib",
     "projectType": "library",
     "tags": [
-        "type:lib",
+        "type: lib",
         "platform:web",
         "scope:web-core"
     ],
