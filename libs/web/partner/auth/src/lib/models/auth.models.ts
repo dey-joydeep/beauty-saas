@@ -1,6 +1,6 @@
 // Partner auth library local models (app-specific)
-// If promoted to core later, migrate to @beauty-saas/web-core/auth
-import type { BaseAuthUser } from '@beauty-saas/web-core/auth';
+// If promoted to core later, migrate to @beauty-saas/web-core-auth
+import type { BaseAuthUser } from '@beauty-saas/web-core-auth';
 
 export interface LoginCredentials {
     readonly email: string;

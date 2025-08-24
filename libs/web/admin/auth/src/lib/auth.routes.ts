@@ -1,4 +1,4 @@
-﻿import { authGuard } from '@beauty-saas/web-core/auth';
+import { authGuard } from '@beauty-saas/web-core-auth';
 import { Routes } from '@angular/router';
 // Components
 import { LoginComponent } from './components/login/login.component';
