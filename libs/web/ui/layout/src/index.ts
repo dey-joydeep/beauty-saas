@@ -1,1 +1,1 @@
-export * from './lib/shell/layout.component';
+export * from './lib/layout/layout.component';
