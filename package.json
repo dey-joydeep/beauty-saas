@@ -16,7 +16,7 @@
     "dev:partner": "nx serve partner",
     "dev:api": "nx serve api",
     "build": "nx run-many --target=build --all",
-    "build:libs": "nx run-many -t build -p web-config,web-core-http,web-core-auth,admin-auth,customer-auth,partner-auth --skip-nx-cache",
+    "build:angular-libs": "nx run-many -t build -p web-config,http,auth,testing,admin-auth,customer-auth,partner-auth,header,ui,shell --skip-nx-cache",
     "build:prod": "nx run-many --target=build --all --configuration=production",
     "build:affected": "nx affected:build",
     "build:admin": "nx build admin",
