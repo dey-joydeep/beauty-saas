@@ -5,9 +5,8 @@
   "projectType": "library",
   "prefix": "lib",
   "tags": [
-    "type:lib",
-    "platform:web",
-    "scope:web-ui"
+    "scope:web",
+    "type:ui"
   ],
   "targets": {
     "test": {

@@ -5,9 +5,8 @@
     "prefix": "lib",
     "projectType": "library",
     "tags": [
-        "type: lib",
-        "platform:web",
-        "scope:web-core"
+        "scope:web-core",
+        "type:data"
     ],
     "targets": {
         "test": {

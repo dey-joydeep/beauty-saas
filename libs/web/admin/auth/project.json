@@ -32,8 +32,7 @@
         }
     },
     "tags": [
-        "type:lib",
-        "platform:web",
-        "scope:web-feature-auth"
+        "scope:web-app",
+        "type:feature"
     ]
 }

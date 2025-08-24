@@ -5,9 +5,8 @@
     "prefix": "lib",
     "projectType": "library",
     "tags": [
-        "type:lib",
-        "platform:web",
-        "scope:web-config"
+        "scope:web",
+        "type:config"
     ],
     "targets": {
         "lint": {
