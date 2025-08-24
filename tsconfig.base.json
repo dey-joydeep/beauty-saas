@@ -25,8 +25,6 @@
       "@beauty-saas/data-access/*": ["libs/data-access/src/*"],
       "@beauty-saas/shared": ["libs/shared/src/index.ts"],
       "@beauty-saas/shared/*": ["libs/shared/src/*"],
-      "@beauty-saas/web-ui": ["libs/web/ui/src/index.ts"],
-      "@beauty-saas/web-ui/*": ["libs/web/ui/src/*"],
       "@beauty-saas/web-admin-auth": ["libs/web/admin/auth/src/index.ts"],
       "@beauty-saas/web-admin-auth/*": ["libs/web/admin/auth/src/*"],
       "@beauty-saas/web-config": ["libs/web/config/src/index.ts"],
@@ -40,7 +38,13 @@
       "@beauty-saas/web-customer-auth": ["libs/web/customer/auth/src/index.ts"],
       "@beauty-saas/web-customer-auth/*": ["libs/web/customer/auth/src/*"],
       "@beauty-saas/web-partner-auth": ["libs/web/partner/auth/src/index.ts"],
-      "@beauty-saas/web-partner-auth/*": ["libs/web/partner/auth/src/*"]
+      "@beauty-saas/web-partner-auth/*": ["libs/web/partner/auth/src/*"],
+      "@beauty-saas/web-ui-header": ["libs/web/ui/header/src/index.ts"],
+      "@beauty-saas/web-ui-header/*": ["libs/web/ui/header/src/*"],
+      "@beauty-saas/web-ui-shell": ["libs/web/ui/shell/src/index.ts"],
+      "@beauty-saas/web-ui-shell/*": ["libs/web/ui/shell/src/*"],
+      "@beauty-saas/web-ui": ["libs/web/ui/src/index.ts"],
+      "@beauty-saas/web-ui/*": ["libs/web/ui/src/*"]
     },
     "types": ["node", "jest"],
     "experimentalDecorators": true,
