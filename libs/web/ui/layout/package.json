@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/web-ui-shell",
+  "name": "@beauty-saas/web-ui-layout",
   "version": "0.0.1",
   "type": "module",
   "peerDependencies": {
