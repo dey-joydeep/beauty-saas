@@ -1,5 +1,6 @@
 {
-  "name": "@beauty-saas/ui",
+  "name": "@beauty-saas/web-ui",
   "version": "0.0.1",
-  "sideEffects": false
+  "sideEffects": false,
+  "type": "module"
 }
