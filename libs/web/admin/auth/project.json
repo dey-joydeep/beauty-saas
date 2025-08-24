@@ -1,5 +1,5 @@
 {
-    "name": "admin-auth",
+    "name": "web-admin-auth",
     "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "libs/web/admin/auth/src",
     "prefix": "lib",

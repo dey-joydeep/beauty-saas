@@ -1,5 +1,5 @@
 {
-  "name": "partner-auth",
+  "name": "web-partner-auth",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/web/partner/auth/src",
   "prefix": "lib",
