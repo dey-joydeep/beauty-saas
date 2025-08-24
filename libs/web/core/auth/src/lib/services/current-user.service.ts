@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
-import { StorageService } from '@beauty-saas/web-core/http';
+import { StorageService } from '@beauty-saas/web-core-http';
 import { BehaviorSubject, Subject, timer } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, takeUntil } from 'rxjs/operators';
 import { AUTH_STATE_PORT, type AuthStatePort, type BaseAuthUser } from '../ports/auth-state.port';

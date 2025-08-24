@@ -11,90 +11,38 @@
     "importHelpers": true,
     "emitDecoratorMetadata": true,
     "module": "ES2022",
-    "lib": [
-      "ES2022",
-      "dom"
-    ],
+    "lib": ["ES2022", "dom"],
     "esModuleInterop": true,
     "allowJs": false,
     "moduleDetection": "force",
     "strict": true,
     "moduleResolution": "node",
     "paths": {
-      "@app/*": [
-        "apps/api/src/*"
-      ],
-      "@beauty-saas/core": [
-        "libs/core/src/index.ts"
-      ],
-      "@beauty-saas/core/*": [
-        "libs/core/src/*"
-      ],
-      "@beauty-saas/data-access": [
-        "libs/data-access/src/index.ts"
-      ],
-      "@beauty-saas/data-access/*": [
-        "libs/data-access/src/*"
-      ],
-      "@beauty-saas/shared": [
-        "libs/shared/src/index.ts"
-      ],
-      "@beauty-saas/shared/*": [
-        "libs/shared/src/*"
-      ],
-      "@beauty-saas/web-ui": [
-        "libs/web/ui/dist"
-      ],
-      "@beauty-saas/web-ui/*": [
-        "libs/web/ui/dist/*"
-      ],
-      "@beauty-saas/web-admin/auth": [
-        "libs/web/admin/auth/dist"
-      ],
-      "@beauty-saas/web-admin/auth/*": [
-        "libs/web/admin/auth/dist/*"
-      ],
-      "@beauty-saas/web-config": [
-        "libs/web/config/dist"
-      ],
-      "@beauty-saas/web-config/*": [
-        "libs/web/config/dist/*"
-      ],
-      "@beauty-saas/web-core/auth": [
-        "libs/web/core/auth/dist"
-      ],
-      "@beauty-saas/web-core/auth/*": [
-        "libs/web/core/auth/dist/*"
-      ],
-      "@beauty-saas/web-core/http": [
-        "libs/web/core/http/dist"
-      ],
-      "@beauty-saas/web-core/http/*": [
-        "libs/web/core/http/dist/*"
-      ],
-      "@beauty-saas/web-core/testing": [
-        "libs/web/core/testing/dist"
-      ],
-      "@beauty-saas/web-core/testing/*": [
-        "libs/web/core/testing/dist/*"
-      ],
-      "@beauty-saas/web-customer/auth": [
-        "libs/web/customer/auth/dist"
-      ],
-      "@beauty-saas/web-customer/auth/*": [
-        "libs/web/customer/auth/dist/*"
-      ],
-      "@beauty-saas/web-partner/auth": [
-        "libs/web/partner/auth/dist"
-      ],
-      "@beauty-saas/web-partner/auth/*": [
-        "libs/web/partner/auth/dist/*"
-      ]
+      "@app/*": ["apps/api/src/*"],
+      "@beauty-saas/core": ["libs/core/src/index.ts"],
+      "@beauty-saas/core/*": ["libs/core/src/*"],
+      "@beauty-saas/data-access": ["libs/data-access/src/index.ts"],
+      "@beauty-saas/data-access/*": ["libs/data-access/src/*"],
+      "@beauty-saas/shared": ["libs/shared/src/index.ts"],
+      "@beauty-saas/shared/*": ["libs/shared/src/*"],
+      "@beauty-saas/web-ui": ["libs/web/ui/src/index.ts"],
+      "@beauty-saas/web-ui/*": ["libs/web/ui/src/*"],
+      "@beauty-saas/web-admin-auth": ["libs/web/admin/auth/src/index.ts"],
+      "@beauty-saas/web-admin-auth/*": ["libs/web/admin/auth/src/*"],
+      "@beauty-saas/web-config": ["libs/web/config/src/index.ts"],
+      "@beauty-saas/web-config/*": ["libs/web/config/src/*"],
+      "@beauty-saas/web-core-auth": ["libs/web/core/auth/src/index.ts"],
+      "@beauty-saas/web-core-auth/*": ["libs/web/core/auth/src/*"],
+      "@beauty-saas/web-core-http": ["libs/web/core/http/src/index.ts"],
+      "@beauty-saas/web-core-http/*": ["libs/web/core/http/src/*"],
+      "@beauty-saas/web-core-testing": ["libs/web/core/testing/src/index.ts"],
+      "@beauty-saas/web-core-testing/*": ["libs/web/core/testing/src/*"],
+      "@beauty-saas/web-customer-auth": ["libs/web/customer/auth/src/index.ts"],
+      "@beauty-saas/web-customer-auth/*": ["libs/web/customer/auth/src/*"],
+      "@beauty-saas/web-partner-auth": ["libs/web/partner/auth/src/index.ts"],
+      "@beauty-saas/web-partner-auth/*": ["libs/web/partner/auth/src/*"]
     },
-    "types": [
-      "node",
-      "jest"
-    ],
+    "types": ["node", "jest"],
     "experimentalDecorators": true,
     "sourceMap": true,
     "noUnusedParameters": true,
@@ -105,10 +53,7 @@
     "noImplicitAny": true,
     "resolveJsonModule": true
   },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
+  "exclude": ["node_modules", "dist"],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,

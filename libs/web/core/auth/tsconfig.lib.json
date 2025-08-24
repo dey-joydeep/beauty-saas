@@ -5,14 +5,13 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
-    "types": []
+    "types": [],
+    "paths": {
+      "@beauty-saas/web-core-http": ["libs/web/core/http/dist/index.d.ts"],
+      "@beauty-saas/web-core-http/*": ["libs/web/core/http/dist/*"]
+    }
   },
   "angularCompilerOptions": { "compilationMode": "partial" },
-  "exclude": [
-    "src/test-setup.ts",
-    "**/*.spec.ts",
-    "jest.config.ts",
-    "**/*.test.ts"
-  ],
+  "exclude": ["src/test-setup.ts", "**/*.spec.ts", "jest.config.ts", "**/*.test.ts"],
   "include": ["src/**/*.ts"]
 }

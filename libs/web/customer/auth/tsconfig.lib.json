@@ -5,7 +5,20 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
-    "types": []
+    "types": [],
+    "rootDir": "./src",
+    "paths": {
+      "@beauty-saas/web-core/http": ["libs/web/core/http/dist/index.d.ts"],
+      "@beauty-saas/web-core/http/*": ["libs/web/core/http/dist/*"],
+      "@beauty-saas/web-core-http": ["libs/web/core/http/dist/index.d.ts"],
+      "@beauty-saas/web-core-http/*": ["libs/web/core/http/dist/*"],
+      "@beauty-saas/web-core/auth": ["libs/web/core/auth/dist/index.d.ts"],
+      "@beauty-saas/web-core/auth/*": ["libs/web/core/auth/dist/*"],
+      "@beauty-saas/web-core-auth": ["libs/web/core/auth/dist/index.d.ts"],
+      "@beauty-saas/web-core-auth/*": ["libs/web/core/auth/dist/*"],
+      "@beauty-saas/web-config": ["libs/web/config/dist/index.d.ts"],
+      "@beauty-saas/web-config/*": ["libs/web/config/dist/*"]
+    }
   },
   "angularCompilerOptions": { "compilationMode": "partial" },
   "exclude": [
