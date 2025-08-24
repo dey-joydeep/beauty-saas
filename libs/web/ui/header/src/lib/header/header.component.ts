@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
@@ -136,7 +136,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
   private storageService = inject(StorageService);
-  private platformId = inject(PLATFORM_ID);
   private platformUtils = inject<PlatformUtils>(PLATFORM_UTILS_TOKEN);
   private destroy$ = new Subject<void>();
   private isBrowser: boolean = false;
@@ -268,7 +267,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           }
           this.cdr.markForCheck();
         },
-        error: (error: unknown) => {
+        error: (error) => {
           console.error('Error loading user:', error);
           this.cdr.markForCheck();
         },
@@ -283,7 +282,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             this.onLanguageChange(savedLanguage);
           }
         },
-        error: (error: unknown) => console.warn('Failed to load language preference:', error),
+        error: (error: any) => console.warn('Failed to load language preference:', error),
       });
 
       this.storageService.getItem$<string>('userCity').subscribe({
@@ -293,7 +292,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             this.cdr.markForCheck();
           }
         },
-        error: (error: unknown) => console.warn('Failed to load city preference:', error),
+        error: (error: any) => console.warn('Failed to load city preference:', error),
       });
     }
   }
