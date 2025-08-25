@@ -1,27 +1,27 @@
 {
-  "name": "dashboard",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "server-dashboard",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/features/dashboard/src",
+  "sourceRoot": "libs/server/features/dashboard/src",
   "prefix": "app",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/features/dashboard",
-        "tsConfig": "libs/features/dashboard/tsconfig.lib.json",
-        "packageJson": "libs/features/dashboard/package.json",
-        "main": "libs/features/dashboard/src/index.ts",
+        "outputPath": "dist/libs/server/features/dashboard",
+        "tsConfig": "libs/server/features/dashboard/tsconfig.lib.json",
+        "packageJson": "libs/server/features/dashboard/package.json",
+        "main": "libs/server/features/dashboard/src/index.ts",
         "assets": [],
         "buildableProjectDepsInPackageJsonType": "dependencies"
       },
       "configurations": {
         "production": {
-          "tsConfig": "libs/features/dashboard/tsconfig.lib.prod.json"
+          "tsConfig": "libs/server/features/dashboard/tsconfig.lib.prod.json"
         },
         "development": {
-          "tsConfig": "libs/features/dashboard/tsconfig.lib.json"
+          "tsConfig": "libs/server/features/dashboard/tsconfig.lib.json"
         }
       },
       "defaultConfiguration": "production"
@@ -29,26 +29,26 @@
     "type-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p libs/features/dashboard/tsconfig.lib.json --noEmit"
+        "command": "tsc -p libs/server/features/dashboard/tsconfig.lib.json --noEmit"
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/features/dashboard/**/*.ts"]
+        "lintFilePatterns": ["libs/server/features/dashboard/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": ["{workspaceRoot}/coverage/libs/server/features/dashboard"],
       "options": {
-        "jestConfig": "libs/features/dashboard/jest.config.ts",
+        "jestConfig": "libs/server/features/dashboard/jest.config.ts",
         "passWithNoTests": true,
         "codeCoverage": true,
         "coverageReporters": ["text", "lcov"],
-        "coverageDirectory": "coverage/libs/features/dashboard",
-        "testMatch": ["**/*.spec.ts"],
+        "coverageDirectory": "coverage/libs/server/features/dashboard",
+        "testMatch": ["libs/server/features/dashboard/**/*.spec.ts"],
         "preset": "ts-jest",
         "testEnvironment": "node"
       }
@@ -56,12 +56,12 @@
     "deploy": {
       "executor": "@nx/workspace:run-commands",
       "options": {
-        "command": "npm publish {projectRoot}/dist --access public",
+        "command": "npm publish libs/server/features/dashboard/dist --access public",
         "parallel": true
       },
       "dependsOn": ["build"]
     }
   },
   "tags": ["scope:server", "type:lib"],
-  "implicitDependencies": ["core"]
+  "implicitDependencies": ["server-core"]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "data-access",
+  "name": "server-data-access",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/server/data-access/src",
   "projectType": "library",

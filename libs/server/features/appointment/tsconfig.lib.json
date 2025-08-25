@@ -1,7 +1,7 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../../../dist/out-tsc",
+    "outDir": "../../../../dist/out-tsc",
     "skipLibCheck": true
   },
   "exclude": ["**/*.spec.ts", "**/*.test.ts", "test-setup.ts", "jest.config.ts", "node_modules", "dist"],

@@ -1,5 +1,5 @@
 {
-  "name": "features",
+  "name": "server-features",
   "projectType": "library",
   "sourceRoot": "libs/server/features/src",
   "prefix": "beauty-saas",

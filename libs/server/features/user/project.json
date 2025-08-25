@@ -1,27 +1,27 @@
 {
-  "name": "user",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "server-user",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/features/user/src",
+  "sourceRoot": "libs/server/features/user/src",
   "prefix": "app",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/features/user",
-        "tsConfig": "libs/features/user/tsconfig.lib.json",
-        "packageJson": "libs/features/user/package.json",
-        "main": "libs/features/user/src/index.ts",
+        "outputPath": "dist/libs/server/features/user",
+        "tsConfig": "libs/server/features/user/tsconfig.lib.json",
+        "packageJson": "libs/server/features/user/package.json",
+        "main": "libs/server/features/user/src/index.ts",
         "assets": [],
         "buildableProjectDepsInPackageJsonType": "dependencies"
       },
       "configurations": {
         "production": {
-          "tsConfig": "libs/features/user/tsconfig.lib.prod.json"
+          "tsConfig": "libs/server/features/user/tsconfig.lib.prod.json"
         },
         "development": {
-          "tsConfig": "libs/features/user/tsconfig.lib.json"
+          "tsConfig": "libs/server/features/user/tsconfig.lib.json"
         }
       },
       "defaultConfiguration": "production"
@@ -29,25 +29,25 @@
     "type-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p libs/features/user/tsconfig.lib.json --noEmit"
+        "command": "tsc -p libs/server/features/user/tsconfig.lib.json --noEmit"
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/features/user/**/*.ts"]
+        "lintFilePatterns": ["libs/server/features/user/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "libs/features/user/jest.config.ts",
+        "jestConfig": "libs/server/features/user/jest.config.ts",
         "passWithNoTests": true,
         "codeCoverage": true,
         "coverageReporters": ["text", "lcov"],
-        "coverageDirectory": "coverage/libs/features/user"
+        "coverageDirectory": "coverage/libs/server/features/user"
       }
     },
     "deploy": {
@@ -60,11 +60,11 @@
     }
   },
   "tags": ["type:lib", "platform:server", "scope:server-feature"],
-  "implicitDependencies": ["core"],
+  "implicitDependencies": ["server-core"],
   "dependencies": [
     {
-      "target": "data-access",
-      "projects": "data-access"
+      "target": "server-data-access",
+      "projects": "server-data-access"
     }
   ]
 }

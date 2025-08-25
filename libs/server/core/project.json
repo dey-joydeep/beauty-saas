@@ -1,5 +1,5 @@
 {
-  "name": "core",
+  "name": "server-core",
   "sourceRoot": "libs/server/core/src",
   "tags": [
     "scope:server",
