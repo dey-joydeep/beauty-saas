@@ -1,21 +1,30 @@
 {
   "name": "core",
-  "sourceRoot": "libs/core/src",
-  "tags": ["scope:server", "type:core"],
+  "sourceRoot": "libs/server/core/src",
+  "tags": [
+    "scope:server",
+    "type:core"
+  ],
   "targets": {
     "lint": {
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["libs/core/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/core/**/*.ts"
+        ]
       }
     },
     "build": {
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "executor": "@nx/js:tsc",
       "options": {
-        "main": "libs/core/src/index.ts",
-        "tsConfig": "libs/core/tsconfig.lib.json",
+        "main": "libs/server/core/src/index.ts",
+        "tsConfig": "libs/server/core/tsconfig.lib.json",
         "packageJson": "libs/core/package.json",
         "assets": [],
         "outputPath": "dist/libs/core"
@@ -28,13 +37,18 @@
       }
     },
     "test": {
-      "outputs": ["{workspaceRoot}/coverage/libs/core"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/core"
+      ],
       "executor": "@nx/jest:jest",
       "options": {
         "passWithNoTests": true,
         "jestConfig": "libs/core/jest.config.ts",
         "codeCoverage": true,
-        "coverageReporters": ["text", "lcov"],
+        "coverageReporters": [
+          "text",
+          "lcov"
+        ],
         "coverageDirectory": "coverage/libs/core"
       }
     }

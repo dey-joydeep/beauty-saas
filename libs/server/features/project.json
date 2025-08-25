@@ -1,26 +1,35 @@
 {
   "name": "features",
   "projectType": "library",
-  "sourceRoot": "libs/features/src",
+  "sourceRoot": "libs/server/features/src",
   "prefix": "beauty-saas",
-  "tags": ["scope:server", "type:feature"],
+  "tags": [
+    "scope:server",
+    "type:feature"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/features",
-        "tsConfig": "libs/features/tsconfig.lib.json",
+        "tsConfig": "libs/server/features/tsconfig.lib.json",
         "packageJson": "libs/features/package.json",
-        "main": "libs/features/src/index.ts",
+        "main": "libs/server/features/src/index.ts",
         "assets": []
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/features/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/features/**/*.ts"
+        ]
       }
     },
     "type-check": {
@@ -31,7 +40,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/features"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/features"
+      ],
       "options": {
         "jestConfig": "jest.preset.ts",
         "passWithNoTests": true
