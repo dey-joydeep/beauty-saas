@@ -1,15 +1,16 @@
-import { JwtAuthGuard, RolesGuard } from '@beauty-saas/core/auth/guards';
-import { ConfigModule } from '@beauty-saas/core/config';
-import { ConfigService } from '@beauty-saas/core/src/config';
+import 'reflect-metadata';
+import { JwtAuthGuard, RolesGuard } from '@beauty-saas/server-core/auth';
+import { ConfigService } from './config/config.service';
 import { ClassSerializerInterceptor, Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import helmet from 'helmet';
-import * as morgan from 'morgan';
+import morgan from 'morgan';
 import { AppModule } from './app.module';
+import { ConfigModule } from './config/config.module';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');

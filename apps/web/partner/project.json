@@ -1,5 +1,5 @@
 {
-  "name": "partner",
+  "name": "web-partner",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "src",
@@ -53,16 +53,16 @@
     "serve": {
       "executor": "@nx/angular:dev-server",
       "options": {
-        "buildTarget": "partner:build:development",
+        "buildTarget": "web-partner:build:development",
         "port": 4200,
         "host": "localhost"
       },
       "configurations": {
         "production": {
-          "buildTarget": "partner:build:production"
+          "buildTarget": "web-partner:build:production"
         },
         "development": {
-          "buildTarget": "partner:build:development"
+          "buildTarget": "web-partner:build:development"
         }
       },
       "defaultConfiguration": "development"

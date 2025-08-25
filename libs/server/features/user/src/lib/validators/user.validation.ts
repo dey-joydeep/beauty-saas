@@ -1,15 +1,15 @@
 import { z } from 'zod';
-import { isEmail, isPhoneNumber } from '../../utils/validators';
+// Removed broken '../../utils/validators' import. Using Zod's built-ins and a safe phone regex.
 
 export const registerUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address').refine(isEmail, { message: 'Invalid email format' }),
+  email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   tenantId: z.string().min(1, 'tenantId is required'),
   phone: z
     .string()
     .optional()
-    .refine((val) => !val || isPhoneNumber(val), { message: 'Invalid phone number' }),
+    .refine((val) => !val || /^\+?[1-9]\d{6,14}$/.test(val), { message: 'Invalid phone number' }),
   roles: z.array(z.string()).optional(),
   isVerified: z.boolean().optional(),
   saasOwner: z.boolean().optional(),
@@ -22,14 +22,14 @@ export const updateUserSchema = z
     name: z.string().min(1).optional(),
     email: z
       .string()
-      .email()
+      .email('Invalid email address')
       .optional()
-      .refine((val) => !val || isEmail(val), { message: 'Invalid email format' }),
+      .refine((val) => !val || /.+@.+\..+/.test(val), { message: 'Invalid email format' }),
     password: z.string().min(6).optional(),
     phone: z
       .string()
       .optional()
-      .refine((val) => !val || isPhoneNumber(val), { message: 'Invalid phone number' }),
+      .refine((val) => !val || /^\+?[1-9]\d{6,14}$/.test(val), { message: 'Invalid phone number' }),
     roles: z.array(z.string()).optional(),
     isVerified: z.boolean().optional(),
     saasOwner: z.boolean().optional(),

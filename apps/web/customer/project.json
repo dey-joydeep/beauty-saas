@@ -1,5 +1,5 @@
 {
-  "name": "customer",
+  "name": "web-customer",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "src",
@@ -53,16 +53,16 @@
     "serve": {
       "executor": "@nx/angular:dev-server",
       "options": {
-        "buildTarget": "customer:build:development",
+        "buildTarget": "web-customer:build:development",
         "port": 4200,
         "host": "localhost"
       },
       "configurations": {
         "production": {
-          "buildTarget": "customer:build:production"
+          "buildTarget": "web-customer:build:production"
         },
         "development": {
-          "buildTarget": "customer:build:development"
+          "buildTarget": "web-customer:build:development"
         }
       },
       "defaultConfiguration": "development"

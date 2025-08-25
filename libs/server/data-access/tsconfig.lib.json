@@ -9,10 +9,14 @@
       "node",
       "jest"
     ],
-    "composite": true
+    "composite": true,
+    "isolatedModules": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false
   },
   "include": [
-    "**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "**/*.spec.ts",

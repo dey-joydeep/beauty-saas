@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 import { configuration, validateConfig } from './configuration';
+import { ConfigService } from './config.service';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { configuration, validateConfig } from './configuration';
       },
     }),
   ],
-  exports: [NestConfigModule],
+  providers: [ConfigService],
+  exports: [NestConfigModule, ConfigService],
 })
 export class ConfigModule {}

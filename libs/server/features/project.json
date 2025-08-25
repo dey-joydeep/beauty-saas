@@ -16,7 +16,8 @@
         "tsConfig": "libs/server/features/tsconfig.lib.json",
         "packageJson": "libs/server/features/package.json",
         "main": "libs/server/features/src/index.ts",
-        "assets": []
+        "assets": [],
+        "buildLibsFromSource": false
       }
     },
     "lint": {

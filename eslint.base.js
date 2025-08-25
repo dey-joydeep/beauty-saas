@@ -25,8 +25,9 @@ const typeCheckedScoped = ts.configs.recommendedTypeChecked.map((cfg) => ({
     parser: tsParser,
     parserOptions: {
       ...((cfg.languageOptions && cfg.languageOptions.parserOptions) || {}),
-      // Use a single root project for reliable association across the monorepo
-      project: [path.join(__dirname, 'tsconfig.eslint.json')],
+      // Use the TS Project Service so ESLint auto-discovers the right tsconfig per file
+      // and respects project references across libs. This avoids TS6307 during lint.
+      projectService: true,
     },
   },
 }));

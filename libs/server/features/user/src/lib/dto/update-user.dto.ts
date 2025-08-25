@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { AppUserRole } from '@shared/types/user.types';
+import { AppUserRole } from '@beauty-saas/shared';
 import { IsArray, IsBoolean, IsOptional, IsString, MinLength } from 'class-validator';
 import { BaseUserDto } from './base-user.dto';
 
@@ -73,7 +73,7 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
   })
   @IsBoolean()
   @IsOptional()
-  declare isActive?: boolean;
+  isActive?: boolean;
 
   @ApiPropertyOptional({
     example: 'CurrentPass123!',
@@ -88,11 +88,10 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
 
   @ApiPropertyOptional({
     example: true,
-    description: `Whether the user's email has been verified.\n\
-**Note:** This field is typically managed by the system`,
+    description: `Whether the user's email has been verified.\n**Note:** This field is typically managed by the system`,
     required: false,
   })
   @IsBoolean()
   @IsOptional()
-  declare isVerified?: boolean;
+  isVerified?: boolean;
 }

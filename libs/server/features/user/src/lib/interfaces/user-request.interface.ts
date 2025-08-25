@@ -1,4 +1,4 @@
-import { AppUserRole } from '@shared/types/user.types';
+import { AppUserRole } from '@beauty-saas/shared';
 
 /**
  * Represents the authenticated user in the request object

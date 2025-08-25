@@ -28,7 +28,8 @@
         "tsConfig": "libs/server/core/tsconfig.lib.json",
         "packageJson": "libs/server/core/package.json",
         "assets": [],
-        "outputPath": "dist/libs/server/core"
+        "outputPath": "dist/libs/server/core",
+        "buildLibsFromSource": false
       }
     },
     "type-check": {

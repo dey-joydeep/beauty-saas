@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { isISODateString } from '../../utils/validators';
 
 export const createThemeSchema = z.object({
   name: z.string().min(1, 'Theme name is required'),
@@ -8,15 +7,11 @@ export const createThemeSchema = z.object({
   createdAt: z
     .string()
     .optional()
-    .refine((val) => !val || isISODateString(val), {
-      message: 'createdAt must be a valid ISO date string',
-    }),
+    .datetime({ message: 'createdAt must be a valid ISO date string' }),
   updatedAt: z
     .string()
     .optional()
-    .refine((val) => !val || isISODateString(val), {
-      message: 'updatedAt must be a valid ISO date string',
-    }),
+    .datetime({ message: 'updatedAt must be a valid ISO date string' }),
 });
 
 export const updateThemeSchema = z
@@ -27,9 +22,7 @@ export const updateThemeSchema = z
     updatedAt: z
       .string()
       .optional()
-      .refine((val) => !val || isISODateString(val), {
-        message: 'updatedAt must be a valid ISO date string',
-      }),
+      .datetime({ message: 'updatedAt must be a valid ISO date string' }),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: 'At least one field must be provided for update',

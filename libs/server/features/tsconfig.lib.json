@@ -5,10 +5,14 @@
     "declaration": true,
     "types": [
       "node"
-    ]
+    ],
+    "isolatedModules": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false
   },
   "include": [
-    "**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "**/*.spec.ts",

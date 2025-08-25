@@ -391,10 +391,10 @@ export class UserService {
       if (updateUserDto.tenantId !== undefined) {
         if (updateUserDto.tenantId === null) {
           // Disconnect tenant if tenantId is explicitly set to null
-          updateData.tenant = { disconnect: true };
+          updateData.tenantId = null;
         } else if (typeof updateUserDto.tenantId === 'string') {
           // Connect to the specified tenant
-          updateData.tenant = { connect: { id: updateUserDto.tenantId } };
+          updateData.tenantId = updateUserDto.tenantId;
         }
       }
 

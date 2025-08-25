@@ -2,15 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "../../", // Set root to the project root
-    "baseUrl": ".",
-    "paths": {
-      "@app/*": ["src/*"],
-      "@beauty-saas/core": ["libs/core/src/index.ts"],
-      "@beauty-saas/core/*": ["libs/core/src/*"],
-      "@beauty-saas/shared": ["libs/shared/src/index.ts"],
-      "@beauty-saas/shared/*": ["libs/shared/src/*"]
-    },
+    "rootDir": "../../",
     "typeRoots": ["node_modules/@types", "../../node_modules/@types"],
     "types": ["node", "express", "jest"],
     "composite": true,
@@ -19,9 +11,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.spec.ts",
-    "../../libs/core/src/**/*.ts",
-    "../../libs/shared/src/**/*.ts"
+    "src/**/*.spec.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

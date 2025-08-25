@@ -5,13 +5,32 @@
     "declaration": true,
     "types": [
       "node"
-    ]
+    ],
+    "isolatedModules": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
+    "composite": true,
+    "declarationMap": true,
+    "paths": {
+      "@beauty-saas/server-data-access": [
+        "../../../dist/libs/server/data-access/index.d.ts"
+      ],
+      "@beauty-saas/server-data-access/*": [
+        "../../../dist/libs/server/data-access/*"
+      ]
+    }
   },
   "include": [
-    "**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "**/*.spec.ts",
     "**/*.test.ts"
+  ],
+  "references": [
+    {
+      "path": "../data-access/tsconfig.lib.json"
+    }
   ]
 }

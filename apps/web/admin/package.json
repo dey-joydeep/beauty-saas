@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/admin",
+  "name": "@beauty-saas/web-admin",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "ng build",
     "test": "nx jest:test --config=jest.config.ts --passWithNoTests",
     "lint": "nx eslint:lint",
-    "build:ssr": "ng build && ng run admin:server",
+    "build:ssr": "ng build && ng run web-admin:server",
     "serve:ssr": "node dist/apps/web/admin/server/server.mjs"
   }
 }

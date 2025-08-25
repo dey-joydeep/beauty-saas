@@ -48,12 +48,6 @@
       "@beauty-saas/server-data-access/*": [
         "libs/server/data-access/src/*"
       ],
-      "@beauty-saas/server-features": [
-        "libs/server/features/src/index.ts"
-      ],
-      "@beauty-saas/server-features/*": [
-        "libs/server/features/*/src/index.ts"
-      ],
       "@beauty-saas/shared": [
         "libs/shared/src/index.ts"
       ],
