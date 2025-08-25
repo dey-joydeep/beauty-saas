@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/commo
 import { PrismaClient, Prisma, PrismaPromise } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
-type UnwrapTuple<T extends any[]> = {
+type UnwrapTuple<T extends readonly unknown[]> = {
   [K in keyof T]: T[K] extends Promise<infer U> ? U : T[K];
 };
 
@@ -71,7 +71,7 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, 'que
    * Helper method to handle database operations with error handling
    */
   // Overload for array of Prisma promises
-  async $transaction<P extends PrismaPromise<any>[]>(
+  async $transaction<P extends PrismaPromise<unknown>[]>(
     arg: [...P],
     options?: { isolationLevel?: Prisma.TransactionIsolationLevel },
   ): Promise<UnwrapTuple<P>>;
@@ -84,19 +84,26 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, 'que
 
   // Implementation
   async $transaction(
-    arg: any,
+    arg: unknown,
     options?: {
       maxWait?: number;
       timeout?: number;
       isolationLevel?: Prisma.TransactionIsolationLevel;
     },
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       if (Array.isArray(arg)) {
         const { isolationLevel } = options || {};
-        return await super.$transaction(arg, { isolationLevel });
+        const txArg = arg as PrismaPromise<unknown>[];
+        return await super.$transaction(txArg, { isolationLevel });
       } else if (typeof arg === 'function') {
-        return await super.$transaction(arg, options);
+        const cb = arg as (
+          prisma: Omit<
+            PrismaClient,
+            '$transaction' | '$on' | '$connect' | '$disconnect' | '$use' | '$extends'
+          >,
+        ) => Promise<unknown>;
+        return await super.$transaction(cb, options);
       }
       throw new Error('Invalid argument type for transaction');
     } catch (error) {
