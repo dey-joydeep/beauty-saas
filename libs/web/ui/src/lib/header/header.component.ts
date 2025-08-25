@@ -80,7 +80,7 @@ class NotificationService {
     return of(0);
   }
 
-  markAsRead(notificationId: string) {
+  markAsRead(_notificationId: string) {
     return of({ success: true });
   }
 
@@ -197,7 +197,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   // Handle window resize
   @HostListener('window:resize')
-  private onResize() {
+  onResize() {
     this.checkIfMobile();
   }
 
@@ -242,7 +242,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   // Handle scroll events for header visibility
   @HostListener('window:scroll')
-  private handleScroll() {
+  handleScroll() {
     if (!this.isBrowser) return;
 
     const currentScrollPosition =
