@@ -8,5 +8,5 @@ export interface Notification {
   type: 'info' | 'success' | 'warning' | 'error';
   read: boolean;
   createdAt: Date;
-  data?: any;
+  data?: unknown;
 }

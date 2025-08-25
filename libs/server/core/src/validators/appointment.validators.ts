@@ -5,7 +5,7 @@ import { AppointmentStatus } from '@beauty-saas/shared';
  * Validates that the appointment status is valid
  */
 export function IsValidAppointmentStatus(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: 'isValidAppointmentStatus',
       target: object.constructor,
@@ -14,8 +14,11 @@ export function IsValidAppointmentStatus(validationOptions?: ValidationOptions) 
         message: 'Invalid appointment status',
       },
       validator: {
-        validate(value: any, _args: ValidationArguments) {
-          return typeof value === 'string' && Object.values(AppointmentStatus).includes(value as AppointmentStatus);
+        validate(value: unknown, _args: ValidationArguments) {
+          return (
+            typeof value === 'string' &&
+            (Object.values(AppointmentStatus) as string[]).includes(value)
+          );
         },
       },
     });
@@ -26,7 +29,7 @@ export function IsValidAppointmentStatus(validationOptions?: ValidationOptions) 
  * Validates that the appointment time is in the future
  */
 export function IsValidAppointmentTime(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: 'isValidAppointmentTime',
       target: object.constructor,
@@ -35,7 +38,7 @@ export function IsValidAppointmentTime(validationOptions?: ValidationOptions) {
         message: 'Appointment time must be in the future',
       },
       validator: {
-        validate(value: any, _args: ValidationArguments) {
+        validate(value: unknown, _args: ValidationArguments) {
           if (typeof value === 'string') {
             const appointmentTime = new Date(value);
             const now = new Date();

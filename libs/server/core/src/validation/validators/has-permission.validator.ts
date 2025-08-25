@@ -30,7 +30,7 @@ export class HasPermissionToAssignRoleConstraint implements ValidatorConstraintI
 
     const userRoles = request.user.roles
       .map((role) => role?.name)
-      .filter((role): role is AppUserRole => role !== undefined && Object.values(AppUserRole).includes(role as AppUserRole));
+      .filter((role): role is AppUserRole => role !== undefined && Object.values(AppUserRole).includes(role));
 
     // Check if user has permission to assign the specified role
     return userRoles.some((userRole: AppUserRole) => {
@@ -48,7 +48,7 @@ export class HasPermissionToAssignRoleConstraint implements ValidatorConstraintI
  * Custom decorator to validate if the current user has permission to assign the specified role
  */
 export function HasPermissionToAssignRole(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

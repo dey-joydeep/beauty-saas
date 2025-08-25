@@ -1,15 +1,21 @@
 {
-  "name": "@beauty-saas/data-access",
+  "name": "@beauty-saas/server-data-access",
   "version": "0.0.1",
   "type": "module",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "main": "./../../dist/libs/server/data-access/index.js",
+  "types": "./../../dist/libs/server/data-access/index.d.ts",
   "exports": {
-    ".": "./src/index.js",
-    "./prisma.service": "./src/prisma.service.js",
-    "./prisma.module": "./src/prisma.module.js"
+    ".": {
+      "types": "./../../dist/libs/server/data-access/index.d.ts",
+      "default": "./../../dist/libs/server/data-access/index.js"
+    },
+    "./prisma.service": "./../../dist/libs/server/data-access/prisma.service.js",
+    "./prisma.module": "./../../dist/libs/server/data-access/prisma.module.js"
   },
   "prisma": {
     "schema": "./prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@beauty-saas/shared": "0.0.1"
   }
 }

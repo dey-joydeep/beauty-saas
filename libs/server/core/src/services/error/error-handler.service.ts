@@ -5,7 +5,7 @@ export interface HttpErrorResponse {
   status: number;
   statusText: string;
   message: string;
-  error?: any;
+  error?: unknown;
 }
 
 @Injectable()
@@ -26,8 +26,14 @@ export class ErrorHandlerService {
     }
   }
 
-  private isHttpErrorResponse(error: any): error is HttpErrorResponse {
-    return error && typeof error.status === 'number' && error.statusText && error.message;
+  private isHttpErrorResponse(error: unknown): error is HttpErrorResponse {
+    if (!error || typeof error !== 'object') return false;
+    const e = error as Partial<HttpErrorResponse>;
+    return (
+      typeof e.status === 'number' &&
+      typeof e.statusText === 'string' &&
+      typeof e.message === 'string'
+    );
   }
 
   private handleHttpError(error: HttpErrorResponse): void {

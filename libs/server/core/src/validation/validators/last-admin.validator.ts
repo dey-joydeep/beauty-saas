@@ -13,7 +13,7 @@ import { AppUserRole } from '@beauty-saas/shared';
 class LastAdminValidationError extends Error {
   constructor(
     message: string,
-    public details?: any,
+    public details?: unknown,
   ) {
     super(message);
     this.name = 'LastAdminValidationError';
@@ -23,7 +23,7 @@ class LastAdminValidationError extends Error {
 class DatabaseValidationError extends Error {
   constructor(
     message: string,
-    public details?: any,
+    public details?: unknown,
   ) {
     super(message);
     this.name = 'DatabaseValidationError';
@@ -135,7 +135,7 @@ export class IsNotLastAdminConstraint implements ValidatorConstraintInterface {
  * when attempting to be removed or demoted
  */
 export function IsNotLastAdmin(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

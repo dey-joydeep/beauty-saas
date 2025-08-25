@@ -1,7 +1,7 @@
 /**
  * Standard API response format
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   code: string;
   message: string;
@@ -21,7 +21,7 @@ export interface ApiResponse<T = any> {
 export interface ApiError extends Error {
   statusCode?: number;
   code?: string;
-  details?: any;
+  details?: unknown;
   isOperational?: boolean;
 }
 

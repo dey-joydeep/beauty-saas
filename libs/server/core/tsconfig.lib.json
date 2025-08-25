@@ -11,15 +11,7 @@
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": false,
     "composite": true,
-    "declarationMap": true,
-    "paths": {
-      "@beauty-saas/server-data-access": [
-        "../../../dist/libs/server/data-access/index.d.ts"
-      ],
-      "@beauty-saas/server-data-access/*": [
-        "../../../dist/libs/server/data-access/*"
-      ]
-    }
+    "declarationMap": true
   },
   "include": [
     "src/**/*.ts"
@@ -29,8 +21,7 @@
     "**/*.test.ts"
   ],
   "references": [
-    {
-      "path": "../data-access/tsconfig.lib.json"
-    }
+    { "path": "../../shared/tsconfig.lib.json" },
+    { "path": "../data-access/tsconfig.lib.json" }
   ]
 }

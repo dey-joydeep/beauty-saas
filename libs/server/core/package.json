@@ -1,7 +1,18 @@
 {
-  "name": "@beauty-saas/core",
+  "name": "@beauty-saas/server-core",
   "version": "0.0.1",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts"
+  "main": "./../../dist/libs/server/core/index.js",
+  "types": "./../../dist/libs/server/core/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./../../dist/libs/server/core/index.d.ts",
+      "default": "./../../dist/libs/server/core/index.js"
+    }
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@beauty-saas/shared": "0.0.1",
+    "@beauty-saas/server-data-access": "0.0.1"
+  }
 }

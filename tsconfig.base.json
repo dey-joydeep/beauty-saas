@@ -24,36 +24,13 @@
       "@app/*": [
         "apps/api/src/*"
       ],
-      "@beauty-saas/core": [
-        "libs/server/core/src/index.ts"
-      ],
-      "@beauty-saas/core/*": [
-        "libs/server/core/src/*"
-      ],
-      "@beauty-saas/data-access": [
-        "libs/server/data-access/src/index.ts"
-      ],
-      "@beauty-saas/data-access/*": [
-        "libs/server/data-access/src/*"
-      ],
-      "@beauty-saas/server-core": [
-        "libs/server/core/src/index.ts"
-      ],
-      "@beauty-saas/server-core/*": [
-        "libs/server/core/src/*"
-      ],
-      "@beauty-saas/server-data-access": [
-        "libs/server/data-access/src/index.ts"
-      ],
-      "@beauty-saas/server-data-access/*": [
-        "libs/server/data-access/src/*"
-      ],
       "@beauty-saas/shared": [
-        "libs/shared/src/index.ts"
+        "dist/libs/shared"
       ],
       "@beauty-saas/shared/*": [
-        "libs/shared/src/*"
+        "dist/libs/shared/*"
       ],
+      
       "@beauty-saas/web-admin-auth": [
         "libs/web/admin/auth/src/index.ts"
       ],

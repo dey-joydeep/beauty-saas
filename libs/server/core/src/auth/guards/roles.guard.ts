@@ -24,15 +24,15 @@ const ROLE_HIERARCHY: Record<AppUserRole, AppUserRole[]> = {
  * @param roles Array of AppUserRole that are allowed to access the route
  */
 export const Roles = (...roles: AppUserRole[]) => {
-  return (target: any, descriptor?: PropertyDescriptor) => {
+  return (target: object, descriptor?: PropertyDescriptor) => {
     if (descriptor) {
       // Method decorator
-      Reflect.defineMetadata(ROLES_KEY, roles, descriptor.value);
+      Reflect.defineMetadata(ROLES_KEY, roles, descriptor.value as object);
       return descriptor;
     }
     // Class decorator
-    Reflect.defineMetadata(ROLES_KEY, roles, target);
-    return target;
+    Reflect.defineMetadata(ROLES_KEY, roles, target as object);
+    return undefined;
   };
 };
 
@@ -80,7 +80,7 @@ export class RolesGuard extends AuthGuard('jwt') {
         }
         return (role as UserRoleInfo).name;
       })
-      .filter((role): role is AppUserRole => role !== undefined && Object.values<string>(AppUserRole).includes(role as string));
+      .filter((role): role is AppUserRole => role !== undefined && Object.values<string>(AppUserRole).includes(role));
 
     // Check if user has any of the required roles
     if (userRoleNames.length === 0 || !this.hasRequiredRole(userRoleNames, requiredRoles)) {

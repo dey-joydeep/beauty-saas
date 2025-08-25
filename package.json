@@ -6,7 +6,9 @@
   "workspaces": [
     "apps/*",
     "libs/*",
-    "libs/web/ui"
+    "libs/*/*",
+    "!libs/**/dist",
+    "!libs/**/dist/**"
   ],
   "packageManager": "npm@10.8.2",
   "scripts": {

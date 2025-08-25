@@ -24,5 +24,8 @@
     "**/*.spec.js",
     "**/*.test.js",
     "node_modules"
+  ],
+  "references": [
+    { "path": "../../shared/tsconfig.lib.json" }
   ]
 }

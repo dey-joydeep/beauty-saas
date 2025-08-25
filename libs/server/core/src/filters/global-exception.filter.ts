@@ -1,5 +1,5 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { AppError } from '../errors/app.error';
 
 @Catch()
@@ -7,10 +7,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest();
+    const request = ctx.getRequest<Request>();
 
     // Default error response
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
+    let status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
     let code = 'INTERNAL_SERVER_ERROR';
     let details: Record<string, unknown> | undefined;
@@ -18,7 +18,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Handle our custom AppError
     if (exception instanceof AppError) {
-      status = exception.statusCode;
+      status = exception.statusCode as HttpStatus;
       message = exception.message;
       code = exception.code;
       details = exception.details;
