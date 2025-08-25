@@ -62,6 +62,6 @@
       "dependsOn": ["build"]
     }
   },
-  "tags": ["scope:server", "type:lib"],
+  "tags": ["type:lib", "platform:server", "scope:server-feature"],
   "implicitDependencies": ["server-core"]
 }

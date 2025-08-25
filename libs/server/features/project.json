@@ -1,12 +1,10 @@
 {
   "name": "server-features",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/server/features/src",
-  "prefix": "beauty-saas",
-  "tags": [
-    "scope:server",
-    "type:feature"
-  ],
+  "prefix": "app",
+  "tags": ["type:lib", "platform:server", "scope:server-feature"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",

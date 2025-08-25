@@ -1,11 +1,12 @@
 {
   "name": "server-data-access",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/server/data-access/src",
   "projectType": "library",
   "tags": [
-    "scope:server",
-    "type:data"
+    "type:lib",
+    "platform:server",
+    "scope:server-data"
   ],
   "targets": {
     "build": {

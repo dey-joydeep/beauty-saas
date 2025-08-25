@@ -2,8 +2,9 @@
   "name": "server-core",
   "sourceRoot": "libs/server/core/src",
   "tags": [
-    "scope:server",
-    "type:core"
+    "type:lib",
+    "platform:server",
+    "scope:server-core"
   ],
   "targets": {
     "lint": {
