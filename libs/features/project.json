@@ -3,7 +3,7 @@
   "projectType": "library",
   "sourceRoot": "libs/features/src",
   "prefix": "beauty-saas",
-  "tags": ["type:lib", "platform:server", "scope:server-feature"],
+  "tags": ["scope:server", "type:feature"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",

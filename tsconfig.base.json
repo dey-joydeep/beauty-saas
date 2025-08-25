@@ -23,6 +23,13 @@
       "@beauty-saas/core/*": ["libs/core/src/*"],
       "@beauty-saas/data-access": ["libs/data-access/src/index.ts"],
       "@beauty-saas/data-access/*": ["libs/data-access/src/*"],
+      // New standardized server aliases (non-breaking; old remain)
+      "@beauty-saas/server-core": ["libs/core/src/index.ts"],
+      "@beauty-saas/server-core/*": ["libs/core/src/*"],
+      "@beauty-saas/server-data-access": ["libs/data-access/src/index.ts"],
+      "@beauty-saas/server-data-access/*": ["libs/data-access/src/*"],
+      "@beauty-saas/server-features": ["libs/features/src/index.ts"],
+      "@beauty-saas/server-features/*": ["libs/features/*/src/index.ts"],
       "@beauty-saas/shared": ["libs/shared/src/index.ts"],
       "@beauty-saas/shared/*": ["libs/shared/src/*"],
       "@beauty-saas/web-admin-auth": ["libs/web/admin/auth/src/index.ts"],
