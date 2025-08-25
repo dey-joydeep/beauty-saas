@@ -13,17 +13,17 @@ const TEST_SALON_ID = 'test-salon-id';
 
 // Mock the repository
 const mockAppointmentRepository = {
-  create: jest.fn()
+  create: jest.fn(),
 } as any;
 
 // Create a mock customer service that can be controlled in tests
 const mockCustomerService = {
-  findUnique: jest.fn()
+  findUnique: jest.fn(),
 };
 
 // Mock Prisma service with proper typing
 const mockPrismaService = {
-  customer: mockCustomerService
+  customer: mockCustomerService,
 } as unknown as jest.Mocked<PrismaService>;
 
 describe('AppointmentService', () => {
@@ -68,7 +68,7 @@ describe('AppointmentService', () => {
         startTime: now.toISOString(),
         endTime: oneHourLater.toISOString(),
         services: [{ serviceId: 'service-1', staffId: 'staff-1' }],
-        status: AppointmentStatus.PENDING
+        status: AppointmentStatus.PENDING,
       };
 
       const mockUser: AuthUser = {
@@ -77,12 +77,14 @@ describe('AppointmentService', () => {
         firstName: 'Test',
         lastName: 'User',
         isActive: true,
-        roles: [{
-          role: { name: 'CUSTOMER', id: 1 },
-          userId: TEST_USER_ID,
-          roleId: 1
-        }],
-        customerId: TEST_CUSTOMER_ID
+        roles: [
+          {
+            role: { name: 'CUSTOMER', id: 1 },
+            userId: TEST_USER_ID,
+            roleId: 1,
+          },
+        ],
+        customerId: TEST_CUSTOMER_ID,
       };
 
       // Mock Prisma response
@@ -104,7 +106,7 @@ describe('AppointmentService', () => {
         createdAt: now,
         updatedAt: now,
         customer: { id: TEST_CUSTOMER_ID, userId: TEST_USER_ID },
-        services: createAppointmentDto.services
+        services: createAppointmentDto.services,
       });
 
       // Act
@@ -114,7 +116,7 @@ describe('AppointmentService', () => {
       expect(result).toBeDefined();
       expect(mockAppointmentRepository.create).toHaveBeenCalled();
       expect(prisma.customer.findUnique).toHaveBeenCalledWith({
-        where: { id: TEST_CUSTOMER_ID }
+        where: { id: TEST_CUSTOMER_ID },
       });
     });
 
@@ -129,7 +131,7 @@ describe('AppointmentService', () => {
         startTime: now.toISOString(),
         endTime: oneHourLater.toISOString(),
         services: [{ serviceId: 'service-1', staffId: 'staff-1' }],
-        status: AppointmentStatus.PENDING
+        status: AppointmentStatus.PENDING,
       };
 
       const mockUser: AuthUser = {
@@ -138,21 +140,21 @@ describe('AppointmentService', () => {
         firstName: 'Test',
         lastName: 'User',
         isActive: true,
-        roles: [{
-          role: { name: 'CUSTOMER', id: 1 },
-          userId: TEST_USER_ID,
-          roleId: 1
-        }],
-        customerId: 'non-existent-customer-id'
+        roles: [
+          {
+            role: { name: 'CUSTOMER', id: 1 },
+            userId: TEST_USER_ID,
+            roleId: 1,
+          },
+        ],
+        customerId: 'non-existent-customer-id',
       };
 
       // Mock Prisma to return null for customer
       mockCustomerService.findUnique.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.createAppointment(createAppointmentDto, mockUser))
-        .rejects
-        .toThrow('Customer not found');
+      await expect(service.createAppointment(createAppointmentDto, mockUser)).rejects.toThrow('Customer not found');
     });
   });
 });

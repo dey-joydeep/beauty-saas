@@ -13,7 +13,7 @@ describe('DashboardService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [DashboardService]
+      providers: [DashboardService],
     });
 
     service = TestBed.inject(DashboardService);
@@ -40,19 +40,19 @@ describe('DashboardService', () => {
           totalAmount: 50,
           saleDate: '2023-01-01T00:00:00.000Z',
           soldBy: 'u1',
-          customerName: 'Test User'
-        }
+          customerName: 'Test User',
+        },
       ],
       total: 1,
       page: 1,
       pageSize: 10,
-      totalPages: 1
+      totalPages: 1,
     };
 
     it('should fetch product sales with default parameters', () => {
       const filters: ProductSalesFilter = {};
-      
-      service.getProductSales(filters).subscribe(response => {
+
+      service.getProductSales(filters).subscribe((response) => {
         expect(response.data.length).toBe(1);
         expect(response.data[0].productName).toBe('Test Product');
         expect(response.total).toBe(1);
@@ -72,23 +72,24 @@ describe('DashboardService', () => {
         startDate: '2023-01-01',
         endDate: '2023-12-31',
         productId: 'p1',
-        soldById: 'u1'
+        soldById: 'u1',
       };
-      
+
       service.getProductSales(filters).subscribe();
 
       const req = httpMock.expectOne(
-        req => req.url === `${apiUrl}/dashboard/product-sales` &&
-        req.params.get('page') === '2' &&
-        req.params.get('pageSize') === '5' &&
-        req.params.get('sortBy') === 'saleDate' &&
-        req.params.get('sortOrder') === 'DESC' &&
-        req.params.get('startDate') === '2023-01-01' &&
-        req.params.get('endDate') === '2023-12-31' &&
-        req.params.get('productId') === 'p1' &&
-        req.params.get('soldById') === 'u1'
+        (req) =>
+          req.url === `${apiUrl}/dashboard/product-sales` &&
+          req.params.get('page') === '2' &&
+          req.params.get('pageSize') === '5' &&
+          req.params.get('sortBy') === 'saleDate' &&
+          req.params.get('sortOrder') === 'DESC' &&
+          req.params.get('startDate') === '2023-01-01' &&
+          req.params.get('endDate') === '2023-12-31' &&
+          req.params.get('productId') === 'p1' &&
+          req.params.get('soldById') === 'u1',
       );
-      
+
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
     });
@@ -102,16 +103,16 @@ describe('DashboardService', () => {
       averageSaleValue: 100,
       salesByProduct: [
         { productId: 'p1', productName: 'Product 1', quantity: 20, revenue: 500 },
-        { productId: 'p2', productName: 'Product 2', quantity: 30, revenue: 500 }
+        { productId: 'p2', productName: 'Product 2', quantity: 30, revenue: 500 },
       ],
       salesByDate: [
         { date: '2023-01-01', sales: 500, items: 25 },
-        { date: '2023-01-02', sales: 500, items: 25 }
-      ]
+        { date: '2023-01-02', sales: 500, items: 25 },
+      ],
     };
 
     it('should fetch product sales summary', () => {
-      service.getProductSalesSummary({}).subscribe(summary => {
+      service.getProductSalesSummary({}).subscribe((summary) => {
         expect(summary.totalSales).toBe(10);
         expect(summary.totalRevenue).toBe(1000);
         expect(summary.salesByProduct.length).toBe(2);
@@ -125,17 +126,18 @@ describe('DashboardService', () => {
     it('should apply date range filters when provided', () => {
       const filters = {
         startDate: '2023-01-01',
-        endDate: '2023-12-31'
+        endDate: '2023-12-31',
       };
-      
+
       service.getProductSalesSummary(filters).subscribe();
 
       const req = httpMock.expectOne(
-        req => req.url === `${apiUrl}/dashboard/product-sales/summary` &&
-        req.params.get('startDate') === '2023-01-01' &&
-        req.params.get('endDate') === '2023-12-31'
+        (req) =>
+          req.url === `${apiUrl}/dashboard/product-sales/summary` &&
+          req.params.get('startDate') === '2023-01-01' &&
+          req.params.get('endDate') === '2023-12-31',
       );
-      
+
       expect(req.request.method).toBe('GET');
       req.flush(mockSummary);
     });
@@ -144,11 +146,11 @@ describe('DashboardService', () => {
   describe('getTopSellingProducts', () => {
     const mockTopProducts = [
       { productId: 'p1', productName: 'Product 1', quantity: 20, revenue: 500 },
-      { productId: 'p2', productName: 'Product 2', quantity: 15, revenue: 400 }
+      { productId: 'p2', productName: 'Product 2', quantity: 15, revenue: 400 },
     ];
 
     it('should fetch top selling products with default limit', () => {
-      service.getTopSellingProducts().subscribe(products => {
+      service.getTopSellingProducts().subscribe((products) => {
         expect(products.length).toBe(2);
         expect(products[0].productName).toBe('Product 1');
       });

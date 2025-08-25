@@ -1,7 +1,8 @@
 import js from '@eslint/js';
-import ts from 'typescript-eslint';
+import webBase from '../../../eslint.base.web.js';
 
 export default [
+  ...webBase,
   // Base JavaScript configuration
   {
     files: ['**/*.js'],
@@ -18,18 +19,10 @@ export default [
   },
 
   // TypeScript configuration
-  ...ts.configs.recommended,
   {
     files: ['**/*.ts'],
     ignores: ['node_modules/**', 'dist/**', 'coverage/**'],
-    languageOptions: {
-      parser: ts.parser,
-      parserOptions: {
-        project: './tsconfig.json',
-      },
-    },
     rules: {
-      ...ts.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'warn',

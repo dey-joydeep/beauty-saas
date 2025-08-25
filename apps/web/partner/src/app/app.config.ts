@@ -1,24 +1,18 @@
 import {
   HttpClient,
-  HTTP_INTERCEPTORS,
   provideHttpClient,
   withFetch,
   withInterceptors,
   withInterceptorsFromDi,
-  withXsrfConfiguration
+  withXsrfConfiguration,
 } from '@angular/common/http';
-import {
-  ApplicationConfig,
-  ErrorHandler,
-  importProvidersFrom,
-  PLATFORM_ID,
-  TransferState
-} from '@angular/core';
+import { ApplicationConfig, ErrorHandler, importProvidersFrom } from '@angular/core';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
 import { TranslateLoader, TranslateModule, TranslateStore } from '@ngx-translate/core';
-import { TranslateBrowserLoader } from '@frontend-shared/core/translate/translate-ssr-loader';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { of } from 'rxjs';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -47,54 +41,55 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 // App imports
-import { AUTH_ROUTES } from './core/auth/auth.routes';
-import { ErrorHandlerService } from '@frontend-shared/core/services/error/error-handler.service';
-import { ErrorInterceptor } from '@frontend-shared/core/interceptors/error.interceptor';
-import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { AUTH_STATE_PORT, CURRENT_USER } from '@beauty-saas/web-core/auth';
+import {
+  ERROR_INTERCEPTOR_PROVIDER,
+  ErrorHandlerService,
+  loadingInterceptor,
+  ssrInterceptor,
+  ssrTranslateInterceptor,
+} from '@beauty-saas/web-core/http';
+import { routes } from './app.routes';
+import { LOGIN_API, AUTH_STATE_SETTER } from '@beauty-saas/web-partner-auth';
+import { LoginApiService } from '@beauty-saas/web-partner-auth';
+import {
+  FORGOT_PASSWORD_API,
+  REGISTER_API,
+  type ForgotPasswordApiPort,
+  type RegisterApiPort,
+} from '@beauty-saas/web-partner-auth';
+import { AuthService } from './core/auth/services/auth.service';
+import { CurrentUserAdapter } from './core/auth/services/current-user.adapter';
 
 // AoT requires an exported function for factories
-export function httpLoaderFactory(http: HttpClient, transferState: TransferState) {
-  return new TranslateBrowserLoader(http, transferState);
+export function httpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // Provide PlatformUtils as a singleton
-    { 
-      provide: PLATFORM_UTILS_TOKEN, 
-      useFactory: (platformId: Object) => new PlatformUtils(platformId), 
-      deps: [PLATFORM_ID] 
-    },
-    
-    // Provide PLATFORM_UTILS_TOKEN for client-side
-    {
-      provide: PLATFORM_UTILS_TOKEN,
-      useFactory: (platformId: Object) => new PlatformUtils(platformId),
-      deps: [PLATFORM_ID]
-    },
-    
-    // Configure TranslateModule for client-side with SSR support
+    // PLATFORM_UTILS_TOKEN is provided in web-config at root; no extra providers needed here.
+
+    // Configure TranslateModule for client-side
     {
       provide: TranslateLoader,
       useFactory: httpLoaderFactory,
-      deps: [HttpClient, TransferState]
+      deps: [HttpClient],
     },
     TranslateStore,
-    
-    provideRouter(AUTH_ROUTES),
+
+    provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(
       withInterceptorsFromDi(),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN',
       }),
-      withInterceptors([
-        // Add any HTTP interceptors here
-      ]),
-      withFetch()
+      withInterceptors([loadingInterceptor, ssrInterceptor, ssrTranslateInterceptor]),
+      withFetch(),
     ),
     // Register global HTTP interceptors
-    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+    ERROR_INTERCEPTOR_PROVIDER,
     importProvidersFrom([
       BrowserAnimationsModule,
       MatButtonModule,
@@ -128,11 +123,40 @@ export const appConfig: ApplicationConfig = {
         loader: {
           provide: TranslateLoader,
           useFactory: httpLoaderFactory,
-          deps: [HttpClient, TransferState]
-        }
-      })
+          deps: [HttpClient],
+        },
+      }),
     ]),
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
     { provide: ErrorHandler, useClass: ErrorHandlerService },
+    { provide: AUTH_STATE_PORT, useExisting: AuthService },
+    { provide: LOGIN_API, useClass: LoginApiService },
+    { provide: AUTH_STATE_SETTER, useExisting: AuthService },
+    { provide: CURRENT_USER, useExisting: CurrentUserAdapter },
+    // Token-based auth APIs (temporary placeholder implementations)
+    {
+      provide: FORGOT_PASSWORD_API,
+      useFactory: (http: HttpClient): ForgotPasswordApiPort => {
+        // TODO: Replace with real API integration using a dedicated AuthApiService
+        return {
+          requestPasswordReset: () => {
+            return of(true);
+          },
+          resetPassword: () => {
+            return of(true);
+          },
+        } as ForgotPasswordApiPort;
+      },
+      deps: [HttpClient],
+    },
+    {
+      provide: REGISTER_API,
+      useFactory: (): RegisterApiPort => {
+        // TODO: Replace with real registration API integration
+        return {
+          register: async () => Promise.resolve(),
+        } as RegisterApiPort;
+      },
+    },
   ],
 };

@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "../../",  // Set root to the project root
+    "rootDir": "../../", // Set root to the project root
     "baseUrl": ".",
     "paths": {
       "@app/*": ["src/*"],
@@ -11,14 +11,11 @@
       "@beauty-saas/shared": ["libs/shared/src/index.ts"],
       "@beauty-saas/shared/*": ["libs/shared/src/*"]
     },
-    "typeRoots": [
-      "node_modules/@types",
-      "../../node_modules/@types"
-    ],
+    "typeRoots": ["node_modules/@types", "../../node_modules/@types"],
     "types": ["node", "express", "jest"],
     "composite": true,
     "incremental": true,
-    "preserveSymlinks": true  // Important for monorepo setups
+    "preserveSymlinks": true // Important for monorepo setups
   },
   "include": [
     "src/**/*.ts",

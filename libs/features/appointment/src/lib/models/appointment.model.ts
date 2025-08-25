@@ -36,7 +36,7 @@ export const CUSTOMER_SELECT = {
   updatedAt: true,
   lastLoginAt: true,
   isVerified: true,
-  avatarUrl: true
+  avatarUrl: true,
 } as const;
 
 export const TENANT_SERVICE_SELECT = {
@@ -57,7 +57,7 @@ export const TENANT_SERVICE_SELECT = {
   reorderPoint: true,
   metadata: true,
   createdAt: true,
-  updatedAt: true
+  updatedAt: true,
 } as const;
 
 export const SALON_SELECT: Prisma.SalonSelect = {
@@ -88,14 +88,14 @@ export const SALON_SELECT: Prisma.SalonSelect = {
                 select: {
                   id: true,
                   name: true,
-                  iso2: true
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                  iso2: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   phone: true,
   email: true,
@@ -109,7 +109,7 @@ export const SALON_SELECT: Prisma.SalonSelect = {
   averageRating: true,
   reviewCount: true,
   createdAt: true,
-  updatedAt: true
+  updatedAt: true,
 } as const;
 
 export const TENANT_PRODUCT_SELECT = {
@@ -199,7 +199,7 @@ export const REVIEW_SELECT = {
   salonId: true,
   appointmentId: true,
   staffId: true,
-  adminComment: true
+  adminComment: true,
 } as const;
 
 export const PRODUCT_SALE_SELECT = {
@@ -222,7 +222,7 @@ export const PRODUCT_SALE_SELECT = {
   notes: true,
   metadata: true,
   createdAt: true,
-  updatedAt: true
+  updatedAt: true,
 } as const;
 
 // Base types for related entities
@@ -310,8 +310,8 @@ type TenantServiceWithDetails = TenantService & {
   // through the Prisma include clause
 };
 
-type TenantProductWithDetails = Prisma.TenantProductGetPayload<{ 
-  select: typeof TENANT_PRODUCT_SELECT 
+type TenantProductWithDetails = Prisma.TenantProductGetPayload<{
+  select: typeof TENANT_PRODUCT_SELECT;
 }>;
 
 export type RawAppointment = PrismaAppointment & {

@@ -1,12 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import {
-  ProductSalesFilterDto,
-  ProductSaleDto,
-  ProductSalesSummaryDto,
-  SalesByProductDto,
-  SalesByDateDto,
-} from '../dto/product-sales.dto';
+import { ProductSalesFilterDto, ProductSaleDto, ProductSalesSummaryDto, SalesByProductDto, SalesByDateDto } from '../dto/product-sales.dto';
 
 @Injectable()
 export class DashboardService {
@@ -21,15 +15,14 @@ export class DashboardService {
   }
   async getStats() {
     // Fetch total counts with proper typing
-    const [userCount, salonCount, appointmentCount, reviewCount, /* productCount,*/ saleCount] =
-      await Promise.all([
-        this.prisma.user.count(),
-        this.prisma.salon.count(),
-        this.prisma.appointment.count(),
-        this.prisma.review.count(),
-        // this.prisma.product.count(),
-        this.prisma.productSale.count(),
-      ]);
+    const [userCount, salonCount, appointmentCount, reviewCount, /* productCount,*/ saleCount] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.salon.count(),
+      this.prisma.appointment.count(),
+      this.prisma.review.count(),
+      // this.prisma.product.count(),
+      this.prisma.productSale.count(),
+    ]);
 
     // Calculate total revenue from product sales
     const revenueResult = await this.prisma.productSale.aggregate({
@@ -58,10 +51,8 @@ export class DashboardService {
   async getRevenue(filters: { startDate?: string; endDate?: string } = {}) {
     // Set default date range to last 6 months if not provided
     const endDate = filters.endDate ? new Date(filters.endDate) : new Date();
-    const startDate = filters.startDate 
-      ? new Date(filters.startDate)
-      : new Date();
-    
+    const startDate = filters.startDate ? new Date(filters.startDate) : new Date();
+
     if (!filters.startDate) {
       startDate.setMonth(endDate.getMonth() - 6);
     }
@@ -170,24 +161,19 @@ export class DashboardService {
     });
 
     // Group sales by date
-    const salesByDate = sales.reduce<Record<string, SalesByDateDto>>(
-      (acc: Record<string, SalesByDateDto>, sale: ProductSaleDto) => {
-        const date = this.formatDateForUI(sale.saleDate);
-        if (!acc[date]) {
-          acc[date] = { date, sales: 0, items: 0 };
-        }
-        acc[date].sales += sale.totalAmount;
-        acc[date].items += sale.quantity;
-        return acc;
-      },
-      {},
-    );
+    const salesByDate = sales.reduce<Record<string, SalesByDateDto>>((acc: Record<string, SalesByDateDto>, sale: ProductSaleDto) => {
+      const date = this.formatDateForUI(sale.saleDate);
+      if (!acc[date]) {
+        acc[date] = { date, sales: 0, items: 0 };
+      }
+      acc[date].sales += sale.totalAmount;
+      acc[date].items += sale.quantity;
+      return acc;
+    }, {});
 
     // Convert to arrays and sort
     const productSales = Object.values(salesByProduct).sort((a, b) => b.revenue - a.revenue);
-    const dateSales = Object.values(salesByDate).sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-    );
+    const dateSales = Object.values(salesByDate).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     // Calculate cost and profit (this is a simplified example)
     // In a real app, you'd fetch the actual cost from the database
@@ -213,23 +199,20 @@ export class DashboardService {
   async getTopSellingProducts(limit: number = 5): Promise<SalesByProductDto[]> {
     const sales = await this.getProductSales();
 
-    const products = sales.reduce<Record<string, SalesByProductDto>>(
-      (acc: Record<string, SalesByProductDto>, sale: ProductSaleDto) => {
-        if (!acc[sale.productId]) {
-          acc[sale.productId] = {
-            productId: sale.productId,
-            productName: sale.productName,
-            quantity: 0,
-            revenue: 0,
-            percentage: 0,
-          };
-        }
-        acc[sale.productId].quantity += sale.quantity;
-        acc[sale.productId].revenue += sale.totalAmount;
-        return acc;
-      },
-      {},
-    );
+    const products = sales.reduce<Record<string, SalesByProductDto>>((acc: Record<string, SalesByProductDto>, sale: ProductSaleDto) => {
+      if (!acc[sale.productId]) {
+        acc[sale.productId] = {
+          productId: sale.productId,
+          productName: sale.productName,
+          quantity: 0,
+          revenue: 0,
+          percentage: 0,
+        };
+      }
+      acc[sale.productId].quantity += sale.quantity;
+      acc[sale.productId].revenue += sale.totalAmount;
+      return acc;
+    }, {});
 
     return Object.values(products)
       .sort((a, b) => b.quantity - a.quantity)
@@ -240,12 +223,12 @@ export class DashboardService {
     // Example: list upcoming salon renewals (assume renewal_date on Salon)
     const now = new Date();
     const soon = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30); // next 30 days
-    
+
     interface SalonRenewal {
       name: string;
       renewalDate: Date | null;
     }
-    
+
     const results = await this.prisma.salon.findMany({
       where: {
         renewalDate: {
@@ -261,10 +244,10 @@ export class DashboardService {
         renewalDate: 'asc',
       },
     });
-    
-    return results.map((r: SalonRenewal) => ({ 
-      salonName: r.name, 
-      renewalDate: r.renewalDate 
+
+    return results.map((r: SalonRenewal) => ({
+      salonName: r.name,
+      renewalDate: r.renewalDate,
     }));
   }
 }

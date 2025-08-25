@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
+import { ErrorService } from '@beauty-saas/web-core/http';
 import type { DashboardStats } from '../../models/dashboard.model';
 
 @Component({

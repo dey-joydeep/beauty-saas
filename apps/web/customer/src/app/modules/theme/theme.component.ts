@@ -1,10 +1,11 @@
+﻿import { PlatformUtils } from '@beauty-saas/web-config';
 import { Component, OnInit, Inject, PLATFORM_ID, Renderer2 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ThemeService, Theme } from './theme.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
-import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
+import type { PlatformUtils } from '@beauty-saas/web-config';
+import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 
 @Component({
   selector: 'app-theme',
@@ -25,8 +26,8 @@ export class ThemeComponent implements OnInit {
     private themeService: ThemeService,
     private fb: FormBuilder,
     private renderer: Renderer2,
-    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: IPlatformUtils,
-    @Inject(PLATFORM_ID) platformId: Object
+    @Inject(PLATFORM_UTILS_TOKEN) private platformUtils: PlatformUtils,
+    @Inject(PLATFORM_ID) platformId: object,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.themeForm = this.fb.group({
@@ -88,12 +89,12 @@ export class ThemeComponent implements OnInit {
    * Safe to call in both server and browser environments
    */
   applyTheme(theme: Theme) {
-    if (!this.isBrowser || !this.platformUtils.document) {
+    if (!this.isBrowser || !this.platformUtils.documentRef) {
       return;
     }
 
     try {
-      const doc = this.platformUtils.document;
+      const doc = this.platformUtils.documentRef;
       const rootElement = doc.documentElement;
 
       // Batch style updates to minimize reflows
@@ -118,3 +119,4 @@ export class ThemeComponent implements OnInit {
     }
   }
 }
+

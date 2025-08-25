@@ -19,7 +19,7 @@ export class ErrorHandlerService {
     // Handle HTTP errors
     if (this.isHttpErrorResponse(error)) {
       this.handleHttpError(error);
-    } 
+    }
     // Handle client-side errors
     else if (error instanceof Error) {
       this.handleClientError(error);

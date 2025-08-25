@@ -6,11 +6,11 @@ import { BaseUserDto } from './base-user.dto';
 
 /**
  * User update data transfer object
- * 
+ *
  * @remarks
  * This DTO is used for updating existing users in the system.
  * All fields are optional and only provided fields will be updated.
- * 
+ *
  * @public
  */
 export class UpdateUserDto extends PartialType(BaseUserDto) {
@@ -19,7 +19,7 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
     description: 'New password (min 6 characters)',
     minLength: 6,
     type: String,
-    required: false
+    required: false,
   })
   @IsString()
   @MinLength(6, { message: 'Password must be at least 6 characters' })
@@ -30,7 +30,7 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
     description: 'User roles',
     type: [String],
     example: [AppUserRole.CUSTOMER],
-    required: false
+    required: false,
   })
   @IsArray()
   @IsString({ each: true })
@@ -40,7 +40,7 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
   @ApiPropertyOptional({
     description: 'Whether the user is a SaaS owner',
     default: false,
-    required: false
+    required: false,
   })
   @IsBoolean()
   @IsOptional()
@@ -49,7 +49,7 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
   @ApiPropertyOptional({
     description: 'Whether the user is salon staff',
     default: false,
-    required: false
+    required: false,
   })
   @IsBoolean()
   @IsOptional()
@@ -58,7 +58,7 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
   @ApiPropertyOptional({
     description: 'Whether the user is a customer',
     default: true,
-    required: false
+    required: false,
   })
   @IsBoolean()
   @IsOptional()
@@ -69,7 +69,7 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
   @ApiPropertyOptional({
     example: true,
     description: 'Whether the user is active in the system',
-    required: false
+    required: false,
   })
   @IsBoolean()
   @IsOptional()
@@ -80,7 +80,7 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
     description: 'Current password (required when changing password or email)',
     minLength: 8,
     type: String,
-    required: false
+    required: false,
   })
   @IsString()
   @IsOptional()
@@ -90,7 +90,7 @@ export class UpdateUserDto extends PartialType(BaseUserDto) {
     example: true,
     description: `Whether the user's email has been verified.\n\
 **Note:** This field is typically managed by the system`,
-    required: false
+    required: false,
   })
   @IsBoolean()
   @IsOptional()

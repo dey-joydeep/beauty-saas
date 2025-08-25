@@ -5,25 +5,25 @@ import { AppointmentManagementComponent } from './appointment-management/appoint
 import { StaffManagementComponent } from './staff-management/staff-management.component';
 
 export const OWNER_ROUTES: Routes = [
-  { 
-    path: '', 
+  {
+    path: '',
     component: OwnerDashboardComponent,
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'salon',
-    component: SalonManagementComponent
+    component: SalonManagementComponent,
   },
   {
     path: 'appointments',
-    component: AppointmentManagementComponent
+    component: AppointmentManagementComponent,
   },
   {
     path: 'staff',
-    component: StaffManagementComponent
+    component: StaffManagementComponent,
   },
   {
     path: '**',
-    redirectTo: ''
-  }
+    redirectTo: '',
+  },
 ];

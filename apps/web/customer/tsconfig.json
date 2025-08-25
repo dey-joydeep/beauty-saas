@@ -7,9 +7,16 @@
       "@env/*": ["src/environments/*"],
       "@app/*": ["src/app/*"],
       "@shared/*": ["../../../libs/shared/src/*"],
-      "@frontend-shared/*": ["../../../libs/frontend/src/app/*"]
+      "@beauty-saas/ui": ["../../../libs/ui/src/index.ts"],
+      "@beauty-saas/ui/*": ["../../../libs/ui/src/*"],
+      "@beauty-saas/web-customer/auth": ["../../../libs/web/customer/auth/src/index.ts"],
+      "@beauty-saas/web-config": ["../../../libs/web/config/src/index.ts"],
+      "@beauty-saas/web-core/auth": ["../../../libs/web/core/auth/src/index.ts"],
+      "@beauty-saas/web-core/http": ["../../../libs/web/core/http/src/index.ts"],
+      "@beauty-saas/web-core/testing": ["../../../libs/web/core/testing/src/index.ts"]
     },
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "esModuleInterop": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

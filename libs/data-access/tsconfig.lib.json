@@ -10,11 +10,5 @@
     "composite": true
   },
   "include": ["**/*.ts"],
-  "exclude": [
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "**/*.spec.js",
-    "**/*.test.js",
-    "node_modules"
-  ]
+  "exclude": ["**/*.spec.ts", "**/*.test.ts", "**/*.spec.js", "**/*.test.js", "node_modules"]
 }

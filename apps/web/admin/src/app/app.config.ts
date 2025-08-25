@@ -1,24 +1,18 @@
 import {
   HttpClient,
-  HTTP_INTERCEPTORS,
   provideHttpClient,
   withFetch,
   withInterceptors,
   withInterceptorsFromDi,
-  withXsrfConfiguration
+  withXsrfConfiguration,
 } from '@angular/common/http';
-import {
-  ApplicationConfig,
-  ErrorHandler,
-  importProvidersFrom,
-  PLATFORM_ID,
-  TransferState
-} from '@angular/core';
+import { ApplicationConfig, ErrorHandler, importProvidersFrom } from '@angular/core';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { map } from 'rxjs/operators';
 import { TranslateLoader, TranslateModule, TranslateStore } from '@ngx-translate/core';
-import { TranslateBrowserLoader } from '@frontend-shared/core/translate/translate-ssr-loader';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -47,54 +41,47 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 // App imports
-import { AUTH_ROUTES } from './core/auth/auth.routes';
-import { ErrorHandlerService } from '@frontend-shared/core/services/error/error-handler.service';
-import { ErrorInterceptor } from '@frontend-shared/core/interceptors/error.interceptor';
-import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@frontend-shared/core/utils/platform-utils';
+import { routes } from './app.routes';
+import {
+  ErrorHandlerService,
+  ERROR_INTERCEPTOR_PROVIDER,
+  loadingInterceptor,
+  ssrInterceptor,
+  ssrTranslateInterceptor,
+} from '@beauty-saas/web-core/http';
+import { AUTH_STATE_PORT, CURRENT_USER } from '@beauty-saas/web-core/auth';
+import { LOGIN_API, AUTH_STATE_SETTER, FORGOT_PASSWORD_API, REGISTER_API, type ForgotPasswordApiPort, type RegisterApiPort } from '@beauty-saas/web-admin/auth';
+import { AuthService } from './core/auth/services/auth.service';
+import { AuthApiService } from './core/auth/services/auth-api.service';
+import { CurrentUserAdapter } from './core/auth/services/current-user.adapter';
 
 // AoT requires an exported function for factories
-export function httpLoaderFactory(http: HttpClient, transferState: TransferState) {
-  return new TranslateBrowserLoader(http, transferState);
+export function httpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // Provide PlatformUtils as a singleton
-    { 
-      provide: PLATFORM_UTILS_TOKEN, 
-      useFactory: (platformId: Object) => new PlatformUtils(platformId), 
-      deps: [PLATFORM_ID] 
-    },
-    
-    // Provide PLATFORM_UTILS_TOKEN for client-side
-    {
-      provide: PLATFORM_UTILS_TOKEN,
-      useFactory: (platformId: Object) => new PlatformUtils(platformId),
-      deps: [PLATFORM_ID]
-    },
-    
     // Configure TranslateModule for client-side with SSR support
     {
       provide: TranslateLoader,
       useFactory: httpLoaderFactory,
-      deps: [HttpClient, TransferState]
+      deps: [HttpClient],
     },
     TranslateStore,
-    
-    provideRouter(AUTH_ROUTES),
+
+    provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(
       withInterceptorsFromDi(),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN',
       }),
-      withInterceptors([
-        // Add any HTTP interceptors here
-      ]),
-      withFetch()
+      withInterceptors([loadingInterceptor, ssrInterceptor, ssrTranslateInterceptor]),
+      withFetch(),
     ),
     // Register global HTTP interceptors
-    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+    ERROR_INTERCEPTOR_PROVIDER,
     importProvidersFrom([
       BrowserAnimationsModule,
       MatButtonModule,
@@ -128,11 +115,32 @@ export const appConfig: ApplicationConfig = {
         loader: {
           provide: TranslateLoader,
           useFactory: httpLoaderFactory,
-          deps: [HttpClient, TransferState]
-        }
-      })
+          deps: [HttpClient],
+        },
+      }),
     ]),
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
     { provide: ErrorHandler, useClass: ErrorHandlerService },
+    { provide: AUTH_STATE_PORT, useExisting: AuthService },
+    { provide: CURRENT_USER, useExisting: CurrentUserAdapter },
+    { provide: LOGIN_API, useExisting: AuthApiService },
+    { provide: AUTH_STATE_SETTER, useExisting: AuthService },
+    // Bridge library tokens to app services
+    {
+      provide: FORGOT_PASSWORD_API,
+      useFactory: (api: AuthApiService): ForgotPasswordApiPort => ({
+        requestPasswordReset: (email: string) => api.requestPasswordReset(email).pipe(map((r) => !!r?.success)),
+        resetPassword: (token: string, newPassword: string) => api.resetPassword(token, newPassword).pipe(map((r) => !!r?.success)),
+      }),
+      deps: [AuthApiService],
+    },
+    {
+      provide: REGISTER_API,
+      useFactory: (): RegisterApiPort => ({
+        // TODO: Replace with real registration API when available
+        register: async () => Promise.resolve(),
+      }),
+      deps: [],
+    },
   ],
 };

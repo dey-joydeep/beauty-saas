@@ -1,4 +1,19 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, Controller, Delete, Get, NotFoundException, Param, ParseFloatPipe, Patch, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  ParseFloatPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../core/auth/guards/jwt-auth.guard';
 import { ReviewService } from '../review/review.service';
@@ -15,7 +30,7 @@ import { SalonService } from '../services/salon.service';
 export class SalonController {
   constructor(
     private readonly salonService: SalonService,
-    private readonly reviewService: ReviewService
+    private readonly reviewService: ReviewService,
   ) {}
 
   @Get('top')
@@ -25,7 +40,7 @@ export class SalonController {
   @ApiQuery({ name: 'lng', required: false, type: Number })
   async getTopSalons(
     @Query('lat', new ParseFloatPipe({ optional: true })) lat?: number,
-    @Query('lng', new ParseFloatPipe({ optional: true })) lng?: number
+    @Query('lng', new ParseFloatPipe({ optional: true })) lng?: number,
   ) {
     try {
       return await this.salonService.getTopSalons({
@@ -54,9 +69,9 @@ export class SalonController {
         min_rating: searchParams.minRating,
         max_rating: searchParams.maxRating,
         page: searchParams.page,
-        limit: searchParams.limit
+        limit: searchParams.limit,
       };
-      
+
       return await this.salonService.searchSalons(filters);
     } catch (error) {
       throw new BadRequestException('Error searching salons', error.message);
@@ -91,20 +106,17 @@ export class SalonController {
   @ApiOperation({ summary: 'Update a salon' })
   @ApiResponse({ status: 200, description: 'The salon has been successfully updated.', type: SalonResponseDto })
   @ApiResponse({ status: 404, description: 'Salon not found' })
-  async updateSalon(
-    @Param('id') id: string,
-    @Body() updateSalonDto: UpdateSalonDto
-  ) {
+  async updateSalon(@Param('id') id: string, @Body() updateSalonDto: UpdateSalonDto) {
     try {
       const salon = await this.salonService.updateSalon({
         salonId: id,
-        ...updateSalonDto
+        ...updateSalonDto,
       });
-      
+
       if (!salon) {
         throw new NotFoundException('Salon not found');
       }
-      
+
       return salon;
     } catch (error) {
       throw new BadRequestException(error.message);

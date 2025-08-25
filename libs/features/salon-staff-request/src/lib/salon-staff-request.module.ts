@@ -5,10 +5,7 @@ import { SalonStaffRequestService } from './services/salon-staff-request.service
 
 @Module({
   controllers: [SalonStaffRequestController],
-  providers: [
-    PrismaService,
-    SalonStaffRequestService,
-  ],
+  providers: [PrismaService, SalonStaffRequestService],
   exports: [SalonStaffRequestService],
 })
 export class SalonStaffRequestModule {}

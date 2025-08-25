@@ -43,7 +43,7 @@ export class SalonStaffRequestService {
       where.createdAt = { gte: new Date(query.startDate) };
     }
     if (query.endDate) {
-      where.createdAt = { ...where.createdAt as object, lte: new Date(query.endDate) };
+      where.createdAt = { ...(where.createdAt as object), lte: new Date(query.endDate) };
     }
 
     return where;
@@ -63,22 +63,20 @@ export class SalonStaffRequestService {
       },
     });
 
-    return requests.map(req => this.mapToResponseDto(req));
+    return requests.map((req) => this.mapToResponseDto(req));
   }
 
   async getRequestById(id: string): Promise<SalonStaffRequestResponseDto> {
     const request = await this.prisma.salonStaffRequest.findUnique({ where: { id } });
-    
+
     if (!request) {
       throw new NotFoundException(`Salon staff request with ID ${id} not found`);
     }
-    
+
     return this.mapToResponseDto(request);
   }
 
-  async createRequest(
-    createDto: CreateSalonStaffRequestDto,
-  ): Promise<SalonStaffRequestResponseDto> {
+  async createRequest(createDto: CreateSalonStaffRequestDto): Promise<SalonStaffRequestResponseDto> {
     try {
       const created = await this.prisma.salonStaffRequest.create({
         data: {
@@ -100,10 +98,7 @@ export class SalonStaffRequestService {
     }
   }
 
-  async updateRequest(
-    id: string,
-    updateDto: UpdateSalonStaffRequestDto,
-  ): Promise<SalonStaffRequestResponseDto> {
+  async updateRequest(id: string, updateDto: UpdateSalonStaffRequestDto): Promise<SalonStaffRequestResponseDto> {
     try {
       // Check if the request exists
       const existingRequest = await this.prisma.salonStaffRequest.findUnique({
@@ -120,7 +115,7 @@ export class SalonStaffRequestService {
       }
 
       const updateData: any = { ...updateDto, updatedAt: new Date() };
-      
+
       // Only update rejectionReason if it's provided or if status is being changed to rejected
       if (updateDto.status === SalonStaffRequestStatus.rejected && !updateDto.rejectionReason) {
         updateData.rejectionReason = 'No reason provided';
@@ -128,7 +123,7 @@ export class SalonStaffRequestService {
 
       const updated = await this.prisma.salonStaffRequest.update({
         where: { id },
-        data: updateData
+        data: updateData,
       });
 
       return this.mapToResponseDto(updated);

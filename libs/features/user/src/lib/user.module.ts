@@ -6,22 +6,19 @@ import { UserController } from './controllers/user.controller';
 import { UserService } from './services/user.service';
 
 @Module({
-    imports: [
-        // Configure JWT module
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'),
-                signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN', '1d') },
-            }),
-            inject: [ConfigService],
-        }),
-    ],
-    controllers: [UserController],
-    providers: [
-        PrismaService,
-        UserService,
-    ],
-    exports: [UserService], // Export UserService if it needs to be used by other modules
+  imports: [
+    // Configure JWT module
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN', '1d') },
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+  controllers: [UserController],
+  providers: [PrismaService, UserService],
+  exports: [UserService], // Export UserService if it needs to be used by other modules
 })
-export class UserModule { }
+export class UserModule {}

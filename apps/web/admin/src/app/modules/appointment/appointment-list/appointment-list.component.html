@@ -62,7 +62,12 @@
                   <mat-icon>event_available</mat-icon>
                   <span>{{ 'APPOINTMENT.RESCHEDULE' | translate }}</span>
                 </button>
-                <button mat-menu-item (click)="onCancelAppointment(appointment)" [disabled]="appointment.status !== 'BOOKED'" class="cancel-button">
+                <button
+                  mat-menu-item
+                  (click)="onCancelAppointment(appointment)"
+                  [disabled]="appointment.status !== 'BOOKED'"
+                  class="cancel-button"
+                >
                   <mat-icon>cancel</mat-icon>
                   <span>{{ 'APPOINTMENT.CANCEL' | translate }}</span>
                 </button>

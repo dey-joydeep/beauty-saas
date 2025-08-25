@@ -1,12 +1,7 @@
 import { JwtAuthGuard, RolesGuard } from '@beauty-saas/core/auth/guards';
 import { ConfigModule } from '@beauty-saas/core/config';
 import { ConfigService } from '@beauty-saas/core/src/config';
-import {
-  ClassSerializerInterceptor,
-  Logger,
-  ValidationPipe,
-  VersioningType
-} from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -18,7 +13,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  
+
   // Create the application with logging
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
@@ -28,7 +23,8 @@ async function bootstrap() {
   // Get config service
   const configService = app.select(ConfigModule).get(ConfigService);
   const { port, nodeEnv, isProduction } = configService.app;
-  const { origins, methods, allowedHeaders, exposedHeaders, credentials, maxAge } = configService.cors;
+  const { origins, methods, allowedHeaders, exposedHeaders, credentials, maxAge } =
+    configService.cors;
 
   // Enable CORS with configuration
   app.enableCors({
@@ -47,7 +43,7 @@ async function bootstrap() {
         // If URL parsing fails, deny the request
         return callback(new Error('Invalid origin'));
       }
-      
+
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: credentials,
@@ -58,10 +54,10 @@ async function bootstrap() {
       'X-Requested-With',
       'Accept',
       'X-XSRF-TOKEN',
-      'X-Request-Id'
+      'X-Request-Id',
     ],
     exposedHeaders: exposedHeaders || ['X-Request-Id'],
-    maxAge: maxAge || 600 // 10 minutes
+    maxAge: maxAge || 600, // 10 minutes
   });
 
   // Security middleware
@@ -98,16 +94,11 @@ async function bootstrap() {
   );
 
   // Global interceptors
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector)),
-  );
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   // Global guards
   const reflector = app.get(Reflector);
-  app.useGlobalGuards(
-    new JwtAuthGuard(reflector),
-    new RolesGuard(reflector),
-  );
+  app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
 
   // API versioning
   app.enableVersioning({
@@ -138,7 +129,7 @@ async function bootstrap() {
   // Start the application
   await app.listen(port);
   logger.log(`Application is running on: http://localhost:${port}`);
-  
+
   if (nodeEnv !== 'production') {
     logger.log(`API documentation available at: http://localhost:${port}/api`);
   }
@@ -146,7 +137,7 @@ async function bootstrap() {
 
 // Start the application
 if (process.env.NODE_ENV !== 'test') {
-  bootstrap().catch(err => {
+  bootstrap().catch((err) => {
     Logger.error('Failed to start application:', err);
     process.exit(1);
   });

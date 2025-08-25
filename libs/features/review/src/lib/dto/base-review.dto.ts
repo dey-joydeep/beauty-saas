@@ -3,59 +3,59 @@ import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Max, Min } 
 import { ReviewStatus } from '../enums/review-status.enum';
 
 export class BaseReviewDto {
-  @ApiProperty({ 
-    description: 'The ID of the appointment service being reviewed', 
+  @ApiProperty({
+    description: 'The ID of the appointment service being reviewed',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
-    required: false
+    required: false,
   })
   @IsUUID()
   @IsOptional()
   appointmentServiceId?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'The ID of the customer who is leaving the review',
     format: 'uuid',
-    example: '123e4567-e89b-12d3-a456-426614174001'
+    example: '123e4567-e89b-12d3-a456-426614174001',
   })
   @IsUUID()
   @IsNotEmpty()
   customerId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'The ID of the tenant (business) being reviewed',
     format: 'uuid',
-    example: '123e4567-e89b-12d3-a456-426614174002'
+    example: '123e4567-e89b-12d3-a456-426614174002',
   })
   @IsUUID()
   @IsNotEmpty()
   tenantId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'The ID of the salon service being reviewed',
     format: 'uuid',
-    example: '123e4567-e89b-12d3-a456-426614174003'
+    example: '123e4567-e89b-12d3-a456-426614174003',
   })
   @IsUUID()
   @IsNotEmpty()
   salonServiceId!: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'The ID of the staff member who provided the service',
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174004',
     required: false,
-    nullable: true
+    nullable: true,
   })
   @IsUUID()
   @IsOptional()
   staffId?: string | null;
 
-  @ApiProperty({ 
-    description: 'The rating given (1-5)', 
-    minimum: 1, 
+  @ApiProperty({
+    description: 'The rating given (1-5)',
+    minimum: 1,
     maximum: 5,
-    example: 5
+    example: 5,
   })
   @IsInt()
   @Min(1)
@@ -63,49 +63,49 @@ export class BaseReviewDto {
   @IsNotEmpty()
   rating!: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Optional comment for the review',
     required: false,
     example: 'Great service!',
-    nullable: true
+    nullable: true,
   })
   @IsString()
   @IsOptional()
   comment?: string | null;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Optional response to the review from staff/owner',
     required: false,
     example: 'Thank you for your feedback!',
-    nullable: true
+    nullable: true,
   })
   @IsString()
   @IsOptional()
   response?: string | null;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Whether the review is approved by admin',
     required: false,
-    default: false
+    default: false,
   })
   @IsBoolean()
   @IsOptional()
   isApproved?: boolean;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Whether the review is featured',
     required: false,
-    default: false
+    default: false,
   })
   @IsBoolean()
   @IsOptional()
   isFeatured?: boolean;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Status of the review',
     enum: ReviewStatus,
     default: ReviewStatus.PENDING,
-    required: false
+    required: false,
   })
   @IsString()
   @IsOptional()

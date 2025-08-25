@@ -26,7 +26,7 @@ import { Staff } from '../../../models/staff.model';
     // Angular modules
     CommonModule,
     ReactiveFormsModule,
-    
+
     // Material modules
     MatButtonModule,
     MatDatepickerModule,
@@ -37,9 +37,9 @@ import { Staff } from '../../../models/staff.model';
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    
+
     // Third-party modules
-    TranslateModule
+    TranslateModule,
   ],
   templateUrl: './create-appointment.component.html',
   styleUrls: ['./create-appointment.component.scss'],
@@ -74,7 +74,7 @@ export class CreateAppointmentComponent implements OnInit {
 
   ngOnInit() {
     this.fetchSalons();
-    this.currentUserService.currentUser$.subscribe(user => {
+    this.currentUserService.currentUser$.subscribe((user) => {
       this.userId = user?.id || null;
     });
   }
@@ -137,11 +137,11 @@ export class CreateAppointmentComponent implements OnInit {
       this.error = 'Salon, service, and start time are required.';
       return;
     }
-    
+
     const startDate = new Date(startTime);
     // Calculate end time (assuming 1 hour duration for now)
     const endTime = new Date(startDate.getTime() + 60 * 60 * 1000).toISOString();
-    
+
     const appointment: CreateAppointmentParams = {
       customerId: this.userId,
       salonId: salonId as string,
@@ -149,9 +149,9 @@ export class CreateAppointmentComponent implements OnInit {
       staffId: staffId as string,
       startTime: startDate.toISOString(),
       endTime: endTime,
-      notes: notes as string | undefined
+      notes: notes as string | undefined,
     };
-    
+
     this.http.post('/api/appointments', appointment).subscribe({
       next: () => {
         this.loading = false;

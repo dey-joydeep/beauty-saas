@@ -92,7 +92,7 @@ describe('SocialService', () => {
       };
 
       const result = await service.createSocial(createData);
-      
+
       expect(prisma.social.create).toHaveBeenCalledWith({
         data: createData,
       });
@@ -123,9 +123,7 @@ describe('SocialService', () => {
 
     it('should throw NotFoundException when updating non-existent social link', async () => {
       (prisma.social.update as jest.Mock).mockRejectedValueOnce({ code: 'P2025' });
-      await expect(
-        service.updateSocial({ id: '999', data: { platform: 'test' } })
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.updateSocial({ id: '999', data: { platform: 'test' } })).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -139,9 +137,7 @@ describe('SocialService', () => {
 
     it('should throw NotFoundException when deleting non-existent social link', async () => {
       (prisma.social.delete as jest.Mock).mockRejectedValueOnce({ code: 'P2025' });
-      await expect(
-        service.deleteSocial({ id: '999' })
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.deleteSocial({ id: '999' })).rejects.toThrow(NotFoundException);
     });
   });
 });

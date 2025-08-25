@@ -3,8 +3,8 @@
  * These roles are used for authorization and access control.
  */
 export enum AppUserRole {
-    ADMIN = 'ADMIN',
-    OWNER = 'OWNER',
-    STAFF = 'STAFF',
-    CUSTOMER = 'CUSTOMER'
+  ADMIN = 'ADMIN',
+  OWNER = 'OWNER',
+  STAFF = 'STAFF',
+  CUSTOMER = 'CUSTOMER',
 }

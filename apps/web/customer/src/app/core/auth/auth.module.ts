@@ -17,7 +17,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './services/auth.service';
 
 // Guards
-import { authGuard, publicGuard } from './guards/auth.guard';
+import { authGuard, publicGuard } from '@beauty-saas/web-core/auth';
 
 // Components
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
@@ -61,13 +61,13 @@ const routes: Routes = [
     MatProgressBarModule,
     MatProgressSpinnerModule,
     TranslateModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
   ],
   providers: [
-    AuthService, 
+    AuthService,
     { provide: 'authGuard', useValue: authGuard },
     // Re-export the services to make them available to the rest of the app
-    { provide: 'authService', useClass: AuthService }
-  ]
+    { provide: 'authService', useClass: AuthService },
+  ],
 })
 export class AuthModule {}

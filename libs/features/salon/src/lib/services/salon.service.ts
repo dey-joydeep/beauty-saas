@@ -24,8 +24,7 @@ export class SalonService {
           const dLon = toRad(salon.longitude - longitude);
           const lat1 = toRad(latitude);
           const lat2 = toRad(salon.latitude);
-          const a =
-            Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+          const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
           salon.distanceKm = R * c;
         } else {
@@ -68,11 +67,7 @@ export class SalonService {
       );
       // Sort by averageRating desc, then reviewCount desc (preserve distance order if present)
       salonsWithRatings.sort((a, b) => {
-        if (
-          a.distanceKm !== undefined &&
-          b.distanceKm !== undefined &&
-          a.distanceKm !== b.distanceKm
-        ) {
+        if (a.distanceKm !== undefined && b.distanceKm !== undefined && a.distanceKm !== b.distanceKm) {
           return a.distanceKm - b.distanceKm;
         }
         return b.averageRating - a.averageRating || b.reviewCount - a.reviewCount;
@@ -120,13 +115,14 @@ export class SalonService {
 
   async updateSalon(params: any): Promise<any | null> {
     try {
-      const updated = await this.prisma.salon.update({ 
-        where: { id: params.salonId }, 
-        data: params 
+      const updated = await this.prisma.salon.update({
+        where: { id: params.salonId },
+        data: params,
       });
       return updated;
     } catch (error) {
-      if (error.code === 'P2025') { // Prisma not found error code
+      if (error.code === 'P2025') {
+        // Prisma not found error code
         throw new NotFoundException(`Salon with ID ${params.salonId} not found`);
       }
       throw error;
@@ -150,7 +146,8 @@ export class SalonService {
       await this.prisma.salon.delete({ where: { id: params.salonId } });
       return true;
     } catch (error) {
-      if (error.code === 'P2025') { // Prisma not found error code
+      if (error.code === 'P2025') {
+        // Prisma not found error code
         throw new NotFoundException(`Salon with ID ${params.salonId} not found`);
       }
       throw error;

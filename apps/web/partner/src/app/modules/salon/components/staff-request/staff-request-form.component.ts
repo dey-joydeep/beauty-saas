@@ -3,8 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StaffRequestService, CreateLeaveRequestPayload } from '../../services/staff-request.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
+import { ErrorService } from '@beauty-saas/web-core/http';
 
 @Component({
   selector: 'app-staff-request-form',
@@ -22,7 +22,7 @@ export class StaffRequestFormComponent extends AbstractBaseComponent {
   constructor(
     private fb: FormBuilder,
     private staffRequestService: StaffRequestService,
-    @Inject(ErrorService) protected override errorService: ErrorService
+    @Inject(ErrorService) protected override errorService: ErrorService,
   ) {
     super(errorService);
     this.form = this.fb.group({

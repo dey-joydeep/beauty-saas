@@ -1,16 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { 
-  IsString, 
-  IsNumber, 
-  IsOptional, 
-  IsUUID, 
-  MinLength, 
-  MaxLength, 
-  Min, 
-  Max 
-} from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsUUID, MinLength, MaxLength, Min, Max } from 'class-validator';
 import { CreateSalonDto } from './create-salon.dto';
 
 /**
@@ -26,7 +17,7 @@ export class UpdateSalonDto extends PartialType(CreateSalonDto) {
     description: 'The updated name of the salon',
     minLength: 2,
     maxLength: 100,
-    required: false
+    required: false,
   })
   @IsString({ message: 'Name must be a string' })
   @MinLength(2, { message: 'Name must be at least 2 characters long' })
@@ -39,7 +30,7 @@ export class UpdateSalonDto extends PartialType(CreateSalonDto) {
     description: 'The updated address of the salon',
     minLength: 5,
     maxLength: 255,
-    required: false
+    required: false,
   })
   @IsString({ message: 'Address must be a string' })
   @MinLength(5, { message: 'Address must be at least 5 characters long' })
@@ -52,7 +43,7 @@ export class UpdateSalonDto extends PartialType(CreateSalonDto) {
     description: 'The updated zip code of the salon',
     minLength: 3,
     maxLength: 20,
-    required: false
+    required: false,
   })
   @IsString({ message: 'Zip code must be a string' })
   @MinLength(3, { message: 'Zip code must be at least 3 characters long' })
@@ -65,7 +56,7 @@ export class UpdateSalonDto extends PartialType(CreateSalonDto) {
     description: 'The updated city where the salon is located',
     minLength: 2,
     maxLength: 100,
-    required: false
+    required: false,
   })
   @IsString({ message: 'City must be a string' })
   @MinLength(2, { message: 'City must be at least 2 characters long' })
@@ -78,7 +69,7 @@ export class UpdateSalonDto extends PartialType(CreateSalonDto) {
     description: 'The updated latitude coordinate of the salon location',
     minimum: -90,
     maximum: 90,
-    required: false
+    required: false,
   })
   @IsNumber({}, { message: 'Latitude must be a number' })
   @Min(-90, { message: 'Latitude must be between -90 and 90' })
@@ -92,7 +83,7 @@ export class UpdateSalonDto extends PartialType(CreateSalonDto) {
     description: 'The updated longitude coordinate of the salon location',
     minimum: -180,
     maximum: 180,
-    required: false
+    required: false,
   })
   @IsNumber({}, { message: 'Longitude must be a number' })
   @Min(-180, { message: 'Longitude must be between -180 and 180' })
@@ -105,7 +96,7 @@ export class UpdateSalonDto extends PartialType(CreateSalonDto) {
     example: 'A newly renovated salon with modern facilities',
     description: 'An updated description of the salon',
     maxLength: 500,
-    required: false
+    required: false,
   })
   @IsString({ message: 'Description must be a string' })
   @MaxLength(500, { message: 'Description cannot be longer than 500 characters' })

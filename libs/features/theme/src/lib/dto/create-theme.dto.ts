@@ -4,7 +4,7 @@ import { Type } from 'class-transformer';
 
 /**
  * Theme styles DTO
- * 
+ *
  * @remarks
  * This DTO represents the styles configuration for a theme.
  */
@@ -35,10 +35,10 @@ export class ThemeStylesDto {
 
 /**
  * Create Theme DTO
- * 
+ *
  * @remarks
  * This DTO is used for creating a new theme in the system.
- * 
+ *
  * @public
  */
 export class CreateThemeDto {
@@ -46,7 +46,7 @@ export class CreateThemeDto {
     description: 'Name of the theme',
     minLength: 3,
     maxLength: 50,
-    example: 'Corporate Blue'
+    example: 'Corporate Blue',
   })
   @IsString()
   @MinLength(3, { message: 'Name must be at least 3 characters long' })
@@ -56,7 +56,7 @@ export class CreateThemeDto {
   @ApiPropertyOptional({
     description: 'Description of the theme',
     maxLength: 255,
-    example: 'A professional blue theme for corporate websites'
+    example: 'A professional blue theme for corporate websites',
   })
   @IsString()
   @MaxLength(255, { message: 'Description must not exceed 255 characters' })
@@ -65,7 +65,7 @@ export class CreateThemeDto {
 
   @ApiProperty({
     description: 'Theme styles configuration',
-    type: ThemeStylesDto
+    type: ThemeStylesDto,
   })
   @IsDefined()
   @ValidateNested()
@@ -75,7 +75,7 @@ export class CreateThemeDto {
   @ApiPropertyOptional({
     description: 'Whether the theme is active',
     default: true,
-    example: true
+    example: true,
   })
   @IsBoolean()
   @IsOptional()
@@ -84,7 +84,7 @@ export class CreateThemeDto {
   @ApiPropertyOptional({
     description: 'Whether this is the default theme',
     default: false,
-    example: false
+    example: false,
   })
   @IsBoolean()
   @IsOptional()

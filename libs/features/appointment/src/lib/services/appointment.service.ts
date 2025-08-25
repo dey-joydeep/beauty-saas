@@ -5,16 +5,8 @@ import { BadRequestException, Inject, Injectable, Logger, NotFoundException } fr
 import { CreateAppointmentDto } from '../dto/requests/create-appointment.dto';
 import { FilterAppointmentsDto } from '../dto/requests/filter-appointments.dto';
 import { UpdateAppointmentDto } from '../dto/requests/update-appointment.dto';
-import {
-  AppointmentDetailsDto,
-  AppointmentResponseDto,
-  AppointmentStatsDto,
-  PaginatedAppointmentsDto
-} from '../dto/responses';
-import {
-  APPOINTMENT_REPOSITORY,
-  type AppointmentRepository
-} from '../repositories/appointment.repository';
+import { AppointmentDetailsDto, AppointmentResponseDto, AppointmentStatsDto, PaginatedAppointmentsDto } from '../dto/responses';
+import { APPOINTMENT_REPOSITORY, type AppointmentRepository } from '../repositories/appointment.repository';
 
 // Import DTO interfaces for type safety
 
@@ -54,11 +46,11 @@ const toAppointmentStatus = (status: string): string => {
 @Injectable()
 export class AppointmentService {
   private readonly logger = new Logger(AppointmentService.name);
-  
+
   constructor(
     @Inject(APPOINTMENT_REPOSITORY)
     private readonly appointmentRepository: AppointmentRepository,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {
     this.logger.warn('AppointmentService initialized with stubbed implementation - Appointment model not found in schema');
   }
@@ -79,12 +71,9 @@ export class AppointmentService {
   /**
    * Create a new appointment
    */
-  async createAppointment(
-    createAppointmentDto: CreateAppointmentDto,
-    user: AuthUser
-  ): Promise<AppointmentDetailsDto> {
+  async createAppointment(createAppointmentDto: CreateAppointmentDto, user: AuthUser): Promise<AppointmentDetailsDto> {
     this.logger.warn('Using stubbed implementation for createAppointment - Appointment model not found in schema');
-    
+
     try {
       // Validate required fields
       if (!createAppointmentDto.customerId) {
@@ -99,11 +88,11 @@ export class AppointmentService {
 
       // Log the creation attempt
       this.logger.log(`Creating appointment for customer: ${createAppointmentDto.customerId}`);
-      
+
       // Get customer details
       const customer = await this.prisma.customer.findUnique({
         where: { id: createAppointmentDto.customerId },
-        include: { user: true }
+        include: { user: true },
       });
 
       if (!customer) {
@@ -113,7 +102,7 @@ export class AppointmentService {
       // Get salon details
       const salon = await this.prisma.salon.findUnique({
         where: { id: createAppointmentDto.salonId },
-        include: { address: true }
+        include: { address: true },
       });
 
       if (!salon) {
@@ -121,15 +110,15 @@ export class AppointmentService {
       }
 
       // Calculate total price and duration
-      const serviceIds = createAppointmentDto.services.map(s => s.serviceId);
+      const serviceIds = createAppointmentDto.services.map((s) => s.serviceId);
       const services = await this.prisma.tenantService.findMany({
         where: {
           id: { in: serviceIds },
-          tenantId: user.tenantId
+          tenantId: user.tenantId,
         },
         include: {
-          service: true
-        }
+          service: true,
+        },
       });
 
       if (services.length !== serviceIds.length) {
@@ -154,29 +143,25 @@ export class AppointmentService {
           id: customer.id,
           name: [customer.user?.firstName, customer.user?.lastName].filter(Boolean).join(' ') || 'Unknown Customer',
           email: customer.user?.email || '',
-          phone: customer.user?.phone || null
+          phone: customer.user?.phone || null,
         },
         staff: null, // Will be set if staff is assigned
-        services: services.map(service => ({
+        services: services.map((service) => ({
           id: service.id,
           name: service.service?.name || 'Unknown Service',
           description: service.service?.description || null,
           price: Number(service.price),
           duration: service.duration || 0,
-          staff: null // Will be set if staff is assigned
+          staff: null, // Will be set if staff is assigned
         })),
         salon: {
           id: salon.id,
           name: salon.name,
-          address: [
-            salon.address?.line1,
-            salon.address?.line2,
-            salon.address?.city,
-            salon.address?.state,
-            salon.address?.postalCode
-          ].filter(Boolean).join(', '),
+          address: [salon.address?.line1, salon.address?.line2, salon.address?.city, salon.address?.state, salon.address?.postalCode]
+            .filter(Boolean)
+            .join(', '),
           phone: salon.phone || null,
-          email: salon.email || null
+          email: salon.email || null,
         },
         totalPrice,
         totalDuration,
@@ -187,7 +172,7 @@ export class AppointmentService {
         cancellationDate: null,
         createdAt: now.toISOString(),
         updatedAt: now.toISOString(),
-        metadata: {}
+        metadata: {},
       };
     } catch (error) {
       this.logger.error('Error in createAppointment', error);
@@ -201,12 +186,9 @@ export class AppointmentService {
   /**
    * Get all appointments with pagination
    */
-  async findAllAppointments(
-    filters: FilterAppointmentsDto,
-    user: AuthUser
-  ): Promise<PaginatedAppointmentsDto> {
+  async findAllAppointments(filters: FilterAppointmentsDto, user: AuthUser): Promise<PaginatedAppointmentsDto> {
     this.logger.warn('Using stubbed implementation for findAllAppointments - Appointment model not found in schema');
-    
+
     // Return empty paginated result
     return {
       items: [],
@@ -230,11 +212,7 @@ export class AppointmentService {
   /**
    * Update an appointment
    */
-  async updateAppointment(
-    id: string,
-    updateAppointmentDto: UpdateAppointmentDto,
-    user: AuthUser
-  ): Promise<AppointmentDetailsDto> {
+  async updateAppointment(id: string, updateAppointmentDto: UpdateAppointmentDto, user: AuthUser): Promise<AppointmentDetailsDto> {
     this.logger.warn(`Using stubbed implementation for updateAppointment - Appointment model not found in schema (ID: ${id})`);
     throw new BadRequestException('Cannot update appointment - Appointment model not found in schema');
   }
@@ -250,12 +228,9 @@ export class AppointmentService {
   /**
    * Get appointment statistics
    */
-  async getAppointmentStats(
-    filters: FilterAppointmentsDto,
-    user: AuthUser
-  ): Promise<AppointmentStatsDto> {
+  async getAppointmentStats(filters: FilterAppointmentsDto, user: AuthUser): Promise<AppointmentStatsDto> {
     this.logger.warn('Using stubbed implementation for getAppointmentStats - Appointment model not found in schema');
-    
+
     return {
       total: 0,
       completed: 0,
@@ -264,29 +239,24 @@ export class AppointmentService {
       revenue: 0,
       averageRating: 0,
       statusDistribution: {},
-      monthlyStats: []
+      monthlyStats: [],
     };
   }
 
   /**
    * Get appointments for a specific tenant
    */
-  async getTenantAppointments(
-    tenantId: string,
-    filters: FilterAppointmentsDto
-  ): Promise<AppointmentDetailsDto[]> {
-    this.logger.warn(`Using stubbed implementation for getTenantAppointments - Appointment model not found in schema (Tenant ID: ${tenantId})`);
+  async getTenantAppointments(tenantId: string, filters: FilterAppointmentsDto): Promise<AppointmentDetailsDto[]> {
+    this.logger.warn(
+      `Using stubbed implementation for getTenantAppointments - Appointment model not found in schema (Tenant ID: ${tenantId})`,
+    );
     return [];
   }
 
   /**
    * Check if a user is eligible for a review
    */
-  async checkReviewEligibility(
-    userId: string,
-    type: 'service' | 'staff',
-    id: string
-  ): Promise<{ eligible: boolean; message?: string }> {
+  async checkReviewEligibility(userId: string, type: 'service' | 'staff', id: string): Promise<{ eligible: boolean; message?: string }> {
     this.logger.warn(`Using stubbed implementation for checkReviewEligibility - Appointment model not found in schema`);
     return { eligible: false, message: 'Appointment model not found in schema' };
   }
@@ -294,9 +264,7 @@ export class AppointmentService {
   /**
    * Helper method to map appointment to response DTO
    */
-  private mapToAppointmentResponse(
-    appointment: StubAppointment
-  ): AppointmentResponseDto {
+  private mapToAppointmentResponse(appointment: StubAppointment): AppointmentResponseDto {
     if (!appointment) {
       throw new BadRequestException('Appointment is required');
     }

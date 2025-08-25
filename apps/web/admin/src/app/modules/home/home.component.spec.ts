@@ -31,10 +31,10 @@ const mockSalon: ISalonDto = {
     {
       id: '1',
       name: 'Hair',
-      slug: 'hair'
-    }
+      slug: 'hair',
+    },
   ],
-  amenities: ['WiFi', 'Parking']
+  amenities: ['WiFi', 'Parking'],
 };
 
 const mockService: IServiceDto = {
@@ -47,42 +47,46 @@ const mockService: IServiceDto = {
   salonId: '1',
   isActive: true,
   isFeatured: true,
-  imageUrl: 'test.jpg'
+  imageUrl: 'test.jpg',
 };
 
 const mockHomeData: IHomePageData = {
   featuredSalons: [mockSalon],
   newSalons: [],
   featuredServices: [mockService],
-  testimonials: [{
-    id: '1',
-    content: 'Great service!',
-    rating: 5,
-    author: {
+  testimonials: [
+    {
       id: '1',
-      name: 'Test User',
-      avatar: 'test.jpg',
-      location: 'Test City'
+      content: 'Great service!',
+      rating: 5,
+      author: {
+        id: '1',
+        name: 'Test User',
+        avatar: 'test.jpg',
+        location: 'Test City',
+      },
+      salon: {
+        id: '1',
+        name: 'Test Salon',
+        slug: 'test-salon',
+      },
+      service: {
+        id: '1',
+        name: 'Haircut',
+      },
+      createdAt: '2023-01-01T00:00:00.000Z',
     },
-    salon: {
+  ],
+  cities: [
+    {
       id: '1',
-      name: 'Test Salon',
-      slug: 'test-salon'
+      name: 'Test City',
+      state: 'Test State',
+      country: 'Test Country',
+      isActive: true,
+      salonCount: 1,
     },
-    service: {
-      id: '1',
-      name: 'Haircut'
-    },
-    createdAt: '2023-01-01T00:00:00.000Z'
-  }],
-  cities: [{
-    id: '1',
-    name: 'Test City',
-    state: 'Test State',
-    country: 'Test Country',
-    isActive: true,
-    salonCount: 1
-  }]
+  ],
 };
 
 describe('HomeComponent', () => {
@@ -99,24 +103,21 @@ describe('HomeComponent', () => {
       getFeaturedSalons: jest.fn(),
       getFeaturedServices: jest.fn(),
       getTestimonials: jest.fn(),
-      getCities: jest.fn()
+      getCities: jest.fn(),
     } as unknown as jest.Mocked<HomeService>;
 
     snackBar = {
-      open: jest.fn()
+      open: jest.fn(),
     } as unknown as jest.Mocked<MatSnackBar>;
 
     TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule,
-        RouterTestingModule.withRoutes([])
-      ],
+      imports: [HttpClientTestingModule, RouterTestingModule.withRoutes([])],
       declarations: [HomeComponent],
       providers: [
         { provide: HomeService, useValue: homeService },
-        { provide: MatSnackBar, useValue: snackBar }
+        { provide: MatSnackBar, useValue: snackBar },
       ],
-      schemas: [NO_ERRORS_SCHEMA]
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     homeService = TestBed.inject(HomeService) as jest.Mocked<HomeService>;
@@ -127,12 +128,14 @@ describe('HomeComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
-    homeService.getHomePageData.mockReturnValue(of({
-      featuredSalons: [],
-      featuredServices: [],
-      testimonials: [],
-      cities: []
-    }));
+    homeService.getHomePageData.mockReturnValue(
+      of({
+        featuredSalons: [],
+        featuredServices: [],
+        testimonials: [],
+        cities: [],
+      }),
+    );
     fixture.detectChanges();
   });
 
@@ -149,12 +152,12 @@ describe('HomeComponent', () => {
   it('should handle error when loading home data fails', () => {
     const error = new Error('Failed to load data');
     homeService.getHomePageData.mockReturnValue(throwError(() => error));
-    
+
     // Recreate component to trigger ngOnInit again
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    
+
     expect(component.loading).toBeFalse();
     expect(component.error).toBe('Failed to load data');
     expect(snackBar.open).toHaveBeenCalledWith('Failed to load home data', 'Dismiss', { duration: 3000 });
@@ -166,7 +169,7 @@ describe('HomeComponent', () => {
       if (price === null) return 'N/A';
       return `$${price.toFixed(2)}`;
     });
-    
+
     expect((component as any).formatPrice(30)).toBe('$30.00');
     expect((component as any).formatPrice(29.99)).toBe('$29.99');
     expect((component as any).formatPrice(null)).toBe('N/A');
@@ -180,7 +183,7 @@ describe('HomeComponent', () => {
       const mins = minutes % 60;
       return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
     });
-    
+
     expect((component as any).formatDuration(90)).toBe('1h 30m');
     expect((component as any).formatDuration(30)).toBe('30m');
     expect((component as any).formatDuration(null)).toBe('N/A');
@@ -192,7 +195,7 @@ describe('HomeComponent', () => {
     (component as any).navigateToSalon = (slug: string) => {
       router.navigate(['/salon', slug]);
     };
-    
+
     (component as any).navigateToSalon('test-salon');
     expect(navigateSpy).toHaveBeenCalledWith(['/salon', 'test-salon']);
   });
@@ -204,7 +207,7 @@ describe('HomeComponent', () => {
     (component as any).onSearch = () => {
       router.navigate(['/search'], { queryParams: { q: (component as any).searchQuery } });
     };
-    
+
     (component as any).onSearch();
     expect(navigateSpy).toHaveBeenCalledWith(['/search'], { queryParams: { q: 'test' } });
   });

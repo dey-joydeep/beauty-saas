@@ -15,8 +15,6 @@ describe('ThemeService Edge Cases', () => {
   });
 
   it('should throw error for missing colors', async () => {
-    await expect(
-      service.updateTheme('tenant1', { primaryColor: '', secondaryColor: '', accentColor: '' }),
-    ).rejects.toThrow();
+    await expect(service.updateTheme('tenant1', { primaryColor: '', secondaryColor: '', accentColor: '' })).rejects.toThrow();
   });
 });

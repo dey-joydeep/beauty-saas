@@ -35,15 +35,13 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
 
 // Routes
 const routes: Routes = [
-  { 
-    path: '', 
-    loadComponent: () => import('./components/salon-list/salon-list.component')
-      .then(m => m.SalonListComponent)
+  {
+    path: '',
+    loadComponent: () => import('./components/salon-list/salon-list.component').then((m) => m.SalonListComponent),
   },
-  { 
-    path: ':id', 
-    loadComponent: () => import('./components/salon-profile/salon-profile.component')
-      .then(m => m.SalonProfileComponent)
+  {
+    path: ':id',
+    loadComponent: () => import('./components/salon-profile/salon-profile.component').then((m) => m.SalonProfileComponent),
   },
   // Add more routes as needed for other standalone components
 ];
@@ -74,14 +72,9 @@ const routes: Routes = [
     MatDialogModule,
     MatSnackBarModule,
     // Import SafeUrlPipe since it's standalone
-    SafeUrlPipe
+    SafeUrlPipe,
   ],
-  providers: [
-    SalonService,
-    ServiceApprovalService,
-    StaffManagementService,
-    StaffRequestService
-  ]
+  providers: [SalonService, ServiceApprovalService, StaffManagementService, StaffRequestService],
   // No need to export SafeUrlPipe as it's standalone and can be imported directly
 })
-export class SalonModule { }
+export class SalonModule {}

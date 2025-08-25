@@ -19,9 +19,9 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
 import { Appointment, TimeSlot } from '../models/appointment.model';
-import { LoadingService } from '@frontend-shared/core/services/loading.service';
+import { LoadingService } from '@beauty-saas/web-core/http';
 import { AppointmentService } from '../services/appointment.service';
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 // Using the base Appointment model which already has startTime and endTime
@@ -148,7 +148,7 @@ export class AppointmentRescheduleComponent implements OnInit, OnDestroy {
     private datePipe: DatePipe,
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
   ) {
     // Initialize form groups
     this.dateTimeFormGroup = this.fb.group({
@@ -229,30 +229,30 @@ export class AppointmentRescheduleComponent implements OnInit, OnDestroy {
     const durationMinutes = this.calculateDurationInMinutes(this.appointment);
     endTime.setMinutes(endTime.getMinutes() + durationMinutes);
 
-    this.appointmentService.getAvailableTimeSlots({
-      serviceId: this.appointment.serviceId,
-      staffId: this.appointment.staffId,
-      date: date.toISOString().split('T')[0],
-      duration: durationMinutes
-    }).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (timeSlots) => {
-        this.availableTimeSlots = timeSlots;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading time slots:', error);
-        this.snackBar.open(
-          this.translate.instant('APPOINTMENT.RESCHEDULE.TIME_SLOTS_ERROR'),
-          this.translate.instant('COMMON.CLOSE'),
-          { duration: 3000 }
-        );
-        this.isLoading = false;
-      }
-    });
+    this.appointmentService
+      .getAvailableTimeSlots({
+        serviceId: this.appointment.serviceId,
+        staffId: this.appointment.staffId,
+        date: date.toISOString().split('T')[0],
+        duration: durationMinutes,
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (timeSlots) => {
+          this.availableTimeSlots = timeSlots;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading time slots:', error);
+          this.snackBar.open(this.translate.instant('APPOINTMENT.RESCHEDULE.TIME_SLOTS_ERROR'), this.translate.instant('COMMON.CLOSE'), {
+            duration: 3000,
+          });
+          this.isLoading = false;
+        },
+      });
 
-    this.appointmentService.rescheduleAppointment(this.appointment.id, startTime, endTime, notes)
+    this.appointmentService
+      .rescheduleAppointment(this.appointment.id, startTime, endTime, notes)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
@@ -283,21 +283,21 @@ export class AppointmentRescheduleComponent implements OnInit, OnDestroy {
 
   private loadAvailableTimeSlots(): void {
     if (!this.appointment || !this.selectedDate) return;
-    
+
     this.isLoading = true;
     this.loadingService.show();
-    
+
     const selectedDate = this.selectedDate;
-    
+
     // Calculate duration in minutes
     const durationMinutes = this.calculateDurationInMinutes(this.appointment);
-    
+
     this.appointmentService
       .getAvailableTimeSlots({
         serviceId: this.appointment.serviceId,
         staffId: this.appointment.staffId,
         date: selectedDate.toISOString().split('T')[0],
-        duration: durationMinutes
+        duration: durationMinutes,
       })
       .pipe(
         takeUntil(this.destroy$),
@@ -306,20 +306,20 @@ export class AppointmentRescheduleComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (timeSlots) => {
           // Map the time slots to the expected format
-          this.availableTimeSlots = timeSlots.map(slot => {
+          this.availableTimeSlots = timeSlots.map((slot) => {
             const slotStart = typeof slot.slotStart === 'string' ? new Date(slot.slotStart) : slot.slotStart;
             const slotEnd = typeof slot.slotEnd === 'string' ? new Date(slot.slotEnd) : slot.slotEnd;
-            
+
             return {
               ...slot,
               time: slotStart.toISOString(),
               display: this.formatTime(slotStart),
               available: slot.available !== false,
               slotStart,
-              slotEnd
+              slotEnd,
             };
           });
-          
+
           // Auto-select first available time slot if none selected
           if (!this.dateTimeFormGroup.get('time')?.value && this.availableTimeSlots.length > 0) {
             this.dateTimeFormGroup.get('time')?.setValue(this.availableTimeSlots[0].time);

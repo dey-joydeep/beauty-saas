@@ -33,7 +33,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/features/portfolio/**/*.ts"]
@@ -59,10 +59,12 @@
       "dependsOn": ["build"]
     }
   },
-  "tags": ["type:feature", "scope:portfolio"],
+  "tags": ["scope:server", "type:lib"],
   "implicitDependencies": ["core"],
-  "dependencies": [{
-    "target": "data-access",
-    "projects": "data-access"
-  }]
+  "dependencies": [
+    {
+      "target": "data-access",
+      "projects": "data-access"
+    }
+  ]
 }

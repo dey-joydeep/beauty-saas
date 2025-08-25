@@ -1,5 +1,4 @@
 import { UserRole } from '@prisma/client';
-import { AppUserRole } from '../enums/user-role.enum';
 
 /**
  * Represents role information with ID and name
@@ -18,13 +17,13 @@ export interface AuthenticatedUser {
   email: string;
   name?: string;
   isVerified?: boolean;
-  
+
   // Role information (support both string and object formats for backward compatibility)
   roles: UserRole[] | UserRoleInfo[];
-  
+
   // Tenant information
   tenantId?: string;
-  
+
   // Allow additional properties for flexibility
   [key: string]: unknown;
 }

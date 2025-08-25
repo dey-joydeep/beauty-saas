@@ -9,7 +9,7 @@ export class UpdateReviewDto extends PartialType(BaseReviewDto) {
     minimum: 1,
     maximum: 5,
     example: 5,
-    required: false
+    required: false,
   })
   @IsInt()
   @Min(1)
@@ -21,7 +21,7 @@ export class UpdateReviewDto extends PartialType(BaseReviewDto) {
     description: 'The updated comment',
     example: 'Updated review comment',
     required: false,
-    nullable: true
+    nullable: true,
   })
   @IsString()
   @IsOptional()
@@ -31,7 +31,7 @@ export class UpdateReviewDto extends PartialType(BaseReviewDto) {
     description: 'The updated response from staff/owner',
     example: 'Thank you for your feedback!',
     required: false,
-    nullable: true
+    nullable: true,
   })
   @IsString()
   @IsOptional()
@@ -40,7 +40,7 @@ export class UpdateReviewDto extends PartialType(BaseReviewDto) {
   @ApiProperty({
     description: 'Whether the review is approved by admin',
     required: false,
-    default: false
+    default: false,
   })
   @IsBoolean()
   @IsOptional()
@@ -49,7 +49,7 @@ export class UpdateReviewDto extends PartialType(BaseReviewDto) {
   @ApiProperty({
     description: 'Whether the review is featured',
     required: false,
-    default: false
+    default: false,
   })
   @IsBoolean()
   @IsOptional()
@@ -59,7 +59,7 @@ export class UpdateReviewDto extends PartialType(BaseReviewDto) {
     description: 'Status of the review',
     enum: ReviewStatus,
     required: false,
-    example: ReviewStatus.APPROVED
+    example: ReviewStatus.APPROVED,
   })
   @IsString()
   @IsOptional()
@@ -70,7 +70,7 @@ export class UpdateReviewDto extends PartialType(BaseReviewDto) {
     format: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174004',
     required: false,
-    nullable: true
+    nullable: true,
   })
   @IsUUID()
   @IsOptional()

@@ -18,11 +18,9 @@ export class AppointmentService {
       staffId: params.staffId,
       startTime: params.startTime,
       endTime: params.endTime,
-      notes: params.notes
+      notes: params.notes,
     };
-    return this.http.post(`${this.apiUrl}/appointments`, payload).pipe(
-      catchError((err) => this.handleError(err))
-    );
+    return this.http.post(`${this.apiUrl}/appointments`, payload).pipe(catchError((err) => this.handleError(err)));
   }
 
   saveAppointment(data: CreateAppointmentParams): Observable<{ success: boolean }> {
@@ -33,11 +31,9 @@ export class AppointmentService {
       staffId: data.staffId,
       startTime: data.startTime,
       endTime: data.endTime,
-      notes: data.notes
+      notes: data.notes,
     };
-    return this.http.post<{ success: boolean }>(`${this.apiUrl}/save`, payload).pipe(
-      catchError((err) => this.handleError(err))
-    );
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/save`, payload).pipe(catchError((err) => this.handleError(err)));
   }
 
   private handleError(err: any) {

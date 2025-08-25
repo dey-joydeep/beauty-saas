@@ -22,7 +22,7 @@ const MATERIAL_MODULES = [
   MatSlideToggleModule,
   MatSnackBarModule,
   MatSortModule,
-  MatTableModule
+  MatTableModule,
 ];
 
 // Import Material modules
@@ -44,10 +44,6 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    RouterModule.forChild(ADMIN_ROUTES),
-    ...MATERIAL_MODULES
-  ]
+  imports: [CommonModule, RouterModule.forChild(ADMIN_ROUTES), ...MATERIAL_MODULES],
 })
-export class AdminModule { }
+export class AdminModule {}

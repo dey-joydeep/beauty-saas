@@ -54,7 +54,6 @@ beauty-saas/
    ```
 
 3. **Set up environment variables**
-
    - Copy `.env.example` to `.env` in the `apps/api` directory
    - Update the values in `.env` as needed for your local setup
    - For frontend, configure environment files in `apps/web/*/src/environments/`
@@ -62,18 +61,20 @@ beauty-saas/
 4. **Start the development servers**
 
    Start the backend API:
+
    ```bash
    nx serve api
    ```
 
    In a separate terminal, start the frontend application:
+
    ```bash
    # For admin dashboard
    nx serve web-admin
-   
+
    # Or for partner portal
    nx serve web-partner
-   
+
    # Or for customer app
    nx serve web-customer
    ```
@@ -89,16 +90,19 @@ beauty-saas/
 ### Run applications
 
 - **Start admin dashboard in development mode**
+
   ```bash
   npx nx serve admin
   ```
 
 - **Start partner portal in development mode**
+
   ```bash
   npx nx serve partner
   ```
 
 - **Start customer app in development mode**
+
   ```bash
   npx nx serve customer
   ```
@@ -111,17 +115,19 @@ beauty-saas/
 ### Build applications
 
 - **Build all applications**
+
   ```bash
   npx nx run-many --target=build --all
   ```
 
 - **Build specific application**
+
   ```bash
   # Frontend apps
   npx nx build admin
   npx nx build partner
   npx nx build customer
-  
+
   # Backend
   npx nx build api
   ```
@@ -129,17 +135,19 @@ beauty-saas/
 ### Testing
 
 - **Run all tests**
+
   ```bash
   npx nx run-many --target=test --all
   ```
 
 - **Run tests for specific project**
+
   ```bash
   # Frontend apps
   npx nx test admin
   npx nx test partner
   npx nx test customer
-  
+
   # Backend
   npx nx test api
   ```
@@ -153,6 +161,7 @@ beauty-saas/
 ### Linting
 
 - **Lint all projects**
+
   ```bash
   npx nx run-many --target=lint --all
   ```

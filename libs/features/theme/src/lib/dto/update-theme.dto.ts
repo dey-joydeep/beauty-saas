@@ -6,11 +6,11 @@ import { CreateThemeDto, ThemeStylesDto } from './create-theme.dto';
 
 /**
  * Update Theme DTO
- * 
+ *
  * @remarks
  * This DTO is used for updating an existing theme in the system.
  * All fields are optional, and only provided fields will be updated.
- * 
+ *
  * @public
  */
 export class UpdateThemeDto extends PartialType(CreateThemeDto) {
@@ -18,7 +18,7 @@ export class UpdateThemeDto extends PartialType(CreateThemeDto) {
     description: 'Name of the theme',
     minLength: 3,
     maxLength: 50,
-    example: 'Corporate Blue'
+    example: 'Corporate Blue',
   })
   @IsString()
   @MinLength(3, { message: 'Name must be at least 3 characters long' })
@@ -29,7 +29,7 @@ export class UpdateThemeDto extends PartialType(CreateThemeDto) {
   @ApiPropertyOptional({
     description: 'Description of the theme',
     maxLength: 255,
-    example: 'A professional blue theme for corporate websites'
+    example: 'A professional blue theme for corporate websites',
   })
   @IsString()
   @MaxLength(255, { message: 'Description must not exceed 255 characters' })
@@ -38,7 +38,7 @@ export class UpdateThemeDto extends PartialType(CreateThemeDto) {
 
   @ApiPropertyOptional({
     description: 'Theme styles configuration',
-    type: ThemeStylesDto
+    type: ThemeStylesDto,
   })
   @ValidateNested()
   @Type(() => ThemeStylesDto)
@@ -47,7 +47,7 @@ export class UpdateThemeDto extends PartialType(CreateThemeDto) {
 
   @ApiPropertyOptional({
     description: 'Whether the theme is active',
-    example: true
+    example: true,
   })
   @IsBoolean()
   @IsOptional()
@@ -55,7 +55,7 @@ export class UpdateThemeDto extends PartialType(CreateThemeDto) {
 
   @ApiPropertyOptional({
     description: 'Whether this is the default theme',
-    example: false
+    example: false,
   })
   @IsBoolean()
   @IsOptional()

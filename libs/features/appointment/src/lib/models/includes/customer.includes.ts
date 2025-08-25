@@ -9,8 +9,8 @@ export const CUSTOMER_WITH_USER = {
   userId: true,
   user: {
     select: {
-      ...BASIC_USER_SELECT
-    }
+      ...BASIC_USER_SELECT,
+    },
   },
 } as const satisfies Prisma.CustomerSelect;
 
@@ -22,10 +22,10 @@ export const PRODUCT_SALE_INCLUDE = {
     select: {
       id: true,
       name: true,
-      price: true
-    }
+      price: true,
+    },
   },
   customerRef: {
-    select: CUSTOMER_WITH_USER
-  }
+    select: CUSTOMER_WITH_USER,
+  },
 } as const satisfies Prisma.ProductSaleInclude;

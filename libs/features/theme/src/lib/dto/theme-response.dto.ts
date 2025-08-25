@@ -5,11 +5,11 @@ import { ThemeStylesDto } from './create-theme.dto';
 
 /**
  * Theme Response DTO
- * 
+ *
  * @remarks
  * This DTO represents the response when retrieving a theme.
  * It includes all theme properties and is used for API responses.
- * 
+ *
  * @public
  */
 export class ThemeResponseDto {

@@ -8,17 +8,11 @@ import { MatTabsModule } from '@angular/material/tabs';
 @Component({
   selector: 'app-salon-management',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTabsModule
-  ],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatTabsModule],
   template: `
     <div class="management-container">
       <h1>Salon Management</h1>
-      
+
       <mat-tab-group>
         <mat-tab label="Details">
           <div class="tab-content">
@@ -33,7 +27,7 @@ import { MatTabsModule } from '@angular/material/tabs';
             </mat-card>
           </div>
         </mat-tab>
-        
+
         <mat-tab label="Services">
           <div class="tab-content">
             <mat-card>
@@ -47,7 +41,7 @@ import { MatTabsModule } from '@angular/material/tabs';
             </mat-card>
           </div>
         </mat-tab>
-        
+
         <mat-tab label="Gallery">
           <div class="tab-content">
             <mat-card>
@@ -64,18 +58,20 @@ import { MatTabsModule } from '@angular/material/tabs';
       </mat-tab-group>
     </div>
   `,
-  styles: [`
-    .management-container {
-      padding: 20px;
-    }
-    
-    .tab-content {
-      padding: 20px 0;
-    }
-    
-    mat-card {
-      margin-bottom: 20px;
-    }
-  `]
+  styles: [
+    `
+      .management-container {
+        padding: 20px;
+      }
+
+      .tab-content {
+        padding: 20px 0;
+      }
+
+      mat-card {
+        margin-bottom: 20px;
+      }
+    `,
+  ],
 })
 export class SalonManagementComponent {}

@@ -80,15 +80,15 @@ describe('PortfolioComponent', () => {
     });
     component.selectedImage = new File([''], 'test.jpg', { type: 'image/jpeg' });
     service.createPortfolioItem.mockReturnValue(throwError(() => error));
-    
+
     // Store the initial state
     const initialItems = [...component.portfolioItems];
-    
+
     component.addPortfolioItem();
-    
+
     // Verify the service was called
     expect(service.createPortfolioItem).toHaveBeenCalled();
-    
+
     // Verify the items array wasn't modified on error
     expect(component.portfolioItems).toEqual(initialItems);
   });

@@ -82,10 +82,7 @@ describe('ReviewController (e2e)', () => {
         comment: 'Great service!',
       };
 
-      const response = await request(httpServer)
-        .post('/reviews')
-        .send(createDto)
-        .expect(201);
+      const response = await request(httpServer).post('/reviews').send(createDto).expect(201);
 
       expect(response.body.rating).toBe(createDto.rating);
       expect(response.body.comment).toBe(createDto.comment);
@@ -95,9 +92,7 @@ describe('ReviewController (e2e)', () => {
 
   describe('GET /reviews', () => {
     it('should return an array of reviews', async () => {
-      const response = await request(httpServer)
-        .get('/reviews')
-        .expect(200);
+      const response = await request(httpServer).get('/reviews').expect(200);
 
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data[0].id).toBeDefined();
@@ -107,9 +102,7 @@ describe('ReviewController (e2e)', () => {
 
   describe('GET /reviews/:id', () => {
     it('should return a review by ID', async () => {
-      const response = await request(httpServer)
-        .get(`/reviews/${mockReview.id}`)
-        .expect(200);
+      const response = await request(httpServer).get(`/reviews/${mockReview.id}`).expect(200);
 
       expect(response.body.id).toBe(mockReview.id);
       expect(response.body.rating).toBe(mockReview.rating);
@@ -123,10 +116,7 @@ describe('ReviewController (e2e)', () => {
         comment: 'Updated review',
       };
 
-      const response = await request(httpServer)
-        .put(`/reviews/${mockReview.id}`)
-        .send(updateDto)
-        .expect(200);
+      const response = await request(httpServer).put(`/reviews/${mockReview.id}`).send(updateDto).expect(200);
 
       expect(response.body.rating).toBe(updateDto.rating);
       expect(response.body.comment).toBe(updateDto.comment);
@@ -135,9 +125,7 @@ describe('ReviewController (e2e)', () => {
 
   describe('DELETE /reviews/:id', () => {
     it('should delete a review', async () => {
-      const response = await request(httpServer)
-        .delete(`/reviews/${mockReview.id}`)
-        .expect(200);
+      const response = await request(httpServer).delete(`/reviews/${mockReview.id}`).expect(200);
 
       expect(response.body.success).toBe(true);
     });
@@ -147,10 +135,7 @@ describe('ReviewController (e2e)', () => {
     it('should add a response to a review', async () => {
       const responseText = 'Thank you for your feedback!';
 
-      const response = await request(httpServer)
-        .post(`/reviews/${mockReview.id}/respond`)
-        .send({ response: responseText })
-        .expect(201);
+      const response = await request(httpServer).post(`/reviews/${mockReview.id}/respond`).send({ response: responseText }).expect(201);
 
       expect(response.body.response).toBe(responseText);
     });

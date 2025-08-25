@@ -1,26 +1,19 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatError, MatFormFieldModule } from '@angular/material/form-field';
 import { MatListModule } from '@angular/material/list';
-import { DashboardApiService, Renewal } from '@frontend-shared/features/dashboard/services/dashboard-api.service';
+import { DashboardApiService, Renewal } from '@beauty-saas/features/dashboard/services/dashboard-api.service';
 
 @Component({
   selector: 'app-renewals-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatProgressBarModule,
-    MatFormFieldModule,
-    MatError,
-    MatListModule
-  ],
+  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatFormFieldModule, MatError, MatListModule],
   templateUrl: './renewals-list.component.html',
   styleUrls: ['./renewals-list.component.scss'],
 })
-export class RenewalsListComponent {
+export class RenewalsListComponent implements OnInit {
   @Input() tenantId = '';
   renewals = signal<Renewal[]>([]);
   loading = signal(true);

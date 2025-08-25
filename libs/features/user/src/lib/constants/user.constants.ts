@@ -11,7 +11,8 @@ export const USER_ERROR_MESSAGES = {
   LAST_ADMIN: 'Cannot remove the last admin user',
   INVALID_EMAIL: 'Invalid email format',
   INVALID_PHONE: 'Invalid phone number',
-  INVALID_PASSWORD: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+  INVALID_PASSWORD:
+    'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character',
   UPDATE_REQUIRES_CURRENT_PASSWORD: 'Current password is required to update sensitive information',
   MISSING_FIELDS: 'At least one field must be provided for update',
 } as const;

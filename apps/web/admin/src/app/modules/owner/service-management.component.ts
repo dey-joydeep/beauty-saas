@@ -38,7 +38,7 @@ export class ServiceManagementComponent {
   ) {
     // In a real app, you would get this from your auth service
     this.currentUser = { id: 'current-user-id' };
-    
+
     this.serviceForm = this.fb.group({
       name: ['', Validators.required],
       description: [''],
@@ -51,30 +51,30 @@ export class ServiceManagementComponent {
   onSubmit() {
     if (this.serviceForm.invalid) {
       // Mark all fields as touched to show validation messages
-      Object.values(this.serviceForm.controls).forEach(control => {
+      Object.values(this.serviceForm.controls).forEach((control) => {
         control.markAsTouched();
       });
       return;
     }
-    
+
     this.loading = true;
     this.error = null;
-    
+
     const { name, description, duration, price, salonId } = this.serviceForm.value;
-    
+
     if (!name || duration === null || price === null || !salonId) {
       this.loading = false;
       this.error = 'All required fields must be filled out.';
       return;
     }
-    
+
     const service = {
-      name: name as string,
-      description: description as string || '',
+      name: name,
+      description: (description as string) || '',
       duration: Number(duration),
       price: Number(price),
-      salonId: salonId as string,
-      createdBy: this.currentUser.id
+      salonId: salonId,
+      createdBy: this.currentUser.id,
     };
     this.serviceService.saveService(service).subscribe({
       next: (res: { success: boolean }) => {

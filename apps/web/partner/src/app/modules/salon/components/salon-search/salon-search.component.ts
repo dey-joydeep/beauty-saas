@@ -1,14 +1,14 @@
-import { Component, inject, PLATFORM_ID } from '@angular/core';
+﻿import { PlatformUtils } from '@beauty-saas/web-config';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
+import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
 import { TranslateModule } from '@ngx-translate/core';
-import { Salon } from '../../models/salon.model';
 import { SalonServiceItem } from '../../models/salon-service-item.model';
+import { Salon } from '../../models/salon.model';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
-import type { IPlatformUtils } from '@frontend-shared/core/utils/platform-utils';
-import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils';
 
 @Component({
   selector: 'app-salon-search',
@@ -17,7 +17,7 @@ import { PLATFORM_UTILS_TOKEN } from '@frontend-shared/core/utils/platform-utils
   templateUrl: './salon-search.component.html',
   styleUrls: ['./salon-search.component.scss'],
 })
-export class SalonSearchComponent {
+export class SalonSearchComponent implements OnInit {
   salons: Salon[] = [];
   total = 0;
   loading = false;
@@ -37,7 +37,7 @@ export class SalonSearchComponent {
   sort = '';
   showMap = false;
 
-  private readonly platformUtils = inject(PLATFORM_UTILS_TOKEN);
+  private readonly platformUtils = inject<PlatformUtils>(PLATFORM_UTILS_TOKEN);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
@@ -113,10 +113,10 @@ export class SalonSearchComponent {
 
   openMap(salon: Salon): void {
     const url = `https://www.google.com/maps?q=${encodeURIComponent(salon.address)}`;
-    if (this.isBrowser && this.platformUtils.window) {
-      this.platformUtils.window.open(url, '_blank');
+    if (this.isBrowser && this.platformUtils.windowRef) {
+      this.platformUtils.windowRef.open(url, '_blank');
     } else if (this.isBrowser) {
-      // Fallback for browser environment if platformUtils.window is not available
+      // Fallback for browser environment if windowRef is not available
       window.open(url, '_blank');
     }
   }
@@ -149,3 +149,4 @@ export class SalonSearchComponent {
     // For production, consider using a proper map component or backend-generated map with markers
   }
 }
+

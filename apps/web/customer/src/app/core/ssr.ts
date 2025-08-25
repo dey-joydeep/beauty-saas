@@ -38,7 +38,7 @@ const _setImmediate = (callback: () => void): any => {
 export class MaterialSsrHandler {
   private static initialized = false;
 
-  constructor(private platformId: Object) { }
+  constructor(private platformId: object) {}
 
   /**
    * Initialize Material components for server-side rendering
@@ -73,19 +73,20 @@ export class MaterialSsrHandler {
         // Document mock
         document: {
           body: {},
-          addEventListener: (): void => { },
-          removeEventListener: (): void => { },
-          createElement: (): HTMLElement => ({
-            setAttribute: (): void => { },
-            style: {},
-            getContext: () => ({}),
-            toDataURL: () => ''
-          } as unknown as HTMLElement)
+          addEventListener: (): void => {},
+          removeEventListener: (): void => {},
+          createElement: (): HTMLElement =>
+            ({
+              setAttribute: (): void => {},
+              style: {},
+              getContext: () => ({}),
+              toDataURL: () => '',
+            }) as unknown as HTMLElement,
         },
 
         // Basic browser APIs
-        addEventListener: (): void => { },
-        removeEventListener: (): void => { },
+        addEventListener: (): void => {},
+        removeEventListener: (): void => {},
 
         // Performance API
         performance: {
@@ -104,24 +105,24 @@ export class MaterialSsrHandler {
             domContentLoadedEventEnd: 0,
             domComplete: 0,
             loadEventStart: 0,
-            loadEventEnd: 0
+            loadEventEnd: 0,
           },
           memory: {
             usedJSHeapSize: 0,
             totalJSHeapSize: 0,
-            jsHeapSizeLimit: 0
+            jsHeapSizeLimit: 0,
           },
           navigation: {
             type: 0,
-            redirectCount: 0
-          }
+            redirectCount: 0,
+          },
         },
 
         // MatchMedia mock
         matchMedia: (): any => ({
           matches: false,
-          addListener: (): void => { },
-          removeListener: (): void => { }
+          addListener: (): void => {},
+          removeListener: (): void => {},
         }),
 
         // Animation frame mocks
@@ -138,42 +139,42 @@ export class MaterialSsrHandler {
         // Storage mocks
         localStorage: {
           getItem: (): null => null,
-          setItem: (): void => { },
-          removeItem: (): void => { },
-          clear: (): void => { },
+          setItem: (): void => {},
+          removeItem: (): void => {},
+          clear: (): void => {},
           key: (): null => null,
-          length: 0
+          length: 0,
         },
 
         sessionStorage: {
           getItem: (): null => null,
-          setItem: (): void => { },
-          removeItem: (): void => { },
-          clear: (): void => { },
+          setItem: (): void => {},
+          removeItem: (): void => {},
+          clear: (): void => {},
           key: (): null => null,
-          length: 0
+          length: 0,
         },
 
         // Navigation
         navigator: {
-          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         },
 
         // Location
         location: {
           protocol: 'http:',
-          host: 'localhost:4200'
+          host: 'localhost:4200',
         },
 
         // CSS
         CSS: {
-          escape: (val: string): string => val
+          escape: (val: string): string => val,
         },
 
         // Basic DOM types
-        HTMLElement: class { },
-        Element: class { },
-        Node: class { }
+        HTMLElement: class {},
+        Element: class {},
+        Node: class {},
       };
 
       // Set global references
@@ -215,7 +216,7 @@ export class MaterialSsrHandler {
 /**
  * Factory function to create MaterialSsrHandler
  */
-export function materialSsrHandlerFactory(platformId: Object): MaterialSsrHandler {
+export function materialSsrHandlerFactory(platformId: object): MaterialSsrHandler {
   const handler = new MaterialSsrHandler(platformId);
   handler.initialize();
   return handler;
@@ -228,6 +229,6 @@ export function provideMaterialSsrHandler(): Provider {
   return {
     provide: MaterialSsrHandler,
     useFactory: materialSsrHandlerFactory,
-    deps: [PLATFORM_ID]
+    deps: [PLATFORM_ID],
   };
 }

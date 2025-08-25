@@ -26,13 +26,14 @@ export class DashboardService {
       .toPromise()
       .then(
         (data) =>
-          data || {
+          data ||
+          ({
             totalCustomers: 0,
             totalAppointments: 0,
             totalRevenue: 0,
             activeSubscriptions: 0,
             count: 0,
-          } as DashboardStats,
+          } as DashboardStats),
       );
   }
 

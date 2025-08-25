@@ -8,11 +8,7 @@ export function getProtectedProperty<T, K extends keyof T>(instance: T, property
   return (instance as any)[property];
 }
 
-export function setProtectedProperty<T, K extends keyof T>(
-  instance: T,
-  property: K,
-  value: T[K]
-): void {
+export function setProtectedProperty<T, K extends keyof T>(instance: T, property: K, value: T[K]): void {
   (instance as any)[property] = value;
 }
 
@@ -22,12 +18,11 @@ export function setProtectedProperty<T, K extends keyof T>(
 export function spyOnProtectedProperty<T, K extends keyof T>(
   instance: T,
   property: K,
-  accessType: 'get' | 'set' = 'get'
+  accessType: 'get' | 'set' = 'get',
 ): jest.SpyInstance<T[K], []> {
   const prototype = Object.getPrototypeOf(instance);
-  const descriptor = Object.getOwnPropertyDescriptor(prototype, property) ||
-                    Object.getOwnPropertyDescriptor(instance as any, property);
-  
+  const descriptor = Object.getOwnPropertyDescriptor(prototype, property) || Object.getOwnPropertyDescriptor(instance as any, property);
+
   if (!descriptor) {
     throw new Error(`Property ${String(property)} does not exist on the object`);
   }

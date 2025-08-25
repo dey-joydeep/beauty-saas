@@ -15,22 +15,24 @@ import appConfig from './config/app.config';
       isGlobal: true,
       load: [appConfig],
     }),
-    
+
     // Core module (imports all core services)
     CoreModule,
-    
+
     // Third-party modules
     ScheduleModule.forRoot(),
-    
+
     // API rate limiting
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        throttlers: [{
-          ttl: config.get<number>('throttle.ttl', 60), // Default 60 seconds
-          limit: config.get<number>('throttle.limit', 100), // Default 100 requests per ttl
-        }],
+        throttlers: [
+          {
+            ttl: config.get<number>('throttle.ttl', 60), // Default 60 seconds
+            limit: config.get<number>('throttle.limit', 100), // Default 100 requests per ttl
+          },
+        ],
       }),
     }),
     // Feature modules

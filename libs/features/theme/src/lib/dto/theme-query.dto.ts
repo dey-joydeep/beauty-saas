@@ -4,10 +4,10 @@ import { Type } from 'class-transformer';
 
 /**
  * Theme Query DTO
- * 
+ *
  * @remarks
  * This DTO is used for querying themes with filtering, sorting, and pagination.
- * 
+ *
  * @public
  */
 export class ThemeQueryDto {

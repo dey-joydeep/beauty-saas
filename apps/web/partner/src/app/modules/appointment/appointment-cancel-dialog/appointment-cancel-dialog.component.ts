@@ -64,14 +64,12 @@ export class AppointmentCancelDialogComponent {
     // Simulate API call
     setTimeout(() => {
       this.isSubmitting = false;
-      this.snackBar.open(
-        this.translate.instant('APPOINTMENT.CANCELLATION_SUCCESS'),
-        this.translate.instant('COMMON.CLOSE'),
-        { duration: 3000 }
-      );
+      this.snackBar.open(this.translate.instant('APPOINTMENT.CANCELLATION_SUCCESS'), this.translate.instant('COMMON.CLOSE'), {
+        duration: 3000,
+      });
       this.dialogRef.close({
         action: 'confirmed',
-        reason: reason
+        reason: reason,
       });
     }, 1500);
   }
@@ -81,9 +79,7 @@ export class AppointmentCancelDialogComponent {
   }
 
   get appointmentDate(): string {
-    return this.data.appointment.startTime
-      ? new Date(this.data.appointment.startTime).toLocaleDateString()
-      : '';
+    return this.data.appointment.startTime ? new Date(this.data.appointment.startTime).toLocaleDateString() : '';
   }
 
   get appointmentTime(): string {

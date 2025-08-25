@@ -44,10 +44,7 @@ export class SocialController {
   @Roles(AppUserRole.ADMIN, AppUserRole.OWNER, AppUserRole.STAFF, AppUserRole.CUSTOMER)
   @ApiOperation({ summary: 'Update a social link' })
   @ApiResponse({ status: HttpStatus.OK, type: SocialResponseDto })
-  async update(
-    @Param('id') id: string,
-    @Body() updateSocialDto: UpdateSocialDto,
-  ): Promise<SocialResponseDto> {
+  async update(@Param('id') id: string, @Body() updateSocialDto: UpdateSocialDto): Promise<SocialResponseDto> {
     return this.socialService.updateSocial({ id, data: updateSocialDto });
   }
 

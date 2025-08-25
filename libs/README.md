@@ -25,7 +25,7 @@ Add an export to the relevant index file. For example, if you added a new type:
 ```typescript
 // libs/shared/src/types/index.ts
 export * from './user.types.js';
-export * from './new-type.js';  // Add your new file
+export * from './new-type.js'; // Add your new file
 ```
 
 ### 3. Build the Shared Library
@@ -57,7 +57,7 @@ export enum PaymentStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
-  REFUNDED = 'REFUNDED'
+  REFUNDED = 'REFUNDED',
 }
 ```
 
@@ -66,7 +66,7 @@ export enum PaymentStatus {
 ```typescript
 // libs/shared/src/enums/index.ts
 export * from './appointment-status.enum.js';
-export * from './payment-status.enum.js';  // Add this line
+export * from './payment-status.enum.js'; // Add this line
 ```
 
 3. Build the shared library (see step 3 above)

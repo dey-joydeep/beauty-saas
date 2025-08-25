@@ -20,10 +20,10 @@ import { PortfolioService } from './portfolio.service';
     MatButtonModule,
     MatProgressBarModule,
     MatIconModule,
-    TranslateModule
+    TranslateModule,
   ],
   templateUrl: './portfolio-management.component.html',
-  styleUrls: ['./portfolio-management.component.scss']
+  styleUrls: ['./portfolio-management.component.scss'],
 })
 export class PortfolioManagementComponent {
   loading = false;
@@ -32,11 +32,14 @@ export class PortfolioManagementComponent {
   imagePreview: string | ArrayBuffer | null = null;
   portfolioForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private portfolioService: PortfolioService) {
+  constructor(
+    private fb: FormBuilder,
+    private portfolioService: PortfolioService,
+  ) {
     this.portfolioForm = this.fb.group({
       title: ['', Validators.required],
       description: ['', Validators.required],
-      image: [null as File | null, [Validators.required]]
+      image: [null as File | null, [Validators.required]],
     });
   }
 
@@ -46,7 +49,7 @@ export class PortfolioManagementComponent {
       const file = input.files[0];
       this.portfolioForm.patchValue({ image: file });
       this.portfolioForm.get('image')?.updateValueAndValidity();
-      
+
       // Update image preview
       const reader = new FileReader();
       reader.onload = () => {
@@ -85,7 +88,7 @@ export class PortfolioManagementComponent {
       error: (err: any) => {
         this.loading = false;
         this.error = err.userMessage || 'Error saving portfolio item.';
-      }
+      },
     });
   }
 }

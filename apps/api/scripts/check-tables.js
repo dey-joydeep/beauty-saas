@@ -42,10 +42,9 @@ async function checkTables() {
         tc.constraint_type = 'FOREIGN KEY' 
         AND (ccu.table_name = 'salon_tenant_staff' OR ccu.table_name = 'salon_staff');
     `;
-    
+
     console.log('\nForeign key constraints involving staff tables:');
     console.table(fkCheck);
-
   } catch (error) {
     console.error('Error checking tables:', error);
   } finally {

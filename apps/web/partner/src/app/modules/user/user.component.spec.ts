@@ -17,8 +17,8 @@ class MockTranslateService {
     en: {
       'USER.ERRORS.PERMISSION_DENIED': 'You do not have permission to view this data.',
       'USER.ERRORS.SESSION_EXPIRED': 'Your session has expired. Please log in again.',
-      'USER.ERRORS.FORBIDDEN': 'You do not have permission to access this resource.'
-    }
+      'USER.ERRORS.FORBIDDEN': 'You do not have permission to access this resource.',
+    },
   };
 
   getTranslation(lang: string): Record<string, string> | undefined {
@@ -31,20 +31,22 @@ class MockTranslateService {
 
   get(key: string | string[], interpolateParams?: object): string {
     const keys = Array.isArray(key) ? key : [key];
-    const translation = keys.map(k => {
-      const parts = k.split('.');
-      let result: any = this.translations[this.currentLang];
-      for (const part of parts) {
-        result = result?.[part];
-        if (result === undefined) return k;
-      }
-      return result || k;
-    }).join(' ');
-    
+    const translation = keys
+      .map((k) => {
+        const parts = k.split('.');
+        let result: any = this.translations[this.currentLang];
+        for (const part of parts) {
+          result = result?.[part];
+          if (result === undefined) return k;
+        }
+        return result || k;
+      })
+      .join(' ');
+
     if (interpolateParams) {
       return Object.entries(interpolateParams).reduce(
         (acc, [key, value]) => acc.replace(new RegExp(`{{${key}}}`, 'g'), String(value)),
-        translation
+        translation,
       );
     }
     return translation;
@@ -71,21 +73,17 @@ describe('UserComponent', () => {
 
   beforeEach(async () => {
     userService = {
-      getUserStats: jest.fn()
+      getUserStats: jest.fn(),
     } as unknown as jest.Mocked<UserService>;
 
     await TestBed.configureTestingModule({
-      imports: [
-        CommonModule, 
-        UserComponent, 
-        TranslateModule.forRoot()
-      ],
+      imports: [CommonModule, UserComponent, TranslateModule.forRoot()],
       providers: [
         { provide: UserService, useValue: userService },
-        { provide: TranslateService, useClass: MockTranslateService }
+        { provide: TranslateService, useClass: MockTranslateService },
       ],
     }).compileComponents();
-    
+
     fixture = TestBed.createComponent(UserComponent);
     component = fixture.componentInstance;
     translateService = TestBed.inject(TranslateService);
@@ -107,27 +105,27 @@ describe('UserComponent', () => {
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
-    
+
     // Setup service response
     userService.getUserStats.mockReturnValue(of(mockStats));
-    
+
     // Trigger change detection
     fixture.detectChanges();
-    
+
     // Test public property
     expect(component.isAdmin).toBeTrue();
-    
+
     // Check if the stats are rendered in the DOM
     const statElements = fixture.debugElement.queryAll(By.css('.stat-card'));
     expect(statElements.length).toBe(4);
-    
+
     // Check if the stats are displayed correctly
     const statText = fixture.debugElement.nativeElement.textContent;
     expect(statText).toContain('2'); // businessCount
     expect(statText).toContain('5'); // customerCount
     expect(statText).toContain('1'); // activeBusiness
     expect(statText).toContain('3'); // activeCustomer
-    
+
     // Verify no error message is shown
     const errorElement = fixture.debugElement.query(By.css('.error-message'));
     expect(errorElement).toBeNull();
@@ -140,23 +138,23 @@ describe('UserComponent', () => {
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
-    
+
     // Mock getUserStats to throw an error if called (shouldn't be called for non-admin)
     userService.getUserStats.mockImplementation(() => {
       throw new Error('getUserStats should not be called for non-admin');
     });
-    
+
     // Trigger change detection
     fixture.detectChanges();
-    
+
     // Test public property
     expect(component.isAdmin).toBeFalse();
-    
+
     // Check if the error message is displayed in the DOM
     const errorElement = fixture.debugElement.query(By.css('.error-message'));
     expect(errorElement).toBeTruthy();
     expect(errorElement.nativeElement.textContent).toContain('permission');
-    
+
     // Verify no stats are shown
     const statElements = fixture.debugElement.queryAll(By.css('.stat-card'));
     expect(statElements.length).toBe(0);
@@ -169,19 +167,21 @@ describe('UserComponent', () => {
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
-    
+
     // Setup error response
-    userService.getUserStats.mockReturnValue(throwError(() => ({
-      status: 401,
-      error: { message: 'Session expired' }
-    })));
-    
+    userService.getUserStats.mockReturnValue(
+      throwError(() => ({
+        status: 401,
+        error: { message: 'Session expired' },
+      })),
+    );
+
     // Trigger change detection
     fixture.detectChanges();
-    
+
     // Test public property
     expect(component.isAdmin).toBeTrue();
-    
+
     // Check if the error message is displayed in the DOM
     const errorElement = fixture.debugElement.query(By.css('.error-message'));
     expect(errorElement).toBeTruthy();
@@ -195,19 +195,21 @@ describe('UserComponent', () => {
       if (key === 'tenant_id') return 'test-tenant';
       return null;
     });
-    
+
     // Setup error response
-    userService.getUserStats.mockReturnValue(throwError(() => ({
-      status: 403,
-      error: { message: 'Forbidden' }
-    })));
-    
+    userService.getUserStats.mockReturnValue(
+      throwError(() => ({
+        status: 403,
+        error: { message: 'Forbidden' },
+      })),
+    );
+
     // Trigger change detection
     fixture.detectChanges();
-    
+
     // Test public property
     expect(component.isAdmin).toBeTrue();
-    
+
     // Check if the error message is displayed in the DOM
     const errorElement = fixture.debugElement.query(By.css('.error-message'));
     expect(errorElement).toBeTruthy();

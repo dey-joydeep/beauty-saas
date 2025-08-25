@@ -5,11 +5,11 @@ import { AppUserRole } from '@shared/types/user.types';
 
 /**
  * User creation data transfer object
- * 
+ *
  * @remarks
  * This DTO is used for creating new users in the system.
  * Extends BaseUserDto and adds password field.
- * 
+ *
  * @public
  */
 export class CreateUserDto extends BaseUserDto {
@@ -18,7 +18,7 @@ export class CreateUserDto extends BaseUserDto {
     required: true,
     minLength: 6,
     example: 'securePassword123!',
-    type: String
+    type: String,
   })
   @IsString()
   @MinLength(6, { message: 'Password must be at least 6 characters' })
@@ -27,43 +27,43 @@ export class CreateUserDto extends BaseUserDto {
 
   // tenantId is already defined in BaseUserDto
 
-  @ApiPropertyOptional({ 
-    description: 'User roles', 
+  @ApiPropertyOptional({
+    description: 'User roles',
     type: [String],
-    example: [AppUserRole.CUSTOMER]
+    example: [AppUserRole.CUSTOMER],
   })
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
   roles?: string[] = [AppUserRole.CUSTOMER];
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Whether the user is verified',
-    default: false
+    default: false,
   })
   @IsBoolean()
   @IsOptional()
   isVerified?: boolean = false;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Whether the user is a SaaS owner',
-    default: false
+    default: false,
   })
   @IsBoolean()
   @IsOptional()
   saasOwner?: boolean = false;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Whether the user is salon staff',
-    default: false
+    default: false,
   })
   @IsBoolean()
   @IsOptional()
   salonStaff?: boolean = false;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Whether the user is a customer',
-    default: true
+    default: true,
   })
   @IsBoolean()
   @IsOptional()

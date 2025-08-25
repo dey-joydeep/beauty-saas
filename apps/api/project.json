@@ -50,12 +50,12 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/api/**/*.ts"]
       }
     }
   },
-  "tags": []
+  "tags": ["type:app", "platform:server"]
 }

@@ -14,7 +14,7 @@ describe('ServiceManagementComponent', () => {
       saveService: jest.fn(),
       getServices: jest.fn(),
       updateService: jest.fn(),
-      deleteService: jest.fn()
+      deleteService: jest.fn(),
     } as unknown as jest.Mocked<ServiceService>;
 
     await TestBed.configureTestingModule({
@@ -30,40 +30,42 @@ describe('ServiceManagementComponent', () => {
   it('should display error on failed service save', fakeAsync(() => {
     const errorResponse = { error: { userMessage: 'Failed to save service.' } };
     serviceService.saveService.mockReturnValue(throwError(() => errorResponse));
-    
+
     // Set form values
-    component.serviceForm.setValue({ 
-      name: 'Test', 
-      description: 'Desc', 
-      duration: '30', 
-      price: '50', 
-      salonId: 'test-salon-123' 
+    component.serviceForm.setValue({
+      name: 'Test',
+      description: 'Desc',
+      duration: '30',
+      price: '50',
+      salonId: 'test-salon-123',
     });
-    
+
     // Mock the auth service or set the required properties directly
     Object.defineProperty(component, 'currentUser', {
       get: () => ({ id: 'user-123' }),
-      configurable: true
+      configurable: true,
     });
-    
+
     component.onSubmit();
     tick();
-    
-    expect(serviceService.saveService).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Test',
-      description: 'Desc',
-      duration: 30,
-      price: 50,
-      createdBy: 'user-123',
-      salonId: 'test-salon-123',
-      isActive: true
-    }));
+
+    expect(serviceService.saveService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Test',
+        description: 'Desc',
+        duration: 30,
+        price: 50,
+        createdBy: 'user-123',
+        salonId: 'test-salon-123',
+        isActive: true,
+      }),
+    );
     expect(component.error).toBe('Failed to save service.');
-    
+
     // Cleanup
     Object.defineProperty(component, 'currentUser', {
       get: () => undefined,
-      configurable: true
+      configurable: true,
     });
   }));
 
@@ -74,67 +76,69 @@ describe('ServiceManagementComponent', () => {
   });
 
   it('should call saveService on valid submit', fakeAsync(() => {
-    const mockResponse = { 
-      success: true, 
-      data: { 
-        id: '1', 
-        name: 'Test', 
-        description: 'Desc', 
-        duration: 30, 
+    const mockResponse = {
+      success: true,
+      data: {
+        id: '1',
+        name: 'Test',
+        description: 'Desc',
+        duration: 30,
         price: 50,
-        isActive: true
+        isActive: true,
       },
-      message: 'Service saved successfully'
+      message: 'Service saved successfully',
     };
-    
+
     serviceService.saveService.mockReturnValue(of(mockResponse));
     // serviceService.getServices.mockReturnValue(of({
     //   success: true,
     //   data: [
-    //     { 
-    //       id: '1', 
-    //       name: 'Test', 
-    //       description: 'Desc', 
-    //       duration: 30, 
+    //     {
+    //       id: '1',
+    //       name: 'Test',
+    //       description: 'Desc',
+    //       duration: 30,
     //       price: 50,
     //       isActive: true
     //     }
     //   ],
     //   message: 'Services retrieved successfully'
     // }));
-    
+
     // Mock the auth service or set the required properties directly
     Object.defineProperty(component, 'currentUser', {
       get: () => ({ id: 'user-123' }),
-      configurable: true
+      configurable: true,
     });
-    
+
     // Set form values
-    component.serviceForm.setValue({ 
-      name: 'Test', 
-      description: 'Desc', 
-      duration: '30', 
-      price: '50', 
-      salonId: 'test-salon-123' 
-    });
-    
-    component.onSubmit();
-    tick();
-    
-    expect(serviceService.saveService).toHaveBeenCalledWith(expect.objectContaining({
+    component.serviceForm.setValue({
       name: 'Test',
       description: 'Desc',
-      duration: 30,
-      price: 50,
-      createdBy: 'user-123',
+      duration: '30',
+      price: '50',
       salonId: 'test-salon-123',
-      isActive: true
-    }));
-    
+    });
+
+    component.onSubmit();
+    tick();
+
+    expect(serviceService.saveService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Test',
+        description: 'Desc',
+        duration: 30,
+        price: 50,
+        createdBy: 'user-123',
+        salonId: 'test-salon-123',
+        isActive: true,
+      }),
+    );
+
     // Cleanup
     Object.defineProperty(component, 'currentUser', {
       get: () => undefined,
-      configurable: true
+      configurable: true,
     });
   }));
 });

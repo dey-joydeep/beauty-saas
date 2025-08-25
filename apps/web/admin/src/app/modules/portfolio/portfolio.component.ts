@@ -4,8 +4,8 @@ import { PortfolioService, PortfolioItem } from './portfolio.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AbstractBaseComponent } from '@frontend-shared/core/base/abstract-base.component';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
+import { ErrorService } from '@beauty-saas/web-core/http';
 
 @Component({
   selector: 'app-portfolio',
@@ -99,7 +99,7 @@ export class PortfolioComponent extends AbstractBaseComponent {
     formData.append('description', this.addForm.value.description);
     formData.append('image', this.selectedImage);
     this.portfolioService.createPortfolioItem(formData).subscribe({
-      next: (res) => {
+      next: () => {
         this.fetchPortfolio();
         this.addForm.reset();
         this.selectedImage = null;

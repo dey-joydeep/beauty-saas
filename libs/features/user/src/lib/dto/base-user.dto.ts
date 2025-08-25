@@ -9,7 +9,7 @@ export class BaseUserDto {
     required: true,
     pattern: '^[^\s@]+@[^\s@]+\.[^\s@]+$',
     maxLength: 255,
-    type: String
+    type: String,
   })
   @IsEmail()
   @IsNotEmpty()
@@ -20,7 +20,7 @@ export class BaseUserDto {
     description: 'User full name',
     required: false,
     maxLength: 100,
-    type: String
+    type: String,
   })
   @IsString()
   @IsOptional()
@@ -31,7 +31,7 @@ export class BaseUserDto {
     description: 'User phone number',
     required: false,
     maxLength: 20,
-    type: String
+    type: String,
   })
   @IsString()
   @IsOptional()
@@ -41,7 +41,7 @@ export class BaseUserDto {
     enum: AppUserRole,
     description: 'User role',
     required: true,
-    example: AppUserRole.CUSTOMER
+    example: AppUserRole.CUSTOMER,
   })
   @IsEnum(AppUserRole)
   @IsNotEmpty()
@@ -50,7 +50,7 @@ export class BaseUserDto {
   @ApiPropertyOptional({
     description: 'Tenant ID (for multi-tenant applications)',
     required: false,
-    type: String
+    type: String,
   })
   @IsString()
   @IsOptional()

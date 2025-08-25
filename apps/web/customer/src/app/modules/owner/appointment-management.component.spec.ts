@@ -24,9 +24,9 @@ describe('AppointmentManagementComponent', () => {
     const appointmentServiceMock = {
       createAppointment: jest.fn(),
       getAppointments: jest.fn(),
-      updateAppointmentStatus: jest.fn()
+      updateAppointmentStatus: jest.fn(),
     } as unknown as jest.Mocked<AppointmentService>;
-    
+
     await TestBed.configureTestingModule({
       imports: [
         ReactiveFormsModule,
@@ -45,7 +45,7 @@ describe('AppointmentManagementComponent', () => {
     }).compileComponents();
 
     appointmentService = TestBed.inject(AppointmentService) as jest.Mocked<AppointmentService>;
-    
+
     fixture = TestBed.createComponent(AppointmentManagementComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -94,14 +94,14 @@ describe('AppointmentManagementComponent', () => {
     // Arrange
     const mockResponse = { success: true };
     appointmentService.createAppointment.mockReturnValue(of(mockResponse));
-    appointmentService.getAppointments.mockReturnValue(of({
-      success: true,
-      data: [
-        { id: '1', date: '2023-01-01', time: '10:00', clientName: 'John Doe', service: 'Haircut' }
-      ],
-      message: 'Appointments retrieved successfully'
-    }));
-    
+    appointmentService.getAppointments.mockReturnValue(
+      of({
+        success: true,
+        data: [{ id: '1', date: '2023-01-01', time: '10:00', clientName: 'John Doe', service: 'Haircut' }],
+        message: 'Appointments retrieved successfully',
+      }),
+    );
+
     const form = component.appointmentForm;
     form.patchValue({
       customerId: 'customer-123',
@@ -126,7 +126,7 @@ describe('AppointmentManagementComponent', () => {
       endTime: jasmine.any(String),
       notes: 'Test appointment',
     });
-    
+
     expect(component.loading).toBeFalsy();
     expect(component.success).toBe('Appointment created successfully!');
   });
@@ -134,10 +134,12 @@ describe('AppointmentManagementComponent', () => {
   it('should handle error when createAppointment fails', () => {
     // Arrange
     const errorResponse = { message: 'Error creating appointment' };
-    appointmentService.createAppointment.mockReturnValue(throwError(() => ({
-      error: errorResponse,
-    })));
-    
+    appointmentService.createAppointment.mockReturnValue(
+      throwError(() => ({
+        error: errorResponse,
+      })),
+    );
+
     const form = component.appointmentForm;
     form.patchValue({
       customerId: 'customer-123',

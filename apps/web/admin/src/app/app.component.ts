@@ -13,17 +13,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from './core/auth/services/auth.service';
-import { CurrentUserService } from './core/auth/services/current-user.service';
+import { Inject } from '@angular/core';
+import { CURRENT_USER } from '@beauty-saas/web-core/auth';
+import type { CurrentUserPort, CurrentUserMin } from '@beauty-saas/web-core/auth';
 
-// Define a User interface with roles
-export interface User {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  roles?: string[];
-  [key: string]: any; // Allow for additional properties
-}
+// Using CurrentUserMin from shared auth port
 
 @Component({
   selector: 'app-root',
@@ -42,7 +36,7 @@ export interface User {
     MatTooltipModule,
     MatSidenavModule,
     MatListModule,
-    MatSnackBarModule
+    MatSnackBarModule,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
@@ -51,65 +45,65 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'BeautySaaS';
   error: string | null = null;
   // Public properties for template binding
-  currentUser: User | null = null;
+  currentUser: CurrentUserMin | null = null;
   isLoggedIn = false;
   pendingApprovalsCount = 0; // Will be populated from a service
-  
+
   /**
    * Check if the current user has admin role
    */
   get isAdmin(): boolean {
-    return this.currentUser?.roles?.includes('admin') || false;
+    return (this.currentUser?.role || '') === 'admin';
   }
-  
+
   private authSubscription?: Subscription;
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private currentUserService: CurrentUserService,
-    private snackBar: MatSnackBar
+    @Inject(CURRENT_USER) private currentUserService: CurrentUserPort,
+    private snackBar: MatSnackBar,
   ) {}
-  
+
   ngOnInit(): void {
     this.initializeAuthSubscription();
   }
-  
+
   private initializeAuthSubscription(): void {
-    this.authSubscription = this.currentUserService.currentUser$.subscribe({
-      next: (user: User | null) => {
+    this.authSubscription = this.currentUserService.currentUser$.subscribe(
+      (user: CurrentUserMin | null) => {
         this.currentUser = user;
         this.isLoggedIn = !!user;
-        
+
         if (this.isAdmin) {
           this.loadAdminData();
         }
       },
-      error: (error: Error) => {
+      (error: unknown) => {
         console.error('Error in user subscription:', error);
         this.showError('Failed to load user data');
         this.isLoggedIn = false;
         this.currentUser = null;
-      }
-    });
+      },
+    );
   }
-  
+
   private loadAdminData(): void {
     // Load admin-specific data here
     this.loadPendingApprovals();
   }
-  
+
   private loadPendingApprovals(): void {
     // TODO: Implement actual service call to get pending approvals count
     // For now, we'll simulate it
     this.pendingApprovalsCount = 3; // Simulated count
   }
-  
+
   private showError(message: string): void {
     this.error = message;
     this.snackBar.open(message, 'Dismiss', {
       duration: 5000,
-      panelClass: ['error-snackbar']
+      panelClass: ['error-snackbar'],
     });
   }
 
@@ -132,7 +126,7 @@ export class AppComponent implements OnInit, OnDestroy {
       console.error('Logout error:', error);
     }
   }
-  
+
   /**
    * Navigate to the admin dashboard
    */
@@ -141,7 +135,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.router.navigate(['/admin/dashboard']);
     }
   }
-  
+
   /**
    * Navigate to the user's profile
    */

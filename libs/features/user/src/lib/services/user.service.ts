@@ -1,5 +1,13 @@
 import { AppUserRole } from '@beauty-saas/shared';
-import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -13,7 +21,7 @@ enum UserRole {
   ADMIN = 'ADMIN',
   OWNER = 'OWNER',
   STAFF = 'STAFF',
-  CUSTOMER = 'CUSTOMER'
+  CUSTOMER = 'CUSTOMER',
 }
 
 interface UserBase {
@@ -51,7 +59,7 @@ type User = UserWithRoles;
 @Injectable()
 export class UserService {
   private readonly prisma: PrismaClient;
-  
+
   constructor(
     @Inject(forwardRef(() => JwtService))
     private readonly jwtService: JwtService,
@@ -107,8 +115,8 @@ export class UserService {
 
   async login(loginDto: LoginUserDto) {
     const user = await this.validateUser(loginDto.email, loginDto.password);
-    const roles = user.roles?.map(userRole => userRole.role.name) || [];
-    
+    const roles = user.roles?.map((userRole) => userRole.role.name) || [];
+
     return {
       accessToken: this.generateToken({
         id: user.id,
@@ -119,10 +127,10 @@ export class UserService {
   }
 
   private generateToken(user: { id: string; email: string; roles: string[] }): string {
-    const payload = { 
-      sub: user.id, 
-      email: user.email, 
-      roles: user.roles 
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      roles: user.roles,
     };
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
@@ -136,38 +144,41 @@ export class UserService {
     });
   }
 
-  async getUsers(params: {
-    where?: Prisma.UserWhereInput;
-    skip?: number;
-    take?: number;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-    include?: Prisma.UserInclude;
-  } = {}): Promise<User[]> {
+  async getUsers(
+    params: {
+      where?: Prisma.UserWhereInput;
+      skip?: number;
+      take?: number;
+      orderBy?: Prisma.UserOrderByWithRelationInput;
+      include?: Prisma.UserInclude;
+    } = {},
+  ): Promise<User[]> {
     const users = await this.prisma.user.findMany({
       where,
       include: {
-        roles: { 
-          include: { 
-            role: true 
-          } 
+        roles: {
+          include: {
+            role: true,
+          },
         },
         saasOwner: true,
         salonStaff: true,
         customer: true,
       },
     });
-    
+
     return users.map((user) => {
       // Map the roles to the expected format
-      const mappedRoles = user.roles?.map(ur => ({
-        role: {
-          id: ur.roleId,
-          name: ur.role?.name || '',
-        },
-        userId: user.id,
-        roleId: ur.roleId,
-      })) || [];
-      
+      const mappedRoles =
+        user.roles?.map((ur) => ({
+          role: {
+            id: ur.roleId,
+            name: ur.role?.name || '',
+          },
+          userId: user.id,
+          roleId: ur.roleId,
+        })) || [];
+
       // Create a properly typed user object with all required fields
       const userWithRoles: UserWithRoles = {
         ...user,
@@ -186,7 +197,7 @@ export class UserService {
         salonStaff: user.salonStaff || undefined,
         customer: user.customer || undefined,
       };
-      
+
       return userWithRoles;
     });
   }
@@ -210,11 +221,12 @@ export class UserService {
     const userWithRoles = user as unknown as UserWithRoles;
     return {
       ...user,
-      roles: userWithRoles.roles?.map(ur => ({
-        role: ur.role,
-        userId: ur.userId,
-        roleId: ur.roleId,
-      })) || [],
+      roles:
+        userWithRoles.roles?.map((ur) => ({
+          role: ur.role,
+          userId: ur.userId,
+          roleId: ur.roleId,
+        })) || [],
     };
   }
 
@@ -225,7 +237,7 @@ export class UserService {
     }
 
     const hashedPassword = await this.hashPassword(createUserDto.password);
-    
+
     // Start a transaction to ensure data consistency
     return this.prisma.$transaction(async (prisma) => {
       const user = await prisma.user.create({
@@ -277,11 +289,12 @@ export class UserService {
         const typedUser = userWithRoles as unknown as UserWithRoles;
         return {
           ...typedUser,
-          roles: typedUser.roles?.map(ur => ({
-            role: ur.role,
-            userId: ur.userId,
-            roleId: ur.roleId,
-          })) || [],
+          roles:
+            typedUser.roles?.map((ur) => ({
+              role: ur.role,
+              userId: ur.userId,
+              roleId: ur.roleId,
+            })) || [],
         };
       } catch (error) {
         // If anything fails, delete the created user to maintain consistency
@@ -313,11 +326,12 @@ export class UserService {
     const userWithRoles = user as unknown as UserWithRoles;
     return {
       ...user,
-      roles: userWithRoles.roles?.map(ur => ({
-        role: ur.role,
-        userId: ur.userId,
-        roleId: ur.roleId,
-      })) || [],
+      roles:
+        userWithRoles.roles?.map((ur) => ({
+          role: ur.role,
+          userId: ur.userId,
+          roleId: ur.roleId,
+        })) || [],
     };
   }
 
@@ -352,12 +366,12 @@ export class UserService {
         if (!updateUserDto.currentPassword) {
           throw new BadRequestException('Current password is required to update password');
         }
-        
+
         const isPasswordValid = await this.validateUser(user.email, updateUserDto.currentPassword);
         if (!isPasswordValid) {
           throw new UnauthorizedException('Invalid current password');
         }
-        
+
         updateUserDto.password = await this.hashPassword(updateUserDto.password);
         delete updateUserDto.currentPassword;
       } else if (updateUserDto.currentPassword) {
@@ -445,22 +459,24 @@ export class UserService {
         const typedUser = userWithUpdatedRoles as unknown as UserWithRoles;
         return {
           ...typedUser,
-          roles: typedUser.roles?.map(ur => ({
-            role: ur.role,
-            userId: ur.userId,
-            roleId: ur.roleId,
-          })) || [],
+          roles:
+            typedUser.roles?.map((ur) => ({
+              role: ur.role,
+              userId: ur.userId,
+              roleId: ur.roleId,
+            })) || [],
         };
       }
 
       const typedUser = updatedUser as unknown as UserWithRoles;
       return {
         ...typedUser,
-        roles: typedUser.roles?.map(ur => ({
-          role: ur.role,
-          userId: ur.userId,
-          roleId: ur.roleId,
-        })) || [],
+        roles:
+          typedUser.roles?.map((ur) => ({
+            role: ur.role,
+            userId: ur.userId,
+            roleId: ur.roleId,
+          })) || [],
       };
     });
   }

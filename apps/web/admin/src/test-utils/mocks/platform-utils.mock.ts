@@ -1,68 +1,71 @@
-import { IPlatformUtils } from '../../app/core/tokens/platform-utils.token';
+import type { PlatformUtils } from '@beauty-saas/web-config';
 
 /**
- * Creates a mock implementation of IPlatformUtils for testing
+ * Creates a mock implementation of PlatformUtils for testing
  * @param overrides Optional overrides for the default mock values
  */
-export function createPlatformUtilsMock(
-  overrides: Partial<IPlatformUtils> = {}
-): IPlatformUtils {
-  const defaultGeolocation = {
-    getCurrentPosition: jest.fn((success) => {
-      success({
-        coords: {
-          latitude: 40.7128,
-          longitude: -74.0060,
-          accuracy: 1,
-          altitude: null,
-          altitudeAccuracy: null,
-          heading: null,
-          speed: null
-        },
-        timestamp: Date.now()
-      });
-    })
+export function createPlatformUtilsMock(overrides: Partial<PlatformUtils> = {}): PlatformUtils {
+  const position: GeolocationPosition = {
+    coords: {
+      latitude: 40.7128,
+      longitude: -74.006,
+      accuracy: 1,
+      altitude: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+      toJSON: (): unknown => ({}),
+    },
+    timestamp: Date.now(),
+    toJSON: (): unknown => ({}),
   };
 
-  const mock: IPlatformUtils = {
+  const defaultGeolocation: Geolocation = {
+    getCurrentPosition: jest.fn((success: PositionCallback): void => {
+      success(position);
+    }),
+    watchPosition: jest.fn((_success: PositionCallback): number => 1),
+    clearWatch: jest.fn((_watchId: number): void => undefined),
+  };
+
+  const mock: PlatformUtils = {
     isBrowser: true,
     isServer: false,
-    browserLocalStorage: null,
-    browserSessionStorage: null,
-    browserNavigator: {
-      geolocation: defaultGeolocation
-    } as any,
-    browserLocation: null,
-    document: typeof document !== 'undefined' ? document : null,
-    window: typeof window !== 'undefined' ? window : null,
-    runInBrowser: jest.fn(<T, F = undefined>(fn: () => T, fallback?: () => F) => {
-      return mock.isBrowser ? fn() : (fallback ? fallback() : undefined);
-    }),
-    ...overrides
+    documentRef: typeof document !== 'undefined' ? document : null,
+    windowRef:
+      typeof window !== 'undefined'
+        ? ({
+            ...window,
+            navigator: {
+              ...(window.navigator ?? {}),
+              geolocation: defaultGeolocation,
+            } as Navigator,
+          } as unknown as Window)
+        : ({ navigator: { geolocation: defaultGeolocation } } as unknown as Window),
+    ...overrides,
   };
 
   return mock;
 }
 
 /**
- * Creates a server-side mock implementation of IPlatformUtils
+ * Creates a server-side mock implementation of PlatformUtils
  */
-export function createServerPlatformUtilsMock(): IPlatformUtils {
+export function createServerPlatformUtilsMock(): PlatformUtils {
   return createPlatformUtilsMock({
     isBrowser: false,
     isServer: true,
-    browserNavigator: null,
-    document: null,
-    window: null
+    documentRef: null,
+    windowRef: null as unknown as Window,
   });
 }
 
 /**
- * Creates a browser mock implementation of IPlatformUtils
+ * Creates a browser mock implementation of PlatformUtils
  */
-export function createBrowserPlatformUtilsMock(): IPlatformUtils {
+export function createBrowserPlatformUtilsMock(): PlatformUtils {
   return createPlatformUtilsMock({
     isBrowser: true,
-    isServer: false
+    isServer: false,
   });
 }

@@ -15,6 +15,8 @@ import { TranslateModule } from '@ngx-translate/core';
 
 // Services
 import { AuthService } from './services/auth.service';
+import { CurrentUserService } from './services/current-user.service';
+import { CURRENT_USER } from '@beauty-saas/web-core/auth';
 
 // Guards
 import { authGuard, publicGuard } from './guards/auth.guard';
@@ -61,13 +63,15 @@ const routes: Routes = [
     MatProgressBarModule,
     MatProgressSpinnerModule,
     TranslateModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
   ],
   providers: [
-    AuthService, 
+    AuthService,
+    CurrentUserService,
+    { provide: CURRENT_USER, useExisting: CurrentUserService },
     { provide: 'authGuard', useValue: authGuard },
     // Re-export the services to make them available to the rest of the app
-    { provide: 'authService', useClass: AuthService }
-  ]
+    { provide: 'authService', useClass: AuthService },
+  ],
 })
 export class AuthModule {}

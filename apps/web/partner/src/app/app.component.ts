@@ -42,7 +42,7 @@ export interface User {
     MatTooltipModule,
     MatSidenavModule,
     MatListModule,
-    MatSnackBarModule
+    MatSnackBarModule,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
@@ -54,33 +54,33 @@ export class AppComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   isLoggedIn = false;
   pendingApprovalsCount = 0; // Will be populated from a service
-  
+
   /**
    * Check if the current user has admin role
    */
   get isAdmin(): boolean {
     return this.currentUser?.roles?.includes('admin') || false;
   }
-  
+
   private authSubscription?: Subscription;
 
   constructor(
     private router: Router,
     private authService: AuthService,
     private currentUserService: CurrentUserService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {}
-  
+
   ngOnInit(): void {
     this.initializeAuthSubscription();
   }
-  
+
   private initializeAuthSubscription(): void {
     this.authSubscription = this.currentUserService.currentUser$.subscribe({
       next: (user: User | null) => {
         this.currentUser = user;
         this.isLoggedIn = !!user;
-        
+
         if (this.isAdmin) {
           this.loadAdminData();
         }
@@ -90,26 +90,26 @@ export class AppComponent implements OnInit, OnDestroy {
         this.showError('Failed to load user data');
         this.isLoggedIn = false;
         this.currentUser = null;
-      }
+      },
     });
   }
-  
+
   private loadAdminData(): void {
     // Load admin-specific data here
     this.loadPendingApprovals();
   }
-  
+
   private loadPendingApprovals(): void {
     // TODO: Implement actual service call to get pending approvals count
     // For now, we'll simulate it
     this.pendingApprovalsCount = 3; // Simulated count
   }
-  
+
   private showError(message: string): void {
     this.error = message;
     this.snackBar.open(message, 'Dismiss', {
       duration: 5000,
-      panelClass: ['error-snackbar']
+      panelClass: ['error-snackbar'],
     });
   }
 
@@ -132,7 +132,7 @@ export class AppComponent implements OnInit, OnDestroy {
       console.error('Logout error:', error);
     }
   }
-  
+
   /**
    * Navigate to the admin dashboard
    */
@@ -141,7 +141,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.router.navigate(['/admin/dashboard']);
     }
   }
-  
+
   /**
    * Navigate to the user's profile
    */

@@ -6,7 +6,7 @@ export class ReviewQueryDto {
   @ApiPropertyOptional({
     description: 'Page number for pagination',
     default: 1,
-    minimum: 1
+    minimum: 1,
   })
   @IsInt()
   @Min(1)
@@ -18,7 +18,7 @@ export class ReviewQueryDto {
     description: 'Number of items per page',
     default: 10,
     minimum: 1,
-    maximum: 100
+    maximum: 100,
   })
   @IsInt()
   @Min(1)
@@ -29,7 +29,7 @@ export class ReviewQueryDto {
 
   @ApiPropertyOptional({
     description: 'Filter by salon ID',
-    format: 'uuid'
+    format: 'uuid',
   })
   @IsUUID()
   @IsOptional()
@@ -37,7 +37,7 @@ export class ReviewQueryDto {
 
   @ApiPropertyOptional({
     description: 'Filter by user ID',
-    format: 'uuid'
+    format: 'uuid',
   })
   @IsUUID()
   @IsOptional()
@@ -46,7 +46,7 @@ export class ReviewQueryDto {
   @ApiPropertyOptional({
     description: 'Filter by minimum rating (1-5)',
     minimum: 1,
-    maximum: 5
+    maximum: 5,
   })
   @IsInt()
   @Min(1)
@@ -58,7 +58,7 @@ export class ReviewQueryDto {
   @ApiPropertyOptional({
     description: 'Filter by maximum rating (1-5)',
     minimum: 1,
-    maximum: 5
+    maximum: 5,
   })
   @IsInt()
   @Min(1)
@@ -70,7 +70,7 @@ export class ReviewQueryDto {
   @ApiPropertyOptional({
     description: 'Field to sort by',
     enum: ['rating', 'createdAt'],
-    default: 'createdAt'
+    default: 'createdAt',
   })
   @IsOptional()
   @IsIn(['rating', 'createdAt'])
@@ -79,7 +79,7 @@ export class ReviewQueryDto {
   @ApiPropertyOptional({
     description: 'Sort order',
     enum: ['asc', 'desc'],
-    default: 'desc'
+    default: 'desc',
   })
   @IsOptional()
   @IsIn(['asc', 'desc'])
@@ -87,7 +87,7 @@ export class ReviewQueryDto {
 
   @ApiPropertyOptional({
     description: 'Include related entities (comma-separated: user,salon)',
-    example: 'user,salon'
+    example: 'user,salon',
   })
   @IsOptional()
   include?: string;

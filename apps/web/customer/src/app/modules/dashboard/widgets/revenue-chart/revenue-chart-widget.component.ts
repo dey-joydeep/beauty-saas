@@ -11,7 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DashboardService } from '../../../dashboard/dashboard.service';
 import { RevenueData } from '../../../dashboard/models/dashboard.model';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { ErrorService } from '@beauty-saas/web-core/http';
 
 @Component({
   selector: 'app-revenue-chart-widget',
@@ -24,40 +24,42 @@ import { ErrorService } from '@frontend-shared/core/services/error/error.service
     MatIconModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-    BaseChartDirective
+    BaseChartDirective,
   ],
   templateUrl: './revenue-chart-widget.component.html',
   styleUrls: ['./revenue-chart-widget.component.scss'],
   host: { class: 'revenue-chart' },
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RevenueChartWidgetComponent implements OnInit, OnDestroy {
   private dataSubscription?: Subscription;
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
-  
+
   // Chart configuration
   public chartType = 'line' as const;
   public revenueData: RevenueData[] = [];
   public isLoading = true;
   public error: string | null = null;
-  
+
   // Chart data with proper typing
   public chartData: ChartData<'line', number[], string> = {
     labels: [],
-    datasets: [{
-      data: [],
-      label: 'Revenue',
-      borderColor: '#3f51b5',
-      backgroundColor: 'rgba(63, 81, 181, 0.1)',
-      pointBackgroundColor: '#3f51b5',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: '#3f51b5',
-      fill: true,
-      tension: 0.4
-    }]
+    datasets: [
+      {
+        data: [],
+        label: 'Revenue',
+        borderColor: '#3f51b5',
+        backgroundColor: 'rgba(63, 81, 181, 0.1)',
+        pointBackgroundColor: '#3f51b5',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: '#3f51b5',
+        fill: true,
+        tension: 0.4,
+      },
+    ],
   };
-  
+
   // Chart options
   public chartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -76,44 +78,44 @@ export class RevenueChartWidgetComponent implements OnInit, OnDestroy {
             const label = context.dataset.label || '';
             const value = context.parsed.y;
             return `${label}: $${value?.toLocaleString()}`;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     scales: {
       x: {
         display: true,
         title: {
           display: true,
-          text: 'Date'
+          text: 'Date',
         },
         grid: {
-          display: false
-        }
+          display: false,
+        },
       },
       y: {
         display: true,
         title: {
           display: true,
-          text: 'Revenue ($)'
+          text: 'Revenue ($)',
         },
         beginAtZero: true,
         ticks: {
-          callback: (value) => `$${value}`
+          callback: (value) => `$${value}`,
         },
         grid: {
           display: true,
           drawOnChartArea: true,
-          drawTicks: true
-        }
-      }
-    }
+          drawTicks: true,
+        },
+      },
+    },
   };
 
   constructor(
     private dashboardService: DashboardService,
     protected errorService: ErrorService,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   public ngOnInit(): void {
@@ -136,10 +138,11 @@ export class RevenueChartWidgetComponent implements OnInit, OnDestroy {
   private loadData(): void {
     this.isLoading = true;
     this.error = null;
-    
+
     try {
       // getRevenueData() returns a Promise<RevenueData[]>
-      this.dashboardService.getRevenueData()
+      this.dashboardService
+        .getRevenueData()
         .then((revenueData: RevenueData[]) => {
           this.updateChartData(revenueData);
           this.isLoading = false;
@@ -164,13 +167,15 @@ export class RevenueChartWidgetComponent implements OnInit, OnDestroy {
     try {
       // Update the chart data with the new values
       this.chartData = {
-        labels: revenueData.map(item => item.date),
-        datasets: [{
-          ...this.chartData.datasets[0],
-          data: revenueData.map(item => item.amount)
-        }]
+        labels: revenueData.map((item) => item.date),
+        datasets: [
+          {
+            ...this.chartData.datasets[0],
+            data: revenueData.map((item) => item.amount),
+          },
+        ],
       };
-      
+
       this.error = null;
       this.chart?.update();
     } catch (error) {
@@ -179,7 +184,7 @@ export class RevenueChartWidgetComponent implements OnInit, OnDestroy {
       this.changeDetectorRef.detectChanges();
     }
   }
-  
+
   // Refresh chart data
   public refreshChart(): void {
     this.error = null;

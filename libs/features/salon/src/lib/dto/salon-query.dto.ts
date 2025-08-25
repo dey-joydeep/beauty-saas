@@ -1,16 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { 
-  IsNumber, 
-  IsOptional, 
-  IsString, 
-  Min, 
-  Max, 
-  IsLatitude, 
-  IsLongitude,
-  IsPositive,
-  ValidateIf,
-  IsInt
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString, Min, Max, IsLatitude, IsLongitude, IsPositive, ValidateIf, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -24,7 +13,7 @@ export class SalonQueryDto {
     type: 'integer',
     minimum: 1,
     default: 1,
-    example: 1
+    example: 1,
   })
   @IsInt({ message: 'Page must be an integer' })
   @Min(1, { message: 'Page must be at least 1' })
@@ -38,7 +27,7 @@ export class SalonQueryDto {
     minimum: 1,
     maximum: 100,
     default: 10,
-    example: 10
+    example: 10,
   })
   @IsInt({ message: 'Limit must be an integer' })
   @Min(1, { message: 'Limit must be at least 1' })
@@ -51,7 +40,7 @@ export class SalonQueryDto {
     description: 'Search term for salon name or address',
     maxLength: 100,
     required: false,
-    example: 'beauty'
+    example: 'beauty',
   })
   @IsString({ message: 'Search term must be a string' })
   @MaxLength(100, { message: 'Search term cannot be longer than 100 characters' })
@@ -62,7 +51,7 @@ export class SalonQueryDto {
     description: 'Filter by city',
     maxLength: 100,
     required: false,
-    example: 'New York'
+    example: 'New York',
   })
   @IsString({ message: 'City must be a string' })
   @MaxLength(100, { message: 'City cannot be longer than 100 characters' })
@@ -73,7 +62,7 @@ export class SalonQueryDto {
     description: 'Filter by zip code',
     maxLength: 20,
     required: false,
-    example: '10001'
+    example: '10001',
   })
   @IsString({ message: 'Zip code must be a string' })
   @MaxLength(20, { message: 'Zip code cannot be longer than 20 characters' })
@@ -87,7 +76,7 @@ export class SalonQueryDto {
     minimum: -90,
     maximum: 90,
     required: false,
-    example: 40.7128
+    example: 40.7128,
   })
   @IsNumber({}, { message: 'Latitude must be a number' })
   @IsLatitude({ message: 'Invalid latitude value' })
@@ -104,7 +93,7 @@ export class SalonQueryDto {
     minimum: -180,
     maximum: 180,
     required: false,
-    example: -74.0060
+    example: -74.006,
   })
   @IsNumber({}, { message: 'Longitude must be a number' })
   @IsLongitude({ message: 'Invalid longitude value' })
@@ -121,7 +110,7 @@ export class SalonQueryDto {
     minimum: 0.1,
     maximum: 1000,
     required: false,
-    example: 5
+    example: 5,
   })
   @IsNumber({}, { message: 'Max distance must be a number' })
   @IsPositive({ message: 'Max distance must be a positive number' })
@@ -129,8 +118,8 @@ export class SalonQueryDto {
   @Max(1000, { message: 'Max distance cannot exceed 1000 km' })
   @Type(() => Number)
   @IsOptional()
-  @ValidateIf(o => (o.latitude !== undefined && o.longitude !== undefined) || o.maxDistanceKm !== undefined, {
-    message: 'Latitude and longitude are required when using maxDistanceKm'
+  @ValidateIf((o) => (o.latitude !== undefined && o.longitude !== undefined) || o.maxDistanceKm !== undefined, {
+    message: 'Latitude and longitude are required when using maxDistanceKm',
   })
   maxDistanceKm?: number;
 }

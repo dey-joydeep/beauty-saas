@@ -9,7 +9,7 @@ export const SERVICE_CATEGORY_SELECT = {
   description: true,
   isActive: true,
   createdAt: true,
-  updatedAt: true
+  updatedAt: true,
 } as const satisfies Prisma.ServiceCategorySelect;
 
 /**
@@ -36,14 +36,14 @@ export const SALON_SERVICE_SELECT = {
           postalCode: true,
           city: true,
           state: true,
-          country: true
-        }
-      }
-    }
+          country: true,
+        },
+      },
+    },
   },
   serviceCategory: {
-    select: SERVICE_CATEGORY_SELECT
+    select: SERVICE_CATEGORY_SELECT,
   },
   createdAt: true,
-  updatedAt: true
+  updatedAt: true,
 } as const satisfies Prisma.SalonServiceSelect;

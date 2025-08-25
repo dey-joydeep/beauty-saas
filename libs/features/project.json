@@ -1,52 +1,41 @@
 {
-    "name": "@beauty-saas/features",
-    "projectType": "library",
-    "sourceRoot": "libs/features/src",
-    "prefix": "beauty-saas",
-    "tags": [
-        "scope:features",
-        "type:features"
-    ],
-    "targets": {
-        "build": {
-            "executor": "@nx/js:tsc",
-            "outputs": [
-                "{options.outputPath}"
-            ],
-            "options": {
-                "outputPath": "dist/libs/features",
-                "tsConfig": "libs/features/tsconfig.lib.json",
-                "packageJson": "libs/features/package.json",
-                "main": "libs/features/src/index.ts",
-                "assets": []
-            }
-        },
-        "lint": {
-            "executor": "@nx/linter:eslint",
-            "outputs": [
-                "{options.outputFile}"
-            ],
-            "options": {
-                "lintFilePatterns": [
-                    "libs/features/**/*.ts"
-                ]
-            }
-        },
-        "type-check": {
-            "executor": "nx:run-commands",
-            "options": {
-                "command": "tsc -p libs/features/tsconfig.lib.json --noEmit"
-            }
-        },
-        "test": {
-            "executor": "@nx/jest:jest",
-            "outputs": [
-                "{workspaceRoot}/coverage/libs/features"
-            ],
-            "options": {
-                "jestConfig": "jest.preset.ts",
-                "passWithNoTests": true
-            }
-        }
+  "name": "features",
+  "projectType": "library",
+  "sourceRoot": "libs/features/src",
+  "prefix": "beauty-saas",
+  "tags": ["type:lib", "platform:server", "scope:server-feature"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/features",
+        "tsConfig": "libs/features/tsconfig.lib.json",
+        "packageJson": "libs/features/package.json",
+        "main": "libs/features/src/index.ts",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/features/**/*.ts"]
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/features/tsconfig.lib.json --noEmit"
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/features"],
+      "options": {
+        "jestConfig": "jest.preset.ts",
+        "passWithNoTests": true
+      }
     }
+  }
 }

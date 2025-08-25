@@ -4,23 +4,12 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { environment } from '@env/environment';
-import { 
-  DashboardStats, 
-  ProductSale, 
-  ProductSalesFilter, 
-  ProductSalesResponse, 
-  ProductSalesSummary 
-} from '../models/dashboard.model';
-import { 
-  AppointmentsFilter, 
-  AppointmentsOverview, 
-  AppointmentsPageableResponse, 
-  Appointment
-} from '../models/appointment.model';
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { DashboardStats, ProductSale, ProductSalesFilter, ProductSalesResponse, ProductSalesSummary } from '../models/dashboard.model';
+import { AppointmentsFilter, AppointmentsOverview, AppointmentsPageableResponse, Appointment } from '../models/appointment.model';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DashboardService {
   private apiUrl = `${environment.apiUrl}/dashboard`;
@@ -40,7 +29,7 @@ export class DashboardService {
    */
   getAppointmentsOverview(filters?: AppointmentsFilter): Observable<AppointmentsOverview> {
     let params = new HttpParams();
-    
+
     // Add filter parameters if provided
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -49,7 +38,7 @@ export class DashboardService {
         }
       });
     }
-    
+
     return this.http.get<AppointmentsOverview>(`${environment.apiUrl}/appointments/overview`, { params });
   }
 
@@ -58,10 +47,8 @@ export class DashboardService {
    * @param filters Filters for appointments
    */
   getAppointments(filters?: AppointmentsFilter): Observable<AppointmentsPageableResponse> {
-    let params = new HttpParams()
-      .set('page', filters?.page?.toString() || '1')
-      .set('pageSize', filters?.pageSize?.toString() || '10');
-    
+    let params = new HttpParams().set('page', filters?.page?.toString() || '1').set('pageSize', filters?.pageSize?.toString() || '10');
+
     // Add filter parameters if provided
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -70,7 +57,7 @@ export class DashboardService {
         }
       });
     }
-    
+
     return this.http.get<AppointmentsPageableResponse>(`${environment.apiUrl}/appointments`, { params });
   }
 
@@ -88,10 +75,7 @@ export class DashboardService {
    * @param status New status
    */
   updateAppointmentStatus(id: string, status: AppointmentStatus): Observable<Appointment> {
-    return this.http.patch<Appointment>(
-      `${environment.apiUrl}/appointments/${id}/status`,
-      { status }
-    );
+    return this.http.patch<Appointment>(`${environment.apiUrl}/appointments/${id}/status`, { status });
   }
 
   /**
@@ -135,16 +119,15 @@ export class DashboardService {
       params = params.set('customerId', filters.customerId);
     }
 
-    return this.http.get<ProductSalesResponse>(`${this.apiUrl}/product-sales`, { params })
-      .pipe(
-        map(response => ({
-          ...response,
-          data: response.data.map(sale => ({
-            ...sale,
-            saleDate: new Date(sale.saleDate as string)
-          }))
-        }))
-      );
+    return this.http.get<ProductSalesResponse>(`${this.apiUrl}/product-sales`, { params }).pipe(
+      map((response) => ({
+        ...response,
+        data: response.data.map((sale) => ({
+          ...sale,
+          saleDate: new Date(sale.saleDate as string),
+        })),
+      })),
+    );
   }
 
   /**
@@ -166,11 +149,13 @@ export class DashboardService {
   /**
    * Get top selling products
    */
-  getTopSellingProducts(limit: number = 5): Observable<Array<{ productId: string; productName: string; quantity: number; revenue: number }>> {
+  getTopSellingProducts(
+    limit: number = 5,
+  ): Observable<Array<{ productId: string; productName: string; quantity: number; revenue: number }>> {
     const params = new HttpParams().set('limit', limit.toString());
     return this.http.get<Array<{ productId: string; productName: string; quantity: number; revenue: number }>>(
       `${this.apiUrl}/products/top-selling`,
-      { params }
+      { params },
     );
   }
 
@@ -178,18 +163,8 @@ export class DashboardService {
    * Get upcoming subscription renewals for a tenant
    * @param tenantId ID of the tenant
    */
-  getRenewals(tenantId: string): Observable<Array<{
-    id?: string;
-    salonName: string;
-    customerName?: string;
-    serviceName?: string;
-    renewalDate: string;
-    amount?: number;
-    status?: 'pending' | 'completed' | 'overdue';
-  }>> {
-    // For now, return an empty array as a placeholder
-    // TODO: Implement actual API call when backend is ready
-    return this.http.get<Array<{
+  getRenewals(tenantId: string): Observable<
+    Array<{
       id?: string;
       salonName: string;
       customerName?: string;
@@ -197,8 +172,22 @@ export class DashboardService {
       renewalDate: string;
       amount?: number;
       status?: 'pending' | 'completed' | 'overdue';
-    }>>(`${this.apiUrl}/renewals`, {
-      params: { tenantId }
+    }>
+  > {
+    // For now, return an empty array as a placeholder
+    // TODO: Implement actual API call when backend is ready
+    return this.http.get<
+      Array<{
+        id?: string;
+        salonName: string;
+        customerName?: string;
+        serviceName?: string;
+        renewalDate: string;
+        amount?: number;
+        status?: 'pending' | 'completed' | 'overdue';
+      }>
+    >(`${this.apiUrl}/renewals`, {
+      params: { tenantId },
     });
   }
 }

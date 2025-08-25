@@ -8,7 +8,7 @@ export const BASIC_USER_SELECT = {
   id: true,
   name: true,
   email: true,
-  phone: true
+  phone: true,
 } as const satisfies Prisma.UserSelect;
 
 /**
@@ -21,17 +21,17 @@ export const STAFF_WITH_SALON_SELECT = {
   isActive: true,
   user: {
     select: {
-      ...BASIC_USER_SELECT
-    }
+      ...BASIC_USER_SELECT,
+    },
   },
   salon: {
     select: {
       id: true,
       name: true,
       email: true,
-      phone: true
-    }
+      phone: true,
+    },
   },
   createdAt: true,
-  updatedAt: true
+  updatedAt: true,
 } as const;

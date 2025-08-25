@@ -89,9 +89,9 @@ export class StaffManagementComponent {
       return;
     }
     const staff = {
-      name: name as string,
-      email: email as string,
-      contact: contact as string,
+      name: name,
+      email: email,
+      contact: contact,
       nickname: nickname as string,
       profilePicture: profilePicture as File | null,
     };

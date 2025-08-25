@@ -28,12 +28,8 @@ import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { formatDate } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import {
-  Appointment,
-  AppointmentsFilter,
-  AppointmentsOverview
-} from '../../models/appointment.model';
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { Appointment, AppointmentsFilter, AppointmentsOverview } from '../../models/appointment.model';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 import { DashboardService } from '../../services/dashboard.service';
 
 interface StatusBadgeConfig {
@@ -70,45 +66,36 @@ interface StatusBadgeConfig {
     MatDividerModule,
     MatListModule,
     MatDialogModule,
-    TranslateModule
+    TranslateModule,
   ],
   templateUrl: './appointments-overview-widget.component.html',
-  styleUrls: ['./appointments-overview-widget.component.scss']
+  styleUrls: ['./appointments-overview-widget.component.scss'],
 })
 export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
-  
+
   // Data
   overview: AppointmentsOverview | null = null;
   dataSource = new MatTableDataSource<Appointment>([]);
-  displayedColumns: string[] = [
-    'title', 
-    'customerName', 
-    'staffName', 
-    'serviceName', 
-    'startTime', 
-    'duration',
-    'status',
-    'actions'
-  ];
-  
+  displayedColumns: string[] = ['title', 'customerName', 'staffName', 'serviceName', 'startTime', 'duration', 'status', 'actions'];
+
   // Loading & error states
   isLoading = true;
   error: string | null = null;
-  
+
   // Pagination
   pageIndex = 0;
   pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50];
   totalItems = 0;
-  
+
   // Filters
   filters: AppointmentsFilter = {};
   dateRange = new FormGroup({
     start: new FormControl<Date | null>(null),
-    end: new FormControl<Date | null>(null)
+    end: new FormControl<Date | null>(null),
   });
-  
+
   // Status filter
   statusFilter = new FormControl<AppointmentStatus | 'ALL'>('ALL');
   statusOptions = [
@@ -119,41 +106,37 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
     { value: AppointmentStatus.CANCELLED, label: 'Cancelled' },
     { value: AppointmentStatus.NOSHOW, label: 'No Show' },
   ] as const;
-  
+
   // Tabs
   selectedTabIndex = 0;
-  
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private dashboardService: DashboardService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private translate: TranslateService
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
     this.loadData();
-    
+
     // Subscribe to status filter changes
-    this.statusFilter.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(status => {
-        this.filters.status = status === 'ALL' ? undefined : status as AppointmentStatus;
-        this.loadData();
-      });
-    
+    this.statusFilter.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((status) => {
+      this.filters.status = status === 'ALL' ? undefined : (status as AppointmentStatus);
+      this.loadData();
+    });
+
     // Subscribe to date range changes with debounce
-    this.dateRange.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(range => {
-        this.filters = {
-          ...this.filters,
-          startDate: range.start ? formatDate(range.start, 'yyyy-MM-dd', 'en-US') : undefined,
-          endDate: range.end ? formatDate(range.end, 'yyyy-MM-dd', 'en-US') : undefined
-        };
-        this.loadData();
-      });
+    this.dateRange.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((range) => {
+      this.filters = {
+        ...this.filters,
+        startDate: range.start ? formatDate(range.start, 'yyyy-MM-dd', 'en-US') : undefined,
+        endDate: range.end ? formatDate(range.end, 'yyyy-MM-dd', 'en-US') : undefined,
+      };
+      this.loadData();
+    });
   }
 
   ngAfterViewInit(): void {
@@ -171,19 +154,20 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
   loadData(): void {
     this.isLoading = true;
     this.error = null;
-    
+
     // Load overview data
-    this.dashboardService.getAppointmentsOverview(this.filters)
+    this.dashboardService
+      .getAppointmentsOverview(this.filters)
       .pipe(
         takeUntil(this.destroy$),
-        catchError(error => {
+        catchError((error) => {
           console.error('Error loading appointments overview:', error);
           this.error = this.translate.instant('DASHBOARD.APPOINTMENTS.ERROR_LOADING');
           return of(null);
         }),
-        finalize(() => this.isLoading = false)
+        finalize(() => (this.isLoading = false)),
       )
-      .subscribe(overview => {
+      .subscribe((overview) => {
         if (overview) {
           this.overview = overview;
           this.dataSource.data = overview.upcomingAppointments;
@@ -227,7 +211,7 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
     if (status === 'ALL') {
       return '#6c757d'; // Gray
     }
-    
+
     // Handle the enum values
     const colors: Record<AppointmentStatus, string> = {
       PENDING: '#ffc107', // Amber
@@ -235,9 +219,9 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
       COMPLETED: '#28a745', // Green
       CANCELLED: '#dc3545', // Red
       NOSHOW: '#6c757d', // Gray
-      RESCHEDULED: '#6c757d' // Gray
+      RESCHEDULED: '#6c757d', // Gray
     };
-    
+
     return colors[status] || '#6c757d'; // Default gray for unknown statuses
   }
 
@@ -247,17 +231,17 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
   getLast7Days(): { date: Date; label: string }[] {
     const days: { date: Date; label: string }[] = [];
     const today = new Date();
-    
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
-      
+
       days.push({
         date,
-        label: date.toLocaleDateString(undefined, { weekday: 'short' })
+        label: date.toLocaleDateString(undefined, { weekday: 'short' }),
       });
     }
-    
+
     return days;
   }
 
@@ -268,13 +252,13 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
    */
   getStatusIcon(status: AppointmentStatus | 'ALL'): string {
     const icons: Record<AppointmentStatus | 'ALL', string> = {
-      'ALL': 'schedule',
+      ALL: 'schedule',
       [AppointmentStatus.PENDING]: 'schedule',
       [AppointmentStatus.CONFIRMED]: 'check_circle',
       [AppointmentStatus.COMPLETED]: 'done_all',
       [AppointmentStatus.CANCELLED]: 'cancel',
       [AppointmentStatus.NOSHOW]: 'no_accounts',
-      [AppointmentStatus.RESCHEDULED]: 'reschedule'
+      [AppointmentStatus.RESCHEDULED]: 'reschedule',
     };
     return icons[status as AppointmentStatus] || 'help';
   }
@@ -285,45 +269,47 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
   getStatusBadge(status: AppointmentStatus): StatusBadgeConfig {
     // Convert string 'PENDING' to AppointmentStatus.PENDING if needed
     const statusValue = status === 'PENDING' ? AppointmentStatus.PENDING : status;
-    
+
     const badges: Record<AppointmentStatus, StatusBadgeConfig> = {
       [AppointmentStatus.PENDING]: {
         text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.PENDING'),
         class: 'status-pending',
-        icon: 'schedule'
+        icon: 'schedule',
       },
       [AppointmentStatus.CONFIRMED]: {
         text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.CONFIRMED'),
         class: 'status-confirmed',
-        icon: 'check_circle'
+        icon: 'check_circle',
       },
       [AppointmentStatus.COMPLETED]: {
         text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.COMPLETED'),
         class: 'status-completed',
-        icon: 'done_all'
+        icon: 'done_all',
       },
       [AppointmentStatus.CANCELLED]: {
         text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.CANCELLED'),
         class: 'status-cancelled',
-        icon: 'cancel'
+        icon: 'cancel',
       },
       [AppointmentStatus.NOSHOW]: {
         text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.NOSHOW'),
         class: 'status-noshow',
-        icon: 'no_accounts'
+        icon: 'no_accounts',
       },
       [AppointmentStatus.RESCHEDULED]: {
         text: this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS.RESCHEDULED'),
         class: 'status-rescheduled',
-        icon: 'reschedule'
-      }
+        icon: 'reschedule',
+      },
     };
 
-    return badges[statusValue as AppointmentStatus] || {
-      text: statusValue,
-      class: 'status-unknown',
-      icon: 'help'
-    };
+    return (
+      badges[statusValue as AppointmentStatus] || {
+        text: statusValue,
+        class: 'status-unknown',
+        icon: 'help',
+      }
+    );
   }
 
   /**
@@ -350,26 +336,24 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
    */
   changeStatus(appointment: Appointment, status: AppointmentStatus): void {
     if (appointment.status === status) return;
-    
-    this.dashboardService.updateAppointmentStatus(appointment.id, status)
+
+    this.dashboardService
+      .updateAppointmentStatus(appointment.id, status)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open(
-            this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS_UPDATED'),
-            this.translate.instant('COMMON.CLOSE'),
-            { duration: 3000 }
-          );
+          this.snackBar.open(this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS_UPDATED'), this.translate.instant('COMMON.CLOSE'), {
+            duration: 3000,
+          });
           this.loadData();
         },
         error: (error) => {
           console.error('Error updating appointment status:', error);
-          this.snackBar.open(
-            this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS_UPDATE_ERROR'),
-            this.translate.instant('COMMON.CLOSE'),
-            { duration: 5000, panelClass: ['error-snackbar'] }
-          );
-        }
+          this.snackBar.open(this.translate.instant('DASHBOARD.APPOINTMENTS.STATUS_UPDATE_ERROR'), this.translate.instant('COMMON.CLOSE'), {
+            duration: 5000,
+            panelClass: ['error-snackbar'],
+          });
+        },
       });
   }
 
@@ -384,21 +368,17 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
     }
   }
 
-
-
   /**
    * Check if a date is today
    * @param dateInput - Date string or Date object
    */
   isToday(dateInput: string | Date): boolean {
     if (!dateInput) return false;
-    
+
     const date = new Date(dateInput);
     const today = new Date();
-    
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
+
+    return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
   }
 
   /**
@@ -407,14 +387,14 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
    */
   isPast(dateInput: string | Date): boolean {
     if (!dateInput) return false;
-    
+
     const date = new Date(dateInput);
     const now = new Date();
-    
+
     // Set both dates to midnight for accurate day comparison
     const dateAtMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const nowAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     return dateAtMidnight < nowAtMidnight && !this.isToday(dateInput);
   }
 
@@ -425,11 +405,11 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
     if (this.isPast(appointment.endTime) && appointment.status !== 'COMPLETED' && appointment.status !== 'CANCELLED') {
       return 'warning'; // Missed appointment
     }
-    
+
     if (this.isToday(appointment.startTime)) {
       return 'today'; // Today's appointment
     }
-    
+
     // Default icon based on status
     const statusIcons: Record<AppointmentStatus, string> = {
       PENDING: 'schedule',
@@ -437,9 +417,9 @@ export class AppointmentsOverviewWidgetComponent implements OnInit, OnDestroy, A
       COMPLETED: 'done_all',
       CANCELLED: 'cancel',
       NOSHOW: 'no_accounts',
-      RESCHEDULED: 'reschedule'
+      RESCHEDULED: 'reschedule',
     };
-    
+
     return statusIcons[appointment.status] || 'event';
   }
 }

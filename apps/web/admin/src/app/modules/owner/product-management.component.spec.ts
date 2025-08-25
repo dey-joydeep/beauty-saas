@@ -13,14 +13,12 @@ describe('ProductManagementComponent', () => {
     productService = {
       saveProduct: jest.fn(),
       getProducts: jest.fn(),
-      updateProduct: jest.fn()
+      updateProduct: jest.fn(),
     } as unknown as jest.Mocked<ProductService>;
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],
       declarations: [ProductManagementComponent],
-      providers: [
-        { provide: ProductService, useValue: productService }
-      ]
+      providers: [{ provide: ProductService, useValue: productService }],
     }).compileComponents();
     fixture = TestBed.createComponent(ProductManagementComponent);
     component = fixture.componentInstance;
@@ -28,9 +26,11 @@ describe('ProductManagementComponent', () => {
   });
 
   it('should display error on failed product save', fakeAsync(() => {
-    productService.saveProduct.mockReturnValue(throwError(() => ({ 
-      error: { userMessage: 'Failed to save product.' } 
-    })));
+    productService.saveProduct.mockReturnValue(
+      throwError(() => ({
+        error: { userMessage: 'Failed to save product.' },
+      })),
+    );
     component.productForm.setValue({ name: 'Test', description: 'Desc', price: 10, stock: 5 });
     component.onSubmit();
     tick();
@@ -44,43 +44,45 @@ describe('ProductManagementComponent', () => {
   });
 
   it('should call saveProduct on valid submit', fakeAsync(() => {
-    const mockProduct = { 
-      id: '1', 
-      name: 'Shampoo', 
+    const mockProduct = {
+      id: '1',
+      name: 'Shampoo',
       description: 'Test shampoo',
-      price: 10, 
+      price: 10,
       stock: 5,
-      isActive: true
+      isActive: true,
     };
-    
+
     // productService.getProducts.mockReturnValue(of({
     //   success: true,
     //   data: [mockProduct],
     //   message: 'Products retrieved successfully'
     // }));
-    
-    productService.saveProduct.mockReturnValue(of({ 
-      success: true,
-      data: { ...mockProduct, id: '1' },
-      message: 'Product saved successfully'
-    }));
-    
-    component.productForm.setValue({ 
-      name: 'Shampoo', 
-      description: 'Test shampoo', 
-      price: 10, 
-      stock: 5 
+
+    productService.saveProduct.mockReturnValue(
+      of({
+        success: true,
+        data: { ...mockProduct, id: '1' },
+        message: 'Product saved successfully',
+      }),
+    );
+
+    component.productForm.setValue({
+      name: 'Shampoo',
+      description: 'Test shampoo',
+      price: 10,
+      stock: 5,
     });
-    
+
     component.onSubmit();
     tick();
-    
+
     expect(productService.saveProduct).toHaveBeenCalledWith({
       name: 'Shampoo',
       description: 'Test shampoo',
       price: 10,
       stock: 5,
-      isActive: true
+      isActive: true,
     });
   }));
 });

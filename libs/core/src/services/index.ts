@@ -3,6 +3,4 @@
 
 // Core services
 export * from './error/error-handler.service';
-export * from './error/error.service';
-export * from './loading.service';
 export * from './notification.service';

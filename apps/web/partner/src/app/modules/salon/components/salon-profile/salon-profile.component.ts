@@ -6,8 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 // Core services
-import { CurrentUserService } from '../../../../core/auth/services/current-user.service';
-import { ErrorService } from '@frontend-shared/core/services/error/error.service';
+import { CurrentUserService } from '@beauty-saas/web-core/auth';
 
 // Models from salon module
 import { Appointment } from '../../models/appointment.model';
@@ -16,7 +15,7 @@ import { Salon } from '../../models/salon.model';
 import { Staff } from '../../models/staff.model';
 
 // Models from other modules
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared';
 import { Review } from '../../../reviews/models/review.model';
 
 // Pipes
@@ -29,15 +28,9 @@ import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
 @Component({
   selector: 'app-salon-profile',
   standalone: true,
-  imports: [
-    CommonModule,
-    HttpClientModule,
-    TranslateModule, 
-    SafeUrlPipe, 
-    FormsModule
-  ],
+  imports: [CommonModule, HttpClientModule, TranslateModule, SafeUrlPipe, FormsModule],
   templateUrl: './salon-profile.component.html',
-  styleUrls: ['./salon-profile.component.scss']
+  styleUrls: ['./salon-profile.component.scss'],
 })
 export class SalonProfileComponent implements OnInit {
   salon: Salon | null = null;
@@ -60,7 +53,6 @@ export class SalonProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private http: HttpClient,
     @Inject(CurrentUserService) public currentUserService: CurrentUserService,
-    @Inject(ErrorService) private errorService: ErrorService
   ) {
     // Get the current user ID
     const user = this.currentUserService.currentUser;
@@ -122,21 +114,23 @@ export class SalonProfileComponent implements OnInit {
     this.submitting = true;
     this.reviewError = null;
 
-    this.http.post<Review>(`/api/salon/${this.salon.id}/reviews`, {
-      rating: parseInt(rating, 10),
-      comment,
-      userId: this.userId
-    }).subscribe({
-      next: (review) => {
-        this.reviews = [review, ...this.reviews];
-        this.eligibleToReview = false;
-        this.submitting = false;
-      },
-      error: (err) => {
-        this.reviewError = err.error?.message || 'Failed to submit review';
-        this.submitting = false;
-      }
-    });
+    this.http
+      .post<Review>(`/api/salon/${this.salon.id}/reviews`, {
+        rating: parseInt(rating, 10),
+        comment,
+        userId: this.userId,
+      })
+      .subscribe({
+        next: (review) => {
+          this.reviews = [review, ...this.reviews];
+          this.eligibleToReview = false;
+          this.submitting = false;
+        },
+        error: (err) => {
+          this.reviewError = err.error?.message || 'Failed to submit review';
+          this.submitting = false;
+        },
+      });
   }
 
   submitAppointment() {
@@ -145,12 +139,12 @@ export class SalonProfileComponent implements OnInit {
       alert('Please fill in all appointment details.');
       return;
     }
-    
+
     // Combine date and time into a single Date object for startTime
     const startTime = new Date(`${this.selectedDate}T${this.selectedTime}`);
     // Assuming a default duration of 1 hour for the appointment
     const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
-    
+
     const appointmentData: Partial<Appointment> = {
       salonId,
       customerId: this.userId,

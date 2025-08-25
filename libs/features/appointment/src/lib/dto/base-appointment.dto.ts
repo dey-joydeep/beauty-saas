@@ -105,7 +105,7 @@ export class BaseAppointmentDto {
 
   @ApiProperty({
     description: 'Title of the appointment',
-    example: 'Haircut and Styling'
+    example: 'Haircut and Styling',
   })
   @IsString()
   title!: string;
@@ -113,7 +113,7 @@ export class BaseAppointmentDto {
   @ApiProperty({
     description: 'Description of the appointment',
     example: 'Haircut with shampoo and blow dry',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -123,7 +123,7 @@ export class BaseAppointmentDto {
     description: 'ID of the service being provided',
     required: false,
     format: 'uuid',
-    example: '123e4567-e89b-12d3-a456-426614174004'
+    example: '123e4567-e89b-12d3-a456-426614174004',
   })
   @IsOptional()
   @IsUUID()
@@ -133,7 +133,7 @@ export class BaseAppointmentDto {
     description: 'Total price of the appointment',
     minimum: 0,
     required: false,
-    example: 50.00
+    example: 50.0,
   })
   @IsOptional()
   @IsNumber()
@@ -144,7 +144,7 @@ export class BaseAppointmentDto {
     description: 'Duration of the appointment in minutes',
     minimum: 1,
     required: false,
-    example: 60
+    example: 60,
   })
   @IsOptional()
   @IsNumber()
@@ -153,11 +153,9 @@ export class BaseAppointmentDto {
 
   @ApiPropertyOptional({
     description: 'Price of the appointment',
-    example: 100.50,
+    example: 100.5,
   })
   @IsNumber()
   @IsOptional()
   price?: number;
-
-
 }

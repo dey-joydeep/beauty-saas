@@ -7,4 +7,4 @@ import { SocialService } from './services/social.service';
   providers: [SocialService],
   exports: [SocialService],
 })
-export class SocialModule { }
+export class SocialModule {}

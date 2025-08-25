@@ -32,7 +32,7 @@ function mapToResponseDto(prismaSocial: PrismaSocial): SocialResponseDto {
   if (!prismaSocial) {
     throw new Error('Cannot map null or undefined social object');
   }
-  
+
   return {
     id: prismaSocial.id,
     userId: prismaSocial.userId,
@@ -47,40 +47,40 @@ function mapToResponseDto(prismaSocial: PrismaSocial): SocialResponseDto {
 @Injectable()
 export class SocialService {
   async getSocials(filter: Prisma.SocialWhereInput = {}): Promise<SocialResponseDto[]> {
-    const socials = await prisma.social.findMany({ 
+    const socials = await prisma.social.findMany({
       where: filter,
-      orderBy: { createdAt: 'desc' } 
+      orderBy: { createdAt: 'desc' },
     });
-    return socials.map(social => mapToResponseDto(social));
+    return socials.map((social) => mapToResponseDto(social));
   }
 
   async getSocialById(params: GetSocialByIdParams): Promise<SocialResponseDto> {
-    const social = await prisma.social.findUnique({ 
-      where: { id: params.id } 
+    const social = await prisma.social.findUnique({
+      where: { id: params.id },
     });
-    
+
     if (!social) {
       throw new NotFoundException(`Social with ID ${params.id} not found`);
     }
-    
+
     return mapToResponseDto(social);
   }
 
   async createSocial(data: Omit<Social, 'id' | 'createdAt' | 'updatedAt'>): Promise<SocialResponseDto> {
-    const social = await prisma.social.create({ 
+    const social = await prisma.social.create({
       data: {
         userId: data.userId,
         platform: data.platform,
         handle: data.handle,
         url: data.url,
-      } 
+      },
     });
     return mapToResponseDto(social);
   }
 
   async updateSocial(params: UpdateSocialParams): Promise<SocialResponseDto> {
     const { id, data } = params;
-    
+
     try {
       const social = await prisma.social.update({
         where: { id },
@@ -93,7 +93,8 @@ export class SocialService {
       });
       return mapToResponseDto(social);
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') { // Record not found
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+        // Record not found
         throw new NotFoundException(`Social with ID ${id} not found`);
       }
       throw error;
@@ -104,7 +105,8 @@ export class SocialService {
     try {
       await prisma.social.delete({ where: { id: params.id } });
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') { // Record not found
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+        // Record not found
         throw new NotFoundException(`Social with ID ${params.id} not found`);
       }
       throw error;

@@ -1,11 +1,11 @@
-import { AppointmentStatus } from '@frontend-shared/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
 
 export interface CreateAppointmentParams {
   serviceId: string;
   staffId: string;
   salonId: string;
   startTime: string; // ISO date string
-  endTime: string;   // ISO date string
+  endTime: string; // ISO date string
   notes?: string;
   customerId?: string;
 }
@@ -15,7 +15,7 @@ export interface UpdateAppointmentParams {
   serviceId?: string;
   staffId?: string;
   startTime?: string; // ISO date string
-  endTime?: string;   // ISO date string
+  endTime?: string; // ISO date string
   status?: AppointmentStatus;
   notes?: string;
 }
@@ -27,7 +27,7 @@ export interface AppointmentQueryParams {
   serviceId?: string;
   status?: AppointmentStatus | AppointmentStatus[];
   startDate?: string; // ISO date string
-  endDate?: string;   // ISO date string
+  endDate?: string; // ISO date string
   page?: number;
   limit?: number;
   sortBy?: string;
@@ -39,7 +39,7 @@ export interface BookAppointmentParams {
   staffId: string;
   salonId: string;
   startTime: string; // ISO date string
-  endTime: string;   // ISO date string
+  endTime: string; // ISO date string
   customerNotes?: string;
   customerId?: string;
 }
@@ -47,7 +47,7 @@ export interface BookAppointmentParams {
 export interface RescheduleAppointmentParams {
   appointmentId: string;
   newStartTime: string; // ISO date string
-  newEndTime: string;   // ISO date string
+  newEndTime: string; // ISO date string
   staffId?: string;
   notes?: string;
 }

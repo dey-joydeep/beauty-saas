@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
   template: `
     <div class="p-6">
       <h2 class="text-2xl font-bold mb-6">Admin Dashboard</h2>
-      
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Stats Cards -->
         <mat-card>
@@ -70,7 +70,7 @@ import { MatIconModule } from '@angular/material/icon';
                 </mat-icon>
                 <div>
                   <p class="font-medium">{{ activity.message }}</p>
-                  <p class="text-sm text-gray-500">{{ activity.timestamp | date:'medium' }}</p>
+                  <p class="text-sm text-gray-500">{{ activity.timestamp | date: 'medium' }}</p>
                 </div>
               </div>
             </div>
@@ -79,62 +79,72 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
     </div>
   `,
-  styles: [`
-    mat-card {
-      height: 100%;
-      box-sizing: border-box;
-    }
-    
-    .activity-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 12px;
-    }
-  `]
+  styles: [
+    `
+      mat-card {
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      .activity-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+      }
+    `,
+  ],
 })
 export class AdminDashboardComponent {
   // Mock data - in a real app, this would come from a service
   userCount = 0;
   pendingApprovals = 0;
   activeSalons = 0;
-  
+
   recentActivities = [
     {
       type: 'user',
       message: 'New user registered: johndoe@example.com',
-      timestamp: new Date()
+      timestamp: new Date(),
     },
     {
       type: 'salon',
       message: 'New salon "Beauty Paradise" submitted for approval',
-      timestamp: new Date(Date.now() - 3600000)
+      timestamp: new Date(Date.now() - 3600000),
     },
     {
       type: 'system',
       message: 'System backup completed successfully',
-      timestamp: new Date(Date.now() - 86400000)
-    }
+      timestamp: new Date(Date.now() - 86400000),
+    },
   ];
 
   getActivityIcon(type: string): string {
     switch (type) {
-      case 'user': return 'person_add';
-      case 'salon': return 'store';
-      case 'system': return 'settings';
-      default: return 'notifications';
+      case 'user':
+        return 'person_add';
+      case 'salon':
+        return 'store';
+      case 'system':
+        return 'settings';
+      default:
+        return 'notifications';
     }
   }
 
   getActivityIconClass(type: string): string {
     switch (type) {
-      case 'user': return 'text-blue-500';
-      case 'salon': return 'text-purple-500';
-      case 'system': return 'text-green-500';
-      default: return 'text-gray-500';
+      case 'user':
+        return 'text-blue-500';
+      case 'salon':
+        return 'text-purple-500';
+      case 'system':
+        return 'text-green-500';
+      default:
+        return 'text-gray-500';
     }
   }
 }
