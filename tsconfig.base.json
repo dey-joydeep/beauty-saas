@@ -37,22 +37,22 @@
         "libs/server/data-access/src/*"
       ],
       "@beauty-saas/server-core": [
-        "libs/core/src/index.ts"
+        "libs/server/core/src/index.ts"
       ],
       "@beauty-saas/server-core/*": [
-        "libs/core/src/*"
+        "libs/server/core/src/*"
       ],
       "@beauty-saas/server-data-access": [
-        "libs/data-access/src/index.ts"
+        "libs/server/data-access/src/index.ts"
       ],
       "@beauty-saas/server-data-access/*": [
-        "libs/data-access/src/*"
+        "libs/server/data-access/src/*"
       ],
       "@beauty-saas/server-features": [
-        "libs/features/src/index.ts"
+        "libs/server/features/src/index.ts"
       ],
       "@beauty-saas/server-features/*": [
-        "libs/features/*/src/index.ts"
+        "libs/server/features/*/src/index.ts"
       ],
       "@beauty-saas/shared": [
         "libs/shared/src/index.ts"

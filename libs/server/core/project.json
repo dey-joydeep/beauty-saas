@@ -13,7 +13,7 @@
       "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
-          "libs/core/**/*.ts"
+          "libs/server/core/**/*.ts"
         ]
       }
     },
@@ -25,31 +25,30 @@
       "options": {
         "main": "libs/server/core/src/index.ts",
         "tsConfig": "libs/server/core/tsconfig.lib.json",
-        "packageJson": "libs/core/package.json",
+        "packageJson": "libs/server/core/package.json",
         "assets": [],
-        "outputPath": "dist/libs/core"
+        "outputPath": "dist/libs/server/core"
       }
     },
     "type-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p libs/core/tsconfig.lib.json --noEmit"
+        "command": "tsc -p libs/server/core/tsconfig.lib.json --noEmit"
       }
     },
     "test": {
       "outputs": [
-        "{workspaceRoot}/coverage/libs/core"
+        "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "executor": "@nx/jest:jest",
       "options": {
         "passWithNoTests": true,
-        "jestConfig": "libs/core/jest.config.ts",
+        "jestConfig": "libs/server/core/jest.config.ts",
         "codeCoverage": true,
         "coverageReporters": [
           "text",
           "lcov"
-        ],
-        "coverageDirectory": "coverage/libs/core"
+        ]
       }
     }
   },

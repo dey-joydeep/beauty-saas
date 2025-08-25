@@ -2,19 +2,7 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../../../dist/out-tsc",
-    "module": "es2022",
-    "target": "es2022",
-    "declaration": true,
-    "inlineSources": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "skipLibCheck": true
   },
   "exclude": ["**/*.spec.ts", "**/*.test.ts", "test-setup.ts", "jest.config.ts", "node_modules", "dist"],
   "include": ["**/*.ts"]

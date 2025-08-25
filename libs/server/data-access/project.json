@@ -14,7 +14,7 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/libs/data-access",
+        "outputPath": "dist/libs/server/data-access",
         "main": "src/index.ts",
         "tsConfig": "libs/server/data-access/tsconfig.lib.json",
         "assets": [
@@ -30,14 +30,14 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "libs/data-access/**/*.ts"
+          "libs/server/data-access/**/*.ts"
         ]
       }
     },
     "type-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p libs/data-access/tsconfig.lib.json --noEmit"
+        "command": "tsc -p libs/server/data-access/tsconfig.lib.json --noEmit"
       }
     },
     "test": {

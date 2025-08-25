@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../../../dist/out-tsc/libs/web/admin/auth",
+    "outDir": "../../../../dist/out-tsc",
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,

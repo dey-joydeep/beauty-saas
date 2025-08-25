@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../../../dist/libs/data-access",
+    "outDir": "../../../dist/out-tsc",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -9,7 +9,6 @@
       "node",
       "jest"
     ],
-    "rootDir": "./src",
     "composite": true
   },
   "include": [

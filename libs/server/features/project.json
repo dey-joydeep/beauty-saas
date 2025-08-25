@@ -14,9 +14,9 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/libs/features",
+        "outputPath": "dist/libs/server/features",
         "tsConfig": "libs/server/features/tsconfig.lib.json",
-        "packageJson": "libs/features/package.json",
+        "packageJson": "libs/server/features/package.json",
         "main": "libs/server/features/src/index.ts",
         "assets": []
       }
@@ -28,20 +28,20 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "libs/features/**/*.ts"
+          "libs/server/features/**/*.ts"
         ]
       }
     },
     "type-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p libs/features/tsconfig.lib.json --noEmit"
+        "command": "tsc -p libs/server/features/tsconfig.lib.json --noEmit"
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": [
-        "{workspaceRoot}/coverage/libs/features"
+        "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
         "jestConfig": "jest.preset.ts",
