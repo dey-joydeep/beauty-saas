@@ -10,5 +10,5 @@
     "tsBuildInfoFile": "../../dist/libs/shared/tsconfig.lib.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["***.test.ts"]
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"]
 }

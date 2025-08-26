@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import type { AuthenticatedUser } from '@beauty-saas/shared/types/user.types';
+import type { AuthenticatedUser } from '@beauty-saas/shared';
 
 /**
  * Custom decorator to get the current authenticated user from the request

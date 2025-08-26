@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { AppUserRole } from '@beauty-saas/shared/enums/user-role.enum';
+import { UserRole } from '@beauty-saas/shared';
 
 // Local error classes since we can't import them yet
 class LastAdminValidationError extends Error {
@@ -41,11 +41,11 @@ export class IsNotLastAdminConstraint implements ValidatorConstraintInterface {
 
   async validate(userId: string, args: ValidationArguments): Promise<boolean> {
     try {
-      const dto = args.object as { role?: AppUserRole };
+      const dto = args.object as { role?: UserRole };
       const roleToSet = dto.role;
 
       // If not setting a role or not demoting from admin, allow
-      if (!roleToSet || roleToSet === AppUserRole.ADMIN) {
+      if (!roleToSet || roleToSet === UserRole.ADMIN) {
         return true;
       }
 
@@ -54,7 +54,7 @@ export class IsNotLastAdminConstraint implements ValidatorConstraintInterface {
         where: {
           userId,
           role: {
-            name: AppUserRole.ADMIN,
+            name: UserRole.ADMIN,
           },
         },
       });
@@ -92,7 +92,7 @@ export class IsNotLastAdminConstraint implements ValidatorConstraintInterface {
             roles: {
               some: {
                 role: {
-                  name: AppUserRole.ADMIN,
+                  name: UserRole.ADMIN,
                 },
               },
             },

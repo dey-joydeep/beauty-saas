@@ -1,19 +1,14 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
-      "@beauty-saas/shared": [
-        "dist/libs/shared/index.d.ts"
-      ],
-      "@beauty-saas/shared/*": [
-        "dist/libs/shared/*"
-      ],
-      "@beauty-saas/server-data-access": [
-        "dist/libs/server/data-access/index.d.ts"
-      ],
-      "@beauty-saas/server-data-access/*": [
-        "dist/libs/server/data-access/*"
-      ]
+      "@beauty-saas/shared": ["dist/libs/shared/index.d.ts", "libs/shared/src/index.ts"],
+      "@beauty-saas/shared/*": ["dist/libs/shared/*", "libs/shared/src/*"],
+      "@beauty-saas/server-data-access": ["dist/libs/server/data-access/index.d.ts", "libs/server/data-access/src/index.ts"],
+      "@beauty-saas/server-data-access/*": ["dist/libs/server/data-access/*", "libs/server/data-access/src/*"],
+      "@beauty-saas/server-core": ["dist/libs/server/core/index.d.ts", "libs/server/core/src/index.ts"],
+      "@beauty-saas/server-core/*": ["dist/libs/server/core/*", "libs/server/core/src/*"]
     }
   }
 }

@@ -1,5 +1,5 @@
 import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
-import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@beauty-saas/shared';
 
 /**
  * Validates that the appointment status is valid

@@ -2,8 +2,8 @@ import { ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
-import { AppUserRole } from '@beauty-saas/shared/enums/user-role.enum';
-import { AuthenticatedUser, UserRoleInfo } from '@beauty-saas/shared/types/user.types';
+import { UserRole } from '@beauty-saas/shared';
+import { AuthenticatedUser, UserRoleInfo } from '@beauty-saas/shared';
 
 export const ROLES_KEY = 'roles';
 
@@ -11,20 +11,21 @@ export const ROLES_KEY = 'roles';
  * Role hierarchy definition
  * Each role inherits permissions from roles to its right
  */
-const ROLE_HIERARCHY: Record<AppUserRole, AppUserRole[]> = {
-  [AppUserRole.ADMIN]: [AppUserRole.OWNER, AppUserRole.STAFF, AppUserRole.CUSTOMER],
-  [AppUserRole.OWNER]: [AppUserRole.STAFF, AppUserRole.CUSTOMER],
-  [AppUserRole.STAFF]: [AppUserRole.CUSTOMER],
-  [AppUserRole.CUSTOMER]: [],
+const ROLE_HIERARCHY: Record<UserRole, UserRole[]> = {
+  [UserRole.ADMIN]: [UserRole.OWNER, UserRole.STAFF, UserRole.CUSTOMER],
+  [UserRole.OWNER]: [UserRole.STAFF, UserRole.CUSTOMER],
+  [UserRole.STAFF]: [UserRole.CUSTOMER],
+  [UserRole.CUSTOMER]: [],
+  [UserRole.GUEST]: [],
 };
 
 // Using AuthenticatedUser from @beauty-saas/shared instead of local UserWithRoles
 
 /**
  * Custom decorator to set required roles for a route handler or controller
- * @param roles Array of AppUserRole that are allowed to access the route
+ * @param roles Array of UserRole that are allowed to access the route
  */
-export const Roles = (...roles: AppUserRole[]) => {
+export const Roles = (...roles: UserRole[]) => {
   return (target: object, descriptor?: PropertyDescriptor) => {
     if (descriptor) {
       // Method decorator
@@ -48,7 +49,7 @@ export class RolesGuard extends AuthGuard('jwt') {
    * @param userRoles - Array of user's roles
    * @param requiredRoles - Array of required roles
    */
-  private hasRequiredRole(userRoles: AppUserRole[], requiredRoles: AppUserRole[]): boolean {
+  private hasRequiredRole(userRoles: UserRole[], requiredRoles: UserRole[]): boolean {
     return userRoles.some((userRole) => {
       // Check direct match
       if (requiredRoles.includes(userRole)) {
@@ -61,7 +62,7 @@ export class RolesGuard extends AuthGuard('jwt') {
   }
 
   override canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const requiredRoles = this.reflector.getAllAndOverride<AppUserRole[]>(ROLES_KEY, [context.getHandler(), context.getClass()]);
+    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [context.getHandler(), context.getClass()]);
 
     // If no roles are required, allow access
     if (!requiredRoles || requiredRoles.length === 0) {
@@ -77,11 +78,11 @@ export class RolesGuard extends AuthGuard('jwt') {
     const userRoleNames = (user.roles || [])
       .map((role) => {
         if (typeof role === 'string') {
-          return role as AppUserRole;
+          return role as UserRole;
         }
         return (role as UserRoleInfo).name;
       })
-      .filter((role): role is AppUserRole => role !== undefined && Object.values<string>(AppUserRole).includes(role));
+      .filter((role): role is UserRole => role !== undefined && Object.values<string>(UserRole).includes(role));
 
     // Check if user has any of the required roles
     if (userRoleNames.length === 0 || !this.hasRequiredRole(userRoleNames, requiredRoles)) {

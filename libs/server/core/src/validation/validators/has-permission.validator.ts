@@ -5,35 +5,36 @@ import {
   registerDecorator,
   ValidationOptions,
 } from 'class-validator';
-import { AppUserRole } from '@beauty-saas/shared/enums/user-role.enum';
+import { UserRole } from '@beauty-saas/shared';
 
 /**
  * Role hierarchy definition - defines which roles can assign which other roles
  * Key: The role that has permission
  * Value: Array of roles that can be assigned by the key role
  */
-const ROLE_ASSIGNMENT_PERMISSIONS: Record<AppUserRole, AppUserRole[]> = {
-  [AppUserRole.ADMIN]: [AppUserRole.OWNER, AppUserRole.STAFF, AppUserRole.CUSTOMER],
-  [AppUserRole.OWNER]: [AppUserRole.STAFF, AppUserRole.CUSTOMER],
-  [AppUserRole.STAFF]: [AppUserRole.CUSTOMER],
-  [AppUserRole.CUSTOMER]: [],
+const ROLE_ASSIGNMENT_PERMISSIONS: Record<UserRole, UserRole[]> = {
+  [UserRole.ADMIN]: [UserRole.OWNER, UserRole.STAFF, UserRole.CUSTOMER],
+  [UserRole.OWNER]: [UserRole.STAFF, UserRole.CUSTOMER],
+  [UserRole.STAFF]: [UserRole.CUSTOMER],
+  [UserRole.CUSTOMER]: [],
+  [UserRole.GUEST]: [],
 };
 
 @ValidatorConstraint({ name: 'hasPermissionToAssignRole', async: false })
 export class HasPermissionToAssignRoleConstraint implements ValidatorConstraintInterface {
-  validate(roleToAssign: AppUserRole, args: ValidationArguments) {
+  validate(roleToAssign: UserRole, args: ValidationArguments) {
     // Get the current user's roles from the request object
-    const request = (args.object as { request?: { user?: { roles?: Array<{ name: AppUserRole }> } } }).request;
+    const request = (args.object as { request?: { user?: { roles?: Array<{ name: UserRole }> } } }).request;
     if (!request?.user?.roles || !Array.isArray(request.user.roles)) {
       return false;
     }
 
     const userRoles = request.user.roles
       .map((role) => role?.name)
-      .filter((role): role is AppUserRole => role !== undefined && Object.values(AppUserRole).includes(role));
+      .filter((role): role is UserRole => role !== undefined && Object.values(UserRole).includes(role));
 
     // Check if user has permission to assign the specified role
-    return userRoles.some((userRole: AppUserRole) => {
+    return userRoles.some((userRole: UserRole) => {
       const allowedRoles = ROLE_ASSIGNMENT_PERMISSIONS[userRole] || [];
       return allowedRoles.includes(roleToAssign);
     });
