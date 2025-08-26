@@ -4,21 +4,11 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "apps/api",
-    "apps/web/admin",
-    "apps/web/customer",
-    "apps/web/partner",
-    "libs/server/core",
-    "libs/server/data-access",
-    "libs/shared",
-    "libs/web/admin/auth",
-    "libs/web/config",
-    "libs/web/core/auth",
-    "libs/web/core/http",
-    "libs/web/core/testing",
-    "libs/web/customer/auth",
-    "libs/web/partner/auth",
-    "libs/web/ui"
+    "apps/*",
+    "libs/*",
+    "libs/*/*",
+    "!libs/**/dist",
+    "!libs/**/dist/**"
   ],
   "packageManager": "npm@10.8.2",
   "scripts": {
