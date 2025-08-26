@@ -5,7 +5,7 @@ import {
   registerDecorator,
   ValidationOptions,
 } from 'class-validator';
-import { AppUserRole } from '@beauty-saas/shared';
+import { AppUserRole } from '@beauty-saas/shared/enums/user-role.enum';
 
 /**
  * Role hierarchy definition - defines which roles can assign which other roles

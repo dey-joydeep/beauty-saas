@@ -5,10 +5,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "types": [
-      "node",
-      "jest"
-    ],
+    "types": ["node", "jest"],
     "composite": true,
     "isolatedModules": false,
     "experimentalDecorators": true,
@@ -17,30 +14,15 @@
     "rootDir": "src",
     "tsBuildInfoFile": "../../../dist/libs/server/data-access/tsconfig.lib.tsbuildinfo",
     "paths": {
-      "@beauty-saas/shared": [
-        "dist/libs/shared/index.d.ts"
-      ],
-      "@beauty-saas/shared/*": [
-        "dist/libs/shared/*"
-      ],
-      "@beauty-saas/server-data-access": [
-        "dist/libs/server/data-access/index.d.ts"
-      ],
-      "@beauty-saas/server-data-access/*": [
-        "dist/libs/server/data-access/*"
-      ]
-    }
+      "@beauty-saas/shared": ["dist/libs/shared/index.d.ts"],
+      "@beauty-saas/shared/*": ["dist/libs/shared/*"],
+      "@beauty-saas/server-data-access": ["dist/libs/server/data-access/index.d.ts"],
+      "@beauty-saas/server-data-access/*": ["dist/libs/server/data-access/*"]
+    },
+    "baseUrl": "."
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "**/*.spec.js",
-    "**/*.test.js",
-    "node_modules"
-  ],
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts", "**/*.spec.js", "**/*.test.js", "node_modules"],
   "references": [
     {
       "path": "../../shared/tsconfig.lib.json"

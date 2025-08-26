@@ -10,13 +10,12 @@
       "jest"
     ],
     "rootDir": "src",
-    "tsBuildInfoFile": "../../dist/libs/shared/tsconfig.lib.tsbuildinfo",
+    "tsBuildInfoFile": "../../dist/libs/shared/tsconfig.lib.tsbuildinfo"
   },
   "include": [
     "src/**/*.ts"
   ],
   "exclude": [
-    "**/*.spec.ts",
-    "**/*.test.ts"
+    "***.test.ts"
   ]
 }

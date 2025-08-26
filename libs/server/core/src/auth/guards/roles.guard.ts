@@ -2,7 +2,8 @@ import { ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
-import { AppUserRole, AuthenticatedUser, UserRoleInfo } from '@beauty-saas/shared';
+import { AppUserRole } from '@beauty-saas/shared/enums/user-role.enum';
+import { AuthenticatedUser, UserRoleInfo } from '@beauty-saas/shared/types/user.types';
 
 export const ROLES_KEY = 'roles';
 

@@ -17,7 +17,8 @@
       "@beauty-saas/shared/*": ["dist/libs/shared/*"],
       "@beauty-saas/server-data-access": ["dist/libs/server/data-access/index.d.ts"],
       "@beauty-saas/server-data-access/*": ["dist/libs/server/data-access/*"]
-    }
+    },
+    "baseUrl": "."
   },
   "include": ["src/**/*.ts"],
   "exclude": ["**/*.spec.ts", "**/*.test.ts"],
