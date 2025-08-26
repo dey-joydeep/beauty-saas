@@ -12,13 +12,7 @@
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": false,
     "rootDir": "src",
-    "tsBuildInfoFile": "../../../dist/libs/server/data-access/tsconfig.lib.tsbuildinfo",
-    "paths": {
-      "@beauty-saas/shared": ["dist/libs/shared/index.d.ts"],
-      "@beauty-saas/shared/*": ["dist/libs/shared/*"],
-      "@beauty-saas/server-data-access": ["dist/libs/server/data-access/index.d.ts"],
-      "@beauty-saas/server-data-access/*": ["dist/libs/server/data-access/*"]
-    }
+    "tsBuildInfoFile": "../../../dist/libs/server/data-access/tsconfig.lib.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["**/*.spec.ts", "**/*.test.ts", "**/*.spec.js", "**/*.test.js", "node_modules"],

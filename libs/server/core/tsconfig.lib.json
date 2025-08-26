@@ -11,13 +11,7 @@
     "composite": true,
     "declarationMap": true,
     "rootDir": "src",
-    "tsBuildInfoFile": "../../../dist/libs/server/core/tsconfig.lib.tsbuildinfo",
-    "paths": {
-      "@beauty-saas/shared": ["dist/libs/shared/index.d.ts"],
-      "@beauty-saas/shared/*": ["dist/libs/shared/*"],
-      "@beauty-saas/server-data-access": ["dist/libs/server/data-access/index.d.ts"],
-      "@beauty-saas/server-data-access/*": ["dist/libs/server/data-access/*"]
-    }
+    "tsBuildInfoFile": "../../../dist/libs/server/core/tsconfig.lib.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["**/*.spec.ts", "**/*.test.ts"],
@@ -30,3 +24,4 @@
     }
   ]
 }
+
