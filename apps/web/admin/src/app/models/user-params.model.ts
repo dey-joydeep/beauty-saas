@@ -1,4 +1,4 @@
-import { UserRole } from '@beauty-saas/shared/enums/user-role.enum';
+import { UserRole } from '@beauty-saas/shared';
 
 export interface UserParams {
   id?: string;
