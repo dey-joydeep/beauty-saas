@@ -1,12 +1,22 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
+    "outDir": "../../dist/libs/shared",
     "declaration": true,
     "declarationMap": true,
     "composite": true,
-    "types": ["node", "jest"]
+    "types": [
+      "node",
+      "jest"
+    ],
+    "rootDir": "src",
+    "tsBuildInfoFile": "../../dist/libs/shared/tsconfig.lib.tsbuildinfo",
   },
-  "include": ["**/*.ts"],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }

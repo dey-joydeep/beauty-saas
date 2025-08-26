@@ -30,7 +30,10 @@
         "assets": [],
         "outputPath": "dist/libs/server/core",
         "buildLibsFromSource": false
-      }
+      },
+      "dependsOn": [
+        "^build"
+      ]
     },
     "type-check": {
       "executor": "nx:run-commands",

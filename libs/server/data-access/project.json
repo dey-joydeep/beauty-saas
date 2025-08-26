@@ -22,7 +22,10 @@
           "prisma/schema.prisma",
           "prisma/migrations/**/*"
         ]
-      }
+      },
+      "dependsOn": [
+        "^build"
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",

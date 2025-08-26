@@ -1,7 +1,7 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.server.base.json",
   "compilerOptions": {
-    "outDir": "../../../dist/out-tsc",
+    "outDir": "../../../dist/libs/server/data-access",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -13,7 +13,23 @@
     "isolatedModules": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "rootDir": "src",
+    "tsBuildInfoFile": "../../../dist/libs/server/data-access/tsconfig.lib.tsbuildinfo",
+    "paths": {
+      "@beauty-saas/shared": [
+        "dist/libs/shared/src/index.d.ts"
+      ],
+      "@beauty-saas/shared/*": [
+        "dist/libs/shared/src/*"
+      ],
+      "@beauty-saas/server-data-access": [
+        "dist/libs/server/data-access/src/index.d.ts"
+      ],
+      "@beauty-saas/server-data-access/*": [
+        "dist/libs/server/data-access/src/*"
+      ]
+    }
   },
   "include": [
     "src/**/*.ts"
@@ -26,6 +42,8 @@
     "node_modules"
   ],
   "references": [
-    { "path": "../../shared/tsconfig.lib.json" }
+    {
+      "path": "../../shared/tsconfig.lib.json"
+    }
   ]
 }

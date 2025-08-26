@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@beauty-saas/shared": [
+        "dist/libs/shared/index.d.ts"
+      ],
+      "@beauty-saas/shared/*": [
+        "dist/libs/shared/*"
+      ],
+      "@beauty-saas/server-data-access": [
+        "dist/libs/server/data-access/index.d.ts"
+      ],
+      "@beauty-saas/server-data-access/*": [
+        "dist/libs/server/data-access/*"
+      ]
+    }
+  }
+}
