@@ -5,7 +5,10 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "types": ["node", "jest"],
+    "types": [
+      "node",
+      "jest"
+    ],
     "composite": true,
     "isolatedModules": false,
     "experimentalDecorators": true,
@@ -14,8 +17,16 @@
     "rootDir": "src",
     "tsBuildInfoFile": "../../../dist/libs/server/data-access/tsconfig.lib.tsbuildinfo"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts", "**/*.spec.js", "**/*.test.js", "node_modules"],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "***.test.ts",
+    "***.test.js",
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
   "references": [
     {
       "path": "../../shared/tsconfig.lib.json"

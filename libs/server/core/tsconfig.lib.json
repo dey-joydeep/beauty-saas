@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "../../../dist/libs/server/core",
     "declaration": true,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "isolatedModules": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -13,8 +15,13 @@
     "rootDir": "src",
     "tsBuildInfoFile": "../../../dist/libs/server/core/tsconfig.lib.tsbuildinfo"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts"],
+  "include": [
+    "src*.ts"
+  ],
+  "exclude": [
+    "***.test.ts",
+    "***.spec.ts"
+  ],
   "references": [
     {
       "path": "../../shared/tsconfig.lib.json"
@@ -24,4 +31,3 @@
     }
   ]
 }
-

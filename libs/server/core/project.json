@@ -1,27 +1,17 @@
 {
   "name": "server-core",
   "sourceRoot": "libs/server/core/src",
-  "tags": [
-    "type:lib",
-    "platform:server",
-    "scope:server-core"
-  ],
+  "tags": ["type:lib", "platform:server", "scope:server-core"],
   "targets": {
     "lint": {
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "libs/server/core/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/server/core*.ts"]
       }
     },
     "build": {
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "executor": "@nx/js:tsc",
       "options": {
         "main": "libs/server/core/src/index.ts",
@@ -29,11 +19,9 @@
         "packageJson": "libs/server/core/package.json",
         "assets": [],
         "outputPath": "dist/libs/server/core",
-        "buildLibsFromSource": false
+        "buildLibsFromSource": true
       },
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "type-check": {
       "executor": "nx:run-commands",
@@ -42,22 +30,16 @@
       }
     },
     "test": {
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "executor": "@nx/jest:jest",
       "options": {
         "passWithNoTests": true,
         "jestConfig": "libs/server/core/jest.config.ts",
         "codeCoverage": true,
-        "coverageReporters": [
-          "text",
-          "lcov"
-        ]
+        "coverageReporters": ["text", "lcov"]
       }
     }
   },
   "projectType": "library",
   "prefix": "beauty-saas"
 }
-
