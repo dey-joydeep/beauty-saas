@@ -1,16 +1,32 @@
 // Core library public API
+
+// Auth
+export { ROLES_KEY, Roles } from './auth/decorators/roles.decorator';
+export { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+export { RolesGuard } from './auth/guards/roles.guard';
+
+// Config
+export * from './config/core.module';
+
+// Decorators
 export * from './decorators/user.decorator';
 export * from './decorators/current-user.decorator';
 
-// Core exports
-export * from './auth';
-export * from './config';
+// Errors
+export * from './errors/app.error';
+export * from './errors/http-errors';
 
-export * from './errors';
-export * from './filters';
-export * from './validators';
+// Filters
+export * from './filters/global-exception.filter';
+export * from './filters/http-exception.filter';
 
-export * from './types';
-
-// Export models individually to avoid duplicate exports
+// Models
 export * from './models/notification.model';
+
+// Types
+export * from './types/api.types';
+
+// Validators
+export * from './validators/appointment.validators';
+export * from './validators/portfolio.validator';
+export * from './validators/theme.validator';

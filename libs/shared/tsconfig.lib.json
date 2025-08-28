@@ -5,9 +5,7 @@
     "declaration": true,
     "declarationMap": true,
     "composite": true,
-    "types": ["node", "jest"],
-    "rootDir": "src",
-    "tsBuildInfoFile": "../../dist/libs/shared/tsconfig.lib.tsbuildinfo"
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["**/*.spec.ts", "**/*.test.ts"]

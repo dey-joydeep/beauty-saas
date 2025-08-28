@@ -1,0 +1,50 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "noFallthroughCasesInSwitch": true,
+        "noEmitOnError": false,
+        "forceConsistentCasingInFileNames": true,
+        "target": "ES2022",
+        "baseUrl": ".",
+        "isolatedModules": false,
+        "useDefineForClassFields": false,
+        "importHelpers": true,
+        "emitDecoratorMetadata": true,
+        "module": "ES2022",
+        "lib": ["ES2022", "dom"],
+        "esModuleInterop": true,
+        "allowJs": false,
+        "strict": true,
+        "moduleResolution": "node",
+        "paths": {
+            "@app/*": ["apps/api/src/*"],
+
+            "@beauty-saas/server-data-access": ["libs/server/data-access/src/index.ts"],
+            "@beauty-saas/web-admin-auth": ["libs/web/admin/auth/src/index.ts"],
+            "@beauty-saas/web-config": ["libs/web/config/src/index.ts"],
+            "@beauty-saas/web-core-auth": ["libs/web/core/auth/src/index.ts"],
+            "@beauty-saas/web-core-http": ["libs/web/core/http/src/index.ts"],
+            "@beauty-saas/web-core-testing": ["libs/web/core/testing/src/index.ts"],
+            "@beauty-saas/web-customer-auth": ["libs/web/customer/auth/src/index.ts"],
+            "@beauty-saas/web-partner-auth": ["libs/web/partner/auth/src/index.ts"],
+            "@beauty-saas/web-ui": ["libs/web/ui/src/index.ts"]
+        },
+        "types": ["node", "jest"],
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "noImplicitReturns": true,
+        "declarationMap": true,
+        "declaration": true,
+        "noImplicitAny": true,
+        "resolveJsonModule": true
+    },
+    "exclude": ["node_modules", "dist"],
+    "angularCompilerOptions": {
+        "enableI18nLegacyMessageIdFormat": false,
+        "strictInjectionParameters": true,
+        "strictInputAccessModifiers": true,
+        "strictTemplates": true
+    }
+}

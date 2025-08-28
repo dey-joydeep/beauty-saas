@@ -1,13 +1,20 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
     "outDir": "../../../dist/out-tsc/libs/web/config",
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
-    "types": []
+    "types": [],
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "paths": {}
   },
-  "angularCompilerOptions": { "compilationMode": "partial" },
+  "angularCompilerOptions": {
+    "compilationMode": "partial",
+    "target": "ES2022"
+  },
   "exclude": [
     "src/test-setup.ts",
     "**/*.spec.ts",

@@ -19,8 +19,7 @@
             ],
             "options": {
                 "tsConfig": "libs/web/config/tsconfig.lib.json",
-                "project": "libs/web/config/ng-package.json"
-            }
+                "project": "libs/web/config/ng-package.json"            }
         }
     }
 }

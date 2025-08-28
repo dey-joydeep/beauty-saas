@@ -1,35 +1,22 @@
 {
-  "extends": "../../../tsconfig.server.base.json",
-  "compilerOptions": {
-    "outDir": "../../../dist/libs/server/data-access",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "types": [
-      "node",
-      "jest"
-    ],
-    "composite": true,
-    "isolatedModules": false,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "useDefineForClassFields": false,
-    "rootDir": "src",
-    "tsBuildInfoFile": "../../../dist/libs/server/data-access/tsconfig.lib.tsbuildinfo"
-  },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "***.test.ts",
-    "***.test.js",
-    "node_modules",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ],
-  "references": [
-    {
-      "path": "../../shared/tsconfig.lib.json"
-    }
-  ]
+    "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "../../../dist/libs/server/data-access",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "types": ["node", "jest"],
+        "composite": true,
+        "isolatedModules": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "useDefineForClassFields": false
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["**/*.test.ts", "**/*.spec.ts"],
+    "references": [
+        {
+            "path": "../../shared/tsconfig.lib.json"
+        }
+    ]
 }

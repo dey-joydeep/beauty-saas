@@ -1,33 +1,24 @@
 {
-  "extends": "../../../tsconfig.server.base.json",
-  "compilerOptions": {
-    "outDir": "../../../dist/libs/server/core",
-    "declaration": true,
-    "types": [
-      "node"
-    ],
-    "isolatedModules": false,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "useDefineForClassFields": false,
-    "composite": true,
-    "declarationMap": true,
-    "rootDir": "src",
-    "tsBuildInfoFile": "../../../dist/libs/server/core/tsconfig.lib.tsbuildinfo"
-  },
-  "include": [
-    "src*.ts"
-  ],
-  "exclude": [
-    "***.test.ts",
-    "***.spec.ts"
-  ],
-  "references": [
-    {
-      "path": "../../shared/tsconfig.lib.json"
+    "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+        "types": ["node"],
+        "isolatedModules": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "useDefineForClassFields": false,
+        "composite": true,
+        "declaration": true,
+        "declarationMap": true,
+        "outDir": "../../../dist/libs/server/core"
     },
-    {
-      "path": "../data-access/tsconfig.lib.json"
-    }
-  ]
+    "include": ["src/**/*.ts"],
+    "exclude": ["**/*.test.ts", "**/*.spec.ts"],
+    "references": [
+        {
+            "path": "../../shared/tsconfig.lib.json"
+        },
+        {
+            "path": "../data-access/tsconfig.lib.json"
+        }
+    ]
 }

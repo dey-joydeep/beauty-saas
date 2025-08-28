@@ -1,45 +1,79 @@
 {
-  "name": "server-core",
-  "sourceRoot": "libs/server/core/src",
-  "tags": ["type:lib", "platform:server", "scope:server-core"],
-  "targets": {
-    "lint": {
-      "outputs": ["{options.outputFile}"],
-      "executor": "@nx/eslint:lint",
-      "options": {
-        "lintFilePatterns": ["libs/server/core*.ts"]
-      }
+    "name": "server-core",
+    "sourceRoot": "libs/server/core/src",
+    "tags": ["type:lib", "platform:server", "scope:server-core"],
+    "targets": {
+        "lint": {
+            "outputs": ["{options.outputFile}"],
+            "executor": "@nx/eslint:lint",
+            "options": {
+                "lintFilePatterns": ["libs/server/core/**/*.ts"]
+            }
+        },
+        "build": {
+            "executor": "@nx/rollup:rollup",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "dist/libs/server/core",
+                "tsConfig": "libs/server/core/tsconfig.lib.json",
+                "project": "libs/server/core/package.json",
+                "entryFile": "libs/server/core/src/index.ts",
+                "external": [
+                    "@nestjs/common",
+                    "@nestjs/config",
+                    "@nestjs/core",
+                    "@nestjs/jwt",
+                    "@nestjs/passport",
+                    "@nestjs/platform-express",
+                    "@nestjs/schedule",
+                    "@nestjs/swagger",
+                    "@nestjs/terminus",
+                    "@nestjs/testing",
+                    "@nestjs/throttler",
+                    "class-transformer",
+                    "class-validator",
+                    "cookie-parser",
+                    "cors",
+                    "express",
+                    "helmet",
+                    "joi",
+                    "jsonwebtoken",
+                    "log4js",
+                    "morgan",
+                    "passport",
+                    "passport-jwt",
+                    "reflect-metadata",
+                    "rxjs",
+                    "swagger-ui-express"
+                ],
+                "rollupConfig": "libs/server/core/rollup.config.js",
+                "format": ["esm"],
+                "useLegacyTypescriptPlugin": false,
+                "assets": []
+            },
+            "configurations": {
+                "production": {
+                    "minify": true
+                }
+            }
+        },
+        "type-check": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "tsc -p libs/server/core/tsconfig.lib.json --noEmit"
+            }
+        },
+        "test": {
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "executor": "@nx/jest:jest",
+            "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/server/core/jest.config.ts",
+                "codeCoverage": true,
+                "coverageReporters": ["text", "lcov"]
+            }
+        }
     },
-    "build": {
-      "outputs": ["{options.outputPath}"],
-      "executor": "@nx/js:tsc",
-      "options": {
-        "main": "libs/server/core/src/index.ts",
-        "tsConfig": "libs/server/core/tsconfig.lib.json",
-        "packageJson": "libs/server/core/package.json",
-        "assets": [],
-        "outputPath": "dist/libs/server/core",
-        "buildLibsFromSource": true
-      },
-      "dependsOn": ["^build"]
-    },
-    "type-check": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc -p libs/server/core/tsconfig.lib.json --noEmit"
-      }
-    },
-    "test": {
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "executor": "@nx/jest:jest",
-      "options": {
-        "passWithNoTests": true,
-        "jestConfig": "libs/server/core/jest.config.ts",
-        "codeCoverage": true,
-        "coverageReporters": ["text", "lcov"]
-      }
-    }
-  },
-  "projectType": "library",
-  "prefix": "beauty-saas"
+    "projectType": "library",
+    "prefix": "beauty-saas"
 }

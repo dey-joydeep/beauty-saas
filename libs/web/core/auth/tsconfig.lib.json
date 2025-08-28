@@ -1,13 +1,21 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "../../../../dist/out-tsc",
-    "declaration": true,
-    "declarationMap": true,
-    "inlineSources": true,
-    "types": []
-  },
-  "angularCompilerOptions": { "compilationMode": "partial" },
-  "exclude": ["src/test-setup.ts", "**/*.spec.ts", "jest.config.ts", "**/*.test.ts"],
-  "include": ["src/**/*.ts"]
+    "extends": "../../../../tsconfig.base.json",
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "../../../../dist/out-tsc",
+        "declaration": true,
+        "declarationMap": true,
+        "inlineSources": true,
+        "types": [],
+        "noImplicitAny": false,
+        "rootDir": "src",
+        "skipLibCheck": true,
+        "paths": {}
+    },
+    "angularCompilerOptions": {
+        "compilationMode": "partial",
+        "target": "ES2022"
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["src/test-setup.ts", "**/*.spec.ts", "jest.config.ts", "**/*.test.ts"]
 }
