@@ -4,22 +4,18 @@
     "sourceRoot": "libs/web/config/src",
     "prefix": "lib",
     "projectType": "library",
-    "tags": [
-        "scope:web",
-        "type:config"
-    ],
+    "tags": ["scope:web", "type:config"],
     "targets": {
         "lint": {
             "executor": "@nx/eslint:lint"
         },
         "build": {
             "executor": "@nx/angular:package",
-            "outputs": [
-                "{projectRoot}/dist"
-            ],
+            "outputs": ["{workspaceRoot}/dist/libs/web/config"],
             "options": {
                 "tsConfig": "libs/web/config/tsconfig.lib.json",
-                "project": "libs/web/config/ng-package.json"            }
+                "project": "libs/web/config/ng-package.json"
+            }
         }
     }
 }
