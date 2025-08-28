@@ -1,13 +1,11 @@
 {
     "extends": "../../../../tsconfig.base.json",
     "compilerOptions": {
-        "composite": true,
-        "outDir": "../../../../dist/out-tsc",
+        "outDir": "../../../../dist/out-tsc/libs/web/core/http",
         "declaration": true,
         "declarationMap": true,
         "inlineSources": true,
         "types": [],
-        "rootDir": "src",
         "skipLibCheck": true,
         "paths": {}
     },
