@@ -1,13 +1,16 @@
 {
     "extends": "../../../../tsconfig.base.json",
     "compilerOptions": {
+        "rootDir": "src",
         "outDir": "../../../../dist/out-tsc/libs/web/core/http",
         "declaration": true,
         "declarationMap": true,
         "inlineSources": true,
         "types": [],
         "skipLibCheck": true,
-        "paths": {}
+        "paths": {},
+        "isolatedModules": true,
+        "useDefineForClassFields": true
     },
     "angularCompilerOptions": {
         "compilationMode": "partial",

@@ -1,11 +1,14 @@
 {
     "extends": "../../../../tsconfig.base.json",
     "compilerOptions": {
+        "rootDir": "src",
         "outDir": "../../../../dist/out-tsc",
         "declaration": true,
         "declarationMap": true,
         "inlineSources": true,
-        "types": []
+        "types": [],
+        "isolatedModules": true,
+        "useDefineForClassFields": true
     },
     "angularCompilerOptions": {
         "skipTemplateCodegen": true,
