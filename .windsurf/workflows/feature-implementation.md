@@ -1,5 +1,6 @@
 ---
 description: Structured workflow to go from requirements → analysis/plan → implementation with quality gates
+auto_execution_mode: 1
 ---
 
 # Feature / Change Implementation Workflow
@@ -51,7 +52,7 @@ Gate B — Plan approval
 Recommended sequence and guardrails:
 
 1. Create branch using the branching workflow
-   - Use: `/branch-from-readme` (follows naming rules described in the root README)
+   - Use: `/branch-from-readme` (follows naming rules described in the root README). At this moment, no ticketing system is present. So, generate name without any ticket number prefix. Always switch to new branch.
 2. Add failing tests (TDD when reasonable)
 3. Implement code changes incrementally
 4. Keep commits small and atomic; use conventional commits
@@ -63,7 +64,8 @@ Recommended sequence and guardrails:
    - Affected graph (optional): `npx nx affected:graph`
 7. Use commit approval workflow
    - Use: `/commit-approval` to stage and commit with explicit confirmation
-8. Open PR with:
+8. Create PR using `gh` command and verify to ensure it is created.
+9. Open PR with:
    - Summary, scope, screenshots (if UI)
    - Test plan, coverage summary, risks/mitigations
    - Linked issues, breaking change note if any
