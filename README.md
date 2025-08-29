@@ -12,15 +12,24 @@ A modern, scalable beauty salon management platform built with Nx, Angular, and 
 cthub-bsaas/
 ├── apps/
 │   ├── web/              # Frontend applications
-│   │   ├── admin/        # Admin dashboard (Angular)
-│   │   ├── partner/      # Partner portal (Angular)
-│   │   └── customer/     # Customer app (Angular)
+│   │   ├── admin/        # Admin dashboard (web-admin)
+│   │   ├── partner/      # Partner portal (web-partner)
+│   │   └── customer/     # Customer app (web-customer)
 │   └── api/              # Backend API (NestJS)
 │
-├── libs/                 # Shared libraries
-│   ├── shared/           # Shared types and utilities
-│   ├── ui/              # Shared UI components
-│   └── feature/*        # Feature libraries
+├── libs/
+│   ├── server/             # Backend libraries
+│   │   ├── core/
+│   │   ├── data-access/
+│   │   └── features/
+│   ├── shared/             # Shared libraries (isomorphic)
+│   └── web/                # Frontend libraries
+│       ├── admin/
+│       ├── config/
+│       ├── core/
+│       ├── customer/
+│       ├── partner/
+│       └── ui/
 │
 ├── docs/                # Project documentation
 ├── scripts/             # Utility scripts
@@ -92,22 +101,23 @@ cthub-bsaas/
 - **Start admin dashboard in development mode**
 
   ```bash
-  npx nx serve admin
+  npx nx serve web-admin
   ```
 
 - **Start partner portal in development mode**
 
   ```bash
-  npx nx serve partner
+  npx nx serve web-partner
   ```
 
 - **Start customer app in development mode**
 
   ```bash
-  npx nx serve customer
+  npx nx serve web-customer
   ```
 
 - **Start backend API in development mode**
+
   ```bash
   npx nx serve api
   ```
@@ -124,9 +134,9 @@ cthub-bsaas/
 
   ```bash
   # Frontend apps
-  npx nx build admin
-  npx nx build partner
-  npx nx build customer
+  npx nx build web-admin
+  npx nx build web-partner
+  npx nx build web-customer
 
   # Backend
   npx nx build api
@@ -144,18 +154,19 @@ cthub-bsaas/
 
   ```bash
   # Frontend apps
-  npx nx test admin
-  npx nx test partner
-  npx nx test customer
+  npx nx test web-admin
+  npx nx test web-partner
+  npx nx test web-customer
 
   # Backend
   npx nx test api
   ```
 
 - **Run tests in watch mode**
+
   ```bash
   # Example for admin app
-  npx nx test admin --watch
+  npx nx test web-admin --watch
   ```
 
 ### Linting
@@ -167,6 +178,7 @@ cthub-bsaas/
   ```
 
 - **Fix linting issues**
+
   ```bash
   npx nx run-many --target=lint --all --fix
   ```
@@ -175,16 +187,16 @@ cthub-bsaas/
 
 ### Apps
 
-- **admin**: Admin dashboard (Angular)
-- **partner**: Partner portal (Angular)
-- **customer**: Customer application (Angular)
+- **web-admin**: Admin dashboard (Angular)
+- **web-partner**: Partner portal (Angular)
+- **web-customer**: Customer application (Angular)
 - **api**: Backend API (NestJS)
 
 ### Libraries
 
-- **shared**: Code shared between frontend and backend (DTOs, interfaces, utilities)
-- **frontend**: Shared frontend components and services
-- **ui**: Shared UI components library
+- **server/**: Backend libraries, separated by feature or concern (e.g., `core`, `data-access`).
+- **shared/**: Isomorphic libraries shared between frontend and backend (e.g., DTOs, interfaces, utilities).
+- **web/**: Frontend libraries, organized by scope (e.g., `core`, `config`, `ui`) and application-specific features (e.g., `admin/auth`).
 
 ## 🔧 Tools
 
@@ -206,7 +218,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Use the following format for branch names:
 
-```
+```text
 <type>/<ticket-number>-<short-description>
 ```
 
@@ -222,7 +234,7 @@ Types:
 
 Example:
 
-```
+```text
 feat/123-add-user-profile
 ```
 
@@ -230,7 +242,7 @@ feat/123-add-user-profile
 
 Follow Conventional Commits specification:
 
-```
+```text
 <type>(<scope>): <description>
 
 [optional body]
@@ -240,7 +252,7 @@ Follow Conventional Commits specification:
 
 Example:
 
-```
+```text
 feat(auth): add password reset functionality
 
 - Add password reset endpoint
