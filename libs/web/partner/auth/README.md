@@ -1,7 +1,9 @@
 # partner-auth
 
-This library was generated with [Nx](https://nx.dev).
+Purpose: Authentication utilities and facades for the Partner web app.
+
+See overview: [libs/README.md](../../../README.md)
 
 ## Running unit tests
 
-Run `nx test partner-auth` to execute the unit tests.
+Run `npx nx test web-partner-auth` to execute the unit tests.

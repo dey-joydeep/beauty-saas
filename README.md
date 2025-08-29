@@ -4,8 +4,6 @@
 
 A modern, scalable beauty salon management platform built with Nx, Angular, and NestJS.
 
-> **Last Updated**: August 29, 2025
-
 ## 🏗️ Project Structure
 
 ```text
@@ -72,20 +70,20 @@ cthub-bsaas/
    Start the backend API:
 
    ```bash
-   nx serve api
+   npx nx serve api
    ```
 
    In a separate terminal, start the frontend application:
 
    ```bash
    # For admin dashboard
-   nx serve web-admin
+   npx nx serve web-admin
 
    # Or for partner portal
-   nx serve web-partner
+   npx nx serve web-partner
 
    # Or for customer app
-   nx serve web-customer
+   npx nx serve web-customer
    ```
 
 5. **Run database migrations**
@@ -115,7 +113,6 @@ cthub-bsaas/
   ```bash
   npx nx serve web-customer
   ```
-
 - **Start backend API in development mode**
 
   ```bash
@@ -185,18 +182,43 @@ cthub-bsaas/
 
 ## 🏗️ Project Structure Details
 
-### Apps
-
-- **web-admin**: Admin dashboard (Angular)
-- **web-partner**: Partner portal (Angular)
-- **web-customer**: Customer application (Angular)
-- **api**: Backend API (NestJS)
-
 ### Libraries
 
-- **server/**: Backend libraries, separated by feature or concern (e.g., `core`, `data-access`).
+- **server/**: Backend libraries, separated by feature or concern (e.g., `core`, `data-access`, `features`, `salon`).
 - **shared/**: Isomorphic libraries shared between frontend and backend (e.g., DTOs, interfaces, utilities).
 - **web/**: Frontend libraries, organized by scope (e.g., `core`, `config`, `ui`) and application-specific features (e.g., `admin/auth`).
+
+#### Library documentation
+
+- Overview of libraries: [libs/README.md](libs/README.md)
+
+- Server:
+  - [libs/server/core/README.md](libs/server/core/README.md)
+  - [libs/server/data-access/README.md](libs/server/data-access/README.md)
+  - [libs/server/features/README.md](libs/server/features/README.md)
+  - Features:
+    - [libs/server/features/appointment/README.md](libs/server/features/appointment/README.md)
+    - [libs/server/features/dashboard/README.md](libs/server/features/dashboard/README.md)
+    - [libs/server/features/portfolio/README.md](libs/server/features/portfolio/README.md)
+    - [libs/server/features/review/README.md](libs/server/features/review/README.md)
+    - [libs/server/features/salon/README.md](libs/server/features/salon/README.md)
+    - [libs/server/features/salon-staff-request/README.md](libs/server/features/salon-staff-request/README.md)
+    - [libs/server/features/social/README.md](libs/server/features/social/README.md)
+    - [libs/server/features/theme/README.md](libs/server/features/theme/README.md)
+    - [libs/server/features/user/README.md](libs/server/features/user/README.md)
+
+- Shared:
+  - [libs/shared/README.md](libs/shared/README.md)
+
+- Web Core:
+  - [libs/web/core/auth/README.md](libs/web/core/auth/README.md)
+  - [libs/web/core/http/README.md](libs/web/core/http/README.md)
+  - [libs/web/core/testing/README.md](libs/web/core/testing/README.md)
+
+- Web App-specific:
+  - [libs/web/admin/auth/README.md](libs/web/admin/auth/README.md)
+  - [libs/web/customer/auth/README.md](libs/web/customer/auth/README.md)
+  - [libs/web/partner/auth/README.md](libs/web/partner/auth/README.md)
 
 ## 🔧 Tools
 
@@ -288,7 +310,6 @@ Closes #123
 - Follow BEM naming convention
 - Use CSS custom properties for theming
 - Mobile-first approach
-
 
 ## API Development
 

@@ -1,12 +1,20 @@
-# Shared Libraries
+# Libraries
 
-This directory contains shared libraries used across the Beauty SaaS application. These libraries are designed to be reusable across different parts of the application.
+This directory contains reusable libraries used across the Beauty SaaS platform. Path aliases match the workspace configuration in `tsconfig.base.json`.
 
-## Available Libraries
+Note: This file provides an overview. Individual libraries include their own README with details (purpose, usage, testing) and link back here.
 
-- `@shared` - Core shared utilities, types, and enums used across the entire application
-- `@backend` - Backend-specific utilities, decorators, guards, and services
-- `@frontend` - Frontend components, services, and utilities for the web application
+## Available Libraries (aliases)
+
+- `@cthub-bsaas/shared` – Shared utilities, types, enums, and constants
+- `@cthub-bsaas/server-core` – Backend core modules (NestJS)
+- `@cthub-bsaas/server-data-access` – Backend data-access layer (ORM, repositories)
+- `@cthub-bsaas/web-admin-auth` – Admin app authentication utilities
+- `@cthub-bsaas/web-core-auth` – Web core auth services/guards
+- `@cthub-bsaas/web-core-http` – Web core HTTP abstractions/interceptors
+- `@cthub-bsaas/web-core-testing` – Web testing utilities
+- `@cthub-bsaas/web-customer-auth` – Customer app authentication utilities
+- `@cthub-bsaas/web-partner-auth` – Partner app authentication utilities
 
 ## Adding a New File to a Shared Library
 
@@ -14,7 +22,7 @@ This directory contains shared libraries used across the Beauty SaaS application
 
 Add your new file in the appropriate directory, for example:
 
-```
+```text
 libs/shared/src/types/new-type.ts
 ```
 
@@ -28,26 +36,26 @@ export * from './user.types.js';
 export * from './new-type.js'; // Add your new file
 ```
 
-### 3. Build the Shared Library
+### 3. Build a library (Nx)
 
 ```bash
-cd libs/shared
-npx tsc -p tsconfig.lib.json
+# Example: build shared library
+npx nx build shared
 ```
 
-### 4. Use Your New Export
+### 4. Use your new export
 
 Import your new file in your application:
 
 ```typescript
 // Import from the barrel export (recommended)
-import { NewType } from '@shared/types';
+import { NewType } from '@cthub-bsaas/shared/types';
 
 // Or import directly from the main index
-import { NewType } from '@shared';
+import { NewType } from '@cthub-bsaas/shared';
 ```
 
-## Example: Adding a New Enum
+## Example: Adding a new enum
 
 1. Create the enum file:
 
@@ -61,7 +69,7 @@ export enum PaymentStatus {
 }
 ```
 
-2. Update the enums index:
+1. Update the enums index:
 
 ```typescript
 // libs/shared/src/enums/index.ts
@@ -69,12 +77,12 @@ export * from './appointment-status.enum.js';
 export * from './payment-status.enum.js'; // Add this line
 ```
 
-3. Build the shared library (see step 3 above)
+1. Build the shared library (see step 3 above)
 
-4. Import in your application:
+1. Import in your application:
 
 ```typescript
-import { PaymentStatus } from '@shared/enums';
+import { PaymentStatus } from '@cthub-bsaas/shared/enums';
 ```
 
 ## Best Practices

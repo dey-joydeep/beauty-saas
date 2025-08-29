@@ -1,5 +1,9 @@
 # Shared Library
 
+Purpose: Isomorphic types, utilities, and constants shared across backend and frontend.
+
+See overview: [libs/README.md](../README.md)
+
 This library contains shared code used across the Beauty SaaS application, including:
 
 - **Models**: Shared TypeScript interfaces and types
