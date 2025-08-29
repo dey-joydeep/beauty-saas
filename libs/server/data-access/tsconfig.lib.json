@@ -5,7 +5,7 @@
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
-        "types": ["node", "jest"],
+        "types": ["node"],
         "composite": true,
         "isolatedModules": false,
         "experimentalDecorators": true,
