@@ -4,7 +4,7 @@
 
 A modern, scalable beauty salon management platform built with Nx, Angular, and NestJS.
 
-> **Last Updated**: August 13, 2025
+> **Last Updated**: August 29, 2025
 
 ## 🏗️ Project Structure
 
@@ -196,26 +196,9 @@ cthub-bsaas/
 - **ESLint**: JavaScript/TypeScript linting
 - **Prettier**: Code formatting
 
-## 🤝 Contributing
-
-1. Create a new feature branch: `git checkout -b feature/your-feature`
-2. Make your changes
-3. Run tests: `npx nx affected:test`
-4. Lint your code: `npx nx affected:lint`
-5. Commit your changes: `git commit -m 'feat: your feature'`
-6. Push to the branch: `git push origin feature/your-feature`
-7. Create a Pull Request
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-6. Start the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
 
 ## Development Workflow
 
@@ -281,7 +264,7 @@ Closes #123
 
 ### TypeScript/JavaScript
 
-- Use 2 spaces for indentation
+- Use 4 spaces for indentation
 - Use single quotes
 - Always use semicolons
 - Maximum line length: 100 characters
@@ -294,22 +277,6 @@ Closes #123
 - Use CSS custom properties for theming
 - Mobile-first approach
 
-## Testing
-
-### Running Tests
-
-- Unit tests: `npm test`
-- Integration tests: `npm run test:integration`
-- E2E tests: `npm run test:e2e`
-- All tests: `npm run test:all`
-
-### Writing Tests
-
-- Use Jest for unit and integration tests
-- Use React Testing Library for component tests
-- Use Cypress for E2E tests
-- Follow AAA pattern (Arrange, Act, Assert)
-- Test both success and error cases
 
 ## API Development
 
@@ -430,15 +397,3 @@ Closes #123
    - Check for flaky tests
    - Update snapshots if needed
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Update documentation
-6. Submit a pull request
-
-## License
-
-[Your License Here]
