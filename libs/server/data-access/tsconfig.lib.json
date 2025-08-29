@@ -1,6 +1,7 @@
 {
     "extends": "../../../tsconfig.base.json",
     "compilerOptions": {
+        "rootDir": "src",
         "outDir": "../../../dist/libs/server/data-access",
         "declaration": true,
         "declarationMap": true,
