@@ -1,7 +1,9 @@
 # testing
 
-This library was generated with [Nx](https://nx.dev).
+Purpose: Testing utilities and helpers shared across web apps.
+
+See overview: [libs/README.md](../../../README.md)
 
 ## Running unit tests
 
-Run `nx test testing` to execute the unit tests.
+Run `npx nx test web-core-testing` to execute the unit tests.

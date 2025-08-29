@@ -4,23 +4,30 @@
 
 A modern, scalable beauty salon management platform built with Nx, Angular, and NestJS.
 
-> **Last Updated**: August 13, 2025
-
 ## 🏗️ Project Structure
 
 ```text
 cthub-bsaas/
 ├── apps/
 │   ├── web/              # Frontend applications
-│   │   ├── admin/        # Admin dashboard (Angular)
-│   │   ├── partner/      # Partner portal (Angular)
-│   │   └── customer/     # Customer app (Angular)
+│   │   ├── admin/        # Admin dashboard (web-admin)
+│   │   ├── partner/      # Partner portal (web-partner)
+│   │   └── customer/     # Customer app (web-customer)
 │   └── api/              # Backend API (NestJS)
 │
-├── libs/                 # Shared libraries
-│   ├── shared/           # Shared types and utilities
-│   ├── ui/              # Shared UI components
-│   └── feature/*        # Feature libraries
+├── libs/
+│   ├── server/             # Backend libraries
+│   │   ├── core/
+│   │   ├── data-access/
+│   │   └── features/
+│   ├── shared/             # Shared libraries (isomorphic)
+│   └── web/                # Frontend libraries
+│       ├── admin/
+│       ├── config/
+│       ├── core/
+│       ├── customer/
+│       ├── partner/
+│       └── ui/
 │
 ├── docs/                # Project documentation
 ├── scripts/             # Utility scripts
@@ -63,20 +70,20 @@ cthub-bsaas/
    Start the backend API:
 
    ```bash
-   nx serve api
+   npx nx serve api
    ```
 
    In a separate terminal, start the frontend application:
 
    ```bash
    # For admin dashboard
-   nx serve web-admin
+   npx nx serve web-admin
 
    # Or for partner portal
-   nx serve web-partner
+   npx nx serve web-partner
 
    # Or for customer app
-   nx serve web-customer
+   npx nx serve web-customer
    ```
 
 5. **Run database migrations**
@@ -92,22 +99,22 @@ cthub-bsaas/
 - **Start admin dashboard in development mode**
 
   ```bash
-  npx nx serve admin
+  npx nx serve web-admin
   ```
 
 - **Start partner portal in development mode**
 
   ```bash
-  npx nx serve partner
+  npx nx serve web-partner
   ```
 
 - **Start customer app in development mode**
 
   ```bash
-  npx nx serve customer
+  npx nx serve web-customer
   ```
-
 - **Start backend API in development mode**
+
   ```bash
   npx nx serve api
   ```
@@ -124,9 +131,9 @@ cthub-bsaas/
 
   ```bash
   # Frontend apps
-  npx nx build admin
-  npx nx build partner
-  npx nx build customer
+  npx nx build web-admin
+  npx nx build web-partner
+  npx nx build web-customer
 
   # Backend
   npx nx build api
@@ -144,18 +151,19 @@ cthub-bsaas/
 
   ```bash
   # Frontend apps
-  npx nx test admin
-  npx nx test partner
-  npx nx test customer
+  npx nx test web-admin
+  npx nx test web-partner
+  npx nx test web-customer
 
   # Backend
   npx nx test api
   ```
 
 - **Run tests in watch mode**
+
   ```bash
   # Example for admin app
-  npx nx test admin --watch
+  npx nx test web-admin --watch
   ```
 
 ### Linting
@@ -167,24 +175,50 @@ cthub-bsaas/
   ```
 
 - **Fix linting issues**
+
   ```bash
   npx nx run-many --target=lint --all --fix
   ```
 
 ## 🏗️ Project Structure Details
 
-### Apps
-
-- **admin**: Admin dashboard (Angular)
-- **partner**: Partner portal (Angular)
-- **customer**: Customer application (Angular)
-- **api**: Backend API (NestJS)
-
 ### Libraries
 
-- **shared**: Code shared between frontend and backend (DTOs, interfaces, utilities)
-- **frontend**: Shared frontend components and services
-- **ui**: Shared UI components library
+- **server/**: Backend libraries, separated by feature or concern (e.g., `core`, `data-access`, `features`, `salon`).
+- **shared/**: Isomorphic libraries shared between frontend and backend (e.g., DTOs, interfaces, utilities).
+- **web/**: Frontend libraries, organized by scope (e.g., `core`, `config`, `ui`) and application-specific features (e.g., `admin/auth`).
+
+#### Library documentation
+
+- Overview of libraries: [libs/README.md](libs/README.md)
+
+- Server:
+  - [libs/server/core/README.md](libs/server/core/README.md)
+  - [libs/server/data-access/README.md](libs/server/data-access/README.md)
+  - [libs/server/features/README.md](libs/server/features/README.md)
+  - Features:
+    - [libs/server/features/appointment/README.md](libs/server/features/appointment/README.md)
+    - [libs/server/features/dashboard/README.md](libs/server/features/dashboard/README.md)
+    - [libs/server/features/portfolio/README.md](libs/server/features/portfolio/README.md)
+    - [libs/server/features/review/README.md](libs/server/features/review/README.md)
+    - [libs/server/features/salon/README.md](libs/server/features/salon/README.md)
+    - [libs/server/features/salon-staff-request/README.md](libs/server/features/salon-staff-request/README.md)
+    - [libs/server/features/social/README.md](libs/server/features/social/README.md)
+    - [libs/server/features/theme/README.md](libs/server/features/theme/README.md)
+    - [libs/server/features/user/README.md](libs/server/features/user/README.md)
+
+- Shared:
+  - [libs/shared/README.md](libs/shared/README.md)
+
+- Web Core:
+  - [libs/web/core/auth/README.md](libs/web/core/auth/README.md)
+  - [libs/web/core/http/README.md](libs/web/core/http/README.md)
+  - [libs/web/core/testing/README.md](libs/web/core/testing/README.md)
+
+- Web App-specific:
+  - [libs/web/admin/auth/README.md](libs/web/admin/auth/README.md)
+  - [libs/web/customer/auth/README.md](libs/web/customer/auth/README.md)
+  - [libs/web/partner/auth/README.md](libs/web/partner/auth/README.md)
 
 ## 🔧 Tools
 
@@ -196,26 +230,9 @@ cthub-bsaas/
 - **ESLint**: JavaScript/TypeScript linting
 - **Prettier**: Code formatting
 
-## 🤝 Contributing
-
-1. Create a new feature branch: `git checkout -b feature/your-feature`
-2. Make your changes
-3. Run tests: `npx nx affected:test`
-4. Lint your code: `npx nx affected:lint`
-5. Commit your changes: `git commit -m 'feat: your feature'`
-6. Push to the branch: `git push origin feature/your-feature`
-7. Create a Pull Request
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-6. Start the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
 
 ## Development Workflow
 
@@ -223,7 +240,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Use the following format for branch names:
 
-```
+```text
 <type>/<ticket-number>-<short-description>
 ```
 
@@ -239,7 +256,7 @@ Types:
 
 Example:
 
-```
+```text
 feat/123-add-user-profile
 ```
 
@@ -247,7 +264,7 @@ feat/123-add-user-profile
 
 Follow Conventional Commits specification:
 
-```
+```text
 <type>(<scope>): <description>
 
 [optional body]
@@ -257,7 +274,7 @@ Follow Conventional Commits specification:
 
 Example:
 
-```
+```text
 feat(auth): add password reset functionality
 
 - Add password reset endpoint
@@ -281,7 +298,7 @@ Closes #123
 
 ### TypeScript/JavaScript
 
-- Use 2 spaces for indentation
+- Use 4 spaces for indentation
 - Use single quotes
 - Always use semicolons
 - Maximum line length: 100 characters
@@ -293,23 +310,6 @@ Closes #123
 - Follow BEM naming convention
 - Use CSS custom properties for theming
 - Mobile-first approach
-
-## Testing
-
-### Running Tests
-
-- Unit tests: `npm test`
-- Integration tests: `npm run test:integration`
-- E2E tests: `npm run test:e2e`
-- All tests: `npm run test:all`
-
-### Writing Tests
-
-- Use Jest for unit and integration tests
-- Use React Testing Library for component tests
-- Use Cypress for E2E tests
-- Follow AAA pattern (Arrange, Act, Assert)
-- Test both success and error cases
 
 ## API Development
 
@@ -430,15 +430,3 @@ Closes #123
    - Check for flaky tests
    - Update snapshots if needed
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Update documentation
-6. Submit a pull request
-
-## License
-
-[Your License Here]
