@@ -1,11 +1,11 @@
-﻿import { PlatformUtils } from '@beauty-saas/web-config';
+﻿import { PlatformUtils } from '@cthub-bsaas/web-config';
 import { Component, OnInit, Inject, PLATFORM_ID, Renderer2 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ThemeService, Theme } from './theme.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import type { PlatformUtils } from '@beauty-saas/web-config';
-import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
+import type { PlatformUtils } from '@cthub-bsaas/web-config';
+import { PLATFORM_UTILS_TOKEN } from '@cthub-bsaas/web-config';
 
 @Component({
   selector: 'app-theme',

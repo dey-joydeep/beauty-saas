@@ -2,8 +2,8 @@ import { ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
-import { UserRole } from '@beauty-saas/shared';
-import { AuthenticatedUser, UserRoleInfo } from '@beauty-saas/shared';
+import { UserRole } from '@cthub-bsaas/shared';
+import { AuthenticatedUser, UserRoleInfo } from '@cthub-bsaas/shared';
 
 export const ROLES_KEY = 'roles';
 
@@ -19,7 +19,7 @@ const ROLE_HIERARCHY: Record<UserRole, UserRole[]> = {
   [UserRole.GUEST]: [],
 };
 
-// Using AuthenticatedUser from @beauty-saas/shared instead of local UserWithRoles
+// Using AuthenticatedUser from @cthub-bsaas/shared instead of local UserWithRoles
 
 /**
  * Custom decorator to set required roles for a route handler or controller

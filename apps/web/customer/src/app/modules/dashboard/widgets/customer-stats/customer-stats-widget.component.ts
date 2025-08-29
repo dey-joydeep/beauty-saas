@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AbstractBaseComponent, ErrorService } from '@beauty-saas/web-core/http';
+import { AbstractBaseComponent, ErrorService } from '@cthub-bsaas/web-core/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../dashboard.service';

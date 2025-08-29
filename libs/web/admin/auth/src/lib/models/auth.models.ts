@@ -1,6 +1,6 @@
 // Admin auth library local models (kept app-specific for now)
-// If later promoted to core, migrate these interfaces to @beauty-saas/web-core-auth
-import type { BaseAuthUser } from '@beauty-saas/web-core-auth';
+// If later promoted to core, migrate these interfaces to @cthub-bsaas/web-core-auth
+import type { BaseAuthUser } from '@cthub-bsaas/web-core-auth';
 
 export interface LoginCredentials {
     readonly email: string;

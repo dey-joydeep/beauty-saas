@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { UserRole } from '@beauty-saas/shared';
+import { UserRole } from '@cthub-bsaas/shared';
 
 // Local error classes since we can't import them yet
 class LastAdminValidationError extends Error {

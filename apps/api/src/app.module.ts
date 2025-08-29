@@ -5,7 +5,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CoreModule, JwtAuthGuard, RolesGuard } from '@beauty-saas/core';
+import { CoreModule, JwtAuthGuard, RolesGuard } from '@cthub-bsaas/core';
 import appConfig from './config/app.config';
 
 @Module({

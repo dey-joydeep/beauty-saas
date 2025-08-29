@@ -1,4 +1,4 @@
-/* Revert server-core imports to the barrel '@beauty-saas/shared' (idempotent) */
+/* Revert server-core imports to the barrel '@cthub-bsaas/shared' (idempotent) */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -25,12 +25,12 @@ function patch(file, replace) {
 patch('auth/decorators/roles.decorator.ts', s =>
   s
     .replace(
-      /from\s+['"]@beauty-saas\/shared\/enums\/user-role\.enum['"]/g,
-      `from '@beauty-saas/shared'`
+      /from\s+['"]@cthub-bsaas\/shared\/enums\/user-role\.enum['"]/g,
+      `from '@cthub-bsaas/shared'`
     )
     .replace(
-      /from\s+['"]@beauty-saas\/shared['"]/g,
-      `from '@beauty-saas/shared'`
+      /from\s+['"]@cthub-bsaas\/shared['"]/g,
+      `from '@cthub-bsaas/shared'`
     )
 );
 
@@ -38,12 +38,12 @@ patch('auth/decorators/roles.decorator.ts', s =>
 patch('auth/guards/roles.guard.ts', s =>
   s
     .replace(
-      /import\s*\{\s*AppUserRole\s*\}\s*from\s*['"]@beauty-saas\/shared\/enums\/user-role\.enum['"]\s*;?/g,
-      `import { AppUserRole } from '@beauty-saas/shared';`
+      /import\s*\{\s*AppUserRole\s*\}\s*from\s*['"]@cthub-bsaas\/shared\/enums\/user-role\.enum['"]\s*;?/g,
+      `import { AppUserRole } from '@cthub-bsaas/shared';`
     )
     .replace(
-      /import\s*\{\s*AuthenticatedUser\s*,\s*UserRoleInfo\s*\}\s*from\s*['"]@beauty-saas\/shared\/types\/user\.types['"]\s*;?/g,
-      `import { AuthenticatedUser, UserRoleInfo } from '@beauty-saas/shared';`
+      /import\s*\{\s*AuthenticatedUser\s*,\s*UserRoleInfo\s*\}\s*from\s*['"]@cthub-bsaas\/shared\/types\/user\.types['"]\s*;?/g,
+      `import { AuthenticatedUser, UserRoleInfo } from '@cthub-bsaas/shared';`
     )
 );
 
@@ -51,15 +51,15 @@ patch('auth/guards/roles.guard.ts', s =>
 patch('decorators/current-user.decorator.ts', s =>
   s
     .replace(
-      /from\s+['"]@beauty-saas\/shared\/types\/user\.types['"]/g,
-      `from '@beauty-saas/shared'`
+      /from\s+['"]@cthub-bsaas\/shared\/types\/user\.types['"]/g,
+      `from '@cthub-bsaas/shared'`
     )
 );
 patch('decorators/user.decorator.ts', s =>
   s
     .replace(
-      /from\s+['"]@beauty-saas\/shared\/types\/user\.types['"]/g,
-      `from '@beauty-saas/shared'`
+      /from\s+['"]@cthub-bsaas\/shared\/types\/user\.types['"]/g,
+      `from '@cthub-bsaas/shared'`
     )
 );
 
@@ -67,15 +67,15 @@ patch('decorators/user.decorator.ts', s =>
 patch('validation/validators/has-permission.validator.ts', s =>
   s
     .replace(
-      /from\s+['"]@beauty-saas\/shared\/enums\/user-role\.enum['"]/g,
-      `from '@beauty-saas/shared'`
+      /from\s+['"]@cthub-bsaas\/shared\/enums\/user-role\.enum['"]/g,
+      `from '@cthub-bsaas/shared'`
     )
 );
 patch('validation/validators/last-admin.validator.ts', s =>
   s
     .replace(
-      /from\s+['"]@beauty-saas\/shared\/enums\/user-role\.enum['"]/g,
-      `from '@beauty-saas/shared'`
+      /from\s+['"]@cthub-bsaas\/shared\/enums\/user-role\.enum['"]/g,
+      `from '@cthub-bsaas/shared'`
     )
 );
 
@@ -83,8 +83,8 @@ patch('validation/validators/last-admin.validator.ts', s =>
 patch('validators/appointment.validators.ts', s =>
   s
     .replace(
-      /from\s+['"]@beauty-saas\/shared\/enums\/appointment-status\.enum['"]/g,
-      `from '@beauty-saas/shared'`
+      /from\s+['"]@cthub-bsaas\/shared\/enums\/appointment-status\.enum['"]/g,
+      `from '@cthub-bsaas/shared'`
     )
 );
 
@@ -92,7 +92,7 @@ patch('validators/appointment.validators.ts', s =>
 patch('database/database.module.ts', s =>
   s
     .replace(
-      /from\s+['"]@beauty-saas\/server-data-access(?:\/index)?['"]/g,
-      `from '@beauty-saas/server-data-access'`
+      /from\s+['"]@cthub-bsaas\/server-data-access(?:\/index)?['"]/g,
+      `from '@cthub-bsaas/server-data-access'`
     )
 );

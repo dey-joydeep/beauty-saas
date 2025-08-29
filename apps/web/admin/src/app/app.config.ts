@@ -48,9 +48,9 @@ import {
   loadingInterceptor,
   ssrInterceptor,
   ssrTranslateInterceptor,
-} from '@beauty-saas/web-core/http';
-import { AUTH_STATE_PORT, CURRENT_USER } from '@beauty-saas/web-core/auth';
-import { LOGIN_API, AUTH_STATE_SETTER, FORGOT_PASSWORD_API, REGISTER_API, type ForgotPasswordApiPort, type RegisterApiPort } from '@beauty-saas/web-admin/auth';
+} from '@cthub-bsaas/web-core/http';
+import { AUTH_STATE_PORT, CURRENT_USER } from '@cthub-bsaas/web-core/auth';
+import { LOGIN_API, AUTH_STATE_SETTER, FORGOT_PASSWORD_API, REGISTER_API, type ForgotPasswordApiPort, type RegisterApiPort } from '@cthub-bsaas/web-admin/auth';
 import { AuthService } from './core/auth/services/auth.service';
 import { AuthApiService } from './core/auth/services/auth-api.service';
 import { CurrentUserAdapter } from './core/auth/services/current-user.adapter';

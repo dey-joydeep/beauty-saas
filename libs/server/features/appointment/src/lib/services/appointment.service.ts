@@ -1,6 +1,6 @@
-import type { AuthUser } from '@beauty-saas/server-core';
-import { PrismaService } from '@beauty-saas/server-data-access';
-import { AppointmentStatus, isAppointmentStatus } from '@beauty-saas/shared';
+import type { AuthUser } from '@cthub-bsaas/server-core';
+import { PrismaService } from '@cthub-bsaas/server-data-access';
+import { AppointmentStatus, isAppointmentStatus } from '@cthub-bsaas/shared';
 import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateAppointmentDto } from '../dto/requests/create-appointment.dto';
 import { FilterAppointmentsDto } from '../dto/requests/filter-appointments.dto';

@@ -5,7 +5,7 @@ import {
   registerDecorator,
   ValidationOptions,
 } from 'class-validator';
-import { UserRole } from '@beauty-saas/shared';
+import { UserRole } from '@cthub-bsaas/shared';
 
 /**
  * Role hierarchy definition - defines which roles can assign which other roles

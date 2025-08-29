@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
-import { AppointmentStatus } from '@beauty-saas/shared';
-import { IsValidAppointmentStatus, IsValidAppointmentTime } from '@beauty-saas/core';
+import { AppointmentStatus } from '@cthub-bsaas/shared';
+import { IsValidAppointmentStatus, IsValidAppointmentTime } from '@cthub-bsaas/core';
 
 /**
  * Base DTO for appointment entities

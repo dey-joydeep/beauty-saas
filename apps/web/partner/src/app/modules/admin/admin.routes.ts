@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { roleGuard } from '@beauty-saas/web-core/auth';
+import { roleGuard } from '@cthub-bsaas/web-core/auth';
 
 // Guards
 import { authGuard } from '../../core/auth/guards/auth.guard';

@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/web-core-testing",
+  "name": "@cthub-bsaas/web-core-testing",
   "version": "0.0.1",
   "sideEffects": false,
   "type": "module"

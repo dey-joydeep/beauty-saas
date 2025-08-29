@@ -1,4 +1,4 @@
-import { AppUserRole } from '@beauty-saas/shared';
+import { AppUserRole } from '@cthub-bsaas/shared';
 
 /**
  * Represents the authenticated user in the request object

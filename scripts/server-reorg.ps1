@@ -98,14 +98,14 @@ Fix-TsconfigLib "libs/server/data-access/tsconfig.lib.json"
 Fix-TsconfigLib "libs/server/features/tsconfig.lib.json"
 
 # 5) Update root tsconfig.base.json legacy aliases to new locations
-Write-Step "Update tsconfig.base.json aliases (@beauty-saas/core, @beauty-saas/data-access)"
+Write-Step "Update tsconfig.base.json aliases (@cthub-bsaas/core, @cthub-bsaas/data-access)"
 Update-JsonFile -Path "tsconfig.base.json" -Updater {
     param([ref]$json)
     $paths = $json.Value.compilerOptions.paths
-    if ($paths.'@beauty-saas/core') { $paths.'@beauty-saas/core' = @('libs/server/core/src/index.ts') }
-    if ($paths.'@beauty-saas/core/*') { $paths.'@beauty-saas/core/*' = @('libs/server/core/src/*') }
-    if ($paths.'@beauty-saas/data-access') { $paths.'@beauty-saas/data-access' = @('libs/server/data-access/src/index.ts') }
-    if ($paths.'@beauty-saas/data-access/*') { $paths.'@beauty-saas/data-access/*' = @('libs/server/data-access/src/*') }
+    if ($paths.'@cthub-bsaas/core') { $paths.'@cthub-bsaas/core' = @('libs/server/core/src/index.ts') }
+    if ($paths.'@cthub-bsaas/core/*') { $paths.'@cthub-bsaas/core/*' = @('libs/server/core/src/*') }
+    if ($paths.'@cthub-bsaas/data-access') { $paths.'@cthub-bsaas/data-access' = @('libs/server/data-access/src/index.ts') }
+    if ($paths.'@cthub-bsaas/data-access/*') { $paths.'@cthub-bsaas/data-access/*' = @('libs/server/data-access/src/*') }
 }
 
 # 6) Final git status and optional commit

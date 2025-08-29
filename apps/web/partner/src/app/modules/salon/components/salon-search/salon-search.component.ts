@@ -1,10 +1,10 @@
-﻿import { PlatformUtils } from '@beauty-saas/web-config';
+﻿import { PlatformUtils } from '@cthub-bsaas/web-config';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
+import { PLATFORM_UTILS_TOKEN } from '@cthub-bsaas/web-config';
 import { TranslateModule } from '@ngx-translate/core';
 import { SalonServiceItem } from '../../models/salon-service-item.model';
 import { Salon } from '../../models/salon.model';

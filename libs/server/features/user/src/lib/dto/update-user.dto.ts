@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { AppUserRole } from '@beauty-saas/shared';
+import { AppUserRole } from '@cthub-bsaas/shared';
 import { IsArray, IsBoolean, IsOptional, IsString, MinLength } from 'class-validator';
 import { BaseUserDto } from './base-user.dto';
 

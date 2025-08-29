@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { UserRole } from '@beauty-saas/shared';
+import { UserRole } from '@cthub-bsaas/shared';
 
 export const ROLES_KEY = 'roles';
 

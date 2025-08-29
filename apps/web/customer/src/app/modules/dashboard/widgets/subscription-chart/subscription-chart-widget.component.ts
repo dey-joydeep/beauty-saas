@@ -8,7 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 import { Observable, from, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
-import { AbstractBaseComponent, ErrorService } from '@beauty-saas/web-core/http';
+import { AbstractBaseComponent, ErrorService } from '@cthub-bsaas/web-core/http';
 import { SubscriptionData } from '../../models/dashboard.model';
 import { DashboardService } from '../../dashboard.service';
 import { BaseChartDirective } from 'ng2-charts';

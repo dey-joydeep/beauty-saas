@@ -12,7 +12,7 @@ const config: Config = {
 
   // Module name mapper for path aliases
   moduleNameMapper: {
-    '^@beauty-saas/(.*)$': '<rootDir>/../../$1/src',
+    '^@cthub-bsaas/(.*)$': '<rootDir>/../../$1/src',
   },
 
   // Transform settings

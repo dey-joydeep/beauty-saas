@@ -41,23 +41,23 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 // App imports
-import { AUTH_STATE_PORT, CURRENT_USER } from '@beauty-saas/web-core/auth';
+import { AUTH_STATE_PORT, CURRENT_USER } from '@cthub-bsaas/web-core/auth';
 import {
   ERROR_INTERCEPTOR_PROVIDER,
   ErrorHandlerService,
   loadingInterceptor,
   ssrInterceptor,
   ssrTranslateInterceptor,
-} from '@beauty-saas/web-core/http';
+} from '@cthub-bsaas/web-core/http';
 import { routes } from './app.routes';
-import { LOGIN_API, AUTH_STATE_SETTER } from '@beauty-saas/web-partner-auth';
-import { LoginApiService } from '@beauty-saas/web-partner-auth';
+import { LOGIN_API, AUTH_STATE_SETTER } from '@cthub-bsaas/web-partner-auth';
+import { LoginApiService } from '@cthub-bsaas/web-partner-auth';
 import {
   FORGOT_PASSWORD_API,
   REGISTER_API,
   type ForgotPasswordApiPort,
   type RegisterApiPort,
-} from '@beauty-saas/web-partner-auth';
+} from '@cthub-bsaas/web-partner-auth';
 import { AuthService } from './core/auth/services/auth.service';
 import { CurrentUserAdapter } from './core/auth/services/current-user.adapter';
 

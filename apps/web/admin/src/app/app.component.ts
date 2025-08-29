@@ -14,8 +14,8 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { Subscription } from 'rxjs';
 import { AuthService } from './core/auth/services/auth.service';
 import { Inject } from '@angular/core';
-import { CURRENT_USER } from '@beauty-saas/web-core/auth';
-import type { CurrentUserPort, CurrentUserMin } from '@beauty-saas/web-core/auth';
+import { CURRENT_USER } from '@cthub-bsaas/web-core/auth';
+import type { CurrentUserPort, CurrentUserMin } from '@cthub-bsaas/web-core/auth';
 
 // Using CurrentUserMin from shared auth port
 

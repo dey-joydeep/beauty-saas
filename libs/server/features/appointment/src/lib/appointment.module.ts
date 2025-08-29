@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PrismaService } from '@beauty-saas/server-data-access';
+import { PrismaService } from '@cthub-bsaas/server-data-access';
 import { AppointmentService } from './services/appointment.service';
 import { AppointmentController } from './controllers/appointment.controller';
 import { APPOINTMENT_REPOSITORY } from './repositories/appointment.repository';

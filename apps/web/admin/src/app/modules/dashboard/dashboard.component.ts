@@ -1,12 +1,12 @@
-﻿import { PlatformUtils } from '@beauty-saas/web-config';
+﻿import { PlatformUtils } from '@cthub-bsaas/web-config';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { AbstractBaseComponent, ErrorService } from '@beauty-saas/web-core/http';
-import { StorageService } from '@beauty-saas/web-core/http';
-import type { PlatformUtils } from '@beauty-saas/web-config';
-import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
+import { AbstractBaseComponent, ErrorService } from '@cthub-bsaas/web-core/http';
+import { StorageService } from '@cthub-bsaas/web-core/http';
+import type { PlatformUtils } from '@cthub-bsaas/web-config';
+import { PLATFORM_UTILS_TOKEN } from '@cthub-bsaas/web-config';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 

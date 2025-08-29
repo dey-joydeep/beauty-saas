@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatError, MatFormFieldModule } from '@angular/material/form-field';
 import { MatListModule } from '@angular/material/list';
-import { DashboardApiService, Renewal } from '@beauty-saas/features/dashboard/services/dashboard-api.service';
+import { DashboardApiService, Renewal } from '@cthub-bsaas/features/dashboard/services/dashboard-api.service';
 
 @Component({
   selector: 'app-renewals-list',

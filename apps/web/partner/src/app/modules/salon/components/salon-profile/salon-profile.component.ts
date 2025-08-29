@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 // Core services
-import { CurrentUserService } from '@beauty-saas/web-core/auth';
+import { CurrentUserService } from '@cthub-bsaas/web-core/auth';
 
 // Models from salon module
 import { Appointment } from '../../models/appointment.model';
@@ -15,7 +15,7 @@ import { Salon } from '../../models/salon.model';
 import { Staff } from '../../models/staff.model';
 
 // Models from other modules
-import { AppointmentStatus } from '@beauty-saas/shared';
+import { AppointmentStatus } from '@cthub-bsaas/shared';
 import { Review } from '../../../reviews/models/review.model';
 
 // Pipes

@@ -7,8 +7,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
-import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
-import { ErrorService } from '@beauty-saas/web-core/http';
+import { AbstractBaseComponent } from '@cthub-bsaas/web-core/http';
+import { ErrorService } from '@cthub-bsaas/web-core/http';
 import { DashboardService } from '../../services/dashboard.service';
 import { Subscription } from 'rxjs';
 

@@ -14,7 +14,7 @@ import { Subscription, finalize } from 'rxjs';
 import { AppointmentCancelDialogComponent } from '../appointment-cancel-dialog/appointment-cancel-dialog.component';
 import { AppointmentWithDetails } from '../models/appointment.model';
 import { AppointmentService } from '../services/appointment.service';
-import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@cthub-bsaas/shared/enums/appointment-status.enum';
 
 @Component({
   selector: 'app-appointment-detail',

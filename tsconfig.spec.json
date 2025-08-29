@@ -19,15 +19,15 @@
         "paths": {
             "@app/*": ["apps/api/src/*"],
 
-            "@beauty-saas/server-data-access": ["libs/server/data-access/src/index.ts"],
-            "@beauty-saas/web-admin-auth": ["libs/web/admin/auth/src/index.ts"],
-            "@beauty-saas/web-config": ["libs/web/config/src/index.ts"],
-            "@beauty-saas/web-core-auth": ["libs/web/core/auth/src/index.ts"],
-            "@beauty-saas/web-core-http": ["libs/web/core/http/src/index.ts"],
-            "@beauty-saas/web-core-testing": ["libs/web/core/testing/src/index.ts"],
-            "@beauty-saas/web-customer-auth": ["libs/web/customer/auth/src/index.ts"],
-            "@beauty-saas/web-partner-auth": ["libs/web/partner/auth/src/index.ts"],
-            "@beauty-saas/web-ui": ["libs/web/ui/src/index.ts"]
+            "@cthub-bsaas/server-data-access": ["libs/server/data-access/src/index.ts"],
+            "@cthub-bsaas/web-admin-auth": ["libs/web/admin/auth/src/index.ts"],
+            "@cthub-bsaas/web-config": ["libs/web/config/src/index.ts"],
+            "@cthub-bsaas/web-core-auth": ["libs/web/core/auth/src/index.ts"],
+            "@cthub-bsaas/web-core-http": ["libs/web/core/http/src/index.ts"],
+            "@cthub-bsaas/web-core-testing": ["libs/web/core/testing/src/index.ts"],
+            "@cthub-bsaas/web-customer-auth": ["libs/web/customer/auth/src/index.ts"],
+            "@cthub-bsaas/web-partner-auth": ["libs/web/partner/auth/src/index.ts"],
+            "@cthub-bsaas/web-ui": ["libs/web/ui/src/index.ts"]
         },
         "types": ["node", "jest"],
         "experimentalDecorators": true,

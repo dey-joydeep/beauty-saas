@@ -1,5 +1,5 @@
 # Update import paths in all TypeScript files
-$baseDir = "e:\workspace\beauty-saas\bsaas-back\src"
+$baseDir = "e:\workspace\cthub-bsaas\bsaas-back\src"
 
 # Define the path mappings
 $pathMappings = @{

@@ -4,8 +4,8 @@ import { PortfolioService, PortfolioItem } from './portfolio.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
-import { ErrorService } from '@beauty-saas/web-core/http';
+import { AbstractBaseComponent } from '@cthub-bsaas/web-core/http';
+import { ErrorService } from '@cthub-bsaas/web-core/http';
 
 @Component({
   selector: 'app-portfolio',

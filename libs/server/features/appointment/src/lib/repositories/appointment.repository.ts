@@ -1,5 +1,5 @@
 import { CreateAppointmentDto } from '../dto/requests/create-appointment.dto';
-import { AuthUser } from '@beauty-saas/core';
+import { AuthUser } from '@cthub-bsaas/core';
 import { AppointmentWithRelations } from '../types/appointment.types';
 
 export const APPOINTMENT_REPOSITORY = 'APPOINTMENT_REPOSITORY';

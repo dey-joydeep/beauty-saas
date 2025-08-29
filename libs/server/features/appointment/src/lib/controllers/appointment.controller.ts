@@ -15,13 +15,13 @@ import {
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 // Core imports
-import { AuthUser, User } from '@beauty-saas/server-core';
-import { JwtAuthGuard, Roles, RolesGuard } from '@beauty-saas/server-core';
+import { AuthUser, User } from '@cthub-bsaas/server-core';
+import { JwtAuthGuard, Roles, RolesGuard } from '@cthub-bsaas/server-core';
 
 // Feature imports
 import { CreateAppointmentDto, FilterAppointmentsDto } from '../dto/requests';
 import { AppointmentDetailsDto, AppointmentResponseDto, AppointmentStatsDto, PaginatedAppointmentsDto } from '../dto/responses';
-import { AppUserRole } from '@beauty-saas/shared';
+import { AppUserRole } from '@cthub-bsaas/shared';
 import { AppointmentService } from '../services/appointment.service';
 
 @ApiTags('appointments')

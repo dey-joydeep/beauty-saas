@@ -28,10 +28,10 @@ function merge(a,b){ return JSON.parse(JSON.stringify({ ...a, ...b })); }
   }
   base.compilerOptions = base.compilerOptions || {};
   base.compilerOptions.paths = {
-    "@beauty-saas/shared": ["dist/libs/shared/index.d.ts"],
-    "@beauty-saas/shared/*": ["dist/libs/shared/*"],
-    "@beauty-saas/server-data-access": ["dist/libs/server/data-access/index.d.ts"],
-    "@beauty-saas/server-data-access/*": ["dist/libs/server/data-access/*"]
+    "@cthub-bsaas/shared": ["dist/libs/shared/index.d.ts"],
+    "@cthub-bsaas/shared/*": ["dist/libs/shared/*"],
+    "@cthub-bsaas/server-data-access": ["dist/libs/server/data-access/index.d.ts"],
+    "@cthub-bsaas/server-data-access/*": ["dist/libs/server/data-access/*"]
   };
   ensureDir(p); writeJSON(p, base);
 })();

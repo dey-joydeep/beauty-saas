@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/shared",
+  "name": "@cthub-bsaas/shared",
   "version": "0.0.1",
   "type": "module",
   "main": "./../../dist/libs/shared/index.js",

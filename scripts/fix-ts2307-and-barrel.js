@@ -28,10 +28,10 @@ function saveJSON(p, obj){ write(p, JSON.stringify(obj, null, 2) + '\n'); }
   j.compilerOptions = j.compilerOptions || {};
   j.compilerOptions.baseUrl = '.';
   j.compilerOptions.paths = {
-    '@beauty-saas/shared': ['dist/libs/shared/index.d.ts'],
-    '@beauty-saas/shared/*': ['dist/libs/shared/*'],
-    '@beauty-saas/server-data-access': ['dist/libs/server/data-access/index.d.ts'],
-    '@beauty-saas/server-data-access/*': ['dist/libs/server/data-access/*']
+    '@cthub-bsaas/shared': ['dist/libs/shared/index.d.ts'],
+    '@cthub-bsaas/shared/*': ['dist/libs/shared/*'],
+    '@cthub-bsaas/server-data-access': ['dist/libs/server/data-access/index.d.ts'],
+    '@cthub-bsaas/server-data-access/*': ['dist/libs/server/data-access/*']
   };
   saveJSON(p, j);
 })();
@@ -114,10 +114,10 @@ function saveJSON(p, obj){ write(p, JSON.stringify(obj, null, 2) + '\n'); }
     if (!fs.existsSync(p)) continue;
     let s = fs.readFileSync(p, 'utf8');
     s = s
-      .replace(/from\s+['"]@beauty-saas\/shared\/enums\/user-role\.enum['"]/g, `from '@beauty-saas/shared'`)
-      .replace(/from\s+['"]@beauty-saas\/shared\/enums\/appointment-status\.enum['"]/g, `from '@beauty-saas/shared'`)
-      .replace(/from\s+['"]@beauty-saas\/shared\/types\/user\.types['"]/g, `from '@beauty-saas/shared'`)
-      .replace(/from\s+['"]@beauty-saas\/server-data-access(?:\/index)?['"]/g, `from '@beauty-saas/server-data-access'`);
+      .replace(/from\s+['"]@cthub-bsaas\/shared\/enums\/user-role\.enum['"]/g, `from '@cthub-bsaas/shared'`)
+      .replace(/from\s+['"]@cthub-bsaas\/shared\/enums\/appointment-status\.enum['"]/g, `from '@cthub-bsaas/shared'`)
+      .replace(/from\s+['"]@cthub-bsaas\/shared\/types\/user\.types['"]/g, `from '@cthub-bsaas/shared'`)
+      .replace(/from\s+['"]@cthub-bsaas\/server-data-access(?:\/index)?['"]/g, `from '@cthub-bsaas/server-data-access'`);
     fs.writeFileSync(p, s, 'utf8');
     console.log('Patched', rel);
   }

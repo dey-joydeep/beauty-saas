@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@beauty-saas/server-data-access';
+import { PrismaService } from '@cthub-bsaas/server-data-access';
 import { AppointmentRepository, APPOINTMENT_REPOSITORY } from './appointment.repository';
 import { CreateAppointmentDto } from '../dto/requests/create-appointment.dto';
-import { AuthUser } from '@beauty-saas/server-core';
+import { AuthUser } from '@cthub-bsaas/server-core';
 import { AppointmentWithDetails } from '../models/appointment.model';
 
 @Injectable()

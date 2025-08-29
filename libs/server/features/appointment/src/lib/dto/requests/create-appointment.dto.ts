@@ -12,8 +12,8 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { AppointmentStatus } from '@beauty-saas/shared';
-import { IsValidAppointmentTime } from '@beauty-saas/core/validators';
+import { AppointmentStatus } from '@cthub-bsaas/shared';
+import { IsValidAppointmentTime } from '@cthub-bsaas/core/validators';
 
 /**
  * DTO for creating an appointment service item

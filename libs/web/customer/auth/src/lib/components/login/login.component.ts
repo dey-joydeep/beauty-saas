@@ -23,14 +23,14 @@ import { takeUntil } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
 
 // Services
-import { ErrorService } from '@beauty-saas/web-core-http';
-import { PLATFORM_UTILS_TOKEN } from '@beauty-saas/web-config';
-import { StorageService } from '@beauty-saas/web-core-http';
-import type { PlatformUtils } from '@beauty-saas/web-config';
+import { ErrorService } from '@cthub-bsaas/web-core-http';
+import { PLATFORM_UTILS_TOKEN } from '@cthub-bsaas/web-config';
+import { StorageService } from '@cthub-bsaas/web-core-http';
+import type { PlatformUtils } from '@cthub-bsaas/web-config';
 import { LoginService } from './login.service';
 import type { CustomerAuthUser } from '../../models/auth.models';
 
-import { AbstractBaseComponent } from '@beauty-saas/web-core-http';
+import { AbstractBaseComponent } from '@cthub-bsaas/web-core-http';
 
 @Component({
   standalone: true,

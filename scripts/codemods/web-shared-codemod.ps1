@@ -37,13 +37,13 @@ function Invoke-RegexReplace {
 }
 
 # 1) Specific import path replacements
-Invoke-LiteralReplace -Old '@frontend-shared/core/utils/platform-utils' -New '@beauty-saas/web-config'
-Invoke-LiteralReplace -Old '@frontend-shared/core/services/storage/storage.service' -New '@beauty-saas/web-core/http'
-Invoke-LiteralReplace -Old '@frontend-shared/core/services/error/error.service' -New '@beauty-saas/core'
-Invoke-LiteralReplace -Old '@frontend-shared/core/translate/translate-server.loader' -New '@beauty-saas/core'
+Invoke-LiteralReplace -Old '@frontend-shared/core/utils/platform-utils' -New '@cthub-bsaas/web-config'
+Invoke-LiteralReplace -Old '@frontend-shared/core/services/storage/storage.service' -New '@cthub-bsaas/web-core/http'
+Invoke-LiteralReplace -Old '@frontend-shared/core/services/error/error.service' -New '@cthub-bsaas/core'
+Invoke-LiteralReplace -Old '@frontend-shared/core/translate/translate-server.loader' -New '@cthub-bsaas/core'
 
 # 2) Generic fallback replacement
-Invoke-LiteralReplace -Old '@frontend-shared/' -New '@beauty-saas/'
+Invoke-LiteralReplace -Old '@frontend-shared/' -New '@cthub-bsaas/'
 
 # 3) PlatformUtils typing & DI
 Invoke-RegexReplace -Pattern '\\bIPlatformUtils\\b' -Replacement 'PlatformUtils'

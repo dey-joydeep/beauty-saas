@@ -1,5 +1,5 @@
-import { IsValidAppointmentStatus, IsValidAppointmentTime } from '@beauty-saas/core/validators/appointment.validators';
-import { AppointmentStatus } from '@beauty-saas/shared';
+import { IsValidAppointmentStatus, IsValidAppointmentTime } from '@cthub-bsaas/core/validators/appointment.validators';
+import { AppointmentStatus } from '@cthub-bsaas/shared';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDateString, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 
