@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "../../",
+    "typeRoots": ["node_modules/@types", "../../node_modules/@types"],
+    "types": ["node", "express", "jest"],
+    "composite": true,
+    "incremental": true,
+    "preserveSymlinks": true // Important for monorepo setups
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.spec.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

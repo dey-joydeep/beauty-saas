@@ -4,37 +4,44 @@
 
 A modern, scalable beauty salon management platform built with Nx, Angular, and NestJS.
 
-> **Last Updated**: August 2, 2025
+> **Last Updated**: August 13, 2025
 
 ## 🏗️ Project Structure
 
 ```text
 beauty-saas/
 ├── apps/
-│   ├── bsaas-front/      # Frontend application (Angular)
-│   ├── bsaas-back/       # Backend API (NestJS)
-│   └── bsaas-docs/       # Documentation site
+│   ├── web/              # Frontend applications
+│   │   ├── admin/        # Admin dashboard (Angular)
+│   │   ├── partner/      # Partner portal (Angular)
+│   │   └── customer/     # Customer app (Angular)
+│   └── api/              # Backend API (NestJS)
+│
 ├── libs/                 # Shared libraries
-│   └── shared/           # Shared code between frontend and backend
-├── scripts/              # Utility scripts
-├── .github/              # GitHub workflows
-├── .husky/               # Git hooks
-└── .vscode/              # VS Code settings
+│   ├── shared/           # Shared types and utilities
+│   ├── ui/              # Shared UI components
+│   └── feature/*        # Feature libraries
+│
+├── docs/                # Project documentation
+├── scripts/             # Utility scripts
+├── .github/             # GitHub workflows
+└── .vscode/            # VS Code settings
 ```
 
 ## 🚀 Development Setup
 
 ### Prerequisites
 
-- Node.js 18+
-- npm 9+
-- Docker 20.10+ (optional, for local database)
-- Git 2.35+
-- Nx CLI (optional): `npm install -g nx`
+- Node.js 20+
+- npm 10+
+- Docker 24.0+ (for local development)
+- Git 2.40+
+- Nx CLI (recommended): `npm install -g nx`
 
 ### Getting Started
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-org/beauty-saas.git
    cd beauty-saas
@@ -47,82 +54,114 @@ beauty-saas/
    ```
 
 3. **Set up environment variables**
+   - Copy `.env.example` to `.env` in the `apps/api` directory
+   - Update the values in `.env` as needed for your local setup
+   - For frontend, configure environment files in `apps/web/*/src/environments/`
+
+4. **Start the development servers**
+
+   Start the backend API:
 
    ```bash
-   cp .env.example .env
-   # Update the .env file with your configuration
+   nx serve api
    ```
 
-4. **Start development servers**
+   In a separate terminal, start the frontend application:
 
-   Start the frontend:
    ```bash
-   npm run dev:frontend
-   ```
+   # For admin dashboard
+   nx serve web-admin
 
-   In a separate terminal, start the backend:
-   ```bash
-   npm run dev:api
-   ```
+   # Or for partner portal
+   nx serve web-partner
 
-   For documentation:
-   ```bash
-   npm run dev:docs
+   # Or for customer app
+   nx serve web-customer
    ```
 
 5. **Run database migrations**
+
    ```bash
-   npx nx run bsaas-back:db:migrate
+   npx nx run api:db:migrate
    ```
 
 ## 🛠 Development Commands
 
 ### Run applications
 
-- **Start frontend in development mode**
+- **Start admin dashboard in development mode**
+
   ```bash
-  npx nx serve bsaas-front
+  npx nx serve admin
   ```
 
-- **Start backend in development mode**
+- **Start partner portal in development mode**
+
   ```bash
-  npx nx serve bsaas-back
+  npx nx serve partner
+  ```
+
+- **Start customer app in development mode**
+
+  ```bash
+  npx nx serve customer
+  ```
+
+- **Start backend API in development mode**
+  ```bash
+  npx nx serve api
   ```
 
 ### Build applications
 
 - **Build all applications**
+
   ```bash
   npx nx run-many --target=build --all
   ```
 
 - **Build specific application**
+
   ```bash
-  npx nx build bsaas-front
-  npx nx build bsaas-back
+  # Frontend apps
+  npx nx build admin
+  npx nx build partner
+  npx nx build customer
+
+  # Backend
+  npx nx build api
   ```
 
 ### Testing
 
 - **Run all tests**
+
   ```bash
   npx nx run-many --target=test --all
   ```
 
 - **Run tests for specific project**
+
   ```bash
-  npx nx test bsaas-front
-  npx nx test bsaas-back
+  # Frontend apps
+  npx nx test admin
+  npx nx test partner
+  npx nx test customer
+
+  # Backend
+  npx nx test api
   ```
 
 - **Run tests in watch mode**
   ```bash
-  npx nx test bsaas-front --watch
+  # Example for admin app
+  npx nx test admin --watch
   ```
 
 ### Linting
 
 - **Lint all projects**
+
   ```bash
   npx nx run-many --target=lint --all
   ```
@@ -136,12 +175,16 @@ beauty-saas/
 
 ### Apps
 
-- **bsaas-front**: Angular-based frontend application
-- **bsaas-back**: NestJS-based backend API
+- **admin**: Admin dashboard (Angular)
+- **partner**: Partner portal (Angular)
+- **customer**: Customer application (Angular)
+- **api**: Backend API (NestJS)
 
 ### Libraries
 
 - **shared**: Code shared between frontend and backend (DTOs, interfaces, utilities)
+- **frontend**: Shared frontend components and services
+- **ui**: Shared UI components library
 
 ## 🔧 Tools
 

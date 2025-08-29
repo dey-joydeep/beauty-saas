@@ -1,0 +1,845 @@
+// Prisma schema for PostgreSQL
+
+// Review status enum
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BusinessAddress {
+  id           String       @id @default(uuid()) @db.Uuid
+  countryId    String       @map("country_id") @db.Uuid
+  country      Country      @relation(fields: [countryId], references: [id])
+  stateId      String       @map("state_id") @db.Uuid
+  state        State        @relation(fields: [stateId], references: [id])
+  cityId       String       @map("city_id") @db.Uuid
+  city         City         @relation(fields: [cityId], references: [id])
+  postalCode   String       @map("postal_code")
+  line1        String
+  line2        String?
+  buildingName String?      @map("building_name")
+  floor        String?
+  landmark     String?
+  latitude     Float?
+  longitude    Float?
+  isActive     Boolean      @default(true) @map("is_active")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  salonTenant  SalonTenant? @relation("SalonTenantAddress")
+  salon        Salon?       @relation("SalonAddress")
+
+  @@index([countryId])
+  @@index([stateId])
+  @@index([cityId])
+  @@map("business_address")
+}
+
+model SalonTenant {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
+  email                String               @unique
+  phone                String?
+  businessAddressId    String?              @unique @map("business_address_id") @db.Uuid
+  businessAddress      BusinessAddress?     @relation("SalonTenantAddress", fields: [businessAddressId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  primaryColor         String?              @map("primary_color")
+  secondaryColor       String?              @map("secondary_color")
+  accentColor          String?              @map("accent_color")
+  users                User[]               @relation("UserToTenant")
+  providedServices     TenantSalonService[] // Many-to-many with SalonService
+  tenantProducts       TenantProduct[]
+  coupons              Coupon[]
+  portfolios           Portfolio[]          @relation("TenantPortfolios")
+  salons               Salon[]
+  productSales         ProductSale[]
+  appointments         Appointment[]
+  preferredByCustomers Customer[]           @relation("PreferredSalonTenant")
+  createdAt            DateTime             @default(now()) @map("created_at")
+  updatedAt            DateTime             @updatedAt @map("updated_at")
+
+  @@map("salon_tenant")
+}
+
+model User {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  phone        String?
+  isVerified   Boolean   @default(false) @map("is_verified")
+  isActive     Boolean   @default(true) @map("is_active")
+  name         String?
+  avatarUrl    String?   @map("avatar_url")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  salonTenantId String?      @map("salon_tenant_id") @db.Uuid
+  salonTenant   SalonTenant? @relation("UserToTenant", fields: [salonTenantId], references: [id], onDelete: SetNull)
+
+  // Authentication & Profile
+  customerAppointments Appointment[]     @relation("CustomerAppointments")
+  coupons              UserCoupon[]
+  otps                 OTP[]
+  roles                UserRole[]
+  saasOwner            SaasOwner?
+  salonStaff           SalonTenantStaff?
+  customer             Customer?
+  socialAccounts       SocialAccount[]
+
+  // Content & Portfolios
+  portfolios Portfolio[] @relation("UserPortfolios")
+
+  // Business Relations
+  ownedSalon Salon? @relation("SalonOwner")
+
+  // Social & Commerce
+  social            Social[]      @relation("UserSocials")
+  soldProducts      ProductSale[] @relation("SoldProducts")
+  purchasedProducts ProductSale[] @relation("PurchasedProducts")
+
+  @@map("user")
+}
+
+model Role {
+  id    Int        @id @default(autoincrement())
+  name  String     @unique
+  users UserRole[]
+
+  @@map("role")
+}
+
+model UserRole {
+  userId String @map("user_id") @db.Uuid
+  roleId Int    @map("role_id")
+  user   User   @relation(fields: [userId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("user_role")
+}
+
+model SaasOwner {
+  userId         String   @id @map("user_id") @db.Uuid
+  user           User     @relation(fields: [userId], references: [id])
+  permissions    String[] @default([])
+  managedTenants String[] @map("managed_tenants")
+
+  @@map("saas_owner")
+}
+
+model SalonTenantStaff {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @unique @map("user_id") @db.Uuid
+  user            User      @relation(fields: [userId], references: [id])
+  salonId         String    @map("salon_id") @db.Uuid
+  salon           Salon     @relation(fields: [salonId], references: [id])
+  position        String
+  isActive        Boolean   @default(true) @map("is_active")
+  hireDate        DateTime? @map("hire_date")
+  terminationDate DateTime? @map("termination_date")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  appointmentServices AppointmentService[]
+  staffAppointments   Appointment[]        @relation("StaffAppointments")
+  staffRequests       SalonStaffRequest[]
+  serviceReviews      SalonServiceReview[] @relation("StaffServiceReviews")
+
+  @@unique([userId, salonId])
+  @@unique([id]) // Added to ensure unique reference for one-to-one relations
+  // Indexes for better query performance
+  @@index([userId])
+  @@index([salonId])
+  @@map("salon_tenant_staff")
+}
+
+model SalonStaffRequest {
+  id              String                  @id @default(uuid()) @db.Uuid
+  staffId         String?                 @map("staff_id") @db.Uuid
+  staff           SalonTenantStaff?       @relation(fields: [staffId], references: [id])
+  requestType     SalonStaffRequestType   @map("request_type")
+  leaveFrom       DateTime?               @map("leave_from")
+  leaveTo         DateTime?               @map("leave_to")
+  reason          String?
+  status          SalonStaffRequestStatus @map("status")
+  rejectionReason String?                 @map("rejection_reason")
+  createdAt       DateTime                @default(now()) @map("created_at")
+  updatedAt       DateTime                @updatedAt @map("updated_at")
+
+  @@index([staffId])
+  @@index([status])
+  @@map("salon_staff_request")
+}
+
+model Customer {
+  id                     String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                 String       @unique @map("user_id") @db.Uuid
+  user                   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone                  String?
+  dateOfBirth            DateTime?    @map("date_of_birth")
+  gender                 String?
+  address                String?
+  city                   String?
+  state                  String?
+  country                String?
+  postalCode             String?      @map("postal_code")
+  preferredSalonTenantId String?      @map("preferred_salon_tenant_id") @db.Uuid
+  preferredSalonTenant   SalonTenant? @relation("PreferredSalonTenant", fields: [preferredSalonTenantId], references: [id])
+  loyaltyPoints          Int          @default(0) @map("loyalty_points")
+  lastVisit              DateTime?    @map("last_visit")
+  notes                  String?
+  isActive               Boolean      @default(true) @map("is_active")
+  registeredAt           DateTime     @default(now()) @map("registered_at")
+  updatedAt              DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  appointments   Appointment[]        @relation("CustomerAppointments")
+  serviceReviews SalonServiceReview[] @relation("CustomerServiceReviews")
+  productSales   ProductSale[]        @relation("CustomerProductSales")
+  coupons        UserCoupon[]         @relation("CustomerCoupons")
+
+  @@map("customer")
+}
+
+model Coupon {
+  id           String      @id @default(uuid()) @db.Uuid
+  tenantId     String      @map("tenant_id") @db.Uuid
+  tenant       SalonTenant @relation(fields: [tenantId], references: [id])
+  code         String      @unique
+  description  String?
+  discount     Float
+  discountType String      @default("PERCENT") @map("discount_type") // PERCENT or FIXED
+  maxDiscount  Float?      @map("max_discount")
+  minPurchase  Float?      @map("min_purchase")
+  usageLimit   Int?        @map("usage_limit")
+  usageCount   Int         @default(0) @map("usage_count")
+  isActive     Boolean     @default(true) @map("is_active")
+  validFrom    DateTime    @map("valid_from")
+  validTo      DateTime    @map("valid_to")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  userCoupons UserCoupon[]
+
+  @@index([code])
+  @@index([tenantId])
+  @@index([isActive])
+  @@map("coupon")
+}
+
+model UserCoupon {
+  id        Int       @id @default(autoincrement())
+  userId    String    @map("user_id") @db.Uuid
+  couponId  String    @map("coupon_id") @db.Uuid
+  isUsed    Boolean   @default(false) @map("is_used")
+  usedAt    DateTime? @map("used_at")
+  orderId   String?   @map("order_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id])
+  coupon   Coupon    @relation(fields: [couponId], references: [id])
+  customer Customer? @relation("CustomerCoupons", fields: [userId], references: [userId], map: "user_coupon_customer_fkey")
+
+  @@unique([userId, couponId])
+  @@index([userId])
+  @@index([couponId])
+  @@index([isUsed])
+  @@map("user_coupon")
+}
+
+model OTP {
+  id        Int      @id @default(autoincrement())
+  userId    String?  @map("user_id") @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  code      String
+  type      String   @default("VERIFICATION") // VERIFICATION, PASSWORD_RESET, etc.
+  expiresAt DateTime @map("expires_at")
+  isUsed    Boolean  @default(false) @map("is_used")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([code])
+  @@index([isUsed])
+  @@index([expiresAt])
+  @@map("otp")
+}
+
+model Salon {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String          @map("tenant_id") @db.Uuid
+  businessAddressId String          @unique @map("business_address_id") @db.Uuid
+  businessAddress   BusinessAddress @relation("SalonAddress", fields: [businessAddressId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name              String
+  slug              String          @unique
+  description       String?
+  phone             String
+  email             String?
+  website           String?
+  logoUrl           String?         @map("logo_url")
+  coverImageUrl     String?         @map("cover_image_url")
+  isActive          Boolean         @default(true) @map("is_active")
+  isVerified        Boolean         @default(false) @map("is_verified")
+  isFeatured        Boolean         @default(false) @map("is_featured")
+  averageRating     Decimal?        @default(0.0) @map("average_rating") @db.Decimal(3, 2)
+  reviewCount       Int             @default(0) @map("review_count")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  owner            User               @relation("SalonOwner", fields: [ownerId], references: [id])
+  ownerId          String             @unique @map("owner_id") @db.Uuid
+  metadata         Json?              @db.JsonB
+  tenant           SalonTenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  portfolios       Portfolio[]        @relation("SalonPortfolios")
+  salonTenantStaff SalonTenantStaff[]
+  translations     SalonTranslation[]
+  salonServices    SalonService[]     @relation("SalonServices")
+
+  // Indexes for better query performance
+  @@index([tenantId])
+  @@index([isActive])
+  @@index([isVerified])
+  @@index([averageRating])
+  @@index([reviewCount])
+  @@map("salon")
+}
+
+model Portfolio {
+  id          String   @id @default(uuid()) @map("id") @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  salonId     String   @map("salon_id") @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  title       String?
+  description String?
+  isFeatured  Boolean  @default(false) @map("is_featured")
+  isActive    Boolean  @default(true) @map("is_active")
+  order       Int      @default(0)
+  metadata    Json?    @map("metadata")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  images PortfolioImage[]
+  tenant SalonTenant      @relation("TenantPortfolios", fields: [tenantId], references: [id])
+  salon  Salon            @relation("SalonPortfolios", fields: [salonId], references: [id])
+  user   User?            @relation("UserPortfolios", fields: [userId], references: [id])
+
+  // Indexes
+  @@index([tenantId])
+  @@index([salonId])
+  @@index([userId])
+  @@index([isFeatured])
+  @@index([isActive])
+  @@index([order])
+  @@map("portfolio")
+}
+
+model PortfolioImage {
+  id          String    @id @default(uuid()) @map("id") @db.Uuid
+  portfolioId String    @map("portfolio_id") @db.Uuid
+  imagePath   String    @map("image_path")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+
+  @@map("portfolio_image")
+}
+
+model SocialAccount {
+  id             Int      @id @default(autoincrement())
+  provider       String // 'google' | 'facebook'
+  providerUserId String   @map("provider_user_id")
+  userId         String   @map("user_id") @db.Uuid
+  user           User     @relation(fields: [userId], references: [id])
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@unique([provider, providerUserId])
+  @@map("social_account")
+}
+
+model AppointmentService {
+  id             String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  appointmentId  String               @map("appointment_id") @db.Uuid
+  appointment    Appointment          @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  salonServiceId String               @map("salon_service_id") @db.Uuid
+  salonService   SalonService         @relation(fields: [salonServiceId], references: [id], onDelete: Restrict)
+  staffId        String?              @map("staff_id") @db.Uuid
+  staff          SalonTenantStaff?    @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  price          Decimal              @db.Decimal(10, 2)
+  originalPrice  Decimal?             @map("original_price") @db.Decimal(10, 2)
+  discountAmount Decimal?             @map("discount_amount") @db.Decimal(10, 2)
+  duration       Int                  @default(30) // Duration in minutes
+  startTime      DateTime?            @map("start_time")
+  endTime        DateTime?            @map("end_time")
+  status         String               @default("pending") // pending, confirmed, in_progress, completed, cancelled, no_show
+  notes          String?              @db.Text
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+  metadata       Json?                @db.JsonB
+  reviews        SalonServiceReview[] @relation("AppointmentServiceReviews")
+
+  @@index([appointmentId])
+  @@index([salonServiceId])
+  @@index([staffId])
+  @@index([status])
+  @@index([startTime])
+  @@map("appointment_service")
+}
+
+model Theme {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  colors      Json
+  isActive    Boolean  @default(true) @map("is_active")
+  isDefault   Boolean  @default(false) @map("is_default")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive])
+  @@index([isDefault])
+  @@map("theme")
+}
+
+model Social {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  platform  String
+  handle    String
+  url       String?
+  isActive  Boolean  @default(true) @map("is_active")
+  isPrimary Boolean  @default(false) @map("is_primary")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation("UserSocials", fields: [userId], references: [id])
+
+  @@unique([platform, handle])
+  @@index([userId])
+  @@index([platform])
+  @@index([isActive])
+  @@index([isPrimary])
+  @@map("social")
+}
+
+enum AppointmentStatus {
+  booked
+  completed
+  cancelled
+}
+
+enum SalonStaffRequestType {
+  profile_update
+  leave
+}
+
+enum SalonStaffRequestStatus {
+  pending
+  approved
+  rejected
+}
+
+model ProductSale {
+  id              String        @id @default(uuid()) @db.Uuid
+  salonTenantId   String        @map("salon_tenant_id") @db.Uuid
+  salonTenant     SalonTenant   @relation(fields: [salonTenantId], references: [id])
+  tenantProductId String        @map("tenant_product_id") @db.Uuid
+  tenantProduct   TenantProduct @relation(fields: [tenantProductId], references: [id])
+  quantity        Int
+  unitPrice       Float         @map("unit_price")
+  discountAmount  Float?        @default(0) @map("discount_amount")
+  taxAmount       Float?        @default(0) @map("tax_amount")
+  totalAmount     Float         @map("total_amount")
+  saleDate        DateTime      @default(now()) @map("sale_date")
+  soldById        String        @map("sold_by_id") @db.Uuid
+  soldBy          User          @relation("SoldProducts", fields: [soldById], references: [id])
+  appointmentId   String?       @map("appointment_id") @db.Uuid
+  appointment     Appointment?  @relation("AppointmentProducts", fields: [appointmentId], references: [id])
+  customerId      String?       @map("customer_id") @db.Uuid
+  customerUser    User?         @relation("PurchasedProducts", fields: [customerId], references: [id])
+  customerRef     Customer?     @relation("CustomerProductSales", fields: [customerId], references: [id], map: "product_sale_customer_ref_fkey")
+  notes           String?
+  isRefunded      Boolean       @default(false) @map("is_refunded")
+  refundDate      DateTime?     @map("refund_date")
+  refundReason    String?       @map("refund_reason")
+  metadata        Json?         @db.JsonB
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@index([saleDate])
+  @@index([tenantProductId])
+  @@index([salonTenantId])
+  @@index([appointmentId])
+  @@index([customerId])
+  @@index([soldById])
+  @@index([isRefunded])
+  @@map("product_sale")
+}
+
+model Language {
+  id         String   @id @default(uuid()) @db.Uuid
+  code       String   @map("code")
+  name       String
+  nativeName String   @map("native_name")
+  isActive   Boolean  @default(true) @map("is_active")
+  isRtl      Boolean  @default(false) @map("is_rtl")
+  locale     String? // e.g., "en-US", "fr-FR"
+  flagEmoji  String?  @map("flag_emoji")
+  sortOrder  Int?     @default(0) @map("sort_order")
+  metadata   Json?    @db.JsonB
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  translations SalonTranslation[]
+
+  @@unique([code])
+  // Indexes
+  @@index([code])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("language")
+}
+
+model Country {
+  id                String            @id @default(uuid()) @db.Uuid
+  name              String
+  iso2              String            @unique
+  iso3              String?           @unique
+  phoneCode         String?           @map("phone_code")
+  capital           String?
+  currency          String?
+  native            String?
+  emoji             String?
+  emojiU            String?           @map("emoji_u")
+  isActive          Boolean           @default(true) @map("is_active")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  states            State[]
+  cities            City[]
+  businessAddresses BusinessAddress[]
+
+  @@map("country")
+}
+
+model State {
+  id                String            @id @default(uuid()) @db.Uuid
+  name              String
+  stateCode         String            @map("state_code")
+  countryId         String            @map("country_id") @db.Uuid
+  country           Country           @relation(fields: [countryId], references: [id])
+  latitude          String?
+  longitude         String?
+  isActive          Boolean           @default(true) @map("is_active")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  cities            City[]
+  businessAddresses BusinessAddress[]
+
+  @@unique([countryId, stateCode])
+  @@map("state")
+}
+
+model City {
+  id                String            @id @default(uuid()) @db.Uuid
+  name              String
+  stateId           String            @map("state_id") @db.Uuid
+  state             State             @relation(fields: [stateId], references: [id])
+  countryId         String            @map("country_id") @db.Uuid
+  country           Country           @relation(fields: [countryId], references: [id])
+  latitude          String?
+  longitude         String?
+  isActive          Boolean           @default(true) @map("is_active")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  businessAddresses BusinessAddress[]
+
+  @@index([stateId])
+  @@index([countryId])
+  @@map("city")
+}
+
+model SalonTranslation {
+  id          String   @id @default(uuid()) @db.Uuid
+  salonId     String   @map("salon_id") @db.Uuid
+  salon       Salon    @relation(fields: [salonId], references: [id])
+  languageId  String   @map("language_id") @db.Uuid
+  language    Language @relation(fields: [languageId], references: [id])
+  name        String
+  description String?
+  address     String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([salonId, languageId])
+  @@map("salon_translation")
+}
+
+model ProductCategory {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+  metadata    Json?    @db.JsonB
+
+  // Relations
+  globalProducts GlobalProduct[]
+  tenantProducts TenantProduct[]
+
+  @@unique([name])
+  @@index([isActive])
+  @@map("product_category")
+}
+
+model ServiceCategory {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+  metadata    Json?    @db.JsonB
+
+  // Relations
+  globalServices GlobalService[]
+  salonServices  SalonService[]
+
+  @@unique([name])
+  @@index([isActive])
+  @@map("service_category")
+}
+
+model GlobalProduct {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  categoryId  String   @map("category_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+  isActive    Boolean  @default(true) @map("is_active")
+  skuPattern  String?  @map("sku_pattern") // Pattern for generating tenant SKUs
+  barcodeType String?  @map("barcode_type") // Type of barcode (EAN, UPC, etc.)
+  metadata    Json? // Additional product metadata
+
+  // Relations
+  productCategory ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  tenantProducts  TenantProduct[]
+
+  @@unique([name, categoryId])
+  @@index([categoryId], name: "idx_global_product_category")
+  @@index([isActive], name: "idx_global_product_active")
+  @@map("global_product")
+}
+
+model GlobalService {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  categoryId  String   @map("category_id") @db.Uuid
+  duration    Int? // Duration in minutes
+  price       Decimal? @db.Decimal(10, 2) // Base price
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+  metadata    Json? // Additional service metadata
+
+  // Relations
+  serviceCategory ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  salonServices   SalonService[]
+
+  @@index([categoryId], name: "idx_global_service_category")
+  @@index([isActive], name: "idx_global_service_active")
+  @@map("global_service")
+}
+
+model Appointment {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  salonTenantId      String    @map("salon_tenant_id") @db.Uuid
+  customerId         String?   @map("customer_id") @db.Uuid
+  staffId            String?   @map("staff_id") @db.Uuid
+  status             String    @default("pending") // pending, confirmed, in_progress, completed, cancelled, no_show
+  startTime          DateTime  @map("start_time")
+  endTime            DateTime  @map("end_time")
+  notes              String?
+  customerNotes      String?   @map("customer_notes")
+  internalNotes      String?   @map("internal_notes")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @default(now()) @map("updated_at")
+  cancelledAt        DateTime? @map("cancelled_at")
+  cancelledBy        String?   @map("cancelled_by") @db.Uuid
+  cancellationReason String?   @map("cancellation_reason")
+  customerName       String?   @map("customer_name")
+  customerPhone      String?   @map("customer_phone")
+  customerEmail      String?   @map("customer_email")
+
+  // Relations
+  salonTenant  SalonTenant          @relation(fields: [salonTenantId], references: [id], onDelete: Cascade)
+  customerUser User?                @relation("CustomerAppointments", fields: [customerId], references: [id], onDelete: SetNull)
+  // Customer relation with explicit name to match Customer.appointments
+  customer     Customer?            @relation("CustomerAppointments", fields: [customerId], references: [id], onDelete: SetNull, map: "appointment_customer_ref_fkey")
+  staff        SalonTenantStaff?    @relation("StaffAppointments", fields: [staffId], references: [id], onDelete: SetNull)
+  services     AppointmentService[]
+  productSales ProductSale[]        @relation("AppointmentProducts")
+
+  @@index([salonTenantId], name: "idx_appointment_tenant")
+  @@index([customerId], name: "idx_appointment_customer")
+  @@index([staffId], name: "idx_appointment_staff")
+  @@index([status], name: "idx_appointment_status")
+  @@index([startTime], name: "idx_appointment_start_time")
+  @@map("appointment")
+}
+
+model TenantProduct {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  salonTenantId     String   @map("salon_tenant_id") @db.Uuid
+  globalProductId   String?  @map("global_product_id") @db.Uuid
+  productCategoryId String   @map("product_category_id") @db.Uuid
+  name              String
+  description       String?
+  price             Decimal  @db.Decimal(10, 2)
+  costPrice         Decimal? @map("cost_price") @db.Decimal(10, 2)
+  stockQuantity     Int      @default(0) @map("stock_quantity")
+  sku               String?  @unique
+  barcode           String?  @unique
+  isActive          Boolean  @default(true) @map("is_active")
+  isTaxable         Boolean  @default(true) @map("is_taxable")
+  taxRate           Decimal? @map("tax_rate") @db.Decimal(5, 2)
+  weight            Decimal? @db.Decimal(10, 2)
+  weightUnit        String?  @default("g") @map("weight_unit")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @map("updated_at")
+
+  // Relations
+  salonTenant     SalonTenant     @relation(fields: [salonTenantId], references: [id], onDelete: Cascade)
+  globalProduct   GlobalProduct?  @relation(fields: [globalProductId], references: [id], onDelete: SetNull)
+  productCategory ProductCategory @relation(fields: [productCategoryId], references: [id], onDelete: Restrict)
+  sales           ProductSale[]
+
+  @@index([salonTenantId], name: "idx_tenant_product_tenant")
+  @@index([globalProductId], name: "idx_tenant_product_global")
+  @@index([isActive], name: "idx_tenant_product_active")
+  @@index([sku], name: "idx_tenant_product_sku")
+  @@index([barcode], name: "idx_tenant_product_barcode")
+  @@map("tenant_product")
+}
+
+model SalonService {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  salonId           String   @map("salon_id") @db.Uuid
+  globalServiceId   String?  @map("global_service_id") @db.Uuid // Reference only, no relation
+  serviceCategoryId String   @map("service_category_id") @db.Uuid
+  name              String
+  description       String?
+  duration          Int // Duration in minutes
+  price             Decimal  @db.Decimal(10, 2)
+  costPrice         Decimal? @map("cost_price") @db.Decimal(10, 2)
+  isActive          Boolean  @default(true) @map("is_active")
+  isFeatured        Boolean  @default(false) @map("is_featured")
+  position          Int?     @default(0)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  metadata          Json?    @db.JsonB
+
+  // Relations
+  salon             Salon                @relation("SalonServices", fields: [salonId], references: [id], onDelete: Cascade)
+  serviceCategory   ServiceCategory      @relation(fields: [serviceCategoryId], references: [id], onDelete: Restrict)
+  appointments      AppointmentService[]
+  providedByTenants TenantSalonService[]
+  globalService     GlobalService?       @relation(fields: [globalServiceId], references: [id], onDelete: SetNull)
+
+  @@index([salonId], name: "idx_salon_service_salon")
+  @@index([serviceCategoryId], name: "idx_salon_service_category")
+  @@index([isActive], name: "idx_salon_service_active")
+  @@index([globalServiceId], name: "idx_salon_service_global")
+  @@map("salon_service")
+}
+
+// Join table for many-to-many between Tenant and SalonService with audit capabilities
+model TenantSalonService {
+  // Relations
+  tenantId       String       @map("tenant_id") @db.Uuid
+  salonServiceId String       @map("salon_service_id") @db.Uuid
+  tenant         SalonTenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  salonService   SalonService @relation(fields: [salonServiceId], references: [id], onDelete: Cascade)
+
+  // Status tracking
+  isActive Boolean @default(true) @map("is_active")
+
+  // Audit timestamps
+  addedAt      DateTime  @default(now()) @map("added_at")
+  removedAt    DateTime? @map("removed_at")
+  lastActiveAt DateTime? @map("last_active_at")
+
+  // Relations
+  reviews SalonServiceReview[] @relation("TenantServiceReviews")
+
+  // Standard timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Indexes for common queries
+  @@id([tenantId, salonServiceId])
+  @@index([isActive], name: "idx_tenant_salon_service_active")
+  @@index([addedAt], name: "idx_tenant_salon_service_added")
+  @@map("tenant_salon_service")
+}
+
+model SalonServiceReview {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  appointmentServiceId String             @map("appointment_service_id") @db.Uuid
+  appointmentService   AppointmentService @relation("AppointmentServiceReviews", fields: [appointmentServiceId], references: [id], onDelete: Cascade)
+
+  // Core review fields
+  rating     Int          @db.SmallInt // 1-5, validated in application code
+  comment    String?      @db.Text
+  response   String?      @db.Text
+  isApproved Boolean      @default(false) @map("is_approved")
+  isFeatured Boolean      @default(false) @map("is_featured")
+  status     ReviewStatus @default(PENDING)
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations (denormalized for performance)
+  customerId String   @map("customer_id") @db.Uuid
+  customer   Customer @relation("CustomerServiceReviews", fields: [customerId], references: [id])
+
+  // Reference to the specific tenant's service implementation
+  tenantId       String             @map("tenant_id") @db.Uuid
+  salonServiceId String             @map("salon_service_id") @db.Uuid
+  tenantService  TenantSalonService @relation("TenantServiceReviews", fields: [tenantId, salonServiceId], references: [tenantId, salonServiceId])
+
+  // Keep direct reference to staff who provided the service
+  staffId String?           @map("staff_id") @db.Uuid
+  staff   SalonTenantStaff? @relation("StaffServiceReviews", fields: [staffId], references: [id])
+
+  // Indexes for common queries
+  @@index([customerId])
+  @@index([tenantId, salonServiceId])
+  @@index([staffId])
+  @@index([status])
+  @@index([isApproved])
+  @@index([isFeatured])
+  @@index([createdAt])
+  @@map("salon_service_review")
+}

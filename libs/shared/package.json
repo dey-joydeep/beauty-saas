@@ -1,0 +1,20 @@
+{
+  "name": "@beauty-saas/shared",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./../../dist/libs/shared/index.js",
+  "types": "./../../dist/libs/shared/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./../../dist/libs/shared/index.d.ts",
+      "default": "./../../dist/libs/shared/index.js"
+    },
+    "./enums/user-role.enum": "./../../dist/libs/shared/enums/user-role.enum.js",
+    "./enums/appointment-status.enum": "./../../dist/libs/shared/enums/appointment-status.enum.js",
+    "./types/user.types": {
+      "types": "./../../dist/libs/shared/types/user.types.d.ts",
+      "default": "./../../dist/libs/shared/types/user.types.js"
+    }
+  },
+  "sideEffects": false
+}

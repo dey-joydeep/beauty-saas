@@ -1,0 +1,6 @@
+{
+  "name": "@beauty-saas/web-core-testing",
+  "version": "0.0.1",
+  "sideEffects": false,
+  "type": "module"
+}

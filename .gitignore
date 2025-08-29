@@ -3,6 +3,7 @@ node_modules/
 
 # Build outputs
 dist/
+libs/**/dist/
 .nx/
 *.tsbuildinfo
 
@@ -14,8 +15,12 @@ logs
 *.log
 *.sw?
 
+# Temporary files
+tmp/
+
 # IDE and editor files
 .vscode/
+.cursor/
 
 # Angular
 .angular/
@@ -34,3 +39,5 @@ logs
 
 # Coverage
 coverage/
+.angular
+.github/instructions/nx.instructions.md

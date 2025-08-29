@@ -1,0 +1,39 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "types": ["jest", "node", "@testing-library/jest-dom", "jest-environment-jsdom"],
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "strict": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "lib": ["es2022", "dom"]
+  },
+  "include": [
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts",
+    "src/test-setup.ts",
+    "jest.config.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/test-utils.tsx",
+    "src/**/test-utils.ts",
+    "src/**/__mocks__/*.ts",
+    "src/**/__tests__/*.ts"
+  ],
+  "files": ["src/test-setup.ts"],
+  "exclude": ["node_modules/jasmine", "node_modules/jasmine-core", "node_modules/@types/jasmine", "**/*.mjs"]
+}
