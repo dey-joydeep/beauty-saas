@@ -43,7 +43,7 @@
             "@cthub-bsaas/web-ui": ["libs/web/ui/src/index.ts", "dist/libs/web/ui/index.d.ts"],
             "@cthub-bsaas/web-ui/*": ["libs/web/ui/src/*", "dist/libs/web/ui/*"]
         },
-        "types": ["node", "jest"],
+        "types": ["node"],
         "experimentalDecorators": true,
         "sourceMap": true,
         "noUnusedParameters": true,
