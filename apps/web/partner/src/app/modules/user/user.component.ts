@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { AbstractBaseComponent, ErrorService } from '@beauty-saas/web-core/http';
+import { AbstractBaseComponent, ErrorService } from '@cthub-bsaas/web-core/http';
 import { TranslateModule } from '@ngx-translate/core';
-import { CurrentUserService } from '@beauty-saas/web-core/auth';
+import { CurrentUserService } from '@cthub-bsaas/web-core/auth';
 import { UserService, UserStats } from './user.service';
 
 @Component({

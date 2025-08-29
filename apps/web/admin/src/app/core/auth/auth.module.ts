@@ -16,7 +16,7 @@ import { TranslateModule } from '@ngx-translate/core';
 // Services
 import { AuthService } from './services/auth.service';
 import { CurrentUserService } from './services/current-user.service';
-import { CURRENT_USER } from '@beauty-saas/web-core/auth';
+import { CURRENT_USER } from '@cthub-bsaas/web-core/auth';
 
 // Guards
 import { authGuard, publicGuard } from './guards/auth.guard';

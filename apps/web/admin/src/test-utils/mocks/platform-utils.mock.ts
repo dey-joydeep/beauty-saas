@@ -1,4 +1,4 @@
-import type { PlatformUtils } from '@beauty-saas/web-config';
+import type { PlatformUtils } from '@cthub-bsaas/web-config';
 
 /**
  * Creates a mock implementation of PlatformUtils for testing

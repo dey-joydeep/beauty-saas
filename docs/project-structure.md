@@ -6,7 +6,7 @@ This document outlines the structure of the Beauty SaaS monorepo, following the 
 ## Root Directory Structure
 
 ```
-beauty-saas/
+cthub-bsaas/
 ├── .github/                # GitHub workflows and CI/CD configurations
 ├── .husky/                 # Git hooks
 ├── .nx/                    # NX cache and workspace data

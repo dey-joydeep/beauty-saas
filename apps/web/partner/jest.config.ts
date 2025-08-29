@@ -10,8 +10,8 @@ export default {
     '^@env/(.*)$': '<rootDir>/src/environments/$1',
     '^@shared/(.*)$': '<rootDir>/../../libs/shared/src/$1',
     '^@frontend/(.*)$': '<rootDir>/../../libs/frontend/src/$1',
-    '^@beauty-saas/(.*)$': '<rootDir>/../../libs/frontend/src/app/$1',
-    '^@beauty-saas/shared/(.*)$': '<rootDir>/../../libs/frontend/src/app/shared/$1',
+    '^@cthub-bsaas/(.*)$': '<rootDir>/../../libs/frontend/src/app/$1',
+    '^@cthub-bsaas/shared/(.*)$': '<rootDir>/../../libs/frontend/src/app/shared/$1',
   },
   globals: {
     'ts-jest': {

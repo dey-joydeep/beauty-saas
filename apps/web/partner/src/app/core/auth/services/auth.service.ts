@@ -3,8 +3,8 @@ import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { BehaviorSubject, forkJoin, Observable, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { StorageService } from '@beauty-saas/web-core/http';
-import type { AuthStatePort, BaseAuthUser } from '@beauty-saas/web-core/auth';
+import { StorageService } from '@cthub-bsaas/web-core/http';
+import type { AuthStatePort, BaseAuthUser } from '@cthub-bsaas/web-core/auth';
 
 export interface AuthUser extends BaseAuthUser {
   readonly email?: string;

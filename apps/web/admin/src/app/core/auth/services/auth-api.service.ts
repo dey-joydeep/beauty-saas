@@ -8,7 +8,7 @@ import type {
     InitLoginResponse,
     LoginCredentials,
     VerifyOtpParams,
-} from '@beauty-saas/web-admin/auth';
+} from '@cthub-bsaas/web-admin/auth';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {

@@ -12,7 +12,7 @@ import {
   AppointmentWithDetails,
   TimeSlot,
 } from '../models/appointment.model';
-import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@cthub-bsaas/shared/enums/appointment-status.enum';
 
 export interface RescheduleRequest {
   startTime: Date;

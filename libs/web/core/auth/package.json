@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/web-core-auth",
+  "name": "@cthub-bsaas/web-core-auth",
   "version": "0.0.1",
   "sideEffects": false,
   "type": "module"

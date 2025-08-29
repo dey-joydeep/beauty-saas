@@ -11,11 +11,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ConfirmDialogComponent } from '@beauty-saas/shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from '@cthub-bsaas/shared/components/confirm-dialog/confirm-dialog.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Appointment } from '../models/appointment.model';
 import { AppointmentService } from '../services/appointment.service';
-import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@cthub-bsaas/shared/enums/appointment-status.enum';
 
 interface DialogResult {
   action: 'confirm' | 'cancel';

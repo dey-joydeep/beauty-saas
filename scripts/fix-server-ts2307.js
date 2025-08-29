@@ -25,10 +25,10 @@ const serverBase = {
   extends: './tsconfig.base.json',
   compilerOptions: {
     paths: {
-      '@beauty-saas/shared': ['dist/libs/shared/index.d.ts'],
-      '@beauty-saas/shared/*': ['dist/libs/shared/*'],
-      '@beauty-saas/server-data-access': ['dist/libs/server/data-access/index.d.ts'],
-      '@beauty-saas/server-data-access/*': ['dist/libs/server/data-access/*'],
+      '@cthub-bsaas/shared': ['dist/libs/shared/index.d.ts'],
+      '@cthub-bsaas/shared/*': ['dist/libs/shared/*'],
+      '@cthub-bsaas/server-data-access': ['dist/libs/server/data-access/index.d.ts'],
+      '@cthub-bsaas/server-data-access/*': ['dist/libs/server/data-access/*'],
     },
   },
 };

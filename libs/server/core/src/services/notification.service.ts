@@ -8,7 +8,7 @@ import { Notification } from '../models/notification.model';
  *
  * This implementation is intended for backend usage only and should not be
  * imported by Angular/web apps. Frontend clients must use the web version at:
- * `@beauty-saas/web-core/http` → `libs/web/core/http/src/lib/services/notification.service.ts`.
+ * `@cthub-bsaas/web-core/http` → `libs/web/core/http/src/lib/services/notification.service.ts`.
  *
  * Notes:
  * - Uses NestJS `@Injectable` and lifecycle hook `OnModuleDestroy`.

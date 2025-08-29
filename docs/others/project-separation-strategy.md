@@ -7,7 +7,7 @@ This document outlines the strategy for separating the Beauty SaaS application b
 
 ### New Project Structure
 ```
-beauty-saas/         # Root project
+cthub-bsaas/         # Root project
 ├── docs/            # Project documentation
 ├── apps/
 │   ├── api/         # Backend API (renamed from bsaas-back)

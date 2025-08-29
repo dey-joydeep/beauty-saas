@@ -12,10 +12,10 @@ function load(p){ return JSON.parse(fs.readFileSync(jp(p), 'utf8')); }
 function save(p, o){ fs.writeFileSync(jp(p), JSON.stringify(o, null, 2)+'\n', 'utf8'); console.log('Updated', p); }
 
 const DIST_PATHS = {
-  "@beauty-saas/shared": ["dist/libs/shared/index.d.ts"],
-  "@beauty-saas/shared/*": ["dist/libs/shared/*"],
-  "@beauty-saas/server-data-access": ["dist/libs/server/data-access/index.d.ts"],
-  "@beauty-saas/server-data-access/*": ["dist/libs/server/data-access/*"]
+  "@cthub-bsaas/shared": ["dist/libs/shared/index.d.ts"],
+  "@cthub-bsaas/shared/*": ["dist/libs/shared/*"],
+  "@cthub-bsaas/server-data-access": ["dist/libs/server/data-access/index.d.ts"],
+  "@cthub-bsaas/server-data-access/*": ["dist/libs/server/data-access/*"]
 };
 
 function patch(tsPath) {

@@ -1,6 +1,6 @@
 import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@beauty-saas/web-config';
+import { PLATFORM_UTILS_TOKEN, PlatformUtils } from '@cthub-bsaas/web-config';
 
 /**
  * Interceptor to handle server-side rendering of HTTP requests

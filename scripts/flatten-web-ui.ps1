@@ -54,8 +54,8 @@ Move-IfExists (Join-Path $confirmSrc 'confirm-dialog.component.scss') (Join-Path
 $layoutTs = Join-Path $libRoot 'layout/layout.component.ts'
 if (Test-Path $layoutTs) {
   $content = Get-Content $layoutTs -Raw
-  $content = $content -replace "from\s+'@beauty-saas/web-ui-header'", "from '../header/header.component'"
-  $content = $content -replace 'from\s+"@beauty-saas/web-ui-header"', "from '../header/header.component'"
+  $content = $content -replace "from\s+'@cthub-bsaas/web-ui-header'", "from '../header/header.component'"
+  $content = $content -replace 'from\s+"@cthub-bsaas/web-ui-header"', "from '../header/header.component'"
   Set-Content -Path $layoutTs -Value $content -NoNewline
   Write-Host 'Updated imports in layout.component.ts'
 }

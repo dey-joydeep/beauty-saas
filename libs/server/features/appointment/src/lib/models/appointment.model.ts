@@ -19,7 +19,7 @@ type TenantService = Prisma.TenantSalonServiceGetPayload<{
   };
 }>;
 
-import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@cthub-bsaas/shared/enums/appointment-status.enum';
 
 export const APPOINTMENT_STATUS_VALUES = Object.values(AppointmentStatus) as AppointmentStatus[];
 export const VALID_APPOINTMENT_STATUSES = APPOINTMENT_STATUS_VALUES;

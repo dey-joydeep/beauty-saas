@@ -16,10 +16,10 @@ function patchTsConfig(tsPath) {
   cfg.compilerOptions = cfg.compilerOptions || {};
   cfg.compilerOptions.paths = {
     ...(cfg.compilerOptions.paths || {}),
-    "@beauty-saas/shared": ["dist/libs/shared/src/index.d.ts"],
-    "@beauty-saas/shared/*": ["dist/libs/shared/src/*"],
-    "@beauty-saas/server-data-access": ["dist/libs/server/data-access/src/index.d.ts"],
-    "@beauty-saas/server-data-access/*": ["dist/libs/server/data-access/src/*"]
+    "@cthub-bsaas/shared": ["dist/libs/shared/src/index.d.ts"],
+    "@cthub-bsaas/shared/*": ["dist/libs/shared/src/*"],
+    "@cthub-bsaas/server-data-access": ["dist/libs/server/data-access/src/index.d.ts"],
+    "@cthub-bsaas/server-data-access/*": ["dist/libs/server/data-access/src/*"]
   };
   // keep the rest as-is
   save(tsPath, cfg);

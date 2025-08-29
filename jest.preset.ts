@@ -35,9 +35,9 @@ const config: Omit<Config.InitialOptions, 'testFailureExitCode'> & { testFailure
 
   // Module name mappers for path aliases
   moduleNameMapper: {
-    '^@beauty-saas/shared/(.*)$': '<rootDir>/libs/shared/src/$1',
-    '^@beauty-saas/frontend/(.*)$': '<rootDir>/libs/frontend/src/$1',
-    '^@beauty-saas/backend/(.*)$': '<rootDir>/libs/backend/src/$1',
+    '^@cthub-bsaas/shared/(.*)$': '<rootDir>/libs/shared/src/$1',
+    '^@cthub-bsaas/frontend/(.*)$': '<rootDir>/libs/frontend/src/$1',
+    '^@cthub-bsaas/backend/(.*)$': '<rootDir>/libs/backend/src/$1',
   },
 
   // Ignore patterns

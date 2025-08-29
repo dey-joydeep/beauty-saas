@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { JwtAuthGuard, RolesGuard } from '@beauty-saas/server-core/auth';
+import { JwtAuthGuard, RolesGuard } from '@cthub-bsaas/server-core/auth';
 import { ConfigService } from './config/config.service';
 import { ClassSerializerInterceptor, Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';

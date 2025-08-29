@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { type CurrentUserPort, type CurrentUserMin } from '@beauty-saas/web-core/auth';
+import { type CurrentUserPort, type CurrentUserMin } from '@cthub-bsaas/web-core/auth';
 import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })

@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/web-core-http",
+  "name": "@cthub-bsaas/web-core-http",
   "version": "0.0.1",
   "sideEffects": false,
   "type": "module",
@@ -8,6 +8,6 @@
     "@angular/common": "^20.0.0",
     "@angular/common/http": "^20.0.0",
     "rxjs": "^7.8.0",
-    "@beauty-saas/web-config": "^0.0.1"
+    "@cthub-bsaas/web-config": "^0.0.1"
   }
 }

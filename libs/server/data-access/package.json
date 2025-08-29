@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/server-data-access",
+  "name": "@cthub-bsaas/server-data-access",
   "version": "0.0.1",
   "type": "module",
   "main": "./../../dist/libs/server/data-access/index.js",
@@ -16,6 +16,6 @@
     "schema": "./prisma/schema.prisma"
   },
   "dependencies": {
-    "@beauty-saas/shared": "0.0.1"
+    "@cthub-bsaas/shared": "0.0.1"
   }
 }

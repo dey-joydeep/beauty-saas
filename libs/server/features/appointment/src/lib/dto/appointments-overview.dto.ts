@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AppointmentStatus } from '@beauty-saas/shared';
+import { AppointmentStatus } from '@cthub-bsaas/shared';
 import { Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsNumber, Min, ValidateNested } from 'class-validator';
 import { AppointmentDto } from './appointment.dto';

@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/web-partner-auth",
+  "name": "@cthub-bsaas/web-partner-auth",
   "version": "0.0.1",
   "sideEffects": false,
   "type": "module"

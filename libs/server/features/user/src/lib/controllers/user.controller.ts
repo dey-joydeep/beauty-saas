@@ -1,7 +1,7 @@
-import { JwtAuthGuard, Roles, User, RolesGuard } from '@beauty-saas/server-core';
-import type { PaginatedResponse, PaginationParams } from '@beauty-saas/server-core';
-import type { AuthenticatedUser } from '@beauty-saas/shared';
-import { AppUserRole } from '@beauty-saas/shared';
+import { JwtAuthGuard, Roles, User, RolesGuard } from '@cthub-bsaas/server-core';
+import type { PaginatedResponse, PaginationParams } from '@cthub-bsaas/server-core';
+import type { AuthenticatedUser } from '@cthub-bsaas/shared';
+import { AppUserRole } from '@cthub-bsaas/shared';
 import {
   BadRequestException,
   Body,

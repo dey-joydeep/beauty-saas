@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { BASIC_USER_SELECT } from '@beauty-saas/features/appointment';
+import { BASIC_USER_SELECT } from '@cthub-bsaas/features/appointment';
 
 /**
  * Customer with user details

@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/web-config",
+  "name": "@cthub-bsaas/web-config",
   "version": "0.0.1",
   "sideEffects": false,
   "type": "module"

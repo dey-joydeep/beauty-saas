@@ -1,4 +1,4 @@
-import type { BaseAuthUser } from '@beauty-saas/web-core-auth';
+import type { BaseAuthUser } from '@cthub-bsaas/web-core-auth';
 
 export interface CustomerAuthUser extends BaseAuthUser {
     readonly email: string;

@@ -1,4 +1,4 @@
-/* Ensure @beauty-saas/shared barrel exports required symbols and rebuild chain */
+/* Ensure @cthub-bsaas/shared barrel exports required symbols and rebuild chain */
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
@@ -71,19 +71,19 @@ if (!fs.existsSync(distBarrel)) {
 try {
   run('npx nx build server-data-access');
   run('npx nx build server-core');
-  console.log('✅ server-core build resolved @beauty-saas/shared from dist declarations.');
+  console.log('✅ server-core build resolved @cthub-bsaas/shared from dist declarations.');
 } catch (e) {
   console.error('server-core still failing. Next debug step:\n' +
 `- Dump TypeScript config used by server-core:
   npx tsc -p libs/server/core/tsconfig.lib.json --showConfig > /tmp/core-tsc.json
   Then open /tmp/core-tsc.json and verify:
-    compilerOptions.paths["@beauty-saas/shared"] = ["dist/libs/shared/index.d.ts"]
-    compilerOptions.paths["@beauty-saas/shared/*"] = ["dist/libs/shared/*"]
+    compilerOptions.paths["@cthub-bsaas/shared"] = ["dist/libs/shared/index.d.ts"]
+    compilerOptions.paths["@cthub-bsaas/shared/*"] = ["dist/libs/shared/*"]
   Also verify baseUrl is "." (root-level), and that dist/libs/shared/index.d.ts exists.
 
 - As a fallback, replace barrel imports in server-core with explicit subpath imports:
-    from '@beauty-saas/shared/enums/user-role.enum'
-    from '@beauty-saas/shared/types/user.types'
+    from '@cthub-bsaas/shared/enums/user-role.enum'
+    from '@cthub-bsaas/shared/types/user.types'
   (wildcard paths are definitely mapped and avoid relying on the barrel file)
 `);
   process.exit(1);

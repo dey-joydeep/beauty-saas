@@ -27,7 +27,7 @@ When running the script with the root project, you can use the special project n
 3. If no name is found in package.json, use the parent directory name
 4. Use this name in the generated report and file names
 
-The script will display the project name in the console output (e.g., "Analyzing project 'beauty-saas' packages...") and use it for report generation.
+The script will display the project name in the console output (e.g., "Analyzing project 'cthub-bsaas' packages...") and use it for report generation.
 
 ```powershell
 # Using 'root' will extract the actual project name from package.json or parent directory
@@ -39,10 +39,10 @@ The script will display the project name in the console output (e.g., "Analyzing
 When running with the root project:
 
 ```
-No project name found in package.json, using parent directory name: beauty-saas
-Analyzing project 'beauty-saas' packages...
+No project name found in package.json, using parent directory name: cthub-bsaas
+Analyzing project 'cthub-bsaas' packages...
 ...
-Report generated at: E:\workspace\beauty-saas\bsaas-docs\pvm\report\beauty-saas\20250727_report_beauty-saas.html
+Report generated at: E:\workspace\cthub-bsaas\bsaas-docs\pvm\report\cthub-bsaas\20250727_report_cthub-bsaas.html
 ```
 
 ## Running Tests

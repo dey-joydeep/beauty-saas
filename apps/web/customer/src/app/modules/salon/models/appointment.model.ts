@@ -3,7 +3,7 @@ import { Customer } from './customer.model';
 import { Salon } from './salon.model';
 import { Service } from './service.model';
 import { Staff } from './staff.model';
-import { AppointmentStatus } from '@beauty-saas/shared/enums/appointment-status.enum';
+import { AppointmentStatus } from '@cthub-bsaas/shared/enums/appointment-status.enum';
 
 export interface BaseAppointment {
   id: string;

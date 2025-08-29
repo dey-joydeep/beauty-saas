@@ -1,4 +1,4 @@
-import { DayOfWeek } from '@beauty-saas/shared/models/day-of-week.enum';
+import { DayOfWeek } from '@cthub-bsaas/shared/models/day-of-week.enum';
 
 export interface Salon {
   id: string;

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AppUserRole } from '@beauty-saas/shared';
+import { AppUserRole } from '@cthub-bsaas/shared';
 import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsString, IsUUID } from 'class-validator';
 

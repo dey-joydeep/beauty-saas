@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDateString, IsEnum, IsOptional, IsString, IsUUID, MaxLength, ValidateIf } from 'class-validator';
-import { AppointmentStatus } from '@beauty-saas/shared';
+import { AppointmentStatus } from '@cthub-bsaas/shared';
 import { Type } from 'class-transformer';
 
 /**

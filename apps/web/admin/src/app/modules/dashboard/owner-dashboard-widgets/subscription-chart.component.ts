@@ -8,7 +8,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ChartData, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
-import { DashboardApiService } from '@beauty-saas/features/dashboard/services/dashboard-api.service';
+import { DashboardApiService } from '@cthub-bsaas/features/dashboard/services/dashboard-api.service';
 
 @Component({
   selector: 'app-subscription-chart',

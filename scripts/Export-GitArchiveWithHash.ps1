@@ -1,7 +1,7 @@
 # Save this as Export-GitArchiveWithHash.ps1
 
 param (
-    [string]$RepoPath = "E:\workspace\beauty-saas",
+    [string]$RepoPath = "E:\workspace\cthub-bsaas",
     [string]$OutputDir = "E:\workspace"
 )
 
@@ -14,7 +14,7 @@ if (-not (Test-Path $OutputDir)) {
 $timestamp = Get-Date -Format "yyyyMMddHHmmss"
 
 # Build output zip path
-$zipFile = Join-Path $OutputDir "beauty-saas-$timestamp.zip"
+$zipFile = Join-Path $OutputDir "cthub-bsaas-$timestamp.zip"
 
 # Step 1: Create archive from Git HEAD
 Push-Location $RepoPath

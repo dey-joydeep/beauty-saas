@@ -9,7 +9,7 @@ A modern, scalable beauty salon management platform built with Nx, Angular, and 
 ## 🏗️ Project Structure
 
 ```text
-beauty-saas/
+cthub-bsaas/
 ├── apps/
 │   ├── web/              # Frontend applications
 │   │   ├── admin/        # Admin dashboard (Angular)
@@ -43,8 +43,8 @@ beauty-saas/
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-org/beauty-saas.git
-   cd beauty-saas
+   git clone https://github.com/your-org/cthub-bsaas.git
+   cd cthub-bsaas
    ```
 
 2. **Install dependencies**

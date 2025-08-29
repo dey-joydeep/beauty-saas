@@ -1,5 +1,5 @@
 {
-  "name": "@beauty-saas/web-customer-auth",
+  "name": "@cthub-bsaas/web-customer-auth",
   "version": "0.0.1",
   "sideEffects": false,
   "type": "module"

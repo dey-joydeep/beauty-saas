@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.beauty-saas.com/api',
+  apiUrl: 'https://api.cthub-bsaas.com/api',
   version: '1.0.0',
 };

@@ -1,5 +1,5 @@
 import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
-import { AppointmentStatus } from '@beauty-saas/shared';
+import { AppointmentStatus } from '@cthub-bsaas/shared';
 
 /**
  * Validates that the appointment status is valid

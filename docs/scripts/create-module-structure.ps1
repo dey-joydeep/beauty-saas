@@ -12,7 +12,7 @@ param (
 # Convert comma-separated functions to array
 $functionArray = $Functions -split ',' | ForEach-Object { $_.Trim() }
 
-$basePath = "e:\workspace\beauty-saas\bsaas-docs\specs\$ModuleName"
+$basePath = "e:\workspace\cthub-bsaas\bsaas-docs\specs\$ModuleName"
 $functionFiles = @(
     "frontend-controller-api.md",
     "backend-controller-api.md",

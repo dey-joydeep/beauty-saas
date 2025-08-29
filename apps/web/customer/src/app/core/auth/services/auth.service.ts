@@ -3,9 +3,9 @@ import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { StorageService } from '@beauty-saas/web-core/http';
-import type { AuthStatePort, BaseAuthUser } from '@beauty-saas/web-core/auth';
-import type { CustomerAuthUser } from '@beauty-saas/web-customer-auth';
+import { StorageService } from '@cthub-bsaas/web-core/http';
+import type { AuthStatePort, BaseAuthUser } from '@cthub-bsaas/web-core/auth';
+import type { CustomerAuthUser } from '@cthub-bsaas/web-customer-auth';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService implements AuthStatePort {

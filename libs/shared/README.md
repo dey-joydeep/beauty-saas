@@ -8,7 +8,7 @@ This library contains shared code used across the Beauty SaaS application, inclu
 
 ## Installation
 
-This library is automatically included in the Nx workspace and can be imported using the `@beauty-saas/shared` alias.
+This library is automatically included in the Nx workspace and can be imported using the `@cthub-bsaas/shared` alias.
 
 ## Usage
 
@@ -16,13 +16,13 @@ This library is automatically included in the Nx workspace and can be imported u
 
 ```typescript
 // Import models
-import { User, UserRole, ApiResponse } from '@beauty-saas/shared';
+import { User, UserRole, ApiResponse } from '@cthub-bsaas/shared';
 
 // Import utilities
-import { formatDate, debounce } from '@beauty-saas/shared';
+import { formatDate, debounce } from '@cthub-bsaas/shared';
 
 // Import constants
-import { API_BASE_URL, HTTP_STATUS } from '@beauty-saas/shared';
+import { API_BASE_URL, HTTP_STATUS } from '@cthub-bsaas/shared';
 ```
 
 ### Available Exports

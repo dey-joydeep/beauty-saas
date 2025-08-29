@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '@beauty-saas/web-core/auth';
+import { authGuard } from '@cthub-bsaas/web-core/auth';
 import { HomeComponent } from './modules/home/home.component';
 
 export const routes: Routes = [
@@ -7,7 +7,7 @@ export const routes: Routes = [
   {
     path: 'auth',
     canActivate: [authGuard],
-    loadChildren: () => import('@beauty-saas/web-customer/auth').then((m) => m.AUTH_ROUTES),
+    loadChildren: () => import('@cthub-bsaas/web-customer/auth').then((m) => m.AUTH_ROUTES),
   },
 
   // Protected routes

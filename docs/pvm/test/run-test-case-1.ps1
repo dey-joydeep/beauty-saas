@@ -305,7 +305,7 @@ function Test-InitialReportGeneration {
                     $indexContent = Get-Content -Path $indexPath -Raw -ErrorAction SilentlyContinue
                     $containsReportLink = $indexContent -match [regex]::Escape("$expectedProjectName/$reportFilePattern")
                     
-                    # Convert expected project name to title case for comparison (e.g., "beauty-saas" -> "Beauty Saas")
+                    # Convert expected project name to title case for comparison (e.g., "cthub-bsaas" -> "Beauty Saas")
                     $titleCaseName = (Get-Culture).TextInfo.ToTitleCase($expectedProjectName.ToLower()) -replace '-', ' '
                     $containsProjectLink = $indexContent -match [regex]::Escape(">$titleCaseName<") 
                     

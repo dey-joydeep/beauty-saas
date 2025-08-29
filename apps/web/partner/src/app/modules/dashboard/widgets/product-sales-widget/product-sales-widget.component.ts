@@ -18,9 +18,9 @@ import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntil } from 'rxjs';
 
-import { AbstractBaseComponent } from '@beauty-saas/web-core/http';
-import { DateRange } from '@beauty-saas/ui/models/date-range.model';
-import { ErrorService } from '@beauty-saas/web-core/http';
+import { AbstractBaseComponent } from '@cthub-bsaas/web-core/http';
+import { DateRange } from '@cthub-bsaas/ui/models/date-range.model';
+import { ErrorService } from '@cthub-bsaas/web-core/http';
 import { DashboardService } from '../../dashboard.service';
 import { ProductSale } from '../../models/dashboard.model';
 

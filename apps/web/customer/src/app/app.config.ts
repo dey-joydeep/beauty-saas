@@ -42,22 +42,22 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 // App imports
 import { routes } from './app.routes';
-import { LOGIN_API, AUTH_STATE_SETTER } from '@beauty-saas/web-customer-auth';
-import { LoginApiService } from '@beauty-saas/web-customer-auth';
+import { LOGIN_API, AUTH_STATE_SETTER } from '@cthub-bsaas/web-customer-auth';
+import { LoginApiService } from '@cthub-bsaas/web-customer-auth';
 import {
   FORGOT_PASSWORD_API,
   REGISTER_API,
   type ForgotPasswordApiPort,
   type RegisterApiPort,
-} from '@beauty-saas/web-customer-auth';
+} from '@cthub-bsaas/web-customer-auth';
 import {
   ErrorHandlerService,
   ERROR_INTERCEPTOR_PROVIDER,
   loadingInterceptor,
   ssrInterceptor,
   ssrTranslateInterceptor,
-} from '@beauty-saas/web-core/http';
-import { AUTH_STATE_PORT } from '@beauty-saas/web-core/auth';
+} from '@cthub-bsaas/web-core/http';
+import { AUTH_STATE_PORT } from '@cthub-bsaas/web-core/auth';
 import { AuthService } from './core/auth/services/auth.service';
 
 // AoT requires an exported function for factories

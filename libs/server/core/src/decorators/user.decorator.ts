@@ -1,8 +1,8 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { AuthenticatedUser } from '@beauty-saas/shared';
+import { AuthenticatedUser } from '@cthub-bsaas/shared';
 
 /**
- * @deprecated Use AuthenticatedUser from @beauty-saas/shared instead
+ * @deprecated Use AuthenticatedUser from @cthub-bsaas/shared instead
  */
 export type AuthUser = AuthenticatedUser;
 

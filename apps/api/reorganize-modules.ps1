@@ -1,5 +1,5 @@
 # Define the base directory
-$baseDir = "e:\workspace\beauty-saas\bsaas-back\src\modules"
+$baseDir = "e:\workspace\cthub-bsaas\bsaas-back\src\modules"
 
 # Get all module directories
 $modules = Get-ChildItem -Path $baseDir -Directory
