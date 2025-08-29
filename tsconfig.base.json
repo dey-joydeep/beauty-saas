@@ -6,7 +6,7 @@
         "forceConsistentCasingInFileNames": true,
         "target": "ES2022",
         "baseUrl": ".",
-        "useDefineForClassFields": true,
+        
         "importHelpers": true,
         "emitDecoratorMetadata": true,
         "module": "ES2022",

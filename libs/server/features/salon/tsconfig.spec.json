@@ -6,7 +6,9 @@
     "moduleResolution": "node",
     "types": ["jest", "node"],
     "esModuleInterop": true,
-    "target": "es2022"
+    "target": "es2022",
+    "isolatedModules": false,
+    "useDefineForClassFields": false
   },
   "include": ["**/*.spec.ts", "**/*.test.ts", "**/*.d.ts", "**/*.fixture.ts"]
 }
