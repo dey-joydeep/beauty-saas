@@ -8,7 +8,9 @@
       "jest",
       "node"
     ],
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "useDefineForClassFields": true
   },
   "files": [
     "src/test-setup.ts"

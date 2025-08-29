@@ -20,7 +20,9 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    "lib": ["es2022", "dom"]
+    "lib": ["es2022", "dom"],
+    "isolatedModules": true,
+    "useDefineForClassFields": true
   },
   "include": [
     "src/**/*.spec.ts",

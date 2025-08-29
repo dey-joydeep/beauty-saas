@@ -7,7 +7,9 @@
         "inlineSources": true,
         "types": [],
         "skipLibCheck": true,
-        "paths": {}
+        "paths": {},
+        "isolatedModules": true,
+        "useDefineForClassFields": true
     },
     "angularCompilerOptions": {
         "compilationMode": "partial",
