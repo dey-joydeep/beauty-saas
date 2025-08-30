@@ -29,7 +29,7 @@
     "dev:api": "nx serve api",
     "build": "nx run-many --target=build --all",
     "build:client-libs": "nx run-many -t build -p web-config,web-core-http,web-core-auth,web-core-testing,web-admin-auth,web-customer-auth,web-partner-auth,web-ui --skip-nx-cache",
-    "build:server-libs": "nx run-many -t build -p server-core,server-data-access,server-features,server-appointment,server-dashboard,server-portfolio,server-review,server-salon,server-salon-staff-request,server-social,server-theme,server-user --skip-nx-cache",
+    "build:server-libs": "nx run-many -t build -p server-core,server-data-access,server-features,server-feature-appointment,server-feature-dashboard,server-feature-portfolio,server-feature-review,server-feature-salon,server-feature-salon-staff-request,server-feature-social,server-feature-theme,server-feature-user --skip-nx-cache",
     "build:prod": "nx run-many --target=build --all --configuration=production",
     "build:affected": "nx affected:build",
     "build:web-admin": "nx build web-admin",

@@ -1,4 +1,4 @@
-// Public API for server-user feature
+// Public API for server-feature-user
 export * from './lib/user.module';
 export * from './lib/dto/base-user.dto';
 export * from './lib/dto/create-user.dto';
