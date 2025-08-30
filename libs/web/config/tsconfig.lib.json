@@ -3,6 +3,7 @@
     "compilerOptions": {
         "rootDir": "src",
         "outDir": "../../../dist/out-tsc/libs/web/config",
+        "composite": true,
         "declaration": true,
         "declarationMap": true,
         "inlineSources": true,

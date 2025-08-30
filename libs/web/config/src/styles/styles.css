@@ -1,0 +1,10 @@
+/* libs/web/config/src/styles/styles.css */
+
+/*
+ * Tailwind CSS v4-style imports.
+ * Preflight (base) is intentionally omitted to prevent conflicts with Angular Material.
+ */
+@layer theme, utilities;
+
+@import 'tailwindcss/theme' layer(theme);
+@import 'tailwindcss/utilities' layer(utilities);

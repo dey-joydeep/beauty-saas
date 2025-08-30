@@ -113,6 +113,7 @@ cthub-bsaas/
   ```bash
   npx nx serve web-customer
   ```
+
 - **Start backend API in development mode**
 
   ```bash
@@ -229,6 +230,7 @@ cthub-bsaas/
 - **Jest**: Testing framework
 - **ESLint**: JavaScript/TypeScript linting
 - **Prettier**: Code formatting
+- **Tailwind CSS**: Utility-first CSS framework
 
 ## 📄 License
 
@@ -305,6 +307,37 @@ Closes #123
 - Sort imports alphabetically
 
 ### Styling
+
+This workspace uses a hybrid styling approach that combines **Tailwind CSS** for utility-first styling and standard **SCSS** for component-specific styles.
+
+- **Shared Configuration**: The core Tailwind CSS and PostCSS configurations are located in `libs/web/config`. This ensures a consistent setup across all frontend applications.
+- **Global Styles**: A global stylesheet at `libs/web/config/src/styles/styles.css` imports the necessary Tailwind utilities. This file is included in the `build` configuration of each web application in its respective `project.json`.
+- **Custom Prefix**: To avoid conflicts with other libraries like Angular Material, all Tailwind utility classes are prefixed with `twc-`. For example, use `twc-flex` instead of `flex`.
+- **Preflight Disabled**: Tailwind's `preflight` (a CSS reset) is disabled to prevent overriding the default styles of Angular Material components.
+
+#### Usage Examples
+
+Here are some examples of how to use the `twc-` prefixed utility classes in your HTML templates:
+
+**Flexbox Layout:**
+
+```html
+<div class="twc-flex twc-justify-center twc-items-center twc-h-screen">
+  <div class="twc-w-1/2 twc-p-4">
+    <!-- Content goes here -->
+  </div>
+</div>
+```
+
+**Grid Layout:**
+
+```html
+<div class="twc-grid twc-grid-cols-3 twc-gap-4">
+  <div class="twc-bg-blue-200 twc-p-4">Item 1</div>
+  <div class="twc-bg-blue-200 twc-p-4">Item 2</div>
+  <div class="twc-bg-blue-200 twc-p-4">Item 3</div>
+</div>
+```
 
 - Use CSS Modules for component styles
 - Follow BEM naming convention
@@ -429,4 +462,3 @@ Closes #123
    - Run tests with `--watch` flag
    - Check for flaky tests
    - Update snapshots if needed
-
