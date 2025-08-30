@@ -1,5 +1,5 @@
 {
-  "name": "server-salon",
+  "name": "server-feature-salon",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/server/features/salon/src",

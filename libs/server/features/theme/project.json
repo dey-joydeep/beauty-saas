@@ -1,5 +1,5 @@
 {
-  "name": "server-theme",
+  "name": "server-feature-theme",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/server/features/theme/src",

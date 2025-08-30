@@ -1,5 +1,5 @@
 {
-  "name": "server-dashboard",
+  "name": "server-feature-dashboard",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/server/features/dashboard/src",

@@ -1,5 +1,5 @@
 {
-  "name": "server-portfolio",
+  "name": "server-feature-portfolio",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/server/features/portfolio/src",
