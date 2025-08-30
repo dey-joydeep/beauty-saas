@@ -35,8 +35,6 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "noImplicitReturns": true,
-        "declarationMap": true,
-        "declaration": true,
         "noImplicitAny": true,
         "resolveJsonModule": true
     },
