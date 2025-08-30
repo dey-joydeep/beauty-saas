@@ -9,6 +9,6 @@
     "incremental": true,
     "preserveSymlinks": true // Important for monorepo setups
   },
-  "include": ["src/**/*.ts", "src/**/*.spec.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
