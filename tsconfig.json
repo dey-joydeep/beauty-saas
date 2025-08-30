@@ -8,12 +8,6 @@
     "exclude": ["node_modules", "dist"],
     "references": [
         {
-            "path": "./tsconfig.server.base.json"
-        },
-        {
-            "path": "./tsconfig.web.base.json"
-        },
-        {
             "path": "apps/api/tsconfig.app.json"
         },
         {
