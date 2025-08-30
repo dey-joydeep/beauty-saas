@@ -3,7 +3,7 @@
     "compilerOptions": {
         "rootDir": "src",
         "composite": true,
-        "outDir": "../../../dist/out-tsc",
+        "outDir": "../../../dist/libs/server/features",
         "declaration": true,
         "types": ["node"],
         "isolatedModules": false,
