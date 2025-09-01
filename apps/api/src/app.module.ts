@@ -6,6 +6,7 @@ import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CoreModule, JwtAuthGuard, RolesGuard } from '@cthub-bsaas/core';
+import { AuthModule } from '@cthub-bsaas/server-features-auth';
 import appConfig from './config/app.config';
 
 @Module({
@@ -36,7 +37,7 @@ import appConfig from './config/app.config';
       }),
     }),
     // Feature modules
-    // Note: Import feature modules here (e.g., AuthModule, UsersModule, etc.)
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

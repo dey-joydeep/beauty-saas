@@ -39,3 +39,15 @@ auth-specs-updated/
     migration-notes.md
     changelog.md
 ```
+## Zero-Cost Deployment Profile
+This project is designed to run **without any paid services**:
+
+- **Email**: self-hosted **Postfix** or **OpenSMTPD** (prod); **Mailpit/MailHog** (dev). Configure SPF/DKIM/DMARC in DNS.
+- **2FA**: **Passkeys (WebAuthn)** via `@simplewebauthn` and **TOTP** via `otplib` (OSS).
+- **Cache/Queues/Rate limiting**: **Redis OSS** (Docker). Use `rate-limiter-flexible` and BullMQ (optional).
+- **Database**: **PostgreSQL OSS** (Docker).
+- **Logging**: **pino/pino-http** to local files (no external log SaaS). Separate **access.log** and **app.log**; optional `audit_event` table.
+- **Reverse proxy/TLS**: **Caddy** (automatic Let's Encrypt) or **Nginx** + certbot — both free.
+- **CI**: optional **GitHub Actions** free tier (open-source repos) or local runners.
+- **Captcha**: avoid paid captchas; rely on rate limits + proof-of-work (optional) + heuristic checks.
+- **SMS**: **not used** (removed to avoid cost). Email OTP is fallback.

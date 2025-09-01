@@ -33,12 +33,6 @@ const config: Omit<Config.InitialOptions, 'testFailureExitCode'> & { testFailure
   coverageReporters: ['html', 'text', 'lcov'],
   coverageDirectory: '<rootDir>/coverage',
 
-  // Module name mappers for path aliases
-  moduleNameMapper: {
-    '^@cthub-bsaas/shared/(.*)$': '<rootDir>/libs/shared/src/$1',
-    '^@cthub-bsaas/frontend/(.*)$': '<rootDir>/libs/frontend/src/$1',
-    '^@cthub-bsaas/backend/(.*)$': '<rootDir>/libs/backend/src/$1',
-  },
 
   // Ignore patterns
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],

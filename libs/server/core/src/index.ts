@@ -2,6 +2,9 @@
 
 // Auth
 export { ROLES_KEY, Roles } from './auth/decorators/roles.decorator';
+export { IS_PUBLIC_KEY, Public } from './lib/auth/decorators/public.decorator';
+export * from './lib/encryption/encryption.module';
+export * from './lib/encryption/encryption.service';
 export { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 export { RolesGuard } from './auth/guards/roles.guard';
 
