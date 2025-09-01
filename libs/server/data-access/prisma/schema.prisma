@@ -103,9 +103,16 @@ model User {
   ownedSalon Salon? @relation("SalonOwner")
 
   // Social & Commerce
-  social            Social[]      @relation("UserSocials")
-  soldProducts      ProductSale[] @relation("SoldProducts")
-  purchasedProducts ProductSale[] @relation("PurchasedProducts")
+  social            Social[]            @relation("UserSocials")
+  soldProducts      ProductSale[]       @relation("SoldProducts")
+  purchasedProducts ProductSale[]       @relation("PurchasedProducts")
+  emailVerifiedAt   DateTime?           @map("email_verified_at")
+  passkeys          CredentialPasskey[]
+  totp              CredentialTOTP?
+  sessions          Session[]
+  refreshTokens     RefreshToken[]
+  recoveryCodes     RecoveryCode[]
+  passwordResets    PasswordReset[]
 
   @@map("user")
 }
@@ -756,7 +763,7 @@ model SalonService {
   isFeatured        Boolean  @default(false) @map("is_featured")
   position          Int?     @default(0)
   createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime    @updatedAt @map("updated_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
   metadata          Json?    @db.JsonB
 
   // Relations
@@ -842,4 +849,128 @@ model SalonServiceReview {
   @@index([isFeatured])
   @@index([createdAt])
   @@map("salon_service_review")
+}
+
+// --- AUTH ADDITIONS (merged) ---
+model CredentialPasskey {
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  credentialId String    @unique @map("credential_id")
+  publicKey    Bytes     @map("public_key")
+  counter      Int
+  transports   String?
+  lastUsedAt   DateTime? @map("last_used_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("credential_passkey")
+}
+
+model CredentialTOTP {
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @unique @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  secretEncrypted Bytes     @map("secret_encrypted")
+  secretVersion   Int       @default(1) @map("secret_version")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  lastUsedAt      DateTime? @map("last_used_at")
+
+  @@map("credential_totp")
+}
+
+model RecoveryCode {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  user      User      @relation(fields: [userId], references: [id])
+  codeHash  String    @map("code_hash")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@unique([userId, codeHash])
+  @@index([userId, usedAt])
+  @@map("recovery_code")
+}
+
+model Session {
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  deviceUA   String?  @map("device_ua")
+  deviceOS   String?  @map("device_os")
+  ipHash     String?  @map("ip_hash")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  refreshTokens RefreshToken[]
+
+  @@index([userId, lastSeenAt])
+  @@map("session")
+}
+
+model RefreshToken {
+  jti    String @id
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  sessionId String  @map("session_id") @db.Uuid
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  issuedAt    DateTime  @default(now()) @map("issued_at")
+  revokedAt   DateTime? @map("revoked_at")
+  rotatedFrom String?   @map("rotated_from")
+
+  @@index([userId, sessionId])
+  @@index([revokedAt])
+  @@map("refresh_token")
+}
+
+model EmailVerification {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String
+  codeHash  String    @map("code_hash")
+  expiresAt DateTime  @map("expires_at")
+  attempts  Int       @default(0)
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([email, expiresAt])
+  @@index([usedAt])
+  @@map("email_verification")
+}
+
+model PasswordReset {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  user      User      @relation(fields: [userId], references: [id])
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, expiresAt])
+  @@index([usedAt])
+  @@map("password_reset")
+}
+
+model AuditEvent {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String?  @map("user_id") @db.Uuid
+  tenantId      String?  @map("tenant_id") @db.Uuid
+  action        String
+  result        String?
+  reason        String?
+  ip            String?
+  ua            String?
+  deviceId      String?  @map("device_id")
+  correlationId String?  @map("correlation_id")
+  ts            DateTime @default(now())
+
+  @@index([userId, ts])
+  @@index([tenantId, ts])
+  @@index([action, ts])
+  @@map("audit_event")
 }
