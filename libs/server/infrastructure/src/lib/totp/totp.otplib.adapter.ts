@@ -1,5 +1,5 @@
 import { EncryptionService } from '@cthub-bsaas/server-core';
-import { CREDENTIAL_TOTP_REPOSITORY, ICredentialTotpRepository, IUserRepository, USER_REPOSITORY } from '@cthub-bsaas/server-data-access';
+import { CREDENTIAL_TOTP_REPOSITORY, ICredentialTotpRepository, IUserRepository, USER_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
 import { TotpPort } from '@cthub-bsaas/server-contracts-auth';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { authenticator } from 'otplib';
