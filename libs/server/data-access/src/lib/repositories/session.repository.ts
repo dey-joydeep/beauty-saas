@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Session } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
-import { ISessionRepository } from '../ports/session.repository.port';
+import { ISessionRepository } from '@cthub-bsaas/server-contracts-auth';
 
 @Injectable()
 export class SessionRepository implements ISessionRepository {

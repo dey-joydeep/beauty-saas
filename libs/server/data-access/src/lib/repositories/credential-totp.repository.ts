@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { ICredentialTotpRepository } from '../ports/credential-totp.repository.port';
+import { ICredentialTotpRepository } from '@cthub-bsaas/server-contracts-auth';
 import { CredentialTOTP } from '@prisma/client';
 
 @Injectable()
