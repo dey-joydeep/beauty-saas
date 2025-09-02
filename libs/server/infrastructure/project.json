@@ -11,51 +11,14 @@
             }
         },
         "build": {
-            "executor": "@nx/rollup:rollup",
+            "executor": "@nx/js:tsc",
             "outputs": ["{options.outputPath}"],
             "options": {
                 "outputPath": "dist/libs/server/infrastructure",
+                "main": "libs/server/infrastructure/src/index.ts",
                 "tsConfig": "libs/server/infrastructure/tsconfig.lib.json",
-                "project": "libs/server/infrastructure/package.json",
-                "entryFile": "libs/server/infrastructure/src/index.ts",
-                "external": [
-                    "@nestjs/common",
-                    "@nestjs/config",
-                    "@nestjs/core",
-                    "@nestjs/jwt",
-                    "@nestjs/passport",
-                    "@nestjs/platform-express",
-                    "@nestjs/schedule",
-                    "@nestjs/swagger",
-                    "@nestjs/terminus",
-                    "@nestjs/testing",
-                    "@nestjs/throttler",
-                    "class-transformer",
-                    "class-validator",
-                    "cookie-parser",
-                    "cors",
-                    "express",
-                    "helmet",
-                    "joi",
-                    "jsonwebtoken",
-                    "log4js",
-                    "morgan",
-                    "passport",
-                    "passport-jwt",
-                    "reflect-metadata",
-                    "rxjs",
-                    "swagger-ui-express",
-                    "otplib",
-                    "qrcode"
-                ],
-                "format": ["esm"],
-                "rollupConfig": "libs/server/infrastructure/rollup.config.js",
-                "assets": []
-            },
-            "configurations": {
-                "production": {
-                    "minify": true
-                }
+                "assets": [],
+                "rootDir": "libs/server/infrastructure/src"
             }
         },
         "type-check": {
