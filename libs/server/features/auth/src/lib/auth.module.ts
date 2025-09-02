@@ -14,7 +14,6 @@ import {
 } from '@cthub-bsaas/server-data-access';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { TotpModule } from '@cthub-bsaas/server-infrastructure';
 
 const providers = [
   {
@@ -50,7 +49,6 @@ const providers = [
       }),
       inject: [ConfigService],
     }),
-    TotpModule,
   ],
   controllers: [AuthController, TotpController],
     providers: [AuthService, JwtStrategy, ...providers],

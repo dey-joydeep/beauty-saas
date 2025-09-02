@@ -1,17 +1,17 @@
 import { EncryptionModule } from '@cthub-bsaas/server-core';
 import { PrismaModule } from '@cthub-bsaas/server-data-access';
-import { ITotpService } from '@cthub-bsaas/server-core';
+import { TOTP_PORT } from '@cthub-bsaas/server-contracts-auth';
 import { Module } from '@nestjs/common';
-import { TotpOtpHebAdapter } from './totp.otplib.adapter';
+import { TotpOtplibAdapter } from './totp.otplib.adapter';
 
 @Module({
     imports: [PrismaModule, EncryptionModule],
     providers: [
         {
-            provide: ITotpService,
-            useClass: TotpOtpHebAdapter,
+            provide: TOTP_PORT,
+            useClass: TotpOtplibAdapter,
         },
     ],
-    exports: [ITotpService],
+    exports: [TOTP_PORT],
 })
 export class TotpModule {}

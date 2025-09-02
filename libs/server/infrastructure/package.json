@@ -14,7 +14,6 @@
     "dependencies": {
         "@cthub-bsaas/shared": "0.0.1",
         "@cthub-bsaas/server-core": "0.0.1",
-        "@cthub-bsaas/server-data-access": "0.0.1",
-        "@cthub-bsaas/server-features-auth": "0.0.1"
+        "@cthub-bsaas/server-data-access": "0.0.1"
     }
 }

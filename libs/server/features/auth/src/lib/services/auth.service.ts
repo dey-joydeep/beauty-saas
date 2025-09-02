@@ -11,7 +11,7 @@ import {
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ITotpService } from '@cthub-bsaas/server-core';
+import { TOTP_PORT, TotpPort } from '@cthub-bsaas/server-contracts-auth';
 
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
@@ -26,7 +26,7 @@ export class AuthService {
     @Inject(CREDENTIAL_TOTP_REPOSITORY) private readonly credentialTotpRepository: ICredentialTotpRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    @Inject(ITotpService) private readonly totpService: ITotpService,
+    @Inject(TOTP_PORT) private readonly totpService: TotpPort,
   ) {}
 
     async signIn(email: string, pass: string): Promise<{ totpRequired: boolean; tempToken?: string; accessToken?: string; refreshToken?: string; }> {

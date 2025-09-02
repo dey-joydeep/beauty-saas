@@ -1,12 +1,12 @@
 import { EncryptionService } from '@cthub-bsaas/server-core';
 import { CREDENTIAL_TOTP_REPOSITORY, ICredentialTotpRepository, IUserRepository, USER_REPOSITORY } from '@cthub-bsaas/server-data-access';
-import { ITotpService } from '@cthub-bsaas/server-features-auth';
+import { TotpPort } from '@cthub-bsaas/server-contracts-auth';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
 
 @Injectable()
-export class TotpOtpHebAdapter implements ITotpService {
+export class TotpOtplibAdapter implements TotpPort {
     constructor(
         @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
         @Inject(CREDENTIAL_TOTP_REPOSITORY)
@@ -14,7 +14,7 @@ export class TotpOtpHebAdapter implements ITotpService {
         private readonly encryptionService: EncryptionService,
     ) {}
 
-    async generateSecret(userId: string): Promise<{ qrCodeDataUrl: string }> {
+        async generateSecret(userId: string): Promise<{ qrCodeDataUrl: string; secret: string; }> {
         const user = await this.userRepository.findById(userId);
         if (!user) {
             throw new NotFoundException('User not found');
@@ -32,7 +32,7 @@ export class TotpOtpHebAdapter implements ITotpService {
         }
 
         const qrCodeDataUrl = await toDataURL(otpauthUrl);
-        return { qrCodeDataUrl };
+        return { qrCodeDataUrl, secret };
     }
 
     async verifyToken(userId: string, token: string): Promise<boolean> {

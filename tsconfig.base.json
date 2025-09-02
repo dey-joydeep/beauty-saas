@@ -19,6 +19,8 @@
             "@app/*": ["apps/api/src/*"],
             "@cthub-bsaas/server-core": ["libs/server/core/src/index.ts"],
             "@cthub-bsaas/server-core/*": ["libs/server/core/src/*", "dist/libs/server/core/*"],
+            "@cthub-bsaas/server-contracts-auth": ["libs/server/contracts-auth/src/index.ts"],
+            "@cthub-bsaas/server-contracts-auth/*": ["libs/server/contracts-auth/src/*", "dist/libs/server/contracts-auth/*"],
             "@cthub-bsaas/server-data-access": ["libs/server/data-access/src/index.ts"],
             "@cthub-bsaas/server-data-access/*": ["libs/server/data-access/src/*", "dist/libs/server/data-access/*"],
             "@cthub-bsaas/server-features-auth": ["libs/server/features/auth/src/index.ts"],

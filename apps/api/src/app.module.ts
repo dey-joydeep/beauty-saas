@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CoreModule, JwtAuthGuard, RolesGuard } from '@cthub-bsaas/core';
 import { AuthModule } from '@cthub-bsaas/server-features-auth';
+import { TotpModule } from '@cthub-bsaas/server-infrastructure';
 import appConfig from './config/app.config';
 
 @Module({
@@ -38,6 +39,7 @@ import appConfig from './config/app.config';
     }),
     // Feature modules
     AuthModule,
+    TotpModule,
   ],
   controllers: [AppController],
   providers: [
