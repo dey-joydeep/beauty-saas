@@ -14,5 +14,8 @@
   },
   "dependencies": {
     "@cthub-bsaas/shared": "0.0.1"
+  },
+  "peerDependencies": {
+    "@cthub-bsaas/server-contracts-auth": "0.0.1"
   }
 }

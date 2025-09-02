@@ -8,8 +8,6 @@
         "sourceMap": true,
         "types": ["node"],
         "composite": true,
-        "baseUrl": ".",
-        "paths": {},
         "isolatedModules": false,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -17,13 +15,5 @@
         "tsBuildInfoFile": "../../../dist/.tsbuildinfo/server/data-access.tsbuildinfo"
     },
     "include": ["src/**/*.ts"],
-    "exclude": ["**/*.test.ts", "**/*.spec.ts"],
-    "references": [
-        {
-            "path": "../../shared/tsconfig.lib.json"
-        },
-        {
-            "path": "../contracts-auth/tsconfig.lib.json"
-        }
-    ]
+    "exclude": ["**/*.test.ts", "**/*.spec.ts"]
 }

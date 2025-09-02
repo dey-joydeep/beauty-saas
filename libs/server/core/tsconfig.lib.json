@@ -20,7 +20,7 @@
             "path": "../../shared/tsconfig.lib.json"
         },
         {
-            "path": "../data-access/tsconfig.lib.json"
+            "path": "../contracts-auth/tsconfig.lib.json"
         }
     ]
 }
