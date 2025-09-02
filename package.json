@@ -175,7 +175,6 @@
         "@nestjs/throttler": "^6.4.0",
         "@ngx-translate/core": "16.0.4",
         "@ngx-translate/http-loader": "16.0.1",
-        "@nx/rollup": "^21.4.1",
         "@types/joi": "^17.2.3",
         "@types/qrcode": "^1.5.5",
         "bcryptjs": "3.0.2",

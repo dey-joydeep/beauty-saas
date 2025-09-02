@@ -4,3 +4,11 @@ export interface TotpPort {
   generateSecret(userId: string): Promise<{ qrCodeDataUrl: string; secret: string }>;
   verifyToken(userId: string, token: string): Promise<boolean>;
 }
+
+/**
+ * @ignore
+ * A dummy function to ensure the file is emitted by the compiler.
+ */
+export function _ensureFileIsEmitted() {
+  return true;
+}

@@ -12,7 +12,8 @@
                 "outputPath": "dist/libs/server/contracts-auth",
                 "main": "libs/server/contracts-auth/src/index.ts",
                 "tsConfig": "libs/server/contracts-auth/tsconfig.lib.json",
-                "assets": ["libs/server/contracts-auth/*.md"]
+                "assets": ["libs/server/contracts-auth/*.md"],
+                "rootDir": "libs/server/contracts-auth/src"
             }
         }
     }
