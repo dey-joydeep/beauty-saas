@@ -5,7 +5,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CoreModule, JwtAuthGuard, RolesGuard } from '@cthub-bsaas/core';
+import { CoreModule, JwtAuthGuard, RolesGuard } from '@cthub-bsaas/server-core';
 import { AuthModule } from '@cthub-bsaas/server-features-auth';
 import { TotpModule } from '@cthub-bsaas/server-infrastructure';
 import appConfig from './config/app.config';
