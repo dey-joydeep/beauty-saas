@@ -1,5 +1,10 @@
 import { EncryptionService } from '@cthub-bsaas/server-core';
-import { CREDENTIAL_TOTP_REPOSITORY, ICredentialTotpRepository, IUserRepository, USER_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
+import {
+    CREDENTIAL_TOTP_REPOSITORY,
+    ICredentialTotpRepository,
+    IUserRepository,
+    USER_REPOSITORY,
+} from '@cthub-bsaas/server-contracts-auth';
 import { TotpPort } from '@cthub-bsaas/server-contracts-auth';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { authenticator } from 'otplib';
@@ -14,7 +19,7 @@ export class TotpOtplibAdapter implements TotpPort {
         private readonly encryptionService: EncryptionService,
     ) {}
 
-        async generateSecret(userId: string): Promise<{ qrCodeDataUrl: string; secret: string; }> {
+    async generateSecret(userId: string): Promise<{ qrCodeDataUrl: string; secret: string }> {
         const user = await this.userRepository.findById(userId);
         if (!user) {
             throw new NotFoundException('User not found');
