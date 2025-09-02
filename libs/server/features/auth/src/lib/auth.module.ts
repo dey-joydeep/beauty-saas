@@ -1,5 +1,5 @@
-import { CredentialTotpRepository, RefreshTokenRepository, SessionRepository, UserRepository } from '@cthub-bsaas/server-data-access';
-import { EncryptionModule, PrismaModule } from '@cthub-bsaas/server-core';
+import { CredentialTotpRepository, RefreshTokenRepository, SessionRepository, UserRepository, PrismaModule } from '@cthub-bsaas/server-data-access';
+import { EncryptionModule } from '@cthub-bsaas/server-core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -8,18 +8,13 @@ import { AuthController } from './controllers/auth.controller';
 import { TotpController } from './controllers/totp.controller';
 import {
   CREDENTIAL_TOTP_REPOSITORY,
-  IUserRepository,
-  ICredentialTotpRepository,
-  IRefreshTokenRepository,
-  ISessionRepository,
   REFRESH_TOKEN_REPOSITORY,
   SESSION_REPOSITORY,
   USER_REPOSITORY,
-  ServerDataAccessModule,
 } from '@cthub-bsaas/server-data-access';
 import { AuthService } from './services/auth.service';
-import { TotpService } from './services/totp.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { TotpModule } from '@cthub-bsaas/server-infrastructure';
 
 const providers = [
   {
@@ -55,9 +50,10 @@ const providers = [
       }),
       inject: [ConfigService],
     }),
+    TotpModule,
   ],
   controllers: [AuthController, TotpController],
-  providers: [AuthService, JwtStrategy, TotpService, ...providers],
+    providers: [AuthService, JwtStrategy, ...providers],
   exports: [AuthService, ...providers],
 })
 export class AuthModule {}

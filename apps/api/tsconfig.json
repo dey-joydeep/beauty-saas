@@ -10,5 +10,11 @@
     "preserveSymlinks": true // Important for monorepo setups
   },
   "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../../libs/server/core" },
+    { "path": "../../libs/server/data-access" },
+    { "path": "../../libs/server/features/auth" },
+    { "path": "../../libs/server/infrastructure" }
+  ],
   "exclude": ["node_modules", "dist"]
 }

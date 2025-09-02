@@ -33,6 +33,7 @@
   ],
   "references": [
     { "path": "../../core/tsconfig.lib.json" },
-    { "path": "../../data-access/tsconfig.lib.json" }
+    { "path": "../../data-access/tsconfig.lib.json" },
+    { "path": "../../infrastructure/tsconfig.lib.json" }
   ]
 }

@@ -1,0 +1,80 @@
+{
+    "name": "server-infrastructure",
+    "sourceRoot": "libs/server/infrastructure/src",
+    "tags": ["scope:server", "type:infra"],
+    "targets": {
+        "lint": {
+            "outputs": ["{options.outputFile}"],
+            "executor": "@nx/eslint:lint",
+            "options": {
+                "lintFilePatterns": ["libs/server/infrastructure/**/*.ts"]
+            }
+        },
+        "build": {
+            "executor": "@nx/rollup:rollup",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "dist/libs/server/infrastructure",
+                "tsConfig": "libs/server/infrastructure/tsconfig.lib.json",
+                "project": "libs/server/infrastructure/package.json",
+                "entryFile": "libs/server/infrastructure/src/index.ts",
+                "external": [
+                    "@nestjs/common",
+                    "@nestjs/config",
+                    "@nestjs/core",
+                    "@nestjs/jwt",
+                    "@nestjs/passport",
+                    "@nestjs/platform-express",
+                    "@nestjs/schedule",
+                    "@nestjs/swagger",
+                    "@nestjs/terminus",
+                    "@nestjs/testing",
+                    "@nestjs/throttler",
+                    "class-transformer",
+                    "class-validator",
+                    "cookie-parser",
+                    "cors",
+                    "express",
+                    "helmet",
+                    "joi",
+                    "jsonwebtoken",
+                    "log4js",
+                    "morgan",
+                    "passport",
+                    "passport-jwt",
+                    "reflect-metadata",
+                    "rxjs",
+                    "swagger-ui-express",
+                    "otplib",
+                    "qrcode"
+                ],
+                "format": ["esm"],
+                "rollupConfig": "libs/server/infrastructure/rollup.config.js",
+                "assets": []
+            },
+            "configurations": {
+                "production": {
+                    "minify": true
+                }
+            }
+        },
+        "type-check": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "tsc -p libs/server/infrastructure/tsconfig.lib.json --noEmit"
+            }
+        },
+        "test": {
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "executor": "@nx/jest:jest",
+            "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/server/infrastructure/jest.config.ts",
+                "codeCoverage": true,
+                "coverageReporters": ["text", "lcov"]
+            }
+        }
+    },
+    "projectType": "library",
+    "prefix": "cthub-bsaas"
+}

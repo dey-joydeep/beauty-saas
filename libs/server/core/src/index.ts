@@ -33,3 +33,6 @@ export * from './types/api.types';
 export * from './validators/appointment.validators';
 export * from './validators/portfolio.validator';
 export * from './validators/theme.validator';
+
+// Ports
+export * from './lib/ports/totp.port';

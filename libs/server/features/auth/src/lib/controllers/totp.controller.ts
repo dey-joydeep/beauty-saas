@@ -1,12 +1,12 @@
-import { Controller, Post, UseGuards, Request, Body, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Body, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtAuthGuard } from '@cthub-bsaas/server-core';
-import { TotpService } from '../services/totp.service';
+import { ITotpService } from '../ports/totp.port';
 import { VerifyTotpDto } from '../dto/verify-totp.dto';
 
 @Controller('auth/totp')
 @UseGuards(JwtAuthGuard)
 export class TotpController {
-  constructor(private readonly totpService: TotpService) {}
+    constructor(@Inject(ITotpService) private readonly totpService: ITotpService) {}
 
   @Post('setup')
   async setup(@Request() req: { user: { id: string } }) {
