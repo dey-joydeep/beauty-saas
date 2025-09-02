@@ -7,6 +7,8 @@ import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { SignInWithTotpDto } from '../dto/sign-in-with-totp.dto';
 import type { Response, Request as ExpressRequest } from 'express';
 import type { SignInHttpResponse, SimpleOk } from '../types/auth.types';
+import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT, WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
+import { Inject } from '@nestjs/common';
 // Public decorator is already imported at file top
 
 /**
@@ -16,7 +18,11 @@ import type { SignInHttpResponse, SimpleOk } from '../types/auth.types';
  */
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    @Inject(WEB_AUTHN_PORT) private readonly webAuthn: WebAuthnPort,
+    @Inject(RECOVERY_CODES_PORT) private readonly recovery: RecoveryCodesPort,
+  ) {}
 
   /**
    * Sign in with email and password. If TOTP is enabled, returns a temp token.
@@ -205,6 +211,95 @@ export class AuthController {
   @Post('email/verify')
   async verifyEmail(@Body() body: { token: string }): Promise<SimpleOk> {
     await this.authService.verifyEmail(body.token);
+    return { success: true };
+  }
+
+  /**
+   * Start WebAuthn registration by returning creation options.
+   * @public
+   * @param {{ username: string }} body - Display name/username for credential.
+   * @param {{ user: { userId: string } }} req - Request with current user id.
+   * @returns {Promise<Record<string, unknown>>} Creation options JSON.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('webauthn/register/start')
+  async webauthnRegisterStart(@Body() body: { username: string }, @Request() req: { user: { userId: string } }): Promise<Record<string, unknown>> {
+    return this.webAuthn.startRegistration(req.user.userId, body.username);
+  }
+
+  /**
+   * Finish WebAuthn registration by verifying attestation.
+   * @public
+   * @param {Record<string, unknown>} response - Attestation response.
+   * @param {{ user: { userId: string } }} req - Request with current user id.
+   * @returns {Promise<SimpleOk>} Success on valid registration.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('webauthn/register/finish')
+  async webauthnRegisterFinish(@Body() response: Record<string, unknown>, @Request() req: { user: { userId: string } }): Promise<SimpleOk> {
+    await this.webAuthn.finishRegistration(req.user.userId, response);
+    return { success: true };
+  }
+
+  /**
+   * Start WebAuthn login by returning request options.
+   * @public
+   * @param {{ email?: string }} body - Optional lookup; defaults to current user if authenticated.
+   * @param {{ user?: { userId: string } }} req - Optional user context.
+   * @returns {Promise<Record<string, unknown>>} Request options JSON.
+   */
+  @Public()
+  @Post('webauthn/login/start')
+  async webauthnLoginStart(@Request() req: { user?: { userId: string } }): Promise<Record<string, unknown>> {
+    // for simplicity, require authenticated user context in this iteration
+    if (!req.user?.userId) throw new Error('User context required');
+    return this.webAuthn.startAuthentication(req.user.userId);
+  }
+
+  /**
+   * Finish WebAuthn login by verifying assertion and issuing tokens.
+   * @public
+   * @param {Record<string, unknown>} response - Assertion response.
+   * @param {{ user: { userId: string } }} req - Request with user context.
+   * @param {Response} res - Express response to set cookie.
+   * @returns {Promise<{ accessToken: string }>} Access token.
+   */
+  @Public()
+  @Post('webauthn/login/finish')
+  async webauthnLoginFinish(
+    @Body() response: Record<string, unknown>,
+    @Request() req: { user: { userId: string } },
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ accessToken: string }> {
+    await this.webAuthn.finishAuthentication(req.user.userId, response);
+    // Issue session + tokens
+    const result = await this.authService.issueTokensForUser(req.user.userId);
+    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: true, sameSite: 'strict', path: '/' });
+    return { accessToken: result.accessToken };
+  }
+
+  /**
+   * Generate recovery codes for the current user.
+   * @public
+   * @returns {Promise<string[]>} Plain-text recovery codes (store securely client-side).
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('recovery/generate')
+  async generateRecovery(@Request() req: { user: { userId: string } }): Promise<string[]> {
+    return this.recovery.generate(req.user.userId, 10);
+  }
+
+  /**
+   * Verify and consume a recovery code for the current user.
+   * @public
+   * @param {{ code: string }} body - Recovery code.
+   * @returns {Promise<SimpleOk>} Success when valid.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('recovery/verify')
+  async verifyRecovery(@Body() body: { code: string }, @Request() req: { user: { userId: string } }): Promise<SimpleOk> {
+    const ok = await this.recovery.verifyAndConsume(req.user.userId, body.code);
+    if (!ok) throw new Error('Invalid recovery code');
     return { success: true };
   }
 }

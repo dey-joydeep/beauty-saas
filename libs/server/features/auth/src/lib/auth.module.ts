@@ -14,7 +14,7 @@ import {
 } from '@cthub-bsaas/server-contracts-auth';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { EmailModule, TotpModule } from '@cthub-bsaas/server-infrastructure';
+import { EmailModule, TotpModule, WebAuthnModule, RecoveryModule } from '@cthub-bsaas/server-infrastructure';
 
 const providers = [
   {
@@ -45,6 +45,8 @@ const providers = [
     PrismaModule,
     EncryptionModule,
     TotpModule,
+    WebAuthnModule,
+    RecoveryModule,
     EmailModule,
     PassportModule,
     JwtModule.registerAsync({

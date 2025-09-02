@@ -224,6 +224,20 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  /**
+   * Issue tokens for an existing user by id (used after WebAuthn login).
+   *
+   * @public
+   * @param {string} userId - User id to authenticate.
+   * @returns {Promise<TokenPair>} New token pair bound to a new session.
+   */
+  public async issueTokensForUser(userId: string): Promise<TokenPair> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UnauthorizedException('User not found');
+    const session = await this.sessionRepository.create({ userId: user.id });
+    return this.generateTokens(user, session.id);
+  }
+
   // Account recovery: password reset
   /**
    * Send a one-time password reset token to the provided email.

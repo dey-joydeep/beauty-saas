@@ -5,3 +5,5 @@ export * from './lib/ports/session.repository.port';
 export * from './lib/ports/refresh-token.repository.port';
 export * from './lib/ports/credential-totp.repository.port';
 export * from './lib/ports/email.port';
+export * from './lib/ports/webauthn.port';
+export * from './lib/ports/recovery-codes.port';
