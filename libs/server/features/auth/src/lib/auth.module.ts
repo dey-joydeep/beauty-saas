@@ -11,9 +11,10 @@ import {
   REFRESH_TOKEN_REPOSITORY,
   SESSION_REPOSITORY,
   USER_REPOSITORY,
-} from '@cthub-bsaas/server-data-access';
+} from '@cthub-bsaas/server-contracts-auth';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { EmailModule, TotpModule } from '@cthub-bsaas/server-infrastructure';
 
 const providers = [
   {
@@ -34,10 +35,17 @@ const providers = [
   },
 ];
 
+/**
+ * @public
+ * Authentication feature module providing controllers, services and strategies
+ * for sign-in, session management and MFA.
+ */
 @Module({
   imports: [
     PrismaModule,
     EncryptionModule,
+    TotpModule,
+    EmailModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

@@ -1,13 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { mock, MockProxy } from 'jest-mock-extended';
-import { User, Credential, CredentialTOTP, Session } from '@prisma/client';
+import { User, CredentialTOTP, Session } from '@prisma/client';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
-import { CREDENTIAL_TOTP_REPOSITORY, ICredentialTotpRepository, IRefreshTokenRepository, ISessionRepository, IUserRepository, REFRESH_TOKEN_REPOSITORY, SESSION_REPOSITORY, USER_REPOSITORY } from '@cthub-bsaas/server-data-access';
+import { ICredentialTotpRepository, IRefreshTokenRepository, ISessionRepository, IUserRepository, TotpPort, EMAIL_PORT, EmailPort, USER_REPOSITORY, SESSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY, CREDENTIAL_TOTP_REPOSITORY, TOTP_PORT } from '@cthub-bsaas/server-contracts-auth';
 import { AuthService } from './auth.service';
-import { TotpService } from './totp.service';
 
 jest.mock('bcryptjs');
 
@@ -19,7 +18,8 @@ describe('AuthService', () => {
   let credentialTotpRepository: MockProxy<ICredentialTotpRepository>;
   let jwtService: MockProxy<JwtService>;
   let configService: MockProxy<ConfigService>;
-  let totpService: MockProxy<TotpService>;
+  let totpService: MockProxy<TotpPort>;
+  let emailPort: EmailPort;
 
   const mockUser: User = {
     id: 'user-id',
@@ -36,6 +36,10 @@ describe('AuthService', () => {
     salonTenantId: null,
     emailVerifiedAt: new Date(),
   };
+  const mockUserWithRoles = {
+    ...mockUser,
+    roles: [] as { role: { name: string } }[],
+  } as User & { roles: { role: { name: string } }[] };
 
   beforeEach(async () => {
     userRepository = mock<IUserRepository>();
@@ -44,7 +48,8 @@ describe('AuthService', () => {
     credentialTotpRepository = mock<ICredentialTotpRepository>();
     jwtService = mock<JwtService>();
     configService = mock<ConfigService>();
-    totpService = mock<TotpService>();
+    totpService = mock<TotpPort>();
+    emailPort = { sendMail: jest.fn().mockResolvedValue(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -55,7 +60,8 @@ describe('AuthService', () => {
         { provide: CREDENTIAL_TOTP_REPOSITORY, useValue: credentialTotpRepository },
         { provide: JwtService, useValue: jwtService },
         { provide: ConfigService, useValue: configService },
-        { provide: TotpService, useValue: totpService },
+        { provide: TOTP_PORT, useValue: totpService },
+        { provide: EMAIL_PORT, useValue: emailPort },
       ],
     }).compile();
 
@@ -72,7 +78,7 @@ describe('AuthService', () => {
     const session = { id: 'session-id' } as Session;
 
     it('should return tokens for valid credentials when TOTP is not enabled', async () => {
-      userRepository.findByEmail.mockResolvedValue(mockUser);
+      userRepository.findByEmail.mockResolvedValue(mockUserWithRoles);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       credentialTotpRepository.findByUserId.mockResolvedValue(null);
       sessionRepository.create.mockResolvedValue(session);
@@ -91,14 +97,14 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException for invalid password', async () => {
-      userRepository.findByEmail.mockResolvedValue(mockUser);
+      userRepository.findByEmail.mockResolvedValue(mockUserWithRoles);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
       await expect(service.signIn(email, password)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should return a temporary token if TOTP is enabled', async () => {
       const totpCredential = { verified: true } as CredentialTOTP;
-      userRepository.findByEmail.mockResolvedValue(mockUser);
+      userRepository.findByEmail.mockResolvedValue(mockUserWithRoles);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       credentialTotpRepository.findByUserId.mockResolvedValue(totpCredential);
       jwtService.signAsync.mockResolvedValue('temporary-token');
@@ -118,7 +124,7 @@ describe('AuthService', () => {
     it('should return tokens for a valid temp token and TOTP code', async () => {
       jwtService.verifyAsync.mockResolvedValue(decodedTempToken);
       totpService.verifyToken.mockResolvedValue(true);
-      userRepository.findById.mockResolvedValue(mockUser);
+      userRepository.findById.mockResolvedValue(mockUserWithRoles);
       sessionRepository.create.mockResolvedValue(session);
       // @ts-expect-error - private method
       jest.spyOn(service, 'generateTokens').mockResolvedValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
@@ -139,6 +145,42 @@ describe('AuthService', () => {
       jwtService.verifyAsync.mockResolvedValue(decodedTempToken);
       totpService.verifyToken.mockResolvedValue(false);
       await expect(service.signInWithTotp(tempToken, totpCode)).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('account recovery', () => {
+    it('requests password reset (no disclosure)', async () => {
+      userRepository.findByEmail.mockResolvedValue({ ...mockUserWithRoles });
+      jwtService.signAsync.mockResolvedValue('reset-token');
+      await expect(service.requestPasswordReset('test@example.com')).resolves.toBeUndefined();
+      expect(emailPort.sendMail).toHaveBeenCalled();
+    });
+
+    it('resets password with valid token', async () => {
+      jwtService.verifyAsync.mockResolvedValue({ sub: mockUserWithRoles.id, aud: 'reset' });
+      const updated: User = { ...mockUser, updatedAt: new Date() };
+      userRepository.update.mockResolvedValue(updated);
+      await expect(service.resetPassword('reset-token', 'newpass')).resolves.toBeUndefined();
+      expect(userRepository.update).toHaveBeenCalled();
+    });
+
+    it('requests email verification', async () => {
+      const unver: User & { roles: { role: { name: string } }[] } = {
+        ...mockUserWithRoles,
+        emailVerifiedAt: null,
+      };
+      userRepository.findByEmail.mockResolvedValue(unver);
+      jwtService.signAsync.mockResolvedValue('verify-token');
+      await expect(service.requestEmailVerification('test@example.com')).resolves.toBeUndefined();
+      expect(emailPort.sendMail).toHaveBeenCalled();
+    });
+
+    it('verifies email with valid token', async () => {
+      jwtService.verifyAsync.mockResolvedValue({ sub: mockUserWithRoles.id, aud: 'verify' });
+      const updated: User = { ...mockUser, emailVerifiedAt: new Date(), updatedAt: new Date() };
+      userRepository.update.mockResolvedValue(updated);
+      await expect(service.verifyEmail('verify-token')).resolves.toBeUndefined();
+      expect(userRepository.update).toHaveBeenCalled();
     });
   });
 });

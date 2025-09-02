@@ -4,6 +4,10 @@ import { TOTP_PORT } from '@cthub-bsaas/server-contracts-auth';
 import { Module } from '@nestjs/common';
 import { TotpOtplibAdapter } from './totp.otplib.adapter';
 
+/**
+ * @public
+ * Infrastructure module that registers the TOTP adapter implementation.
+ */
 @Module({
     imports: [PrismaModule, EncryptionModule],
     providers: [

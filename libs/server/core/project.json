@@ -1,7 +1,7 @@
 {
     "name": "server-core",
     "sourceRoot": "libs/server/core/src",
-    "tags": ["type:lib", "platform:server", "scope:server-core"],
+    "tags": ["type:lib", "platform:server", "scope:server-core", "scope:server", "type:core"],
     "targets": {
         "lint": {
             "outputs": ["{options.outputFile}"],

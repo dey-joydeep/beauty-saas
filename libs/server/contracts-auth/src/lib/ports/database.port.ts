@@ -1,5 +1,7 @@
 export const DATABASE_PORT = Symbol('DATABASE_PORT');
 
-export interface DatabasePort {
-  // Add minimal surface used by core; implementations can extend
-}
+/**
+ * @public
+ * Abstraction marker for a database provider used by infrastructure.
+ */
+export type DatabasePort = object;
