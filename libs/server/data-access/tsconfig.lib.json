@@ -19,6 +19,9 @@
     "references": [
         {
             "path": "../../shared/tsconfig.lib.json"
+        },
+        {
+            "path": "../contracts-auth/tsconfig.lib.json"
         }
     ]
 }
