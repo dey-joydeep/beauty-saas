@@ -21,7 +21,12 @@
 ## Project Structure & Modules
 - Apps: separate Angular apps for Admin, Partner, Customer under `libs/web/*` (runnable wrappers under `apps/`). Single backend API under `apps/`.
 - Libraries: common code and the entire backend logic live in `libs/` (e.g., `server/*`, `shared/`). Always check and reuse existing libs before adding new code.
-- Output: `dist/` mirrors sources; TS path aliases resolve dist‑first (see `tsconfig.base.json`). Example: `@cthub-bsaas/server-contracts-auth`.
+- Output: `dist/` mirrors sources; TS path aliases resolve dist-first (see `tsconfig.base.json`). Example: `@cthub-bsaas/server-contracts-auth`.
+
+## Docs & Specs
+- User Stories (US): `docs/us/<feature>` — per-feature user stories and acceptance criteria.
+- Specifications/Design: `docs/specs/<feature>` — per-feature technical specs, designs, and API contracts.
+- Cross-link PRs to the relevant US and spec docs; keep them up to date with implementation.
 
 ## Build, Test, and Development
 - Build: `npx nx build <project>`; multiple: `npx nx run-many -t build -p <a,b>`
@@ -161,7 +166,7 @@
 
 ## Testing Guidelines
 - Unit tests: Jest `*.spec.ts` colocated next to source under `src/`.
-- Integration tests: place under each project `tests/integration/**/*.int-spec.ts` (not inside `src/`). Use Nest `TestingModule` with in-memory/test doubles; avoid real external services. Integration tests must run via `nx test <lib>`.
+- Integration tests: place under each project `tests/integration/**/*.it-spec.ts` (not inside `src/`). Use Nest `TestingModule` with in-memory/test doubles; avoid real external services. Integration tests must run via `nx test <lib>`.
 - E2E tests: only at app level (e.g., Playwright or Nest e2e) under `apps/<app>/e2e/`.
 - Keep tests fast and isolated; mock IO/DB where sensible. Avoid flakiness and global state.
 - Coverage: backend feature libs must maintain 100% coverage (statements, branches, functions, lines). Any temporary exception must include a TODO with justification and a follow-up task.
