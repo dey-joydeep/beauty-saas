@@ -1,6 +1,6 @@
 import { IsJWT, IsNotEmpty, IsString, Length } from 'class-validator';
 
-export class LoginWithTotpDto {
+export class TotpLoginDto {
   @IsJWT()
   @IsNotEmpty()
   tempToken!: string;

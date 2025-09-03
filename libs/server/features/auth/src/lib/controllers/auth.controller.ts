@@ -5,7 +5,7 @@ import { AuthService } from '../services/auth.service';
 import { SkipCsrf } from '@cthub-bsaas/server-core';
 import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
-import { LoginWithTotpDto } from '../dto/login-with-totp.dto';
+import { TotpLoginDto } from '../dto/totp-login.dto';
 import type { Response, Request as ExpressRequest } from 'express';
 import type { SignInHttpResponse, SimpleOk } from '../types/auth.types';
 import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT, WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
@@ -178,14 +178,14 @@ export class AuthController {
    * Complete TOTP challenge with a temp token and code.
    *
    * @public
-   * @param {LoginWithTotpDto} signInWithTotpDto - TOTP challenge payload.
+   * @param {TotpLoginDto} signInWithTotpDto - TOTP challenge payload.
    * @returns {Promise<{ accessToken: string; refreshToken: string }>} New token pair.
    */
   @Public()
   @Throttle(5, 60)
   @HttpCode(HttpStatus.OK)
   @Post('login/totp')
-  async signInWithTotp(@Body() signInWithTotpDto: LoginWithTotpDto, @Res({ passthrough: true }) res: Response) {
+  async signInWithTotp(@Body() signInWithTotpDto: TotpLoginDto, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.signInWithTotp(signInWithTotpDto.tempToken, signInWithTotpDto.totpCode);
     const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
     res.cookie('bsaas_at', tokens.accessToken, { httpOnly: true, secure: true, sameSite: 'lax', path: '/', domain });
