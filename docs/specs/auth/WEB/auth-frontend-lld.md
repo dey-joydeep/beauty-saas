@@ -33,6 +33,10 @@ Scope: Forms, fields, validation, i18n keys, SSR/guards, UX states.
   - submit labelKey: `auth.login.submit`
   - passkey labelKey: `auth.login.passkey`
   - social buttons use `auth.oauth.google` / `auth.oauth.meta`
+- Remember Me (client-only)
+  - Checkbox binds to a client preference.
+  - On submit: if checked, set cookie `remember_me=1; Max-Age=15552000; SameSite=Lax; Secure`.
+  - If unchecked, clear the cookie by setting an immediate expiry.
 - API
   - POST `/auth/login` with body { email, password }
   - 200 { totpRequired:false } → navigate to intended or default; toast `auth.login.success`
@@ -173,6 +177,7 @@ Scope: Forms, fields, validation, i18n keys, SSR/guards, UX states.
 - GuestGuard: if authenticated, navigate to intended or default route.
 - TransferState: key `AUTH_BOOTSTRAP` holds `{ user, sessions? }` snapshot; read on client boot.
 - Browser gating: only call WebAuthn/OAuth in `ngAfterViewInit` with `isPlatformBrowser=true`.
+- Remember Me on bootstrap (browser-only): if `remember_me=1` cookie exists, attempt a silent refresh (if RT cookie exists) on app load; otherwise show login.
 
 ## 6. UX Rules
 - Disable submit buttons during pending requests; show inline spinners with `aria-live="polite"`.

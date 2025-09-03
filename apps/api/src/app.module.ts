@@ -10,6 +10,7 @@ import { AuthModule } from '@cthub-bsaas/server-features-auth';
 import { TotpModule } from '@cthub-bsaas/server-infrastructure';
 import appConfig from './config/app.config';
 import { ThrottlerRetryAfterFilter } from './filters/throttler-retry-after.filter';
+import { ThrottlerRetryAfterGuard } from './guards/throttler-retry-after.guard';
 
 @Module({
   imports: [
@@ -45,6 +46,10 @@ import { ThrottlerRetryAfterFilter } from './filters/throttler-retry-after.filte
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerRetryAfterGuard,
+    },
     {
       provide: APP_FILTER,
       useClass: ThrottlerRetryAfterFilter,

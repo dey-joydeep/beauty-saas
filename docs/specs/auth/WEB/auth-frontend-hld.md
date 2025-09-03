@@ -14,6 +14,12 @@ Notes:
 - Following `../API/api-hld.md` and `../API/api-lld.md` routes. Endpoints use `/auth/login` (no `/auth/sign-in`).
 - All requests use relative URLs (SSR-safe). Cookies are set/cleared by the server. Client expects no token in response body except explicit temp tokens.
 
+Remember Me (client-only)
+- Treated as a UX preference, not an auth signal. Server ignores it.
+- Store as a non-HttpOnly, first-party cookie `remember_me=1` with `Max-Age=15552000` (180 days), `SameSite=Lax`, `Secure`.
+- On login page submit, set/clear this cookie based on the checkbox.
+- On app bootstrap in the browser, read this cookie to decide whether to attempt a silent restore (refresh) when RT exists.
+
 ### 2.1 Login (Password)
 - Method/URL: POST `/auth/login`
 - Request body (JSON):

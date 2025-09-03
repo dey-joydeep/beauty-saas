@@ -43,6 +43,7 @@ Status: Tracking items for frontend implementation alignment with HLD/LLD.
 ## Forms & Validation
 - [ ] Implement form models and validators per LLD (login, TOTP, register placeholder, verify, forgot/reset, enroll TOTP, recovery).
 - [ ] Add strength meter (optional) and confirm-password matching.
+- [ ] Remember Me (client-only): set `remember_me=1` cookie with Max-Age=180d when checked; clear when unchecked; read on bootstrap for silent restore UX.
 
 ## Error Handling & UX
 - [ ] Centralize HTTP error → i18n mapping.
