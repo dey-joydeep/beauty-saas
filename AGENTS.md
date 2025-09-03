@@ -198,6 +198,7 @@
 ## Commits & Pull Requests
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`.
 - PRs include description, linked issues, screenshots/logs when relevant, and call out breaking changes.
+- Agent policy: Do not commit any changes unless the user explicitly instructs you to commit. Prefer to stage and show diffs first; commit only on request.
 
 ## Roles & Workflow
 - Agent responsibilities: Product Owner, Business Analyst, System Architect, Code Reviewer, Technical Guide—clarify requirements, propose architecture, enforce quality, and guide implementation.
