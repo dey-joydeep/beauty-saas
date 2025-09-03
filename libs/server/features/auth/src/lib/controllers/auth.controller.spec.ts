@@ -2,6 +2,7 @@ import { AuthController } from './auth.controller';
 import type { Response } from 'express';
 import { AuthService } from '../services/auth.service';
 import type { WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
+import { ConfigService } from '@nestjs/config';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -46,17 +47,18 @@ describe('AuthController', () => {
       generate: jest.fn(),
       verifyAndConsume: jest.fn(),
     } as any;
-    controller = new AuthController(service, webAuthn as any, recovery as any);
+    const config = { get: jest.fn().mockReturnValue(undefined) } as unknown as ConfigService;
+    controller = new AuthController(service, webAuthn as any, recovery as any, config);
   });
 
-  it('signIn sets CSRF and refresh cookies when no TOTP', async () => {
+  it('signIn sets CSRF and auth cookies when no TOTP', async () => {
     service.signIn.mockResolvedValue({ totpRequired: false, accessToken: 'at', refreshToken: 'rt' });
     const { res, cookies } = createRes();
     const result = await controller.signIn({ email: 'e', password: 'p' } as any, res);
-    expect(result).toEqual({ totpRequired: false, accessToken: 'at' });
+    expect(result).toEqual({ totpRequired: false });
     expect(cookies['XSRF-TOKEN']).toBeDefined();
-    expect(cookies['refreshToken'].value).toBe('rt');
-    expect(cookies['refreshToken'].opts.httpOnly).toBe(true);
+    expect(cookies['bsaas_at'].value).toBe('at');
+    expect(cookies['bsaas_rt'].value).toBe('rt');
   });
 
   it('signIn returns temp token when TOTP required', async () => {
@@ -66,13 +68,14 @@ describe('AuthController', () => {
     expect(result).toEqual({ totpRequired: true, tempToken: 'temp' });
   });
 
-  it('refresh rotates cookies and returns access token', async () => {
+  it('refresh rotates cookies and returns empty body', async () => {
     service.refreshToken.mockResolvedValue({ accessToken: 'new-at', refreshToken: 'new-rt' } as any);
     const { res, cookies } = createRes();
-    const req = { headers: { cookie: 'refreshToken=old' } } as any;
+    const req = { headers: { cookie: 'bsaas_rt=old' } } as any;
     const result = await controller.refresh({} as any, req, res);
-    expect(result).toEqual({ accessToken: 'new-at' });
-    expect(cookies['refreshToken'].value).toBe('new-rt');
+    expect(result).toEqual({});
+    expect(cookies['bsaas_rt'].value).toBe('new-rt');
+    expect(cookies['bsaas_at'].value).toBe('new-at');
     expect(cookies['XSRF-TOKEN']).toBeDefined();
   });
 
@@ -81,8 +84,9 @@ describe('AuthController', () => {
     const { res, cookies } = createRes();
     const req = { headers: {} } as any;
     const result = await controller.refresh({ refreshToken: 'from-body' } as any, req, res);
-    expect(result).toEqual({ accessToken: 'at2' });
-    expect(cookies['refreshToken'].value).toBe('rt2');
+    expect(result).toEqual({});
+    expect(cookies['bsaas_rt'].value).toBe('rt2');
+    expect(cookies['bsaas_at'].value).toBe('at2');
   });
 
   it('refresh falls back to body when cookie header present but no refreshToken pair', async () => {
@@ -90,8 +94,9 @@ describe('AuthController', () => {
     const { res, cookies } = createRes();
     const req = { headers: { cookie: 'foo=bar; XSRF-TOKEN=abc' } } as any;
     const result = await controller.refresh({ refreshToken: 'from-body-2' } as any, req, res);
-    expect(result).toEqual({ accessToken: 'at3' });
-    expect(cookies['refreshToken'].value).toBe('rt3');
+    expect(result).toEqual({});
+    expect(cookies['bsaas_rt'].value).toBe('rt3');
+    expect(cookies['bsaas_at'].value).toBe('at3');
   });
 
   it('refresh does not set cookie when service returns no refreshToken', async () => {
@@ -99,8 +104,8 @@ describe('AuthController', () => {
     const { res, cookies } = createRes();
     const req = { headers: { cookie: '' } } as any;
     const result = await controller.refresh({ refreshToken: 'from-body' } as any, req, res);
-    expect(result).toEqual({ accessToken: 'only-at' });
-    expect(cookies['refreshToken']).toBeUndefined();
+    expect(result).toEqual({});
+    expect(cookies['bsaas_rt']).toBeUndefined();
   });
 
   it('refresh throws when cookie has empty refreshToken value and body missing', async () => {
@@ -109,10 +114,13 @@ describe('AuthController', () => {
     await expect(controller.refresh({} as any, req, res)).rejects.toThrow();
   });
 
-  it('signInWithTotp proxies to service', async () => {
+  it('signInWithTotp sets cookies and returns empty body', async () => {
     service.signInWithTotp.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' } as any);
-    const result = await controller.signInWithTotp({ tempToken: 't', totpCode: '123456' } as any);
-    expect(result).toEqual({ accessToken: 'a', refreshToken: 'r' });
+    const { res, cookies } = createRes();
+    const result = await controller.signInWithTotp({ tempToken: 't', totpCode: '123456' } as any, res as any);
+    expect(result).toEqual({});
+    expect(cookies['bsaas_at'].value).toBe('a');
+    expect(cookies['bsaas_rt'].value).toBe('r');
   });
 
   it('webauthn register start/finish call ports and return values', async () => {
@@ -133,8 +141,9 @@ describe('AuthController', () => {
     service.issueTokensForUser.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' } as any);
     const { res, cookies } = createRes();
     const finish = await controller.webauthnLoginFinish({} as any, { user: { userId: 'u1' } } as any, res);
-    expect(finish).toEqual({ accessToken: 'a' });
-    expect(cookies['refreshToken'].value).toBe('r');
+    expect(finish).toEqual({});
+    expect(cookies['bsaas_rt'].value).toBe('r');
+    expect(cookies['bsaas_at'].value).toBe('a');
   });
 
   it('recovery generate/verify call ports and return success', async () => {
@@ -166,7 +175,8 @@ describe('AuthController', () => {
     const { res } = createRes();
     await controller.logout({ user: { sessionId: 's1' } } as any, res);
     expect(service.logout).toHaveBeenCalledWith('s1');
-    expect((res.clearCookie as any)).toHaveBeenCalledWith('refreshToken', { path: '/' });
+    expect((res.clearCookie as any)).toHaveBeenCalledWith('bsaas_rt', expect.any(Object));
+    expect((res.clearCookie as any)).toHaveBeenCalledWith('bsaas_at', expect.any(Object));
   });
 
   it('listSessions proxies to service', async () => {
