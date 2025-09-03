@@ -5,7 +5,7 @@ import { User, CredentialTOTP, Session } from '@prisma/client';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
-import { ICredentialTotpRepository, IRefreshTokenRepository, ISessionRepository, IUserRepository, TotpPort, EMAIL_PORT, EmailPort, USER_REPOSITORY, SESSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY, CREDENTIAL_TOTP_REPOSITORY, TOTP_PORT } from '@cthub-bsaas/server-contracts-auth';
+import { ICredentialTotpRepository, IRefreshTokenRepository, ISessionRepository, IUserRepository, TotpPort, EMAIL_PORT, EmailPort, USER_REPOSITORY, SESSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY, CREDENTIAL_TOTP_REPOSITORY, TOTP_PORT, EMAIL_VERIFICATION_REPOSITORY, IEmailVerificationRepository } from '@cthub-bsaas/server-contracts-auth';
 import { AuditService } from '../services/audit.service';
 import { AuthService } from './auth.service';
 
@@ -21,6 +21,7 @@ describe('AuthService', () => {
   let configService: MockProxy<ConfigService>;
   let totpService: MockProxy<TotpPort>;
   let emailPort: EmailPort;
+  let emailVerRepo: MockProxy<IEmailVerificationRepository>;
 
   const mockUser: User = {
     id: 'user-id',
@@ -51,6 +52,7 @@ describe('AuthService', () => {
     configService = mock<ConfigService>();
     totpService = mock<TotpPort>();
     emailPort = { sendMail: jest.fn().mockResolvedValue(undefined) };
+    emailVerRepo = mock<IEmailVerificationRepository>();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -63,6 +65,7 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: configService },
         { provide: TOTP_PORT, useValue: totpService },
         { provide: EMAIL_PORT, useValue: emailPort },
+        { provide: EMAIL_VERIFICATION_REPOSITORY, useValue: emailVerRepo },
         { provide: AuditService, useValue: { log: jest.fn() } },
       ],
     }).compile();
@@ -166,15 +169,17 @@ describe('AuthService', () => {
       expect(userRepository.update).toHaveBeenCalled();
     });
 
-    it('requests email verification', async () => {
+    it('requests email verification (OTP stored and email sent)', async () => {
       const unver: User & { roles: { role: { name: string } }[] } = {
         ...mockUserWithRoles,
         emailVerifiedAt: null,
       };
       userRepository.findByEmail.mockResolvedValue(unver);
-      jwtService.signAsync.mockResolvedValue('verify-token');
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
+      emailVerRepo.upsertForEmail.mockResolvedValue({} as any);
       await expect(service.requestEmailVerification('test@example.com')).resolves.toBeUndefined();
       expect(emailPort.sendMail).toHaveBeenCalled();
+      expect(emailVerRepo.upsertForEmail).toHaveBeenCalled();
     });
 
     it('verifies email with valid token', async () => {
@@ -183,6 +188,28 @@ describe('AuthService', () => {
       userRepository.update.mockResolvedValue(updated);
       await expect(service.verifyEmail('verify-token')).resolves.toBeUndefined();
       expect(userRepository.update).toHaveBeenCalled();
+    });
+  });
+
+  describe('verifyEmailOtp', () => {
+    it('verifies email via OTP and marks used', async () => {
+      emailVerRepo.findActiveByEmail.mockResolvedValue({ id: 'rec1', codeHash: 'h', email: mockUser.email, expiresAt: new Date(Date.now() + 60000), attempts: 0, usedAt: null, createdAt: new Date() } as any);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      userRepository.findByEmail.mockResolvedValue(mockUserWithRoles);
+      await expect(service.verifyEmailOtp(mockUser.email, '123456')).resolves.toBeUndefined();
+      expect(emailVerRepo.markUsed).toHaveBeenCalledWith('rec1');
+      expect(userRepository.update).toHaveBeenCalledWith(mockUser.id, expect.any(Object));
+    });
+
+    it('throws when OTP expired/missing', async () => {
+      emailVerRepo.findActiveByEmail.mockResolvedValue(null);
+      await expect(service.verifyEmailOtp('x@example.com', '000000')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('throws when OTP does not match', async () => {
+      emailVerRepo.findActiveByEmail.mockResolvedValue({ id: 'rec2', codeHash: 'h', email: mockUser.email, expiresAt: new Date(Date.now() + 60000), attempts: 0, usedAt: null, createdAt: new Date() } as any);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      await expect(service.verifyEmailOtp(mockUser.email, '999999')).rejects.toThrow(UnauthorizedException);
     });
   });
 
