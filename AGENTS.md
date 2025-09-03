@@ -1,5 +1,16 @@
 # Repository Guidelines
 
+## Environment & Shell
+- Confirm runtime environment before running commands:
+  - OS and shell: On Windows, prefer PowerShell Core (`pwsh`). Some POSIX tools like `sed` may be unavailable by default.
+  - Node and npm: Match engines in `package.json` (Node >= 18, npm >= 9).
+  - Postgres for server IT: Ensure the local test DB from `.env.test` or `libs/server/data-access/prisma/.env` is reachable.
+- Shell command notes (Windows/pwsh):
+  - Use `Get-Content` instead of `sed` for quick file reads.
+  - Prefer `rg` (ripgrep) for searching; install it if missing.
+  - Nx, npm and npx commands work the same across shells, e.g., `npx nx test <project>`.
+  - Path separators: use forward slashes (`/`) in Nx targets; PowerShell accepts them.
+
 ## Tech Stack & Tools
 - Backend: NestJS 11; Monorepo: Nx 21.
 - Frontend: Angular 20 (Standalone + SSR), Material v3, Tailwind v4.
@@ -18,6 +29,39 @@
 - Lint: `npx nx lint <project>`
 - Test: `npx nx test <project>`
 - Affected: `npx nx affected -t build,test,lint`
+
+### Testing (Server) — Unit vs Integration
+- Default: `npx nx test <project>` runs both unit (UT) and integration (IT) suites.
+- Split runs per project via Nx configurations:
+  - UT only: `npx nx test <project> --configuration=ut`
+  - IT only: `npx nx test <project> --configuration=it`
+- Example (auth feature):
+  - `npx nx test server-feature-auth --configuration=ut`
+  - `npx nx test server-feature-auth --configuration=it`
+- Optional npm scripts can be added per project for convenience (e.g., `npm run test:server-feature-auth:ut`).
+- IT environment: tests use `.env.test` and shared setup/teardown in `libs/server/core/src/testing/` (excluded from builds). Ensure the test DB is up.
+- Coverage: backend feature libs must maintain 100% statements/lines/functions and ≥95% branches for both UT and IT. Exceptions require explicit TODO and follow‑up task.
+
+### Testing (Server) — Patterns and Conventions
+- Shared IT helpers live in `libs/server/core/src/testing/{global-setup.ts,global-teardown.ts}` and are reused by feature libs. They handle Prisma schema sync and seed/cleanup for a deterministic test user and roles.
+- Prefer typed mocks in tests (e.g., `Pick<Port, 'method'>`) over `any`. If a boundary makes typing impractical, keep the `any` usage narrowly scoped and local to tests.
+- Error handling in controllers should return appropriate HTTP errors. Example: missing refresh token must return 400 (Bad Request), not 500.
+- CSRF policy: the double-submit guard enforces header/cookie match only when the server has issued an `XSRF-TOKEN` cookie; safe methods (GET/HEAD/OPTIONS) and `@SkipCsrf()` are permitted.
+
+#### IT Spec File Pattern & File Moves
+- IT spec naming: place integration tests under `tests/integration/**` and name files `*.it-spec.ts` (e.g., `auth.e2e.it-spec.ts`). Do not use `*.int-spec.ts`.
+- Jest config: ensure `testMatch` includes `'<rootDir>/tests/**/*.it-spec.ts'`.
+- Renaming/moving test files:
+  - Tracked files: prefer `git mv old-path new-path` to preserve history.
+  - Untracked files (common during local iteration): use shell moves — on Windows `Move-Item old new` (pwsh), on POSIX `mv old new`.
+  - After renames, update any references (e.g., `testMatch` patterns, imports) and re-run `nx test <project> --configuration=it`.
+
+### Security & Secrets in Tests
+- Encryption: `EncryptionService` uses `ENCRYPTION_KEY` by default. In tests, it will fall back to `ENCRYPTION_TEST_KEY` or a deterministic test key when `NODE_ENV=test` to keep ITs hermetic. Do not rely on this fallback in production; provide real keys.
+- JWT: access/refresh/reset/verify tokens accept env-based secrets. Tests may use fallbacks (e.g., `JWT_SECRET`) for repeatability; production should configure explicit secrets.
+
+### Data Access Notes (Server)
+- Session deletion must respect FK constraints. If refresh tokens reference sessions, delete dependent refresh tokens before removing the session (or configure proper DB cascades).
 
 ## Coding Style & Naming
 - TypeScript strict; ES modules.
@@ -131,6 +175,7 @@
 - Guards & security:
   - Place all cross-cutting guards (e.g., `JwtAuthGuard`, `RolesGuard`, `CsrfGuard`) in `server-core/src/auth/guards` and export them from `@cthub-bsaas/server-core`.
   - Features must import guards/decorators from core; do not duplicate guards inside feature libs.
+  - CSRF semantics: enforce double-submit only when `XSRF-TOKEN` cookie is present; safe methods and `@SkipCsrf()` are excluded.
 - DI & boundaries:
   - Features depend on `contracts-*` ports and core, not directly on infrastructure implementations.
   - Infrastructure implements `contracts-*` ports and is wired in feature modules via DI tokens.

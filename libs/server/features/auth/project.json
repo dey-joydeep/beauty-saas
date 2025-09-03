@@ -42,6 +42,14 @@
         "codeCoverage": true,
         "coverageReporters": ["text", "lcov"],
         "coverageDirectory": "coverage/libs/server/features/auth"
+      },
+      "configurations": {
+        "ut": {
+          "jestConfig": "libs/server/features/auth/jest.unit.config.ts"
+        },
+        "it": {
+          "jestConfig": "libs/server/features/auth/jest.int.config.ts"
+        }
       }
     }
   },

@@ -10,7 +10,11 @@ export class EncryptionService {
   private readonly authTagLength = 16;
 
   constructor(private readonly configService: ConfigService) {
-    const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
+    const defaultTestKey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+    const encryptionKey =
+      this.configService.get<string>('ENCRYPTION_KEY') ||
+      this.configService.get<string>('ENCRYPTION_TEST_KEY') ||
+      (process.env.NODE_ENV === 'test' ? defaultTestKey : undefined);
     if (!encryptionKey) {
       throw new Error('ENCRYPTION_KEY is not set in environment variables');
     }

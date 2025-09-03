@@ -1,5 +1,5 @@
 import { Public } from '@cthub-bsaas/server-core';
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Res, Get, Param } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Res, Get, Param, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '@cthub-bsaas/server-core';
 import { AuthService } from '../services/auth.service';
 import { SkipCsrf } from '@cthub-bsaas/server-core';
@@ -81,14 +81,18 @@ export class AuthController {
       for (const part of cookieHeader.split(';')) {
         const [k, v] = part.trim().split('=');
         if (k === 'refreshToken') {
-          tokenFromCookie = decodeURIComponent(v || '');
+          if (v) {
+            tokenFromCookie = decodeURIComponent(v);
+          } else {
+            tokenFromCookie = decodeURIComponent('');
+          }
           break;
         }
       }
     }
     const token = tokenFromCookie ?? refreshTokenDto.refreshToken;
     if (!token) {
-      throw new Error('Missing refresh token');
+      throw new BadRequestException('error.auth.missing_refresh_token');
     }
     const result = await this.authService.refreshToken(token);
     if (result?.refreshToken) {

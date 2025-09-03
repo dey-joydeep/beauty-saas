@@ -45,7 +45,9 @@ export class SessionRepository implements ISessionRepository {
     /**
      * @inheritdoc
      */
-    async delete(id: string): Promise<Session> {
+  async delete(id: string): Promise<Session> {
+        // Ensure dependent refresh tokens are removed to satisfy FK constraints
+        await this.prisma.refreshToken.deleteMany({ where: { sessionId: id } });
         return this.prisma.session.delete({ where: { id } });
-    }
+  }
 }

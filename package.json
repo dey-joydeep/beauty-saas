@@ -44,6 +44,8 @@
         "test:web-customer": "nx test web-customer",
         "test:web-partner": "nx test web-partner",
         "test:api": "nx test api",
+        "test:server-feature-auth:ut": "nx test server-feature-auth --configuration=ut",
+        "test:server-feature-auth:it": "nx test server-feature-auth --configuration=it",
         "lint": "nx run-many --target=lint --all",
         "lint:fix": "nx run-many --target=lint --all --fix",
         "lint:affected": "nx affected:lint",

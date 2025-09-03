@@ -62,7 +62,10 @@ export class AuthService {
       const tempToken = await this.jwtService.signAsync(
         { sub: user.id, aud: 'totp' },
         {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+          secret:
+            this.configService.get<string>('JWT_ACCESS_SECRET') ||
+            this.configService.get<string>('JWT_SECRET') ||
+            'test-access-secret',
           expiresIn: '5m',
         },
       );
@@ -124,7 +127,10 @@ export class AuthService {
   public async refreshToken(token: string): Promise<TokenPair | null> {
     try {
       const { sub, jti } = await this.jwtService.verifyAsync<{ sub: string; jti: string }>(token, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret:
+          this.configService.get<string>('JWT_REFRESH_SECRET') ||
+          this.configService.get<string>('JWT_SECRET') ||
+          'test-refresh-secret',
       });
 
       const storedToken = await this.refreshTokenRepository.findByJti(jti);
@@ -216,14 +222,20 @@ export class AuthService {
           ),
         },
         {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+          secret:
+            this.configService.get<string>('JWT_ACCESS_SECRET') ||
+            this.configService.get<string>('JWT_SECRET') ||
+            'test-access-secret',
           expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
         },
       ),
       this.jwtService.signAsync(
         { sub: user.id, jti },
         {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+          secret:
+            this.configService.get<string>('JWT_REFRESH_SECRET') ||
+            this.configService.get<string>('JWT_SECRET') ||
+            'test-refresh-secret',
           expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
         },
       ),

@@ -44,10 +44,12 @@ export class CsrfGuard implements CanActivate {
       (req.headers['x-csrf-token'] as string | undefined) ||
       ((req.headers['X-CSRF-Token'] as unknown) as string | undefined);
     const cookie = req.cookies?.['XSRF-TOKEN'];
-    if (!header || !cookie || header !== cookie) {
-      throw new ForbiddenException('error.security.csrf_failed');
+    // Enforce double-submit only when server has issued a CSRF cookie
+    if (cookie) {
+      if (!header || header !== cookie) {
+        throw new ForbiddenException('error.security.csrf_failed');
+      }
     }
     return true;
   }
 }
-

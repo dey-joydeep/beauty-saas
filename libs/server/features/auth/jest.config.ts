@@ -6,8 +6,11 @@ export default {
     '<rootDir>/src/**/*.spec.ts',
     '<rootDir>/src/**/*.test.ts',
     '<rootDir>/tests/**/*.spec.ts',
-    '<rootDir>/tests/**/*.int-spec.ts',
+    '<rootDir>/tests/**/*.it-spec.ts',
   ],
+  globalSetup: '<rootDir>/../../core/src/testing/global-setup.ts',
+  globalTeardown: '<rootDir>/../../core/src/testing/global-teardown.ts',
+  testTimeout: 30000,
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },

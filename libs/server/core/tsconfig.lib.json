@@ -14,7 +14,7 @@
         "tsBuildInfoFile": "../../../dist/.tsbuildinfo/server/core.tsbuildinfo"
     },
     "include": ["src/**/*.ts"],
-    "exclude": ["**/*.test.ts", "**/*.spec.ts"],
+    "exclude": ["**/*.test.ts", "**/*.spec.ts", "src/testing/**"],
     "references": [
         {
             "path": "../../shared/tsconfig.lib.json"

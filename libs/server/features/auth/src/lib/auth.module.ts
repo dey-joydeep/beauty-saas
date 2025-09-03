@@ -2,6 +2,7 @@ import { CredentialTotpRepository, RefreshTokenRepository, SessionRepository, Us
 import { EncryptionModule } from '@cthub-bsaas/server-core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { resolveAccessSecret } from './utils/jwt-secret.util';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './controllers/auth.controller';
@@ -53,7 +54,7 @@ const providers = [
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_ACCESS_SECRET'),
+        secret: resolveAccessSecret(config),
         signOptions: {
           expiresIn: config.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
         },
