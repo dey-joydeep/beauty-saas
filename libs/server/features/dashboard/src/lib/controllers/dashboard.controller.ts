@@ -1,11 +1,8 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { DashboardService } from '../services/dashboard.service';
 import { ProductSalesFilterDto } from '../dto/product-sales.dto';
-import { JwtAuthGuard } from '../../../core/auth/guards/jwt-auth.guard';
-import { Roles } from '../../../core/auth/decorators/roles.decorator';
-import { RolesGuard } from '../../../core/auth/guards/roles.guard';
+import { JwtAuthGuard, Roles, RolesGuard, User } from '@cthub-bsaas/server-core';
 import { AppUserRole } from '../../appointment/models/user-params.model';
-import { User } from '../../../common/decorators/user.decorator';
 import type { AuthUser } from '../interfaces/dashboard-request.interface';
 
 @Controller('dashboard')

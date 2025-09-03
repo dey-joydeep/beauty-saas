@@ -5,6 +5,7 @@
   },
   "exclude": [
     "**/*.spec.ts",
+    "**/*.e2e-spec.ts",
     "**/*.test.ts",
     "jest.config.ts",
     "node_modules",

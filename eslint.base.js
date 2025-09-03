@@ -88,6 +88,7 @@ export default [
   // Strengthen async safety in source files
   {
     files: ['**/src/**/*.{ts,tsx}'],
+    ignores: ['**/src/**/*.{spec,test}.ts', '**/src/**/*.e2e-spec.ts'],
     rules: {
       '@typescript-eslint/require-await': 'error',
       '@typescript-eslint/no-floating-promises': ['error', { ignoreVoid: false, ignoreIIFE: false }],
@@ -152,5 +153,33 @@ export default [
       parserOptions: { project: false },
     },
     rules: {},
+  },
+  // Prevent deep relative imports to core from feature libs; enforce package-root imports
+  {
+    files: ['libs/server/features/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '../../core/**',
+                '../../../core/**',
+                '../../../../core/**',
+                '../../lib/server/core/**',
+                '../../../lib/server/core/**',
+                '**/core/src/**',
+              ],
+              message: 'Import from @cthub-bsaas/server-core (package root), not deep relative paths into core.',
+            },
+            {
+              group: ['@cthub-bsaas/server-core/*'],
+              message: 'Import from @cthub-bsaas/server-core package root; deep subpath imports are not allowed.',
+            },
+          ],
+        },
+      ],
+    },
   },
 ];

@@ -1,7 +1,8 @@
 import { Public } from '@cthub-bsaas/server-core';
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Res, Get, Param } from '@nestjs/common';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { JwtAuthGuard } from '@cthub-bsaas/server-core';
 import { AuthService } from '../services/auth.service';
+import { SkipCsrf } from '@cthub-bsaas/server-core';
 import { SignInDto } from '../dto/sign-in.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { SignInWithTotpDto } from '../dto/sign-in-with-totp.dto';
@@ -34,10 +35,14 @@ export class AuthController {
    * @returns {Promise<{ totpRequired: boolean; tempToken?: string; accessToken?: string }>} Token response.
    */
   @Public()
+  @SkipCsrf()
   @HttpCode(HttpStatus.OK)
   @Post('sign-in')
   async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) res: Response): Promise<SignInHttpResponse> {
     const result = await this.authService.signIn(signInDto.email, signInDto.password);
+    // Set CSRF token cookie for subsequent state-changing requests
+    const csrf = (Math.random().toString(36) + Math.random().toString(36)).slice(2);
+    res.cookie('XSRF-TOKEN', csrf, { httpOnly: false, secure: true, sameSite: 'strict', path: '/' });
     if (!result.totpRequired && result.refreshToken) {
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
@@ -62,6 +67,7 @@ export class AuthController {
    * @returns {Promise<{ accessToken: string | undefined }>} New access token, if valid.
    */
   @Public()
+  @SkipCsrf()
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
   async refresh(
@@ -92,6 +98,9 @@ export class AuthController {
         sameSite: 'strict',
         path: '/',
       });
+      // rotate CSRF token as well
+      const csrf = (Math.random().toString(36) + Math.random().toString(36)).slice(2);
+      res.cookie('XSRF-TOKEN', csrf, { httpOnly: false, secure: true, sameSite: 'strict', path: '/' });
     }
     return { accessToken: result?.accessToken };
   }
@@ -164,6 +173,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('password/forgot')
+  @SkipCsrf()
   async forgotPassword(@Body() body: { email: string }): Promise<SimpleOk> {
     await this.authService.requestPasswordReset(body.email);
     return { success: true };
@@ -179,6 +189,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('password/reset')
+  @SkipCsrf()
   async resetPassword(@Body() body: { token: string; newPassword: string }): Promise<SimpleOk> {
     await this.authService.resetPassword(body.token, body.newPassword);
     return { success: true };
@@ -194,6 +205,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('email/send-verification')
+  @SkipCsrf()
   async sendEmailVerification(@Body() body: { email: string }): Promise<SimpleOk> {
     await this.authService.requestEmailVerification(body.email);
     return { success: true };
@@ -209,6 +221,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('email/verify')
+  @SkipCsrf()
   async verifyEmail(@Body() body: { token: string }): Promise<SimpleOk> {
     await this.authService.verifyEmail(body.token);
     return { success: true };
@@ -250,6 +263,7 @@ export class AuthController {
    */
   @Public()
   @Post('webauthn/login/start')
+  @SkipCsrf()
   async webauthnLoginStart(@Request() req: { user?: { userId: string } }): Promise<Record<string, unknown>> {
     // for simplicity, require authenticated user context in this iteration
     if (!req.user?.userId) throw new Error('User context required');
@@ -266,6 +280,7 @@ export class AuthController {
    */
   @Public()
   @Post('webauthn/login/finish')
+  @SkipCsrf()
   async webauthnLoginFinish(
     @Body() response: Record<string, unknown>,
     @Request() req: { user: { userId: string } },

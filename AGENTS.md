@@ -81,8 +81,34 @@
 - Unions: represent variants as discriminated unions with a stable `kind`/`type` field for easy narrowing.
 
 ## Testing Guidelines
-- Jest unit tests; files `*.spec.ts` colocated or in `__tests__/`.
-- Keep tests fast and isolated; mock IO/DB where sensible.
+- Unit tests: Jest `*.spec.ts` colocated next to source under `src/`.
+- Integration tests: place under each project `tests/integration/**/*.int-spec.ts` (not inside `src/`). Use Nest `TestingModule` with in-memory/test doubles; avoid real external services. Integration tests must run via `nx test <lib>`.
+- E2E tests: only at app level (e.g., Playwright or Nest e2e) under `apps/<app>/e2e/`.
+- Keep tests fast and isolated; mock IO/DB where sensible. Avoid flakiness and global state.
+- Coverage: backend feature libs must maintain 100% coverage (statements, branches, functions, lines). Any temporary exception must include a TODO with justification and a follow-up task.
+
+## Server Architecture Rules
+- Layering:
+  - `libs/server/core`: cross-cutting concerns and shared building blocks (guards, decorators, filters, config, encryption, common services, validation). No app/feature-specific logic here.
+  - `libs/server/contracts-*`: DI tokens and TypeScript ports/interfaces that define boundaries (e.g., repositories, adapters). No implementations.
+  - `libs/server/infrastructure`: concrete adapters/implementations for ports (e.g., Prisma repositories, external integrations). No domain/business orchestration.
+  - `libs/server/features/*`: domain/business use-cases, controllers, Nest modules wiring ports to use-cases. No low-level infra.
+- Guards & security:
+  - Place all cross-cutting guards (e.g., `JwtAuthGuard`, `RolesGuard`, `CsrfGuard`) in `server-core/src/auth/guards` and export them from `@cthub-bsaas/server-core`.
+  - Features must import guards/decorators from core; do not duplicate guards inside feature libs.
+- DI & boundaries:
+  - Features depend on `contracts-*` ports and core, not directly on infrastructure implementations.
+  - Infrastructure implements `contracts-*` ports and is wired in feature modules via DI tokens.
+  - Never import from `infrastructure` inside `core` or `contracts-*`; avoid circular deps.
+- Import hygiene:
+  - Always import from library package roots (e.g., `@cthub-bsaas/server-core`), never deep subpaths like `../../core/...` or `@cthub-bsaas/server-core/auth/...`.
+  - Prefer path aliases defined in `tsconfig.base.json` over relative paths across packages.
+- Testing placement:
+  - Unit tests colocated under `src/**/*.spec.ts`.
+  - Integration tests under `tests/integration/**/*.int-spec.ts` and executed via `nx test <lib>`.
+- Coverage enforcement:
+  - Backend feature libs must maintain 100% coverage (statements, branches, functions, lines). Add Jest `coverageThreshold` per project to enforce.
+  - Exceptions require TODO with justification and a follow-up task.
 
 ## Commits & Pull Requests
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`.

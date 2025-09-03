@@ -12,6 +12,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TOTP_PORT, TotpPort, EMAIL_PORT, EmailPort } from '@cthub-bsaas/server-contracts-auth';
+import { AuditService } from './audit.service';
 import type { AuthSignInResult, TokenPair } from '../types/auth.types';
 
 import { User } from '@prisma/client';
@@ -34,6 +35,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     @Inject(TOTP_PORT) private readonly totpService: TotpPort,
     @Inject(EMAIL_PORT) private readonly emailPort: EmailPort,
+    private readonly audit: AuditService,
   ) {}
 
     /**
@@ -47,12 +49,12 @@ export class AuthService {
     public async signIn(email: string, pass: string): Promise<AuthSignInResult> {
     const user = await this.userRepository.findByEmail(email);
     if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('error.auth.invalid_credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(pass, user.passwordHash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('error.auth.invalid_credentials');
     }
 
     const totpCredential = await this.credentialTotpRepository.findByUserId(user.id);
@@ -64,12 +66,14 @@ export class AuthService {
           expiresIn: '5m',
         },
       );
+      this.audit.log('login_password_totp_challenge', { userId: user.id });
       return { totpRequired: true, tempToken };
     }
 
     const session = await this.sessionRepository.create({ userId: user.id });
     const { accessToken, refreshToken } = await this.generateTokens(user, session.id);
 
+    this.audit.log('login_password_success', { userId: user.id, sessionId: session.id });
     return { totpRequired: false, accessToken, refreshToken };
   }
 
@@ -88,23 +92,25 @@ export class AuthService {
       });
 
       if (aud !== 'totp') {
-        throw new UnauthorizedException('Invalid token for TOTP verification');
+        throw new UnauthorizedException('error.auth.invalid_totp_token');
       }
 
       const isTotpValid = await this.totpService.verifyToken(sub, totpCode);
       if (!isTotpValid) {
-        throw new UnauthorizedException('Invalid TOTP code');
+        throw new UnauthorizedException('error.auth.invalid_totp_code');
       }
 
       const user = await this.userRepository.findById(sub);
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException('error.auth.user_not_found');
       }
 
       const session = await this.sessionRepository.create({ userId: user.id });
-      return this.generateTokens(user, session.id);
+      const tokens = await this.generateTokens(user, session.id);
+      this.audit.log('login_totp_success', { userId: user.id, sessionId: session.id });
+      return tokens;
     } catch {
-      throw new UnauthorizedException('Invalid or expired TOTP session');
+      throw new UnauthorizedException('error.auth.invalid_or_expired_totp');
     }
   }
 
@@ -123,20 +129,22 @@ export class AuthService {
 
       const storedToken = await this.refreshTokenRepository.findByJti(jti);
       if (!storedToken || storedToken.revokedAt) {
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new UnauthorizedException('error.auth.invalid_refresh_token');
       }
 
       const user = await this.userRepository.findById(sub);
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException('error.auth.user_not_found');
       }
 
       // Invalidate the old refresh token
       await this.refreshTokenRepository.revoke(jti);
 
-      return this.generateTokens(user, storedToken.sessionId);
+      const tokens = await this.generateTokens(user, storedToken.sessionId);
+      this.audit.log('refresh_success', { userId: user.id, sessionId: storedToken.sessionId });
+      return tokens;
     } catch {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('error.auth.invalid_refresh_token');
     }
   }
 
@@ -151,6 +159,7 @@ export class AuthService {
     const session = await this.sessionRepository.findById(sessionId);
     if (session) {
       await this.sessionRepository.delete(sessionId);
+      this.audit.log('logout', { userId: session.userId, sessionId });
     }
   }
 
@@ -176,9 +185,10 @@ export class AuthService {
   public async revokeSession(userId: string, sessionId: string): Promise<{ success: true }> {
     const session = await this.sessionRepository.findById(sessionId);
     if (!session || session.userId !== userId) {
-      throw new UnauthorizedException('Cannot revoke this session');
+      throw new UnauthorizedException('error.auth.cannot_revoke_session');
     }
     await this.sessionRepository.delete(sessionId);
+    this.audit.log('session_revoked', { userId, sessionId });
     return { success: true };
   }
 
@@ -233,7 +243,7 @@ export class AuthService {
    */
   public async issueTokensForUser(userId: string): Promise<TokenPair> {
     const user = await this.userRepository.findById(userId);
-    if (!user) throw new UnauthorizedException('User not found');
+    if (!user) throw new UnauthorizedException('error.auth.user_not_found');
     const session = await this.sessionRepository.create({ userId: user.id });
     return this.generateTokens(user, session.id);
   }
@@ -258,6 +268,7 @@ export class AuthService {
       },
     );
     await this.emailPort.sendMail(user.email, 'Password Reset', `Use this token to reset your password: ${token}`);
+    this.audit.log('password_reset_requested', { userId: user.id });
   }
 
   /**
@@ -274,11 +285,11 @@ export class AuthService {
         const { sub, aud } = await this.jwtService.verifyAsync<{ sub: string; aud: string }>(token, {
           secret: resetSecret,
         });
-      if (aud !== 'reset') throw new UnauthorizedException('Invalid token');
+      if (aud !== 'reset') throw new UnauthorizedException('error.auth.invalid_reset_token');
       const passwordHash = await bcrypt.hash(newPassword, 10);
       await this.userRepository.update(sub, { passwordHash } as Partial<User>);
     } catch {
-      throw new UnauthorizedException('Invalid or expired reset token');
+      throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
     }
   }
 
@@ -302,6 +313,7 @@ export class AuthService {
       },
     );
     await this.emailPort.sendMail(user.email, 'Verify your email', `Use this token to verify your email: ${token}`);
+    this.audit.log('email_verification_requested', { userId: user.id });
   }
 
   /**
@@ -317,10 +329,11 @@ export class AuthService {
       const { sub, aud } = await this.jwtService.verifyAsync<{ sub: string; aud: string }>(token, {
         secret: verifySecret,
       });
-      if (aud !== 'verify') throw new UnauthorizedException('Invalid token');
+      if (aud !== 'verify') throw new UnauthorizedException('error.auth.invalid_verify_token');
       await this.userRepository.update(sub, { emailVerifiedAt: new Date() } as Partial<User>);
+      this.audit.log('email_verified', { userId: sub });
     } catch {
-      throw new UnauthorizedException('Invalid or expired verification token');
+      throw new UnauthorizedException('error.auth.invalid_or_expired_verify_token');
     }
   }
 }

@@ -6,6 +6,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { ICredentialTotpRepository, IRefreshTokenRepository, ISessionRepository, IUserRepository, TotpPort, EMAIL_PORT, EmailPort, USER_REPOSITORY, SESSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY, CREDENTIAL_TOTP_REPOSITORY, TOTP_PORT } from '@cthub-bsaas/server-contracts-auth';
+import { AuditService } from '../services/audit.service';
 import { AuthService } from './auth.service';
 
 jest.mock('bcryptjs');
@@ -62,6 +63,7 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: configService },
         { provide: TOTP_PORT, useValue: totpService },
         { provide: EMAIL_PORT, useValue: emailPort },
+        { provide: AuditService, useValue: { log: jest.fn() } },
       ],
     }).compile();
 
@@ -181,6 +183,148 @@ describe('AuthService', () => {
       userRepository.update.mockResolvedValue(updated);
       await expect(service.verifyEmail('verify-token')).resolves.toBeUndefined();
       expect(userRepository.update).toHaveBeenCalled();
+    });
+  });
+
+  describe('audience and token guards', () => {
+    it('signInWithTotp throws when audience is not totp', async () => {
+      jwtService.verifyAsync.mockResolvedValue({ sub: mockUser.id, aud: 'wrong' } as any);
+      await expect(service.signInWithTotp('t', '123456')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('resetPassword throws on wrong audience', async () => {
+      jwtService.verifyAsync.mockResolvedValue({ sub: mockUser.id, aud: 'wrong' } as any);
+      await expect(service.resetPassword('t', 'p')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('verifyEmail throws on wrong audience', async () => {
+      jwtService.verifyAsync.mockResolvedValue({ sub: mockUser.id, aud: 'wrong' } as any);
+      await expect(service.verifyEmail('t')).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('sessions and tokens', () => {
+    it('refreshes token on valid refresh token', async () => {
+      const jti = 'jti-1';
+      const sessionId = 'sess-1';
+      jwtService.verifyAsync.mockResolvedValue({ sub: mockUserWithRoles.id, jti });
+      refreshTokenRepository.findByJti.mockResolvedValue({ jti, sessionId, revokedAt: null } as any);
+      userRepository.findById.mockResolvedValue(mockUserWithRoles);
+      // @ts-expect-error - private method
+      jest.spyOn(service, 'generateTokens').mockResolvedValue({ accessToken: 'new-at', refreshToken: 'new-rt' });
+
+      const result = await service.refreshToken('rt');
+      expect(refreshTokenRepository.revoke).toHaveBeenCalledWith(jti);
+      expect(result).toEqual({ accessToken: 'new-at', refreshToken: 'new-rt' });
+    });
+
+    it('logout revokes existing session when found', async () => {
+      sessionRepository.findById.mockResolvedValue({ id: 's1', userId: mockUserWithRoles.id } as any);
+      await expect(service.logout('s1')).resolves.toBeUndefined();
+      expect(sessionRepository.delete).toHaveBeenCalledWith('s1');
+    });
+
+    it('listSessions returns sessions', async () => {
+      sessionRepository.findByUserId.mockResolvedValue([{ id: 's1' }] as any);
+      const res = await service.listSessions('u1');
+      expect(res).toEqual([{ id: 's1' }]);
+    });
+
+    it('revokeSession validates owner and deletes', async () => {
+      sessionRepository.findById.mockResolvedValue({ id: 's1', userId: 'u1' } as any);
+      const res = await service.revokeSession('u1', 's1');
+      expect(sessionRepository.delete).toHaveBeenCalledWith('s1');
+      expect(res).toEqual({ success: true });
+    });
+
+    it('revokeSession throws when owner mismatch or missing', async () => {
+      sessionRepository.findById.mockResolvedValue({ id: 's1', userId: 'other' } as any);
+      await expect(service.revokeSession('u1', 's1')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('refreshToken throws on invalid token', async () => {
+      jwtService.verifyAsync.mockRejectedValue(new Error('bad'));
+      await expect(service.refreshToken('rt')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('refreshToken throws when stored token missing or revoked', async () => {
+      jwtService.verifyAsync.mockResolvedValue({ sub: 'u1', jti: 'x' });
+      refreshTokenRepository.findByJti.mockResolvedValue({ jti: 'x', revokedAt: new Date(), sessionId: 's1' } as any);
+      await expect(service.refreshToken('rt')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('refreshToken throws when user not found', async () => {
+      jwtService.verifyAsync.mockResolvedValue({ sub: 'u1', jti: 'x' });
+      refreshTokenRepository.findByJti.mockResolvedValue({ jti: 'x', revokedAt: null, sessionId: 's1' } as any);
+      userRepository.findById.mockResolvedValue(null as any);
+      await expect(service.refreshToken('rt')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('logout no-ops if session not found', async () => {
+      sessionRepository.findById.mockResolvedValue(null as any);
+      await expect(service.logout('missing')).resolves.toBeUndefined();
+      expect(sessionRepository.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('email & verification branches', () => {
+    it('requestPasswordReset no-ops when user missing', async () => {
+      userRepository.findByEmail.mockResolvedValue(null as any);
+      await expect(service.requestPasswordReset('no@user')).resolves.toBeUndefined();
+      expect(emailPort.sendMail).not.toHaveBeenCalled();
+    });
+
+    it('requestEmailVerification no-ops when user missing', async () => {
+      userRepository.findByEmail.mockResolvedValue(null as any);
+      await expect(service.requestEmailVerification('none@example.com')).resolves.toBeUndefined();
+    });
+
+    it('requestEmailVerification no-ops when already verified', async () => {
+      userRepository.findByEmail.mockResolvedValue({ ...mockUserWithRoles, emailVerifiedAt: new Date() });
+      await expect(service.requestEmailVerification('v@example.com')).resolves.toBeUndefined();
+    });
+
+    it('verifyEmail throws on invalid token', async () => {
+      jwtService.verifyAsync.mockRejectedValue(new Error('bad'));
+      await expect(service.verifyEmail('bad')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('signInWithTotp throws when user not found after verify', async () => {
+      jwtService.verifyAsync.mockResolvedValue({ sub: 'nope', aud: 'totp' });
+      totpService.verifyToken.mockResolvedValue(true);
+      userRepository.findById.mockResolvedValue(null as any);
+      await expect(service.signInWithTotp('temp', '123456')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('issueTokensForUser throws for missing user', async () => {
+      userRepository.findById.mockResolvedValue(null as any);
+      await expect(service.issueTokensForUser('x')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('issueTokensForUser returns tokens for existing user', async () => {
+      const withRole = { ...mockUserWithRoles, roles: [{ role: { name: 'admin' } }] as any } as typeof mockUserWithRoles;
+      userRepository.findById.mockResolvedValue(withRole);
+      sessionRepository.create.mockResolvedValue({ id: 'sess' } as any);
+      jwtService.signAsync
+        .mockResolvedValueOnce('access-token')
+        .mockResolvedValueOnce('refresh-token');
+      refreshTokenRepository.create.mockResolvedValue({} as any);
+      const result = await service.issueTokensForUser(withRole.id);
+      expect(result).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+    });
+
+    it('signIn without TOTP generates tokens via generateTokens', async () => {
+      const withRole = { ...mockUserWithRoles, roles: [{ role: { name: 'user' } }] as any } as typeof mockUserWithRoles;
+      userRepository.findByEmail.mockResolvedValue(withRole);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      credentialTotpRepository.findByUserId.mockResolvedValue(null);
+      sessionRepository.create.mockResolvedValue({ id: 'sess' } as any);
+      jwtService.signAsync
+        .mockResolvedValueOnce('access-token')
+        .mockResolvedValueOnce('refresh-token');
+      refreshTokenRepository.create.mockResolvedValue({} as any);
+      const res = await service.signIn('test@example.com', 'password');
+      expect(res).toEqual({ totpRequired: false, accessToken: 'access-token', refreshToken: 'refresh-token' });
     });
   });
 });

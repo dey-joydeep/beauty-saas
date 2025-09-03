@@ -13,6 +13,7 @@ import {
   USER_REPOSITORY,
 } from '@cthub-bsaas/server-contracts-auth';
 import { AuthService } from './services/auth.service';
+import { AuditService } from './services/audit.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { EmailModule, TotpModule, WebAuthnModule, RecoveryModule } from '@cthub-bsaas/server-infrastructure';
 
@@ -61,8 +62,8 @@ const providers = [
     }),
   ],
   controllers: [AuthController, TotpController],
-    providers: [AuthService, JwtStrategy, ...providers],
-  exports: [AuthService, ...providers],
+  providers: [AuthService, JwtStrategy, AuditService, ...providers],
+  exports: [AuthService, AuditService, ...providers],
 })
 export class AuthModule {}
 
