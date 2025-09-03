@@ -23,8 +23,9 @@ Tooling: **Nx 21** monorepo, **Material v3**, **Tailwind v4**, **Jest 29** (unit
 - **Primary:** Cookie‑based auth using **Access Token (AT)** short‑lived and **Refresh Token (RT)** rotating; both are **HttpOnly + Secure** cookies.  
 - **Rotation & Revocation:** Each refresh rotates RT (new `jti`); previous RT becomes invalid. **Redis** stores RT states/deny‑list.  
 - **Cookie scope:** Top‑level domain (e.g., `.cthub.in`) to allow **SSO across subdomains** (`admin.`, `partner.`, `app.`). `SameSite=Lax` by default.  
-- **Bearer tokens:** Reserved for 3rd‑party API clients only (not used by our first‑party web apps).  
-- **CSRF:** For state‑changing requests, use **double‑submit** anti‑CSRF token (non‑HttpOnly `XSRF-TOKEN` cookie + `X-XSRF-TOKEN` header). Angular’s HttpClient XSRF support is leveraged.
+- **Bearer tokens:** Reserved for 3rd-party API clients only (not used by our first-party web apps).  
+- **CSRF:** For state-changing requests, use **double-submit** anti-CSRF token (non-HttpOnly `XSRF-TOKEN` cookie + `X-XSRF-TOKEN` header). Angular's HttpClient XSRF support is leveraged.
+ - **Customer Social Login:** Google and Meta via OAuth 2.0/OIDC with PKCE, `state`, and `nonce`; supports account linking/unlinking.
 
 ## 4) Password Policy (modern / NIST‑aligned)
 - **Min length 8**, allow **64+** (passphrases).  

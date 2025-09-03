@@ -6,6 +6,7 @@
 Key decisions:
 - **Cookie-based auth** (AT short-lived, RT rotating in HttpOnly cookies).
 - **Passkeys (WebAuthn)** + **TOTP** for strong auth; **Email OTP** only as fallback. **No SMS OTP**.
+- **Social Login (Customer)** via OAuth 2.0/OIDC with Google and Meta; accounts may be auto-created on first login with email verification rules and merge/link flows.
 - **Flexible password reset** with recovery codes.
 - **Access log vs Application log** separated. Audit events structured.
 - **SSO across subdomains** (e.g., `admin.cthub.in`, `partner.cthub.in`, `app.cthub.in`) via cookie domain `.cthub.in`.

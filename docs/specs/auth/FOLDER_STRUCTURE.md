@@ -92,7 +92,7 @@ libs/
               totp.controller.ts
               webauthn.controller.ts
             application/          # use-cases (pure business logic) depend on Contracts ports
-              sign-in.usecase.ts
+              login.usecase.ts
               refresh-session.usecase.ts
               enroll-passkey.usecase.ts
               login-passkey.usecase.ts
