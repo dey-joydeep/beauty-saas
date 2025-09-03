@@ -13,7 +13,12 @@ import type { JwtUserContext } from '../types/auth.types';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: (req) => {
+        // Prefer access token from cookie, fallback to Authorization header
+        const cookieToken = (req as any)?.cookies?.['bsaas_at'];
+        if (typeof cookieToken === 'string' && cookieToken.length > 0) return cookieToken;
+        return ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+      },
       ignoreExpiration: false,
       secretOrKey: resolveAccessSecret(configService),
     });

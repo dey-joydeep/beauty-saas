@@ -2,13 +2,14 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CoreModule, JwtAuthGuard, RolesGuard, CsrfGuard } from '@cthub-bsaas/server-core';
 import { AuthModule } from '@cthub-bsaas/server-features-auth';
 import { TotpModule } from '@cthub-bsaas/server-infrastructure';
 import appConfig from './config/app.config';
+import { ThrottlerRetryAfterFilter } from './filters/throttler-retry-after.filter';
 
 @Module({
   imports: [
@@ -44,6 +45,10 @@ import appConfig from './config/app.config';
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_FILTER,
+      useClass: ThrottlerRetryAfterFilter,
+    },
     {
       provide: APP_GUARD,
       useClass: CsrfGuard,

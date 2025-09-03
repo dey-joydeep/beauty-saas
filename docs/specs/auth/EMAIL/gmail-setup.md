@@ -1,6 +1,6 @@
 # Email Delivery — Gmail (Nodemailer)
 
-Use Gmail SMTP with an App Password (recommended) to send emails from `cthub.bsaas@gmail.com`.
+Use Gmail via OAuth2 (recommended) to send emails from `cthub.bsaas@gmail.com`.
 
 ## Env configuration (.env)
 
@@ -8,17 +8,21 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_SECURE=false
 EMAIL_USER=cthub.bsaas@gmail.com
-EMAIL_PASS=<GMAIL_APP_PASSWORD>
+EMAIL_OAUTH_CLIENT_ID=<GMAIL_CLIENT_ID>
+EMAIL_OAUTH_CLIENT_SECRET=<GMAIL_CLIENT_SECRET>
+EMAIL_OAUTH_REFRESH_TOKEN=<GMAIL_REFRESH_TOKEN>
+# Optional if pre-fetched
+EMAIL_OAUTH_ACCESS_TOKEN=<GMAIL_ACCESS_TOKEN>
 EMAIL_FROM="CTHub BSAAS <cthub.bsaas@gmail.com>"
 
 Optional (cookies across subdomains):
 AUTH_COOKIE_DOMAIN=.cthub.in
 
-## Steps to obtain App Password
-- Enable 2‑Step Verification on the Gmail account.
-- Create an App Password in Google Account → Security → App passwords.
-- Choose “Mail” as the app, “Other” if needed, and generate.
-- Paste the 16‑character password into `EMAIL_PASS`.
+## Steps to set up OAuth2
+- Create a Google Cloud project and OAuth Consent Screen.
+- Create OAuth 2.0 Client (type: Web/Desktop as preferred).
+- Generate a Refresh Token using Google OAuth flow for the Gmail account.
+- Set `EMAIL_OAUTH_CLIENT_ID`, `EMAIL_OAUTH_CLIENT_SECRET`, `EMAIL_OAUTH_REFRESH_TOKEN` in env.
 
 ## Code notes
 - Adapter: `libs/server/infrastructure/src/lib/email/email.nodemailer.adapter.ts`

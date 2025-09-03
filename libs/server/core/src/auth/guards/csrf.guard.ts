@@ -9,7 +9,7 @@ export const SKIP_CSRF_KEY = 'skipCsrf';
 
 /**
  * @public
- * Decorator to bypass CSRF validation on a handler (e.g., sign-in, refresh).
+ * Decorator to bypass CSRF validation on a handler (e.g., login, refresh).
  */
 export const SkipCsrf = () => SetMetadata(SKIP_CSRF_KEY, true);
 

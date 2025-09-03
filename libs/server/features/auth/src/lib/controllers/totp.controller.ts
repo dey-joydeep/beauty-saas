@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Request, Body, UnauthorizedException, Inject } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Body, UnauthorizedException, Inject, HttpCode, HttpStatus } from '@nestjs/common';
 import { JwtAuthGuard } from '@cthub-bsaas/server-core';
 import { TOTP_PORT, TotpPort } from '@cthub-bsaas/server-contracts-auth';
 import { VerifyTotpDto } from '../dto/verify-totp.dto';
@@ -33,6 +33,24 @@ export class TotpController {
    */
   @Post('verify')
   public async verify(@Request() req: { user: { id: string } }, @Body() verifyTotpDto: VerifyTotpDto): Promise<{ success: true }> {
+    const isVerified = await this.totpService.verifyToken(req.user.id, verifyTotpDto.token);
+    if (!isVerified) {
+      throw new UnauthorizedException('Invalid TOTP token');
+    }
+    return { success: true };
+  }
+
+  // Aliases aligned with spec
+  @HttpCode(HttpStatus.OK)
+  @Post('enroll/start')
+  public async enrollStart(@Request() req: { user: { id: string } }): Promise<{ qrCodeDataUrl: string }> {
+    const { qrCodeDataUrl } = await this.totpService.generateSecret(req.user.id);
+    return { qrCodeDataUrl };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('enroll/finish')
+  public async enrollFinish(@Request() req: { user: { id: string } }, @Body() verifyTotpDto: VerifyTotpDto): Promise<{ success: true }> {
     const isVerified = await this.totpService.verifyToken(req.user.id, verifyTotpDto.token);
     if (!isVerified) {
       throw new UnauthorizedException('Invalid TOTP token');

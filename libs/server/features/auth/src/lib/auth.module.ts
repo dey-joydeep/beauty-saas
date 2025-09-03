@@ -13,6 +13,8 @@ import {
   SESSION_REPOSITORY,
   USER_REPOSITORY,
 } from '@cthub-bsaas/server-contracts-auth';
+import { EMAIL_VERIFICATION_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
+import { EmailVerificationRepository } from '@cthub-bsaas/server-data-access';
 import { AuthService } from './services/auth.service';
 import { AuditService } from './services/audit.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -35,12 +37,16 @@ const providers = [
     provide: CREDENTIAL_TOTP_REPOSITORY,
     useClass: CredentialTotpRepository,
   },
+  {
+    provide: EMAIL_VERIFICATION_REPOSITORY,
+    useClass: EmailVerificationRepository,
+  },
 ];
 
 /**
  * @public
  * Authentication feature module providing controllers, services and strategies
- * for sign-in, session management and MFA.
+ * for login, session management and MFA.
  */
 @Module({
   imports: [

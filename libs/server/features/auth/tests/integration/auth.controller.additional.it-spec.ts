@@ -48,19 +48,19 @@ describe('AuthController additional (integration-light)', () => {
     await app.close();
   });
 
-  it('handles sign-in/totp endpoint', async () => {
+  it('handles login/totp endpoint', async () => {
     const res = await (await import('supertest')).default(app.getHttpServer())
-      .post('/auth/sign-in/totp')
+      .post('/auth/login/totp')
       .send({ tempToken: 'a.b.c', totpCode: '123456' })
       .expect(200);
-    expect(res.body).toEqual({ accessToken: 'at', refreshToken: 'rt' });
+    expect(res.body).toEqual({});
   });
 
-  it('sign-in sets temp token branch (no refresh cookie)', async () => {
+  it('login sets temp token branch (no cookies)', async () => {
     const req = (await import('supertest')).default(app.getHttpServer());
     // Override signIn to simulate TOTP-required response
     (authSvc.signIn as any) = jest.fn(async () => ({ totpRequired: true, tempToken: 'tmp' }));
-    const res = await req.post('/auth/sign-in').send({ email: 'e@example.com', password: 'p' }).expect(200);
+    const res = await req.post('/auth/login').send({ email: 'e@example.com', password: 'p' }).expect(200);
     expect(res.body).toEqual({ totpRequired: true, tempToken: 'tmp' });
   });
 
@@ -93,7 +93,7 @@ describe('AuthController additional (integration-light)', () => {
     const res = { cookie: jest.fn() } as unknown as Pick<Response, 'cookie'>;
     (authSvc.issueTokensForUser as jest.Mock) = jest.fn(async () => ({ accessToken: 'at3', refreshToken: 'rt3' }));
     const out = await ctrl.webauthnLoginFinish({}, { user: { userId: 'u1' } } as any, res as any);
-    expect(out.accessToken).toBe('at3');
+    expect(out).toEqual({});
   });
 
   it('webauthn login start requires user or throws, else returns options', async () => {
@@ -119,7 +119,7 @@ describe('AuthController additional (integration-light)', () => {
     const ctrl = app.get(AuthController);
     const fakeReq = { headers: { cookie: 'refreshToken=abc' } } as any;
     const out = await ctrl.refresh({} as any, fakeReq, { cookie: () => {} } as any);
-    expect(out).toHaveProperty('accessToken');
+    expect(out).toEqual({});
   });
 
   it('refresh without cookie or body returns 400 over HTTP', async () => {
@@ -135,7 +135,7 @@ describe('AuthController additional (integration-light)', () => {
     // body path covered; check cookie set branch
     const setCookie = res.get('set-cookie') as unknown;
     const cookieStr = Array.isArray(setCookie) ? (setCookie as string[]).join(';') : String(setCookie ?? '');
-    expect(cookieStr).toContain('refreshToken=');
+    expect(cookieStr).toContain('bsaas_rt=');
   });
 
   it('refresh via HTTP picks encoded cookie over body (decode branch)', async () => {
@@ -149,7 +149,7 @@ describe('AuthController additional (integration-light)', () => {
       .expect((r) => {
         const sc = r.get('set-cookie') as unknown;
         const cookieStr = Array.isArray(sc) ? (sc as string[]).join(';') : String(sc ?? '');
-        expect(cookieStr).toContain('refreshToken=');
+        expect(cookieStr).toContain('bsaas_rt=');
       });
   });
 
@@ -164,7 +164,7 @@ describe('AuthController additional (integration-light)', () => {
       .expect((r) => {
         const sc = r.get('set-cookie') as unknown;
         const cookieStr = Array.isArray(sc) ? (sc as string[]).join(';') : String(sc ?? '');
-        expect(cookieStr).toContain('refreshToken=');
+        expect(cookieStr).toContain('bsaas_rt=');
       });
   });
 
@@ -177,7 +177,7 @@ describe('AuthController additional (integration-light)', () => {
       .expect(200);
     const sc = res.get('set-cookie') as unknown;
     const cookieStr = Array.isArray(sc) ? (sc as string[]).join(';') : String(sc ?? '');
-    expect(cookieStr).not.toContain('refreshToken=');
+    expect(cookieStr).not.toContain('bsaas_rt=');
   });
 
   it('refresh via HTTP with empty cookie value returns 400 (v falsy branch)', async () => {

@@ -11,7 +11,7 @@ export type TokenPair = {
 
 /**
  * @public
- * Result of the primary sign-in flow.
+ * Result of the primary login flow.
  * - If TOTP is enabled, a temporary token is returned to complete MFA.
  * - Otherwise, an access/refresh token pair is issued.
  */
@@ -29,7 +29,7 @@ export type AuthSignInResult =
 
 /**
  * @public
- * HTTP response body for the sign-in endpoint.
+ * HTTP response body for the login endpoint.
  * Note: refreshToken is delivered via secure cookie and omitted here.
  */
 export type SignInHttpResponse =
@@ -69,4 +69,3 @@ export type JwtUserContext = {
   /** Active session id bound to this access token. */
   sessionId: string;
 };
-

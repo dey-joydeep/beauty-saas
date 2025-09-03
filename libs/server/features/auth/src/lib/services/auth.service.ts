@@ -12,6 +12,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TOTP_PORT, TotpPort, EMAIL_PORT, EmailPort } from '@cthub-bsaas/server-contracts-auth';
+import { EMAIL_VERIFICATION_REPOSITORY, IEmailVerificationRepository } from '@cthub-bsaas/server-contracts-auth';
 import { AuditService } from './audit.service';
 import type { AuthSignInResult, TokenPair } from '../types/auth.types';
 
@@ -35,6 +36,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     @Inject(TOTP_PORT) private readonly totpService: TotpPort,
     @Inject(EMAIL_PORT) private readonly emailPort: EmailPort,
+    @Inject(EMAIL_VERIFICATION_REPOSITORY) private readonly emailVerRepo: IEmailVerificationRepository,
     private readonly audit: AuditService,
   ) {}
 
@@ -316,15 +318,15 @@ export class AuthService {
   public async requestEmailVerification(email: string): Promise<void> {
     const user = await this.userRepository.findByEmail(email);
     if (!user || user.emailVerifiedAt) return;
-    const verifySecret = this.configService.get<string>('JWT_VERIFY_EMAIL_SECRET') || this.configService.get<string>('JWT_ACCESS_SECRET')!;
-    const token = await this.jwtService.signAsync(
-      { sub: user.id, aud: 'verify' },
-      {
-        secret: verifySecret,
-        expiresIn: '24h',
-      },
+    const otp = (Math.floor(100000 + Math.random() * 900000)).toString(); // 6 digits
+    const codeHash = await bcrypt.hash(otp, 10);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    await this.emailVerRepo.upsertForEmail(user.email, codeHash, expiresAt);
+    await this.emailPort.sendMail(
+      user.email,
+      'Verify your email',
+      `Your verification code is: ${otp}. It expires in 10 minutes.`,
     );
-    await this.emailPort.sendMail(user.email, 'Verify your email', `Use this token to verify your email: ${token}`);
     this.audit.log('email_verification_requested', { userId: user.id });
   }
 
@@ -347,5 +349,23 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('error.auth.invalid_or_expired_verify_token');
     }
+  }
+
+  /**
+   * Verify email via OTP code (DB-backed).
+   * @param email target email
+   * @param otp 6-digit string
+   */
+  public async verifyEmailOtp(email: string, otp: string): Promise<void> {
+    const rec = await this.emailVerRepo.findActiveByEmail(email);
+    if (!rec) throw new UnauthorizedException('error.auth.otp_expired');
+    await this.emailVerRepo.incrementAttempts(rec.id);
+    const ok = await bcrypt.compare(otp, rec.codeHash);
+    if (!ok) throw new UnauthorizedException('error.auth.invalid_otp');
+    await this.emailVerRepo.markUsed(rec.id);
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) throw new UnauthorizedException('error.auth.user_not_found');
+    await this.userRepository.update(user.id, { emailVerifiedAt: new Date() } as Partial<User>);
+    this.audit.log('email_verified', { userId: user.id });
   }
 }

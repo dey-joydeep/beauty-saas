@@ -1,5 +1,5 @@
 import { Public } from '@cthub-bsaas/server-core';
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Res, Get, Param, BadRequestException } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Res, Get, Param, BadRequestException, NotImplementedException } from '@nestjs/common';
 import { JwtAuthGuard } from '@cthub-bsaas/server-core';
 import { AuthService } from '../services/auth.service';
 import { SkipCsrf } from '@cthub-bsaas/server-core';
@@ -10,11 +10,13 @@ import type { Response, Request as ExpressRequest } from 'express';
 import type { SignInHttpResponse, SimpleOk } from '../types/auth.types';
 import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT, WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
 import { Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 // Public decorator is already imported at file top
 
 /**
  * @public
- * Authentication controller exposing sign-in, refresh, logout, sessions
+ * Authentication controller exposing login, refresh, logout, sessions
  * and account recovery endpoints.
  */
 @Controller('auth')
@@ -23,6 +25,7 @@ export class AuthController {
     private readonly authService: AuthService,
     @Inject(WEB_AUTHN_PORT) private readonly webAuthn: WebAuthnPort,
     @Inject(RECOVERY_CODES_PORT) private readonly recovery: RecoveryCodesPort,
+    private readonly config: ConfigService,
   ) {}
 
   /**
@@ -36,25 +39,34 @@ export class AuthController {
    */
   @Public()
   @SkipCsrf()
+  @Throttle(5, 60)
   @HttpCode(HttpStatus.OK)
-  @Post('sign-in')
+  @Post('login')
   async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) res: Response): Promise<SignInHttpResponse> {
     const result = await this.authService.signIn(signInDto.email, signInDto.password);
+    const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
     // Set CSRF token cookie for subsequent state-changing requests
     const csrf = (Math.random().toString(36) + Math.random().toString(36)).slice(2);
-    res.cookie('XSRF-TOKEN', csrf, { httpOnly: false, secure: true, sameSite: 'strict', path: '/' });
-    if (!result.totpRequired && result.refreshToken) {
-      res.cookie('refreshToken', result.refreshToken, {
+    res.cookie('XSRF-TOKEN', csrf, { httpOnly: false, secure: true, sameSite: 'lax', path: '/', domain });
+    if (!result.totpRequired) {
+      // Set cookies: access and refresh tokens
+      res.cookie('bsaas_at', result.accessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict',
+        sameSite: 'lax',
         path: '/',
+        domain,
+      });
+      res.cookie('bsaas_rt', result.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/auth',
+        domain,
       });
     }
-    // Return minimal public payload; refresh token is cookie-only
-    return result.totpRequired
-      ? { totpRequired: true, tempToken: result.tempToken }
-      : { totpRequired: false, accessToken: result.accessToken };
+    // Return minimal public payload; tokens are cookie-only
+    return result.totpRequired ? { totpRequired: true, tempToken: result.tempToken } : { totpRequired: false };
   }
 
   /**
@@ -68,24 +80,21 @@ export class AuthController {
    */
   @Public()
   @SkipCsrf()
+  @Throttle(20, 60)
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
   async refresh(
     @Body() refreshTokenDto: RefreshTokenDto,
     @Request() req: ExpressRequest,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<{ accessToken: string | undefined }> {
+  ): Promise<Record<string, never>> {
     const cookieHeader = req.headers['cookie'];
     let tokenFromCookie: string | undefined;
     if (typeof cookieHeader === 'string') {
       for (const part of cookieHeader.split(';')) {
         const [k, v] = part.trim().split('=');
-        if (k === 'refreshToken') {
-          if (v) {
-            tokenFromCookie = decodeURIComponent(v);
-          } else {
-            tokenFromCookie = decodeURIComponent('');
-          }
+        if (k === 'bsaas_rt' || k === 'refreshToken') {
+          tokenFromCookie = v ? decodeURIComponent(v) : decodeURIComponent('');
           break;
         }
       }
@@ -95,18 +104,27 @@ export class AuthController {
       throw new BadRequestException('error.auth.missing_refresh_token');
     }
     const result = await this.authService.refreshToken(token);
+    const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
     if (result?.refreshToken) {
-      res.cookie('refreshToken', result.refreshToken, {
+      res.cookie('bsaas_rt', result.refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict',
-        path: '/',
+        sameSite: 'lax',
+        path: '/auth',
+        domain,
       });
-      // rotate CSRF token as well
-      const csrf = (Math.random().toString(36) + Math.random().toString(36)).slice(2);
-      res.cookie('XSRF-TOKEN', csrf, { httpOnly: false, secure: true, sameSite: 'strict', path: '/' });
+      res.cookie('bsaas_at', result.accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+        domain,
+      });
     }
-    return { accessToken: result?.accessToken };
+    // rotate CSRF token as well
+    const csrf = (Math.random().toString(36) + Math.random().toString(36)).slice(2);
+    res.cookie('XSRF-TOKEN', csrf, { httpOnly: false, secure: true, sameSite: 'lax', path: '/', domain });
+    return {} as const;
   }
 
   /**
@@ -118,10 +136,13 @@ export class AuthController {
    * @returns {Promise<{ success: true }>} Success response.
    */
   @UseGuards(JwtAuthGuard)
+  @Throttle(10, 60)
   @Post('logout')
   async logout(@Request() req: { user: { sessionId: string } }, @Res({ passthrough: true }) res: Response): Promise<SimpleOk> {
     await this.authService.logout(req.user.sessionId);
-    res.clearCookie('refreshToken', { path: '/' });
+    const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
+    res.clearCookie('bsaas_rt', { path: '/auth', domain });
+    res.clearCookie('bsaas_at', { path: '/', domain });
     return { success: true };
   }
 
@@ -147,6 +168,7 @@ export class AuthController {
    * @returns {Promise<{ success: true }>} Success response.
    */
   @UseGuards(JwtAuthGuard)
+  @Throttle(10, 60)
   @Post('sessions/revoke/:id')
   async revokeSession(@Request() req: { user: { userId: string } }, @Param('id') id: string): Promise<SimpleOk> {
     return this.authService.revokeSession(req.user.userId, id);
@@ -160,10 +182,15 @@ export class AuthController {
    * @returns {Promise<{ accessToken: string; refreshToken: string }>} New token pair.
    */
   @Public()
+  @Throttle(5, 60)
   @HttpCode(HttpStatus.OK)
-  @Post('sign-in/totp')
-  async signInWithTotp(@Body() signInWithTotpDto: SignInWithTotpDto) {
-    return this.authService.signInWithTotp(signInWithTotpDto.tempToken, signInWithTotpDto.totpCode);
+  @Post('login/totp')
+  async signInWithTotp(@Body() signInWithTotpDto: SignInWithTotpDto, @Res({ passthrough: true }) res: Response) {
+    const tokens = await this.authService.signInWithTotp(signInWithTotpDto.tempToken, signInWithTotpDto.totpCode);
+    const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
+    res.cookie('bsaas_at', tokens.accessToken, { httpOnly: true, secure: true, sameSite: 'lax', path: '/', domain });
+    res.cookie('bsaas_rt', tokens.refreshToken, { httpOnly: true, secure: true, sameSite: 'lax', path: '/auth', domain });
+    return {} as const;
   }
 
   // Account recovery endpoints
@@ -178,6 +205,7 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('password/forgot')
   @SkipCsrf()
+  @Throttle(3, 60)
   async forgotPassword(@Body() body: { email: string }): Promise<SimpleOk> {
     await this.authService.requestPasswordReset(body.email);
     return { success: true };
@@ -194,6 +222,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('password/reset')
   @SkipCsrf()
+  @Throttle(3, 60)
   async resetPassword(@Body() body: { token: string; newPassword: string }): Promise<SimpleOk> {
     await this.authService.resetPassword(body.token, body.newPassword);
     return { success: true };
@@ -210,6 +239,7 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('email/send-verification')
   @SkipCsrf()
+  @Throttle(3, 60)
   async sendEmailVerification(@Body() body: { email: string }): Promise<SimpleOk> {
     await this.authService.requestEmailVerification(body.email);
     return { success: true };
@@ -229,6 +259,34 @@ export class AuthController {
   async verifyEmail(@Body() body: { token: string }): Promise<SimpleOk> {
     await this.authService.verifyEmail(body.token);
     return { success: true };
+  }
+
+  // Spec-aligned email verify routes (current implementation uses token under the hood)
+  @Public()
+  @HttpCode(HttpStatus.ACCEPTED)
+  @Post('email/verify/request')
+  @SkipCsrf()
+  @Throttle(3, 60)
+  async emailVerifyRequest(@Body() body: { email: string }): Promise<SimpleOk> {
+    await this.authService.requestEmailVerification(body.email);
+    return { success: true };
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('email/verify/confirm')
+  @SkipCsrf()
+  @Throttle(5, 60)
+  async emailVerifyConfirm(@Body() body: { token?: string; email?: string; otp?: string }): Promise<SimpleOk> {
+    if (body.token) {
+      await this.authService.verifyEmail(body.token);
+      return { success: true };
+    }
+    if (body.email && body.otp) {
+      await this.authService.verifyEmailOtp(body.email, body.otp);
+      return { success: true };
+    }
+    throw new BadRequestException('error.validation');
   }
 
   /**
@@ -289,12 +347,14 @@ export class AuthController {
     @Body() response: Record<string, unknown>,
     @Request() req: { user: { userId: string } },
     @Res({ passthrough: true }) res: Response,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<Record<string, never>> {
     await this.webAuthn.finishAuthentication(req.user.userId, response);
     // Issue session + tokens
     const result = await this.authService.issueTokensForUser(req.user.userId);
-    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: true, sameSite: 'strict', path: '/' });
-    return { accessToken: result.accessToken };
+    const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
+    res.cookie('bsaas_at', result.accessToken, { httpOnly: true, secure: true, sameSite: 'lax', path: '/', domain });
+    res.cookie('bsaas_rt', result.refreshToken, { httpOnly: true, secure: true, sameSite: 'lax', path: '/auth', domain });
+    return {} as const;
   }
 
   /**
@@ -319,6 +379,22 @@ export class AuthController {
   async verifyRecovery(@Body() body: { code: string }, @Request() req: { user: { userId: string } }): Promise<SimpleOk> {
     const ok = await this.recovery.verifyAndConsume(req.user.userId, body.code);
     if (!ok) throw new Error('Invalid recovery code');
+    return { success: true };
+  }
+
+  // Body-based session revoke endpoint (alias without path param)
+  @UseGuards(JwtAuthGuard)
+  @Post('sessions/revoke')
+  async revokeSessionBody(@Request() req: { user: { userId: string } }, @Body() body: { id: string }): Promise<SimpleOk> {
+    return this.authService.revokeSession(req.user.userId, body.id);
+  }
+
+  // Registration placeholder endpoint
+  @Public()
+  @HttpCode(HttpStatus.ACCEPTED)
+  @Post('register')
+  @SkipCsrf()
+  async registerPlaceholder(@Body() _body: { email: string; password?: string }): Promise<SimpleOk> {
     return { success: true };
   }
 }
