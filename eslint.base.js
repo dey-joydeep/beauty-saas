@@ -182,4 +182,27 @@ export default [
       ],
     },
   },
+  // Prevent web -> server imports; web must only import web/* and shared/*
+  {
+    files: ['libs/web/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '../../server/**',
+                '../../../server/**',
+                '../../../../server/**',
+                '@cthub-bsaas/server-*',
+              ],
+              message:
+                'Web libraries must not import server libraries. Use @cthub-bsaas/shared or other web libs instead.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];

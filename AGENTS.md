@@ -45,6 +45,41 @@
 - Prefer Angular abstractions that work on server and browser (`HttpClient` with relative URLs, `TransferState` for hydration, Angular CDK utilities).
 - Use SSR-compatible libraries; if not, lazy-load or guard initialization behind browser checks.
 
+## Web Architecture Rules
+- Layering (web):
+  - `libs/web/config`: environment/config tokens and helpers for web only.
+  - `libs/web/core/*`: core web capabilities (auth, http, testing) shared across web apps.
+  - `libs/web/*/auth`: app-specific auth UX and models (Admin/Partner/Customer).
+  - `libs/web/ui`: design system components (Material v3 + Tailwind v4) as standalone components.
+- Standalone + packaging:
+  - Use standalone components/directives/pipes; prefer functional providers (`provideHttpClient`, etc.).
+  - Keep Angular libs in partial compilation mode; tsconfig: `moduleResolution: bundler`, `module: preserve`.
+  - Avoid NgModules for new code; if bridging legacy, keep wrapper modules thin and temporary.
+- SSR & hydration:
+  - Avoid accessing browser APIs outside guarded code paths; prefer DI of `DOCUMENT`, `PLATFORM_ID`.
+  - Use `TransferState` for caching API responses during SSR to reduce duplicate fetches.
+  - Use relative URLs with `HttpClient`; let the server proxy origin.
+- Testing (web):
+  - Unit tests under `src/**/*.spec.ts` with `jest-preset-angular`; keep tests shallow and deterministic.
+  - Integration tests for web libs may live under `tests/integration/**/*.int-spec.ts` when meaningful (e.g., services with HTTP mocks); include in the lib’s Jest config if used.
+  - E2E remains at app level only.
+- Import hygiene (web):
+  - Web libs must not import from server libs. Allowed: `libs/web/*`, `libs/shared/*`.
+  - Import from library package roots (path aliases), not deep relative paths across packages.
+  - Keep UI in `web/ui`; do not duplicate UI in app-specific libs.
+
+## Shared Library Rules (`libs/shared`)
+- Purpose: pure, framework-agnostic TypeScript used by both server and client (e.g., types, validators, pure utils, feature-agnostic models).
+- Restrictions:
+  - No Angular or NestJS imports; avoid Node-only APIs (fs, path, crypto) unless browser-safe fallbacks exist and are guarded.
+  - Keep code JSON-serializable where practical for SSR/TransferState.
+  - Avoid runtime side effects; design for tree-shaking and bundler friendliness.
+- Types & models:
+  - Place cross-cutting types/enums/constants here (e.g., shared error codes, DTO contracts that are truly isomorphic).
+  - Do not place persistence entities or server-only DTOs in shared; keep server-specific models in server libs.
+- Testing:
+  - Unit tests colocated under `src/**/*.spec.ts`; keep fast and framework-free.
+
 ## JSDoc & API Documentation
 - DTOs/Models (`class`/`interface`/`type`): include a top-level JSDoc (`/** ... */`) describing purpose and usage; each property must also have a JSDoc describing semantics, units, and constraints.
 - Classes (all): include a top-level JSDoc describing responsibility, invariants, and examples when helpful.
