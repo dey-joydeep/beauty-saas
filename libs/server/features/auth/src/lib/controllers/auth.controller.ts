@@ -3,9 +3,9 @@ import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Res, 
 import { JwtAuthGuard } from '@cthub-bsaas/server-core';
 import { AuthService } from '../services/auth.service';
 import { SkipCsrf } from '@cthub-bsaas/server-core';
-import { SignInDto } from '../dto/sign-in.dto';
+import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
-import { SignInWithTotpDto } from '../dto/sign-in-with-totp.dto';
+import { LoginWithTotpDto } from '../dto/login-with-totp.dto';
 import type { Response, Request as ExpressRequest } from 'express';
 import type { SignInHttpResponse, SimpleOk } from '../types/auth.types';
 import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT, WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
@@ -33,7 +33,7 @@ export class AuthController {
    * Sets refresh token cookie on successful non-TOTP login.
    *
    * @public
-   * @param {SignInDto} signInDto - Credentials payload.
+   * @param {LoginDto} signInDto - Credentials payload.
    * @param {Response} res - Express response for setting cookies.
    * @returns {Promise<{ totpRequired: boolean; tempToken?: string; accessToken?: string }>} Token response.
    */
@@ -42,7 +42,7 @@ export class AuthController {
   @Throttle(5, 60)
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) res: Response): Promise<SignInHttpResponse> {
+  async signIn(@Body() signInDto: LoginDto, @Res({ passthrough: true }) res: Response): Promise<SignInHttpResponse> {
     const result = await this.authService.signIn(signInDto.email, signInDto.password);
     const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
     // Set CSRF token cookie for subsequent state-changing requests
@@ -178,14 +178,14 @@ export class AuthController {
    * Complete TOTP challenge with a temp token and code.
    *
    * @public
-   * @param {SignInWithTotpDto} signInWithTotpDto - TOTP challenge payload.
+   * @param {LoginWithTotpDto} signInWithTotpDto - TOTP challenge payload.
    * @returns {Promise<{ accessToken: string; refreshToken: string }>} New token pair.
    */
   @Public()
   @Throttle(5, 60)
   @HttpCode(HttpStatus.OK)
   @Post('login/totp')
-  async signInWithTotp(@Body() signInWithTotpDto: SignInWithTotpDto, @Res({ passthrough: true }) res: Response) {
+  async signInWithTotp(@Body() signInWithTotpDto: LoginWithTotpDto, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.signInWithTotp(signInWithTotpDto.tempToken, signInWithTotpDto.totpCode);
     const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
     res.cookie('bsaas_at', tokens.accessToken, { httpOnly: true, secure: true, sameSite: 'lax', path: '/', domain });
