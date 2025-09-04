@@ -51,6 +51,7 @@ describe('AuthController', () => {
       verifyAndConsume: jest.fn(),
     } as unknown as jest.Mocked<RecoveryCodesPort>;
     const config = { get: jest.fn().mockReturnValue(undefined) } as unknown as ConfigService;
+    (service.resolveUserIdByEmail as unknown as jest.Mock) = jest.fn(() => Promise.resolve('u-by-email'));
     controller = new AuthController(service, webAuthn, recovery, config);
   });
 
@@ -138,7 +139,7 @@ describe('AuthController', () => {
 
   it('webauthn login start/finish work and set cookie', async () => {
     webAuthn.startAuthentication.mockResolvedValue({ request: true } as Record<string, unknown>);
-    const start = await controller.webauthnLoginStart({ user: { userId: 'u1' } } as { user?: { userId: string } });
+    const start = await controller.webauthnLoginStart({}, { user: { userId: 'u1' } } as { user?: { userId: string } });
     expect(start).toEqual({ request: true });
 
     service.issueTokensForUser.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' });
@@ -153,6 +154,8 @@ describe('AuthController', () => {
     recovery.generate.mockResolvedValue(['code1']);
     const codes = await controller.generateRecovery({ user: { userId: 'u1' } } as { user: { userId: string } });
     expect(codes).toEqual(['code1']);
+    const codesAlias = await controller.generateRecoveryCodes({ user: { userId: 'u1' } } as { user: { userId: string } });
+    expect(codesAlias).toEqual(['code1']);
 
     recovery.verifyAndConsume.mockResolvedValue(true);
     const ok = await controller.verifyRecovery({ code: 'x' }, { user: { userId: 'u1' } } as { user: { userId: string } });
@@ -170,8 +173,8 @@ describe('AuthController', () => {
     await expect(controller.refresh({} as RefreshTokenDto, req6, res)).rejects.toThrow();
   });
 
-  it('webauthnLoginStart throws without user context', async () => {
-    await expect(controller.webauthnLoginStart({} as { user?: { userId: string } })).rejects.toThrow();
+  it('webauthnLoginStart throws without identity', async () => {
+    await expect(controller.webauthnLoginStart({}, {} as { user?: { userId: string } })).rejects.toThrow();
   });
 
   it('logout clears cookie and calls service', async () => {

@@ -21,4 +21,13 @@ describe('JwtStrategy jwtFromRequest branches', () => {
     const fromHeader = extract(req2);
     expect(fromHeader).toBe('headerToken');
   });
+
+  it('validate maps payload to JwtUserContext', async () => {
+    const moduleRef = await Test.createTestingModule({
+      providers: [JwtStrategy, { provide: ConfigService, useValue: { get: () => 'AS' } }],
+    }).compile();
+    const strat = moduleRef.get(JwtStrategy);
+    const out = strat.validate({ sub: 'u1', email: 'e@example.com', roles: ['admin'], sessionId: 's1', iat: 1, exp: 2 });
+    expect(out).toEqual({ userId: 'u1', email: 'e@example.com', roles: ['admin'], sessionId: 's1' });
+  });
 });

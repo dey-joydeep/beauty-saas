@@ -12,7 +12,7 @@ import {
 } from '@cthub-bsaas/server-contracts-auth';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import type { IUserRepository, ISessionRepository, IRefreshTokenRepository, ICredentialTotpRepository, TotpPort, EmailPort } from '@cthub-bsaas/server-contracts-auth';
+import type { IUserRepository, ISessionRepository, IRefreshTokenRepository, ICredentialTotpRepository, TotpPort, EmailPort, IEmailVerificationRepository, EmailVerificationRecord } from '@cthub-bsaas/server-contracts-auth';
 import type { User, Session, RefreshToken, CredentialTOTP } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 jest.mock('bcryptjs', () => ({
@@ -22,6 +22,7 @@ jest.mock('bcryptjs', () => ({
 
 describe('AuthService branches (integration-light)', () => {
   let service: AuthService;
+  let moduleRef: import('@nestjs/testing').TestingModule;
   const userRepo: Pick<IUserRepository, 'findByEmail' | 'findById' | 'update'> = {
     findByEmail: async () => null,
     findById: async () => null,
@@ -49,7 +50,7 @@ describe('AuthService branches (integration-light)', () => {
   const audit = { log: jest.fn() };
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
+    moduleRef = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: USER_REPOSITORY, useValue: userRepo },
@@ -191,11 +192,46 @@ describe('AuthService branches (integration-light)', () => {
   });
 
   it('issueTokensForUser success', async () => {
-    userRepo.findById = async () => user;
+    const userWithRole = { ...(user as User), roles: [{ role: { name: 'admin' } }] } as unknown as User & { roles: { role: { name: string } }[] };
+    userRepo.findById = async () => userWithRole;
     sessionRepo.create = async ({ userId }: { userId: string }) => ({ id: 'sess2', userId } as unknown as Session);
     const tokens = await service.issueTokensForUser('u1');
     expect(tokens.accessToken).toBeDefined();
     expect(tokens.refreshToken).toBeDefined();
+  });
+
+  it('listSessions, resolveUserIdByEmail, and verifyEmailOtp branches', async () => {
+    // listSessions
+    const sessions = await service.listSessions('u1');
+    expect(Array.isArray(sessions)).toBe(true);
+
+    // resolveUserIdByEmail success and failure
+    userRepo.findByEmail = async () => user;
+    await expect(service.resolveUserIdByEmail('e@example.com')).resolves.toEqual('u1');
+    userRepo.findByEmail = async () => null;
+    await expect(service.resolveUserIdByEmail('none@example.com')).rejects.toBeTruthy();
+
+    // verifyEmailOtp success path
+    const emailRepo = moduleRef.get(EMAIL_VERIFICATION_REPOSITORY) as IEmailVerificationRepository & { findActiveByEmail: jest.Mock };
+    emailRepo.findActiveByEmail = jest.fn(async () => ({ id: 'rec1', codeHash: 'h', email: user.email, expiresAt: new Date(Date.now() + 60000), attempts: 0, usedAt: null, createdAt: new Date() } as EmailVerificationRecord));
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    userRepo.findByEmail = async () => user;
+    await expect(service.verifyEmailOtp(user.email, '123456')).resolves.toBeUndefined();
+
+    // verifyEmailOtp expired/missing
+    emailRepo.findActiveByEmail = jest.fn(async () => null);
+    await expect(service.verifyEmailOtp(user.email, '123456')).rejects.toBeTruthy();
+
+    // verifyEmailOtp invalid code
+    emailRepo.findActiveByEmail = jest.fn(async () => ({ id: 'rec2', codeHash: 'h2', email: user.email, expiresAt: new Date(Date.now() + 60000), attempts: 0, usedAt: null, createdAt: new Date() } as EmailVerificationRecord));
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+    await expect(service.verifyEmailOtp(user.email, 'bad')).rejects.toBeTruthy();
+
+    // verifyEmailOtp user not found
+    emailRepo.findActiveByEmail = jest.fn(async () => ({ id: 'rec3', codeHash: 'h3', email: 'nouser@example.com', expiresAt: new Date(Date.now() + 60000), attempts: 0, usedAt: null, createdAt: new Date() } as EmailVerificationRecord));
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    userRepo.findByEmail = async () => null;
+    await expect(service.verifyEmailOtp('nouser@example.com', '123456')).rejects.toBeTruthy();
   });
 
   it('covers config secret fallbacks for access/refresh', async () => {

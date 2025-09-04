@@ -23,6 +23,7 @@ describe('AuthController additional (integration-light)', () => {
       | 'signIn'
       | 'verifyEmailOtp'
       | 'issueTokensForUser'
+      | 'resolveUserIdByEmail'
     >
   >;
   const authSvc: AuthSvcMock = {
@@ -38,6 +39,7 @@ describe('AuthController additional (integration-light)', () => {
     signIn: jest.fn(),
     verifyEmailOtp: (jest.fn(async () => {}) as unknown) as AuthSvcMock['verifyEmailOtp'],
     issueTokensForUser: (jest.fn(async () => ({ accessToken: 'a', refreshToken: 'r' })) as unknown) as AuthSvcMock['issueTokensForUser'],
+    resolveUserIdByEmail: (jest.fn(async (e: string) => { void e; return 'u-by-email'; }) as unknown) as AuthSvcMock['resolveUserIdByEmail'],
   };
 
   beforeAll(async () => {
@@ -132,17 +134,24 @@ describe('AuthController additional (integration-light)', () => {
     expect(out).toEqual({});
   });
 
-  it('webauthn login start requires user or throws, else returns options', async () => {
+  it('webauthn login start allows email identity or throws without identity', async () => {
     const ctrl = app.get(AuthController);
-    await expect(ctrl.webauthnLoginStart({} as { user?: { userId: string } })).rejects.toBeTruthy();
-    const r = await ctrl.webauthnLoginStart({ user: { userId: 'u1' } });
-    expect(r).toHaveProperty('challenge');
+    // No identity provided
+    await expect(ctrl.webauthnLoginStart({} as unknown as { email?: string; userId?: string }, {} as { user?: { userId: string } })).rejects.toBeTruthy();
+    // Email provided
+    const r1 = await ctrl.webauthnLoginStart({ email: 'e@example.com' } as { email?: string }, {} as { user?: { userId: string } });
+    expect(r1).toHaveProperty('challenge');
+    // Authenticated context fallback
+    const r2 = await ctrl.webauthnLoginStart({} as { email?: string }, { user: { userId: 'u1' } } as { user?: { userId: string } });
+    expect(r2).toHaveProperty('challenge');
   });
 
   it('recovery generate and verify branches', async () => {
     const ctrl = app.get(AuthController);
     const codes = await ctrl.generateRecovery({ user: { userId: 'u1' } } as { user: { userId: string } });
     expect(Array.isArray(codes)).toBe(true);
+    const codesAlias = await ctrl.generateRecoveryCodes({ user: { userId: 'u1' } } as { user: { userId: string } });
+    expect(Array.isArray(codesAlias)).toBe(true);
     const ok = await ctrl.verifyRecovery({ code: 'r1' }, { user: { userId: 'u1' } } as { user: { userId: string } });
     expect(ok).toEqual({ success: true });
     // failure branch
@@ -275,6 +284,31 @@ describe('AuthController additional (integration-light)', () => {
         {} as unknown as import('../../../src/lib/dto/refresh-token.dto').RefreshTokenDto,
         { headers: { cookie: 'refreshToken=' } } as unknown as import('express').Request,
         { cookie: (() => undefined) as unknown as Response['cookie'] } as Response,
+      ),
+    ).rejects.toBeTruthy();
+  });
+
+  it('covers emailVerifyRequest via HTTP', async () => {
+    const req = (await import('supertest')).default(app.getHttpServer());
+    await req.post('/auth/email/verify/request').send({ email: 'e@example.com' }).expect(202);
+  });
+
+  it('covers listSessions and revokeSessionBody via direct calls', async () => {
+    const ctrl = app.get(AuthController);
+    const list = await ctrl.listSessions({ user: { userId: 'u1' } } as { user: { userId: string } });
+    expect(Array.isArray(list)).toBe(true);
+    const ok = await ctrl.revokeSessionBody({ user: { userId: 'u1' } } as { user: { userId: string } }, { id: 's1' } as { id: string });
+    expect(ok).toEqual({ success: true });
+  });
+
+  it('covers revokeSession (path param) and webauthn start defaults', async () => {
+    const ctrl = app.get(AuthController);
+    const ok = await ctrl.revokeSession({ user: { userId: 'u1' } } as { user: { userId: string } }, 's1');
+    expect(ok).toEqual({ success: true });
+    await expect(
+      ctrl.webauthnLoginStart(
+        undefined as unknown as { email?: string; userId?: string },
+        undefined as unknown as { user?: { userId: string } },
       ),
     ).rejects.toBeTruthy();
   });

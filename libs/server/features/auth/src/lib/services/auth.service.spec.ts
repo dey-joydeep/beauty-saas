@@ -246,6 +246,18 @@ describe('AuthService', () => {
     });
   });
 
+  describe('resolveUserIdByEmail', () => {
+    it('returns user id when email exists', async () => {
+      userRepository.findByEmail.mockResolvedValue({ ...mockUserWithRoles });
+      await expect(service.resolveUserIdByEmail('test@example.com')).resolves.toEqual(mockUser.id);
+    });
+
+    it('throws when email not found', async () => {
+      userRepository.findByEmail.mockResolvedValue(null);
+      await expect(service.resolveUserIdByEmail('none@example.com')).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
   describe('sessions and tokens', () => {
     it('refreshes token on valid refresh token', async () => {
       const jti = 'jti-1';

@@ -262,6 +262,18 @@ export class AuthService {
     return this.generateTokens(user, session.id);
   }
 
+  /**
+   * Resolve a user's id by email, used for unauthenticated WebAuthn start.
+   * @public
+   * @param {string} email target email address
+   * @returns {Promise<string>} user id when found
+   */
+  public async resolveUserIdByEmail(email: string): Promise<string> {
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) throw new UnauthorizedException('error.auth.user_not_found');
+    return user.id;
+  }
+
   // Account recovery: password reset
   /**
    * Send a one-time password reset token to the provided email.

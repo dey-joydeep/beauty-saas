@@ -326,10 +326,17 @@ export class AuthController {
   @Public()
   @Post('webauthn/login/start')
   @SkipCsrf()
-  async webauthnLoginStart(@Request() req: { user?: { userId: string } }): Promise<Record<string, unknown>> {
-    // for simplicity, require authenticated user context in this iteration
-    if (!req.user?.userId) throw new Error('User context required');
-    return this.webAuthn.startAuthentication(req.user.userId);
+  async webauthnLoginStart(
+    @Body() body: { email?: string; userId?: string } = {},
+    @Request() req: { user?: { userId: string } } = {},
+  ): Promise<Record<string, unknown>> {
+    // Allow unauthenticated start by identity (email or userId). Fallback to authenticated user if present.
+    const providedUserId = req.user?.userId ?? body.userId;
+    const userId = providedUserId ?? (body.email ? await this.authService.resolveUserIdByEmail(body.email) : undefined);
+    if (!userId) {
+      throw new BadRequestException('error.validation');
+    }
+    return this.webAuthn.startAuthentication(userId);
   }
 
   /**
@@ -365,6 +372,17 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('recovery/generate')
   async generateRecovery(@Request() req: { user: { userId: string } }): Promise<string[]> {
+    return this.recovery.generate(req.user.userId, 10);
+  }
+
+  /**
+   * Alias for recovery codes generation per spec: POST /auth/recovery/codes
+   * @public
+   * @returns {Promise<string[]>} Plain-text recovery codes.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('recovery/codes')
+  async generateRecoveryCodes(@Request() req: { user: { userId: string } }): Promise<string[]> {
     return this.recovery.generate(req.user.userId, 10);
   }
 

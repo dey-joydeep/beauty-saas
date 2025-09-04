@@ -172,8 +172,8 @@ describe('AuthController branches (unit)', () => {
     const finish = await controller.webauthnRegisterFinish({}, { user: { userId: 'u1' } } as { user: { userId: string } });
     expect(finish).toEqual({ success: true });
 
-    await expect(controller.webauthnLoginStart({} as { user?: { userId: string } })).rejects.toThrow();
-    const reqStart = await controller.webauthnLoginStart({ user: { userId: 'u1' } } as { user?: { userId: string } });
+    await expect(controller.webauthnLoginStart({}, {} as { user?: { userId: string } })).rejects.toThrow();
+    const reqStart = await controller.webauthnLoginStart({}, { user: { userId: 'u1' } } as { user?: { userId: string } });
     expect(reqStart).toEqual({ request: true });
 
     service.issueTokensForUser.mockResolvedValueOnce({ accessToken: 'A', refreshToken: 'R' });
