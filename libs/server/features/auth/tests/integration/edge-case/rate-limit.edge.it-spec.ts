@@ -25,11 +25,14 @@ describe('Rate limiting (edge-case)', () => {
   const authSvc: jest.Mocked<Pick<AuthService, 'signIn' | 'resolveUserIdByEmail'>> = {
     signIn: jest.fn(async () => ({ totpRequired: false, accessToken: 'AT', refreshToken: 'RT' })),
     resolveUserIdByEmail: jest.fn(async () => 'user-1'),
-  } as any;
+  } as jest.Mocked<Pick<AuthService, 'signIn' | 'resolveUserIdByEmail'>>;
 
   beforeAll(async () => {
     webAuthn = {
-      startAuthentication: jest.fn(async (_userId: string) => ({ challenge: 'c' } as unknown as import('@cthub-bsaas/server-contracts-auth').RequestOptionsJSON)),
+      startAuthentication: jest.fn(async (userId: string) => {
+        void userId;
+        return { challenge: 'c' } as unknown as import('@cthub-bsaas/server-contracts-auth').RequestOptionsJSON;
+      }),
     } as unknown as typeof webAuthn;
     const modRef = await Test.createTestingModule({
       imports: [
