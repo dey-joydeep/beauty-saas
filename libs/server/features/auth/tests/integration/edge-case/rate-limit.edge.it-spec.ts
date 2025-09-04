@@ -22,10 +22,10 @@ class TestRetryAfterFilter implements ExceptionFilter<ThrottlerException> {
 describe('Rate limiting (edge-case)', () => {
   let app: INestApplication;
   let webAuthn: jest.Mocked<Pick<WebAuthnPort, 'startAuthentication'>>;
-  const authSvc: jest.Mocked<Pick<AuthService, 'signIn' | 'resolveUserIdByEmail'>> = {
+  const authSvc = {
     signIn: jest.fn(async () => ({ totpRequired: false, accessToken: 'AT', refreshToken: 'RT' })),
     resolveUserIdByEmail: jest.fn(async () => 'user-1'),
-  } as jest.Mocked<Pick<AuthService, 'signIn' | 'resolveUserIdByEmail'>>;
+  } as unknown as jest.Mocked<Pick<AuthService, 'signIn' | 'resolveUserIdByEmail'>>;
 
   beforeAll(async () => {
     webAuthn = {
