@@ -131,7 +131,7 @@ describe('AuthController', () => {
     const start = await controller.webauthnRegisterStart({ username: 'u' }, { user: { userId: 'uid' } } as { user: { userId: string } });
     expect(start).toEqual({ challenge: 'c' });
 
-    webAuthn.finishRegistration.mockResolvedValue({ credentialId: 'cid', counter: 0 } as any);
+    webAuthn.finishRegistration.mockResolvedValue({ credentialId: 'cid', counter: 0 } as { credentialId: string; counter: number });
     const finish = await controller.webauthnRegisterFinish({} as Record<string, unknown>, { user: { userId: 'uid' } } as { user: { userId: string } });
     expect(finish).toEqual({ success: true });
   });
