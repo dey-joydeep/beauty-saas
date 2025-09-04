@@ -5,7 +5,7 @@ import { User, CredentialTOTP, Session, RefreshToken } from '@prisma/client';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
-import { ICredentialTotpRepository, IRefreshTokenRepository, ISessionRepository, IUserRepository, TotpPort, EMAIL_PORT, EmailPort, USER_REPOSITORY, SESSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY, CREDENTIAL_TOTP_REPOSITORY, TOTP_PORT, EMAIL_VERIFICATION_REPOSITORY, IEmailVerificationRepository, EmailVerificationRecord } from '@cthub-bsaas/server-contracts-auth';
+import { ICredentialTotpRepository, IRefreshTokenRepository, ISessionRepository, IUserRepository, TotpPort, EMAIL_PORT, EmailPort, USER_REPOSITORY, SESSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY, CREDENTIAL_TOTP_REPOSITORY, TOTP_PORT, EMAIL_VERIFICATION_REPOSITORY, IEmailVerificationRepository, EmailVerificationRecord, PASSWORD_RESET_REPOSITORY, IPasswordResetRepository, PasswordResetRecord } from '@cthub-bsaas/server-contracts-auth';
 import { AuditService } from '../services/audit.service';
 import { AuthService } from './auth.service';
 
@@ -22,6 +22,7 @@ describe('AuthService', () => {
   let totpService: MockProxy<TotpPort>;
   let emailPort: EmailPort;
   let emailVerRepo: MockProxy<IEmailVerificationRepository>;
+  let pwdResetRepo: MockProxy<IPasswordResetRepository>;
 
   const mockUser: User = {
     id: 'user-id',
@@ -66,6 +67,7 @@ describe('AuthService', () => {
         { provide: TOTP_PORT, useValue: totpService },
         { provide: EMAIL_PORT, useValue: emailPort },
         { provide: EMAIL_VERIFICATION_REPOSITORY, useValue: emailVerRepo },
+        { provide: PASSWORD_RESET_REPOSITORY, useValue: (pwdResetRepo = mock<IPasswordResetRepository>()) },
         { provide: AuditService, useValue: { log: jest.fn() } },
       ],
     }).compile();
@@ -153,20 +155,26 @@ describe('AuthService', () => {
     });
   });
 
-  describe('account recovery', () => {
+  describe('account recovery (DB-backed)', () => {
     it('requests password reset (no disclosure)', async () => {
       userRepository.findByEmail.mockResolvedValue({ ...mockUserWithRoles });
-      jwtService.signAsync.mockResolvedValue('reset-token');
+      pwdResetRepo.create.mockResolvedValue({ id: 'rid', userId: mockUserWithRoles.id, tokenHash: 'h', expiresAt: new Date(Date.now() + 1000), usedAt: null, createdAt: new Date() } as PasswordResetRecord);
       await expect(service.requestPasswordReset('test@example.com')).resolves.toBeUndefined();
       expect(emailPort.sendMail).toHaveBeenCalled();
+      expect(pwdResetRepo.create).toHaveBeenCalled();
     });
 
-    it('resets password with valid token', async () => {
-      jwtService.verifyAsync.mockResolvedValue({ sub: mockUserWithRoles.id, aud: 'reset' });
-      const updated: User = { ...mockUser, updatedAt: new Date() };
-      userRepository.update.mockResolvedValue(updated);
-      await expect(service.resetPassword('reset-token', 'newpass')).resolves.toBeUndefined();
-      expect(userRepository.update).toHaveBeenCalled();
+    it('resets password with valid token and revokes sessions', async () => {
+      const id = 'rid';
+      const secret = 'sec';
+      (bcrypt.hash as jest.Mock).mockResolvedValueOnce('hash');
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+      pwdResetRepo.findById.mockResolvedValue({ id, userId: mockUserWithRoles.id, tokenHash: 'hash', expiresAt: new Date(Date.now() + 60000), usedAt: null, createdAt: new Date() } as PasswordResetRecord);
+      sessionRepository.findByUserId.mockResolvedValue([{ id: 's1', userId: mockUserWithRoles.id }] as unknown as { id: string; userId: string }[]);
+      userRepository.update.mockResolvedValue({ ...mockUserWithRoles });
+      await expect(service.resetPassword(`${id}.${secret}`, 'newpass')).resolves.toBeUndefined();
+      expect(pwdResetRepo.markUsed).toHaveBeenCalledWith(id);
+      expect(sessionRepository.delete).toHaveBeenCalledWith('s1');
     });
 
     it('requests email verification (OTP stored and email sent)', async () => {
@@ -197,6 +205,20 @@ describe('AuthService', () => {
       userRepository.update.mockResolvedValue(updated);
       await expect(service.verifyEmail('verify-token')).resolves.toBeUndefined();
       expect(userRepository.update).toHaveBeenCalled();
+    });
+
+    it('resetPassword throws when record expired/used or secret mismatch', async () => {
+      const id = 'rid2';
+      // expired
+      pwdResetRepo.findById.mockResolvedValue({ id, userId: mockUserWithRoles.id, tokenHash: 'h', expiresAt: new Date(Date.now() - 1000), usedAt: null, createdAt: new Date() } as PasswordResetRecord);
+      await expect(service.resetPassword(`${id}.sec`, 'x')).rejects.toThrow(UnauthorizedException);
+      // used
+      pwdResetRepo.findById.mockResolvedValue({ id, userId: mockUserWithRoles.id, tokenHash: 'h', expiresAt: new Date(Date.now() + 10000), usedAt: new Date(), createdAt: new Date() } as PasswordResetRecord);
+      await expect(service.resetPassword(`${id}.sec`, 'x')).rejects.toThrow(UnauthorizedException);
+      // mismatch
+      pwdResetRepo.findById.mockResolvedValue({ id, userId: mockUserWithRoles.id, tokenHash: 'h', expiresAt: new Date(Date.now() + 10000), usedAt: null, createdAt: new Date() } as PasswordResetRecord);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      await expect(service.resetPassword(`${id}.sec`, 'x')).rejects.toThrow(UnauthorizedException);
     });
   });
 

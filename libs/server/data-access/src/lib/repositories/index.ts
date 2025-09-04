@@ -4,3 +4,4 @@ export * from './session.repository';
 export * from './user.repository';
 
 export * from './email-verification.repository';
+export * from './password-reset.repository';

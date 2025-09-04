@@ -12,7 +12,8 @@ import {
 } from '@cthub-bsaas/server-contracts-auth';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import type { IUserRepository, ISessionRepository, IRefreshTokenRepository, ICredentialTotpRepository, TotpPort, EmailPort, IEmailVerificationRepository, EmailVerificationRecord } from '@cthub-bsaas/server-contracts-auth';
+import type { IUserRepository, ISessionRepository, IRefreshTokenRepository, ICredentialTotpRepository, TotpPort, EmailPort, IEmailVerificationRepository, EmailVerificationRecord, IPasswordResetRepository, PasswordResetRecord } from '@cthub-bsaas/server-contracts-auth';
+import { PASSWORD_RESET_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
 import type { User, Session, RefreshToken, CredentialTOTP } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 jest.mock('bcryptjs', () => ({
@@ -62,6 +63,7 @@ describe('AuthService branches (integration-light)', () => {
         { provide: TOTP_PORT, useValue: totp },
         { provide: EMAIL_PORT, useValue: email },
         { provide: EMAIL_VERIFICATION_REPOSITORY, useValue: { upsertForEmail: async () => ({}), findActiveByEmail: async () => null, markUsed: async () => {}, incrementAttempts: async () => {} } },
+        { provide: PASSWORD_RESET_REPOSITORY, useValue: { create: async (d: { id: string; userId: string; tokenHash: string; expiresAt: Date }) => ({ ...d, usedAt: null, createdAt: new Date() } as PasswordResetRecord), findById: async () => null, markUsed: async () => {} } as IPasswordResetRepository },
         { provide: AuditService, useValue: audit },
       ],
     }).compile();
@@ -154,19 +156,22 @@ describe('AuthService branches (integration-light)', () => {
     await expect(service.revokeSession('u1', 's2')).resolves.toEqual({ success: true });
   });
 
-  it('password reset and email verification branches', async () => {
+  it('password reset (DB-backed) and email verification branches', async () => {
     userRepo.findByEmail = async () => null;
     await service.requestPasswordReset('none@example.com');
 
     userRepo.findByEmail = async () => user;
     await service.requestPasswordReset(user.email);
 
-    // reset success
-    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'reset' })) as JwtService['verifyAsync'];
-    await service.resetPassword('tok', 'NewP@ss');
-    // reset invalid
-    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'bad' })) as JwtService['verifyAsync'];
-    await expect(service.resetPassword('tok', 'x')).rejects.toBeTruthy();
+    // reset success using DB-backed token
+    const pr = moduleRef.get(PASSWORD_RESET_REPOSITORY) as IPasswordResetRepository;
+    const rec = await pr.create({ id: 'rid', userId: 'u1', tokenHash: await (bcrypt.hash as unknown as (s: string) => Promise<string>)('sec'), expiresAt: new Date(Date.now() + 60000) });
+    (pr.findById as unknown as jest.Mock) = jest.fn(async () => rec);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    await service.resetPassword('rid.sec', 'NewP@ss');
+    // reset invalid token
+    (pr.findById as unknown as jest.Mock) = jest.fn(async () => null);
+    await expect(service.resetPassword('bad', 'x')).rejects.toBeTruthy();
 
     // email verification request
     userRepo.findByEmail = async () => ({ ...(user as User), emailVerifiedAt: new Date() } as unknown as User & { roles: { role: { name: string } }[] });
@@ -257,28 +262,42 @@ describe('AuthService branches (integration-light)', () => {
     await service.refreshToken('rtD');
   });
 
-  it('covers reset/verify secret fallbacks', async () => {
-    // requestPasswordReset with explicit RESET secret
-    (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_RESET_SECRET' ? 'RS' : (k === 'JWT_ACCESS_SECRET' ? 'AS' : 'S')));
+  it('covers DB-backed reset success and verify token fallbacks', async () => {
+    // requestPasswordReset -> DB-backed
     userRepo.findByEmail = async () => user;
     await service.requestPasswordReset(user.email);
 
-    // resetPassword uses fallback to ACCESS secret
-    (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_ACCESS_SECRET' ? 'AS' : undefined));
-    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'reset' })) as JwtService['verifyAsync'];
-    await service.resetPassword('tok', 'new');
+    // reset success: create record and mock findById/compare
+    const pr = moduleRef.get(PASSWORD_RESET_REPOSITORY) as IPasswordResetRepository;
+    const rec = await pr.create({ id: 'rid6', userId: 'u1', tokenHash: await (bcrypt.hash as unknown as (s: string) => Promise<string>)('sec6'), expiresAt: new Date(Date.now() + 60000) });
+    (pr.findById as unknown as jest.Mock) = jest.fn(async () => rec);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    sessionRepo.findByUserId = async () => ([{ id: 's1', userId: 'u1' }] as unknown as Session[]);
+    await service.resetPassword('rid6.sec6', 'new');
 
-    // requestEmailVerification with explicit VERIFY secret
-    (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_VERIFY_EMAIL_SECRET' ? 'VS' : (k === 'JWT_ACCESS_SECRET' ? 'AS' : undefined)));
-    userRepo.findByEmail = async () => ({ ...(user as User), emailVerifiedAt: null } as unknown as User & { roles: { role: { name: string } }[] });
-    await service.requestEmailVerification(user.email);
-
-    // verifyEmail with explicit VERIFY secret
+    // verifyEmail with explicit VERIFY secret (token path still supported)
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_VERIFY_EMAIL_SECRET' ? 'VS' : undefined));
     (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'verify' })) as JwtService['verifyAsync'];
     await service.verifyEmail('tok');
     // verifyEmail fallback to ACCESS secret
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_ACCESS_SECRET' ? 'AS' : undefined));
     await service.verifyEmail('tok');
+  });
+
+  it('resetPassword invalid token and missing record throw', async () => {
+    const pr = moduleRef.get(PASSWORD_RESET_REPOSITORY) as IPasswordResetRepository;
+    // bad format
+    await expect(service.resetPassword('bad', 'x')).rejects.toBeTruthy();
+    // well-formed but missing
+    (pr.findById as unknown as jest.Mock) = jest.fn(async () => null);
+    await expect(service.resetPassword('id.only', 'x')).rejects.toBeTruthy();
+  });
+
+  it('resetPassword mismatched secret throws (DB-backed)', async () => {
+    const pr = moduleRef.get(PASSWORD_RESET_REPOSITORY) as IPasswordResetRepository;
+    const rec = await pr.create({ id: 'rid7', userId: 'u1', tokenHash: await (bcrypt.hash as unknown as (s: string) => Promise<string>)('sec7'), expiresAt: new Date(Date.now() + 60000) });
+    (pr.findById as unknown as jest.Mock) = jest.fn(async () => rec);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+    await expect(service.resetPassword('rid7.sec7', 'x')).rejects.toBeTruthy();
   });
 });

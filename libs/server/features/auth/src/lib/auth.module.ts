@@ -1,4 +1,4 @@
-import { CredentialTotpRepository, RefreshTokenRepository, SessionRepository, UserRepository, PrismaModule } from '@cthub-bsaas/server-data-access';
+import { CredentialTotpRepository, RefreshTokenRepository, SessionRepository, UserRepository, PrismaModule, PasswordResetRepository } from '@cthub-bsaas/server-data-access';
 import { EncryptionModule } from '@cthub-bsaas/server-core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -14,6 +14,7 @@ import {
   USER_REPOSITORY,
 } from '@cthub-bsaas/server-contracts-auth';
 import { EMAIL_VERIFICATION_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
+import { PASSWORD_RESET_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
 import { EmailVerificationRepository } from '@cthub-bsaas/server-data-access';
 import { AuthService } from './services/auth.service';
 import { AuditService } from './services/audit.service';
@@ -40,6 +41,10 @@ const providers = [
   {
     provide: EMAIL_VERIFICATION_REPOSITORY,
     useClass: EmailVerificationRepository,
+  },
+  {
+    provide: PASSWORD_RESET_REPOSITORY,
+    useClass: PasswordResetRepository,
   },
 ];
 

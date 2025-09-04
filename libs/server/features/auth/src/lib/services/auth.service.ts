@@ -12,6 +12,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TOTP_PORT, TotpPort, EMAIL_PORT, EmailPort } from '@cthub-bsaas/server-contracts-auth';
+import { PASSWORD_RESET_REPOSITORY, IPasswordResetRepository } from '@cthub-bsaas/server-contracts-auth';
 import { EMAIL_VERIFICATION_REPOSITORY, IEmailVerificationRepository } from '@cthub-bsaas/server-contracts-auth';
 import { AuditService } from './audit.service';
 import type { AuthSignInResult, TokenPair } from '../types/auth.types';
@@ -37,6 +38,7 @@ export class AuthService {
     @Inject(TOTP_PORT) private readonly totpService: TotpPort,
     @Inject(EMAIL_PORT) private readonly emailPort: EmailPort,
     @Inject(EMAIL_VERIFICATION_REPOSITORY) private readonly emailVerRepo: IEmailVerificationRepository,
+    @Inject(PASSWORD_RESET_REPOSITORY) private readonly pwdResetRepo: IPasswordResetRepository,
     private readonly audit: AuditService,
   ) {}
 
@@ -285,14 +287,12 @@ export class AuthService {
   public async requestPasswordReset(email: string): Promise<void> {
     const user = await this.userRepository.findByEmail(email);
     if (!user) return; // Avoid account enumeration
-    const resetSecret = this.configService.get<string>('JWT_RESET_SECRET') || this.configService.get<string>('JWT_ACCESS_SECRET')!;
-    const token = await this.jwtService.signAsync(
-      { sub: user.id, aud: 'reset' },
-      {
-        secret: resetSecret,
-        expiresIn: '15m',
-      },
-    );
+    const id = randomUUID();
+    const secret = randomUUID().replace(/-/g, '');
+    const tokenHash = await bcrypt.hash(secret, 10);
+    const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72h
+    await this.pwdResetRepo.create({ id, userId: user.id, tokenHash, expiresAt });
+    const token = `${id}.${secret}`;
     await this.emailPort.sendMail(user.email, 'Password Reset', `Use this token to reset your password: ${token}`);
     this.audit.log('password_reset_requested', { userId: user.id });
   }
@@ -306,17 +306,23 @@ export class AuthService {
    * @returns {Promise<void>} Resolves after updating the password hash.
    */
   public async resetPassword(token: string, newPassword: string): Promise<void> {
-    try {
-      const resetSecret = this.configService.get<string>('JWT_RESET_SECRET') || this.configService.get<string>('JWT_ACCESS_SECRET')!;
-        const { sub, aud } = await this.jwtService.verifyAsync<{ sub: string; aud: string }>(token, {
-          secret: resetSecret,
-        });
-      if (aud !== 'reset') throw new UnauthorizedException('error.auth.invalid_reset_token');
-      const passwordHash = await bcrypt.hash(newPassword, 10);
-      await this.userRepository.update(sub, { passwordHash } as Partial<User>);
-    } catch {
+    const [id, providedSecret] = token.split('.', 2);
+    if (!id || !providedSecret) throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
+    const rec = await this.pwdResetRepo.findById(id);
+    if (!rec || rec.usedAt || rec.expiresAt.getTime() < Date.now()) {
       throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
     }
+    const ok = await bcrypt.compare(providedSecret, rec.tokenHash);
+    if (!ok) throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.update(rec.userId, { passwordHash } as Partial<User>);
+    await this.pwdResetRepo.markUsed(rec.id);
+    // Revoke all sessions for this user after reset
+    const sessions = (await this.sessionRepository.findByUserId(rec.userId)) as { id: string }[];
+    for (const s of sessions) {
+      await this.sessionRepository.delete(s.id);
+    }
+    this.audit.log('password_reset_confirmed', { userId: rec.userId, revokedSessions: sessions.length });
   }
 
   // Email verification

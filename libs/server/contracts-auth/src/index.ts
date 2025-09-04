@@ -8,3 +8,4 @@ export * from './lib/ports/email.port';
 export * from './lib/ports/webauthn.port';
 export * from './lib/ports/recovery-codes.port';
 export * from './lib/ports/email-verification.repository.port';
+export * from './lib/ports/password-reset.repository.port';

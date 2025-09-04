@@ -177,6 +177,13 @@ describe('AuthController', () => {
     await expect(controller.webauthnLoginStart({}, {} as { user?: { userId: string } })).rejects.toThrow();
   });
 
+  it('webauthnLoginStart resolves user by email when unauthenticated', async () => {
+    (service.resolveUserIdByEmail as unknown as jest.Mock) = jest.fn(() => Promise.resolve('u-by-email'));
+    (webAuthn.startAuthentication as unknown as jest.Mock).mockResolvedValue({ request: true } as unknown as Record<string, unknown>);
+    const req = await controller.webauthnLoginStart({ email: 'e@example.com' } as { email?: string }, {} as { user?: { userId: string } });
+    expect(req).toBeDefined();
+  });
+
   it('logout clears cookie and calls service', async () => {
     const { res } = createRes();
     await controller.logout({ user: { sessionId: 's1' } } as { user: { sessionId: string } }, res);
