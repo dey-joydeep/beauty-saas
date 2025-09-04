@@ -177,7 +177,18 @@
 ## Testing Guidelines
 - Unit tests: Jest `*.spec.ts` colocated next to source under `src/`.
 - Integration tests: place under each project `tests/integration/**/*.it-spec.ts` (not inside `src/`). Use Nest `TestingModule` with in-memory/test doubles; avoid real external services. Integration tests must run via `nx test <lib>`.
-- E2E tests: only at app level (e.g., Playwright or Nest e2e) under `apps/<app>/e2e/`.
+- E2E tests: live under `apps/e2e/**` as dedicated Nx projects.
+  - API E2E: Jest specs in `apps/e2e/api/src/*.e2e-spec.ts`; run with `npx nx run api-e2e:e2e`.
+  - Web E2E: per app under `apps/e2e/web/<app>`.
+    - Admin: `npx nx run web-admin-e2e:e2e`
+    - Customer: `npx nx run web-customer-e2e:e2e`
+    - Partner: `npx nx run web-partner-e2e:e2e`
+
+### E2E Projects (Detected)
+- api-e2e: apps/e2e/api (Jest)
+- web-admin-e2e: apps/e2e/web/admin
+- web-customer-e2e: apps/e2e/web/customer
+- web-partner-e2e: apps/e2e/web/partner
 - Keep tests fast and isolated; mock IO/DB where sensible. Avoid flakiness and global state.
 - Coverage: backend feature libs must maintain 100% coverage (statements, branches, functions, lines). Any temporary exception must include a TODO with justification and a follow-up task.
 
