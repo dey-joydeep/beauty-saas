@@ -3,6 +3,8 @@ import type { Response } from 'express';
 import { AuthService } from '../services/auth.service';
 import type { WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
 import { ConfigService } from '@nestjs/config';
+import { LoginDto } from '../dto/login.dto';
+import { RefreshTokenDto } from '../dto/refresh-token.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -11,14 +13,14 @@ describe('AuthController', () => {
   let recovery: jest.Mocked<RecoveryCodesPort>;
 
   const createRes = () => {
-    const cookies: Record<string, any> = {};
-    const res: Partial<Response> = {
-      cookie: jest.fn((name: string, value: string, opts: any) => {
+    const cookies: Record<string, { value: string; opts: unknown } | undefined> = {};
+    const res: Pick<Response, 'cookie' | 'clearCookie'> = {
+      cookie: jest.fn(((name: string, value: string, opts: unknown) => {
         cookies[name] = { value, opts };
-      }) as any,
-      clearCookie: jest.fn((name: string) => {
+      }) as unknown as Response['cookie']) as unknown as Response['cookie'],
+      clearCookie: jest.fn(((name: string) => {
         cookies[name] = undefined;
-      }) as any,
+      }) as unknown as Response['clearCookie']) as unknown as Response['clearCookie'],
     };
     return { res: res as Response, cookies };
   };
@@ -35,26 +37,27 @@ describe('AuthController', () => {
       resetPassword: jest.fn(),
       requestEmailVerification: jest.fn(),
       verifyEmail: jest.fn(),
+      verifyEmailOtp: jest.fn(),
       issueTokensForUser: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<AuthService>;
     webAuthn = {
       startRegistration: jest.fn(),
       finishRegistration: jest.fn(),
       startAuthentication: jest.fn(),
       finishAuthentication: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<WebAuthnPort>;
     recovery = {
       generate: jest.fn(),
       verifyAndConsume: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<RecoveryCodesPort>;
     const config = { get: jest.fn().mockReturnValue(undefined) } as unknown as ConfigService;
-    controller = new AuthController(service, webAuthn as any, recovery as any, config);
+    controller = new AuthController(service, webAuthn, recovery, config);
   });
 
   it('signIn sets CSRF and auth cookies when no TOTP', async () => {
     service.signIn.mockResolvedValue({ totpRequired: false, accessToken: 'at', refreshToken: 'rt' });
     const { res, cookies } = createRes();
-    const result = await controller.signIn({ email: 'e', password: 'p' } as any, res);
+    const result = await controller.signIn({ email: 'e', password: 'p' } as LoginDto, res);
     expect(result).toEqual({ totpRequired: false });
     expect(cookies['XSRF-TOKEN']).toBeDefined();
     expect(cookies['bsaas_at'].value).toBe('at');
@@ -62,17 +65,17 @@ describe('AuthController', () => {
   });
 
   it('signIn returns temp token when TOTP required', async () => {
-    service.signIn.mockResolvedValue({ totpRequired: true, tempToken: 'temp' } as any);
+    service.signIn.mockResolvedValue({ totpRequired: true, tempToken: 'temp' });
     const { res } = createRes();
-    const result = await controller.signIn({ email: 'e', password: 'p' } as any, res);
+    const result = await controller.signIn({ email: 'e', password: 'p' } as LoginDto, res);
     expect(result).toEqual({ totpRequired: true, tempToken: 'temp' });
   });
 
   it('refresh rotates cookies and returns empty body', async () => {
-    service.refreshToken.mockResolvedValue({ accessToken: 'new-at', refreshToken: 'new-rt' } as any);
+    service.refreshToken.mockResolvedValue({ accessToken: 'new-at', refreshToken: 'new-rt' });
     const { res, cookies } = createRes();
-    const req = { headers: { cookie: 'bsaas_rt=old' } } as any;
-    const result = await controller.refresh({} as any, req, res);
+    const req1: { headers: Record<string, string> } = { headers: { cookie: 'bsaas_rt=old' } };
+    const result = await controller.refresh({} as RefreshTokenDto, req1, res);
     expect(result).toEqual({});
     expect(cookies['bsaas_rt'].value).toBe('new-rt');
     expect(cookies['bsaas_at'].value).toBe('new-at');
@@ -80,132 +83,162 @@ describe('AuthController', () => {
   });
 
   it('refresh reads token from body when cookie missing', async () => {
-    service.refreshToken.mockResolvedValue({ accessToken: 'at2', refreshToken: 'rt2' } as any);
+    service.refreshToken.mockResolvedValue({ accessToken: 'at2', refreshToken: 'rt2' });
     const { res, cookies } = createRes();
-    const req = { headers: {} } as any;
-    const result = await controller.refresh({ refreshToken: 'from-body' } as any, req, res);
+    const req2: { headers: Record<string, string> } = { headers: {} };
+    const result = await controller.refresh({ refreshToken: 'from-body' } as RefreshTokenDto, req2, res);
     expect(result).toEqual({});
     expect(cookies['bsaas_rt'].value).toBe('rt2');
     expect(cookies['bsaas_at'].value).toBe('at2');
   });
 
   it('refresh falls back to body when cookie header present but no refreshToken pair', async () => {
-    service.refreshToken.mockResolvedValue({ accessToken: 'at3', refreshToken: 'rt3' } as any);
+    service.refreshToken.mockResolvedValue({ accessToken: 'at3', refreshToken: 'rt3' });
     const { res, cookies } = createRes();
-    const req = { headers: { cookie: 'foo=bar; XSRF-TOKEN=abc' } } as any;
-    const result = await controller.refresh({ refreshToken: 'from-body-2' } as any, req, res);
+    const req3: { headers: Record<string, string> } = { headers: { cookie: 'foo=bar; XSRF-TOKEN=abc' } };
+    const result = await controller.refresh({ refreshToken: 'from-body-2' } as RefreshTokenDto, req3, res);
     expect(result).toEqual({});
     expect(cookies['bsaas_rt'].value).toBe('rt3');
     expect(cookies['bsaas_at'].value).toBe('at3');
   });
 
   it('refresh does not set cookie when service returns no refreshToken', async () => {
-    service.refreshToken.mockResolvedValue({ accessToken: 'only-at' } as any);
+    service.refreshToken.mockResolvedValue({ accessToken: 'only-at' });
     const { res, cookies } = createRes();
-    const req = { headers: { cookie: '' } } as any;
-    const result = await controller.refresh({ refreshToken: 'from-body' } as any, req, res);
+    const req4: { headers: Record<string, string> } = { headers: { cookie: '' } };
+    const result = await controller.refresh({ refreshToken: 'from-body' } as RefreshTokenDto, req4, res);
     expect(result).toEqual({});
     expect(cookies['bsaas_rt']).toBeUndefined();
   });
 
   it('refresh throws when cookie has empty refreshToken value and body missing', async () => {
     const { res } = createRes();
-    const req = { headers: { cookie: 'refreshToken=; XSRF-TOKEN=abc' } } as any;
-    await expect(controller.refresh({} as any, req, res)).rejects.toThrow();
+    const req5: { headers: Record<string, string> } = { headers: { cookie: 'refreshToken=; XSRF-TOKEN=abc' } };
+    await expect(controller.refresh({} as RefreshTokenDto, req5, res)).rejects.toThrow();
   });
 
   it('signInWithTotp sets cookies and returns empty body', async () => {
-    service.signInWithTotp.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' } as any);
+    service.signInWithTotp.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' });
     const { res, cookies } = createRes();
-    const result = await controller.signInWithTotp({ tempToken: 't', totpCode: '123456' } as any, res as any);
+    const result = await controller.signInWithTotp({ tempToken: 't', totpCode: '123456' } as { tempToken: string; totpCode: string }, res);
     expect(result).toEqual({});
     expect(cookies['bsaas_at'].value).toBe('a');
     expect(cookies['bsaas_rt'].value).toBe('r');
   });
 
   it('webauthn register start/finish call ports and return values', async () => {
-    webAuthn.startRegistration.mockResolvedValue({ challenge: 'c' } as any);
-    const start = await controller.webauthnRegisterStart({ username: 'u' } as any, { user: { userId: 'uid' } } as any);
+    webAuthn.startRegistration.mockResolvedValue({ challenge: 'c' } as Record<string, unknown>);
+    const start = await controller.webauthnRegisterStart({ username: 'u' }, { user: { userId: 'uid' } } as { user: { userId: string } });
     expect(start).toEqual({ challenge: 'c' });
 
-    webAuthn.finishRegistration.mockResolvedValue(undefined as any);
-    const finish = await controller.webauthnRegisterFinish({} as any, { user: { userId: 'uid' } } as any);
+    webAuthn.finishRegistration.mockResolvedValue(undefined as unknown as Record<string, unknown>);
+    const finish = await controller.webauthnRegisterFinish({} as Record<string, unknown>, { user: { userId: 'uid' } } as { user: { userId: string } });
     expect(finish).toEqual({ success: true });
   });
 
   it('webauthn login start/finish work and set cookie', async () => {
-    webAuthn.startAuthentication.mockResolvedValue({ request: true } as any);
-    const start = await controller.webauthnLoginStart({ user: { userId: 'u1' } } as any);
+    webAuthn.startAuthentication.mockResolvedValue({ request: true } as Record<string, unknown>);
+    const start = await controller.webauthnLoginStart({ user: { userId: 'u1' } } as { user?: { userId: string } });
     expect(start).toEqual({ request: true });
 
-    service.issueTokensForUser.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' } as any);
+    service.issueTokensForUser.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' });
     const { res, cookies } = createRes();
-    const finish = await controller.webauthnLoginFinish({} as any, { user: { userId: 'u1' } } as any, res);
+    const finish = await controller.webauthnLoginFinish({} as Record<string, unknown>, { user: { userId: 'u1' } } as { user: { userId: string } }, res);
     expect(finish).toEqual({});
     expect(cookies['bsaas_rt'].value).toBe('r');
     expect(cookies['bsaas_at'].value).toBe('a');
   });
 
   it('recovery generate/verify call ports and return success', async () => {
-    recovery.generate.mockResolvedValue(['code1'] as any);
-    const codes = await controller.generateRecovery({ user: { userId: 'u1' } } as any);
+    recovery.generate.mockResolvedValue(['code1']);
+    const codes = await controller.generateRecovery({ user: { userId: 'u1' } } as { user: { userId: string } });
     expect(codes).toEqual(['code1']);
 
-    recovery.verifyAndConsume.mockResolvedValue(true as any);
-    const ok = await controller.verifyRecovery({ code: 'x' } as any, { user: { userId: 'u1' } } as any);
+    recovery.verifyAndConsume.mockResolvedValue(true);
+    const ok = await controller.verifyRecovery({ code: 'x' }, { user: { userId: 'u1' } } as { user: { userId: string } });
     expect(ok).toEqual({ success: true });
   });
 
   it('verifyRecovery throws when code invalid', async () => {
-    recovery.verifyAndConsume.mockResolvedValue(false as any);
-    await expect(controller.verifyRecovery({ code: 'bad' } as any, { user: { userId: 'u1' } } as any)).rejects.toThrow();
+    recovery.verifyAndConsume.mockResolvedValue(false);
+    await expect(controller.verifyRecovery({ code: 'bad' }, { user: { userId: 'u1' } } as { user: { userId: string } })).rejects.toThrow();
   });
 
   it('refresh throws when no token provided', async () => {
     const { res } = createRes();
-    const req = { headers: {} } as any;
-    await expect(controller.refresh({} as any, req, res)).rejects.toThrow();
+    const req6: { headers: Record<string, string> } = { headers: {} };
+    await expect(controller.refresh({} as RefreshTokenDto, req6, res)).rejects.toThrow();
   });
 
   it('webauthnLoginStart throws without user context', async () => {
-    await expect(controller.webauthnLoginStart({} as any)).rejects.toThrow();
+    await expect(controller.webauthnLoginStart({} as { user?: { userId: string } })).rejects.toThrow();
   });
 
   it('logout clears cookie and calls service', async () => {
     const { res } = createRes();
-    await controller.logout({ user: { sessionId: 's1' } } as any, res);
+    await controller.logout({ user: { sessionId: 's1' } } as { user: { sessionId: string } }, res);
     expect(service.logout).toHaveBeenCalledWith('s1');
-    expect((res.clearCookie as any)).toHaveBeenCalledWith('bsaas_rt', expect.any(Object));
-    expect((res.clearCookie as any)).toHaveBeenCalledWith('bsaas_at', expect.any(Object));
+    const clear = res.clearCookie as unknown as jest.Mock;
+    expect(clear).toHaveBeenCalledWith('bsaas_rt', expect.any(Object));
+    expect(clear).toHaveBeenCalledWith('bsaas_at', expect.any(Object));
   });
 
   it('listSessions proxies to service', async () => {
     service.listSessions.mockResolvedValue([{ id: 's1' }]);
-    const result = await controller.listSessions({ user: { userId: 'u1' } } as any);
+    const result = await controller.listSessions({ user: { userId: 'u1' } } as { user: { userId: string } });
     expect(result).toEqual([{ id: 's1' }]);
   });
 
   it('revokeSession proxies to service', async () => {
-    service.revokeSession.mockResolvedValue({ success: true } as any);
-    const result = await controller.revokeSession({ user: { userId: 'u1' } } as any, 's1');
+    service.revokeSession.mockResolvedValue({ success: true });
+    const result = await controller.revokeSession({ user: { userId: 'u1' } } as { user: { userId: string } }, 's1');
     expect(result).toEqual({ success: true });
   });
 
+  it('revokeSessionBody proxies to service', async () => {
+    (service.revokeSession as unknown as jest.Mock).mockResolvedValue({ success: true });
+    const ok = await controller.revokeSessionBody({ user: { userId: 'u1' } } as { user: { userId: string } }, { id: 's1' } as { id: string });
+    expect(ok).toEqual({ success: true });
+  });
+
+  it('registerPlaceholder returns success', async () => {
+    const ok = await controller.registerPlaceholder();
+    expect(ok).toEqual({ success: true });
+  });
+
   it('forgot/reset/email verify flows call service and return success', async () => {
-    service.requestPasswordReset.mockResolvedValue(undefined as any);
-    const forgot = await controller.forgotPassword({ email: 'e' } as any);
+    service.requestPasswordReset.mockResolvedValue(undefined);
+    const forgot = await controller.forgotPassword({ email: 'e' });
     expect(forgot).toEqual({ success: true });
 
-    service.resetPassword.mockResolvedValue(undefined as any);
-    const reset = await controller.resetPassword({ token: 't', newPassword: 'p' } as any);
+    service.resetPassword.mockResolvedValue(undefined);
+    const reset = await controller.resetPassword({ token: 't', newPassword: 'p' });
     expect(reset).toEqual({ success: true });
 
-    service.requestEmailVerification.mockResolvedValue(undefined as any);
-    const send = await controller.sendEmailVerification({ email: 'e' } as any);
+    service.requestEmailVerification.mockResolvedValue(undefined);
+    const send = await controller.sendEmailVerification({ email: 'e' });
     expect(send).toEqual({ success: true });
 
-    service.verifyEmail.mockResolvedValue(undefined as any);
-    const verify = await controller.verifyEmail({ token: 't' } as any);
+    service.verifyEmail.mockResolvedValue(undefined);
+    const verify = await controller.verifyEmail({ token: 't' });
     expect(verify).toEqual({ success: true });
+  });
+
+  it('emailVerifyRequest calls service and returns success', async () => {
+    (service.requestEmailVerification as unknown as jest.Mock).mockResolvedValue(undefined);
+    const ok = await controller.emailVerifyRequest({ email: 'e' });
+    expect(ok).toEqual({ success: true });
+  });
+
+  it('emailVerifyConfirm handles token and otp branches and throws on bad input', async () => {
+    (service.verifyEmail as unknown as jest.Mock).mockResolvedValue(undefined);
+    const ok1 = await controller.emailVerifyConfirm({ token: 't' });
+    expect(ok1).toEqual({ success: true });
+
+    service.verifyEmailOtp = jest.fn().mockResolvedValue(undefined);
+    const ok2 = await controller.emailVerifyConfirm({ email: 'e', otp: '123456' });
+    expect(ok2).toEqual({ success: true });
+
+    await expect(controller.emailVerifyConfirm({} as { token?: string; email?: string; otp?: string })).rejects.toThrow();
   });
 });
