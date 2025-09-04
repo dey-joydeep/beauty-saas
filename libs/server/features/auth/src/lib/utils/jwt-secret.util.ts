@@ -9,11 +9,11 @@ import { ConfigService } from '@nestjs/config';
  * @returns {string} Secret to use for access tokens.
  */
 export function resolveAccessSecret(config: ConfigService): string {
-  return (
-    config.get<string>('JWT_ACCESS_SECRET') ||
-    config.get<string>('JWT_SECRET') ||
-    'test-access-secret'
-  );
+  const access = config.get<string>('JWT_ACCESS_SECRET');
+  if (access) return access;
+  const fallback = config.get<string>('JWT_SECRET');
+  if (fallback) return fallback;
+  return 'test-access-secret';
 }
 
 /**
@@ -25,10 +25,9 @@ export function resolveAccessSecret(config: ConfigService): string {
  * @returns {string} Secret to use for refresh tokens.
  */
 export function resolveRefreshSecret(config: ConfigService): string {
-  return (
-    config.get<string>('JWT_REFRESH_SECRET') ||
-    config.get<string>('JWT_SECRET') ||
-    'test-refresh-secret'
-  );
+  const refresh = config.get<string>('JWT_REFRESH_SECRET');
+  if (refresh) return refresh;
+  const fallback = config.get<string>('JWT_SECRET');
+  if (fallback) return fallback;
+  return 'test-refresh-secret';
 }
-

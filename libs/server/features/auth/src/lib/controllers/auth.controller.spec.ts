@@ -1,5 +1,5 @@
 import { AuthController } from './auth.controller';
-import type { Response } from 'express';
+import type { Response, Request as ExpressRequest } from 'express';
 import { AuthService } from '../services/auth.service';
 import type { WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
 import { ConfigService } from '@nestjs/config';
@@ -60,8 +60,8 @@ describe('AuthController', () => {
     const result = await controller.signIn({ email: 'e', password: 'p' } as LoginDto, res);
     expect(result).toEqual({ totpRequired: false });
     expect(cookies['XSRF-TOKEN']).toBeDefined();
-    expect(cookies['bsaas_at'].value).toBe('at');
-    expect(cookies['bsaas_rt'].value).toBe('rt');
+    expect(cookies['bsaas_at']!.value).toBe('at');
+    expect(cookies['bsaas_rt']!.value).toBe('rt');
   });
 
   it('signIn returns temp token when TOTP required', async () => {
@@ -74,38 +74,38 @@ describe('AuthController', () => {
   it('refresh rotates cookies and returns empty body', async () => {
     service.refreshToken.mockResolvedValue({ accessToken: 'new-at', refreshToken: 'new-rt' });
     const { res, cookies } = createRes();
-    const req1: { headers: Record<string, string> } = { headers: { cookie: 'bsaas_rt=old' } };
+    const req1 = { headers: { cookie: 'bsaas_rt=old' } } as unknown as ExpressRequest;
     const result = await controller.refresh({} as RefreshTokenDto, req1, res);
     expect(result).toEqual({});
-    expect(cookies['bsaas_rt'].value).toBe('new-rt');
-    expect(cookies['bsaas_at'].value).toBe('new-at');
+    expect(cookies['bsaas_rt']!.value).toBe('new-rt');
+    expect(cookies['bsaas_at']!.value).toBe('new-at');
     expect(cookies['XSRF-TOKEN']).toBeDefined();
   });
 
   it('refresh reads token from body when cookie missing', async () => {
     service.refreshToken.mockResolvedValue({ accessToken: 'at2', refreshToken: 'rt2' });
     const { res, cookies } = createRes();
-    const req2: { headers: Record<string, string> } = { headers: {} };
+    const req2 = { headers: {} } as unknown as ExpressRequest;
     const result = await controller.refresh({ refreshToken: 'from-body' } as RefreshTokenDto, req2, res);
     expect(result).toEqual({});
-    expect(cookies['bsaas_rt'].value).toBe('rt2');
-    expect(cookies['bsaas_at'].value).toBe('at2');
+    expect(cookies['bsaas_rt']!.value).toBe('rt2');
+    expect(cookies['bsaas_at']!.value).toBe('at2');
   });
 
   it('refresh falls back to body when cookie header present but no refreshToken pair', async () => {
     service.refreshToken.mockResolvedValue({ accessToken: 'at3', refreshToken: 'rt3' });
     const { res, cookies } = createRes();
-    const req3: { headers: Record<string, string> } = { headers: { cookie: 'foo=bar; XSRF-TOKEN=abc' } };
+    const req3 = { headers: { cookie: 'foo=bar; XSRF-TOKEN=abc' } } as unknown as ExpressRequest;
     const result = await controller.refresh({ refreshToken: 'from-body-2' } as RefreshTokenDto, req3, res);
     expect(result).toEqual({});
-    expect(cookies['bsaas_rt'].value).toBe('rt3');
-    expect(cookies['bsaas_at'].value).toBe('at3');
+    expect(cookies['bsaas_rt']!.value).toBe('rt3');
+    expect(cookies['bsaas_at']!.value).toBe('at3');
   });
 
   it('refresh does not set cookie when service returns no refreshToken', async () => {
-    service.refreshToken.mockResolvedValue({ accessToken: 'only-at' });
+    service.refreshToken.mockResolvedValue(undefined as unknown as { accessToken: string; refreshToken: string });
     const { res, cookies } = createRes();
-    const req4: { headers: Record<string, string> } = { headers: { cookie: '' } };
+    const req4 = { headers: { cookie: '' } } as unknown as ExpressRequest;
     const result = await controller.refresh({ refreshToken: 'from-body' } as RefreshTokenDto, req4, res);
     expect(result).toEqual({});
     expect(cookies['bsaas_rt']).toBeUndefined();
@@ -113,7 +113,7 @@ describe('AuthController', () => {
 
   it('refresh throws when cookie has empty refreshToken value and body missing', async () => {
     const { res } = createRes();
-    const req5: { headers: Record<string, string> } = { headers: { cookie: 'refreshToken=; XSRF-TOKEN=abc' } };
+    const req5 = { headers: { cookie: 'refreshToken=; XSRF-TOKEN=abc' } } as unknown as ExpressRequest;
     await expect(controller.refresh({} as RefreshTokenDto, req5, res)).rejects.toThrow();
   });
 
@@ -122,8 +122,8 @@ describe('AuthController', () => {
     const { res, cookies } = createRes();
     const result = await controller.signInWithTotp({ tempToken: 't', totpCode: '123456' } as { tempToken: string; totpCode: string }, res);
     expect(result).toEqual({});
-    expect(cookies['bsaas_at'].value).toBe('a');
-    expect(cookies['bsaas_rt'].value).toBe('r');
+    expect(cookies['bsaas_at']!.value).toBe('a');
+    expect(cookies['bsaas_rt']!.value).toBe('r');
   });
 
   it('webauthn register start/finish call ports and return values', async () => {
@@ -131,7 +131,7 @@ describe('AuthController', () => {
     const start = await controller.webauthnRegisterStart({ username: 'u' }, { user: { userId: 'uid' } } as { user: { userId: string } });
     expect(start).toEqual({ challenge: 'c' });
 
-    webAuthn.finishRegistration.mockResolvedValue(undefined as unknown as Record<string, unknown>);
+    webAuthn.finishRegistration.mockResolvedValue({ credentialId: 'cid', counter: 0 } as any);
     const finish = await controller.webauthnRegisterFinish({} as Record<string, unknown>, { user: { userId: 'uid' } } as { user: { userId: string } });
     expect(finish).toEqual({ success: true });
   });
@@ -145,8 +145,8 @@ describe('AuthController', () => {
     const { res, cookies } = createRes();
     const finish = await controller.webauthnLoginFinish({} as Record<string, unknown>, { user: { userId: 'u1' } } as { user: { userId: string } }, res);
     expect(finish).toEqual({});
-    expect(cookies['bsaas_rt'].value).toBe('r');
-    expect(cookies['bsaas_at'].value).toBe('a');
+    expect(cookies['bsaas_rt']!.value).toBe('r');
+    expect(cookies['bsaas_at']!.value).toBe('a');
   });
 
   it('recovery generate/verify call ports and return success', async () => {
@@ -166,7 +166,7 @@ describe('AuthController', () => {
 
   it('refresh throws when no token provided', async () => {
     const { res } = createRes();
-    const req6: { headers: Record<string, string> } = { headers: {} };
+    const req6 = { headers: {} } as unknown as ExpressRequest;
     await expect(controller.refresh({} as RefreshTokenDto, req6, res)).rejects.toThrow();
   });
 

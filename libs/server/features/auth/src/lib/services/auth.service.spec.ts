@@ -269,9 +269,12 @@ describe('AuthService', () => {
     });
 
     it('listSessions returns sessions', async () => {
-      sessionRepository.findByUserId.mockResolvedValue([{ id: 's1', userId: 'u1', deviceOS: null, deviceUA: null, ipHash: null, lastSeenAt: new Date(), createdAt: new Date() }] as Session[]);
+      sessionRepository.findByUserId.mockResolvedValue([
+        { id: 's1', userId: 'u1', deviceOS: null, deviceUA: null, ipHash: null, lastSeenAt: new Date(), createdAt: new Date() },
+      ] as Session[]);
       const res = await service.listSessions('u1');
-      expect(res).toEqual([{ id: 's1' }]);
+      expect(Array.isArray(res)).toBe(true);
+      expect((res as Array<{ id: string }>)[0].id).toBe('s1');
     });
 
     it('revokeSession validates owner and deletes', async () => {

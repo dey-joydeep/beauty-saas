@@ -76,17 +76,17 @@ describe('AuthService branches (integration-light)', () => {
   const user = { id: 'u1', email: 'e@example.com', passwordHash: '$2a$10$aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', roles: [] } as unknown as User & { roles: { role: { name: string } }[] };
 
   it('signIn invalid credentials and password', async () => {
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => null;
+    userRepo.findByEmail = async () => null;
     await expect(service.signIn('x@example.com', 'p')).rejects.toBeTruthy();
 
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => ({ ...user, passwordHash: 'hash' });
+    userRepo.findByEmail = async () => ({ ...user, passwordHash: 'hash' });
     (bcrypt.compare as jest.Mock).mockResolvedValueOnce(false as unknown as boolean);
     await expect(service.signIn(user.email, 'wrong')).rejects.toBeTruthy();
   });
 
   it('signIn totp challenge when verified', async () => {
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => user;
-    (credTotpRepo.findByUserId as unknown as jest.Mock) = async () => ({ verified: true } as CredentialTOTP);
+    userRepo.findByEmail = async () => user;
+    credTotpRepo.findByUserId = async () => ({ verified: true } as CredentialTOTP);
     // Case 1: access secret present
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_ACCESS_SECRET' ? 'AS' : undefined));
     let res = await service.signIn(user.email, 'p');
@@ -102,97 +102,97 @@ describe('AuthService branches (integration-light)', () => {
   });
 
   it('signIn success without totp', async () => {
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => user;
-    (credTotpRepo.findByUserId as unknown as jest.Mock) = async () => null;
+    userRepo.findByEmail = async () => user;
+    credTotpRepo.findByUserId = async () => null;
     const res = await service.signIn(user.email, 'p');
     expect(res.totpRequired).toBe(false);
   });
 
   it('signInWithTotp success and failure branches', async () => {
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => ({ sub: 'u1', aud: 'totp' }));
-    (userRepo.findById as unknown as jest.Mock) = async () => user;
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'totp' })) as JwtService['verifyAsync'];
+    userRepo.findById = async () => user;
     const ok = await service.signInWithTotp('t', '123456');
     expect(ok.accessToken).toBeDefined();
     // invalid aud
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => ({ sub: 'u1', aud: 'bad' }));
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'bad' })) as JwtService['verifyAsync'];
     await expect(service.signInWithTotp('t', '123456')).rejects.toBeTruthy();
     // invalid totp code
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => ({ sub: 'u1', aud: 'totp' }));
-    (totp.verifyToken as unknown as jest.Mock) = async () => false;
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'totp' })) as JwtService['verifyAsync'];
+    totp.verifyToken = async () => false;
     await expect(service.signInWithTotp('t', '000000')).rejects.toBeTruthy();
     // user not found
-    (totp.verifyToken as unknown as jest.Mock) = async () => true;
-    (userRepo.findById as unknown as jest.Mock) = async () => null;
+    totp.verifyToken = async () => true;
+    userRepo.findById = async () => null;
     await expect(service.signInWithTotp('t', '123456')).rejects.toBeTruthy();
   });
 
   it('refreshToken success and invalid', async () => {
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => ({ sub: 'u1', jti: 'j1' }));
-    (refreshRepo.findByJti as unknown as jest.Mock) = async () => ({ jti: 'j1', sessionId: 'sess1' } as RefreshToken);
-    (userRepo.findById as unknown as jest.Mock) = async () => user;
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', jti: 'j1' })) as JwtService['verifyAsync'];
+    refreshRepo.findByJti = async () => ({ jti: 'j1', sessionId: 'sess1' } as RefreshToken);
+    userRepo.findById = async () => user;
     const tokens = await service.refreshToken('rt');
     expect(tokens).toBeTruthy();
     expect(tokens!.accessToken).toBeDefined();
-    (refreshRepo.findByJti as unknown as jest.Mock) = async () => null;
+    refreshRepo.findByJti = async () => null;
     await expect(service.refreshToken('rt-bad')).rejects.toBeTruthy();
     // user not found branch
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => ({ sub: 'no-user', jti: 'j2' }));
-    (refreshRepo.findByJti as unknown as jest.Mock) = async () => ({ jti: 'j2', sessionId: 'sess2' } as RefreshToken);
-    (userRepo.findById as unknown as jest.Mock) = async () => null;
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'no-user', jti: 'j2' })) as JwtService['verifyAsync'];
+    refreshRepo.findByJti = async () => ({ jti: 'j2', sessionId: 'sess2' } as RefreshToken);
+    userRepo.findById = async () => null;
     await expect(service.refreshToken('rt-no-user')).rejects.toBeTruthy();
   });
 
   it('logout branches and revokeSession', async () => {
-    (sessionRepo.findById as unknown as jest.Mock) = async () => null;
+    sessionRepo.findById = async () => null;
     await service.logout('sX');
-    (sessionRepo.findById as unknown as jest.Mock) = async () => ({ id: 's1', userId: 'u1' } as unknown as Session);
+    sessionRepo.findById = async () => ({ id: 's1', userId: 'u1' } as unknown as Session);
     await service.logout('s1');
 
-    (sessionRepo.findById as unknown as jest.Mock) = async () => ({ id: 's2', userId: 'u1' } as unknown as Session);
+    sessionRepo.findById = async () => ({ id: 's2', userId: 'u1' } as unknown as Session);
     await expect(service.revokeSession('u2', 's2')).rejects.toBeTruthy();
     await expect(service.revokeSession('u1', 's2')).resolves.toEqual({ success: true });
   });
 
   it('password reset and email verification branches', async () => {
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => null;
+    userRepo.findByEmail = async () => null;
     await service.requestPasswordReset('none@example.com');
 
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => user;
+    userRepo.findByEmail = async () => user;
     await service.requestPasswordReset(user.email);
 
     // reset success
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => ({ sub: 'u1', aud: 'reset' }));
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'reset' })) as JwtService['verifyAsync'];
     await service.resetPassword('tok', 'NewP@ss');
     // reset invalid
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => ({ sub: 'u1', aud: 'bad' }));
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'bad' })) as JwtService['verifyAsync'];
     await expect(service.resetPassword('tok', 'x')).rejects.toBeTruthy();
 
     // email verification request
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => ({ ...(user as User), emailVerifiedAt: new Date() } as unknown as User & { roles: { role: { name: string } }[] });
+    userRepo.findByEmail = async () => ({ ...(user as User), emailVerifiedAt: new Date() } as unknown as User & { roles: { role: { name: string } }[] });
     await service.requestEmailVerification(user.email);
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => ({ ...(user as User), emailVerifiedAt: null } as unknown as User & { roles: { role: { name: string } }[] });
+    userRepo.findByEmail = async () => ({ ...(user as User), emailVerifiedAt: null } as unknown as User & { roles: { role: { name: string } }[] });
     await service.requestEmailVerification(user.email);
 
     // verify email success and failure
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => ({ sub: 'u1', aud: 'verify' }));
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'verify' })) as JwtService['verifyAsync'];
     await service.verifyEmail('tok');
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => ({ sub: 'u1', aud: 'bad' }));
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'bad' })) as JwtService['verifyAsync'];
     await expect(service.verifyEmail('tok')).rejects.toBeTruthy();
 
     // invalid/expired branches via thrown verify
-    (jwt.verifyAsync as unknown as jest.Mock) = jest.fn(async () => { throw new Error('bad'); });
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => { throw new Error('bad'); }) as JwtService['verifyAsync'];
     await expect(service.resetPassword('tok', 'x')).rejects.toBeTruthy();
     await expect(service.verifyEmail('tok')).rejects.toBeTruthy();
   });
 
   it('issueTokensForUser covers not found branch', async () => {
-    (userRepo.findById as unknown as jest.Mock) = async () => null;
+    userRepo.findById = async () => null;
     await expect(service.issueTokensForUser('nope')).rejects.toBeTruthy();
   });
 
   it('issueTokensForUser success', async () => {
-    (userRepo.findById as unknown as jest.Mock) = async () => user;
-    (sessionRepo.create as unknown as jest.Mock) = async ({ userId }: { userId: string }) => ({ id: 'sess2', userId } as unknown as Session);
+    userRepo.findById = async () => user;
+    sessionRepo.create = async ({ userId }: { userId: string }) => ({ id: 'sess2', userId } as unknown as Session);
     const tokens = await service.issueTokensForUser('u1');
     expect(tokens.accessToken).toBeDefined();
     expect(tokens.refreshToken).toBeDefined();
@@ -201,8 +201,8 @@ describe('AuthService branches (integration-light)', () => {
   it('covers config secret fallbacks for access/refresh', async () => {
     // Fallback to JWT_SECRET when JWT_ACCESS_SECRET is missing
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_SECRET' ? 'S' : undefined));
-    (userRepo.findById as unknown as jest.Mock) = async () => user;
-    (sessionRepo.create as unknown as jest.Mock) = async ({ userId }: { userId: string }) => ({ id: 'sess3', userId } as unknown as Session);
+    userRepo.findById = async () => user;
+    sessionRepo.create = async ({ userId }: { userId: string }) => ({ id: 'sess3', userId } as unknown as Session);
     await service.issueTokensForUser('u1');
 
     // Default to test-access-secret when both missing
@@ -211,35 +211,35 @@ describe('AuthService branches (integration-light)', () => {
 
     // Refresh path fallback to JWT_SECRET then default
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_SECRET' ? 'S' : undefined));
-    (jwt.verifyAsync as unknown as jest.Mock) = async () => ({ sub: 'u1', jti: 'j3' });
-    (refreshRepo.findByJti as unknown as jest.Mock) = async () => ({ jti: 'j3', sessionId: 'sess3' } as RefreshToken);
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', jti: 'j3' })) as JwtService['verifyAsync'];
+    refreshRepo.findByJti = async () => ({ jti: 'j3', sessionId: 'sess3' } as RefreshToken);
     await service.refreshToken('rtS');
 
     (cfg as unknown as { get: jest.Mock }).get = jest.fn(() => undefined);
-    (jwt.verifyAsync as unknown as jest.Mock) = async () => ({ sub: 'u1', jti: 'j4' });
-    (refreshRepo.findByJti as unknown as jest.Mock) = async () => ({ jti: 'j4', sessionId: 'sess4' } as RefreshToken);
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', jti: 'j4' })) as JwtService['verifyAsync'];
+    refreshRepo.findByJti = async () => ({ jti: 'j4', sessionId: 'sess4' } as RefreshToken);
     await service.refreshToken('rtD');
   });
 
   it('covers reset/verify secret fallbacks', async () => {
     // requestPasswordReset with explicit RESET secret
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_RESET_SECRET' ? 'RS' : (k === 'JWT_ACCESS_SECRET' ? 'AS' : 'S')));
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => user;
+    userRepo.findByEmail = async () => user;
     await service.requestPasswordReset(user.email);
 
     // resetPassword uses fallback to ACCESS secret
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_ACCESS_SECRET' ? 'AS' : undefined));
-    (jwt.verifyAsync as unknown as jest.Mock) = async () => ({ sub: 'u1', aud: 'reset' });
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'reset' })) as JwtService['verifyAsync'];
     await service.resetPassword('tok', 'new');
 
     // requestEmailVerification with explicit VERIFY secret
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_VERIFY_EMAIL_SECRET' ? 'VS' : (k === 'JWT_ACCESS_SECRET' ? 'AS' : undefined)));
-    (userRepo.findByEmail as unknown as jest.Mock) = async () => ({ ...(user as User), emailVerifiedAt: null } as unknown as User & { roles: { role: { name: string } }[] });
+    userRepo.findByEmail = async () => ({ ...(user as User), emailVerifiedAt: null } as unknown as User & { roles: { role: { name: string } }[] });
     await service.requestEmailVerification(user.email);
 
     // verifyEmail with explicit VERIFY secret
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_VERIFY_EMAIL_SECRET' ? 'VS' : undefined));
-    (jwt.verifyAsync as unknown as jest.Mock) = async () => ({ sub: 'u1', aud: 'verify' });
+    (jwt as { verifyAsync: JwtService['verifyAsync'] }).verifyAsync = (async () => ({ sub: 'u1', aud: 'verify' })) as JwtService['verifyAsync'];
     await service.verifyEmail('tok');
     // verifyEmail fallback to ACCESS secret
     (cfg as unknown as { get: jest.Mock }).get = jest.fn((k: string) => (k === 'JWT_ACCESS_SECRET' ? 'AS' : undefined));

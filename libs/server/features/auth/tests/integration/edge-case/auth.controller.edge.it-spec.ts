@@ -26,18 +26,18 @@ describe('AuthController additional (integration-light)', () => {
     >
   >;
   const authSvc: AuthSvcMock = {
-    refreshToken: jest.fn(async () => ({ accessToken: 'at2', refreshToken: 'rt2' })),
-    logout: jest.fn(async () => {}),
-    listSessions: jest.fn(async () => []),
+    refreshToken: (jest.fn(async () => ({ accessToken: 'at2', refreshToken: 'rt2' })) as unknown) as AuthSvcMock['refreshToken'],
+    logout: (jest.fn(async () => {}) as unknown) as AuthSvcMock['logout'],
+    listSessions: (jest.fn(async () => []) as unknown) as AuthSvcMock['listSessions'],
     revokeSession: jest.fn(async (u: string, s: string): Promise<{ success: true }> => { void u; void s; return { success: true as const }; }),
-    signInWithTotp: jest.fn(async (t: string, c: string) => { void t; void c; return { accessToken: 'at', refreshToken: 'rt' }; }),
-    requestPasswordReset: jest.fn(async () => {}),
-    resetPassword: jest.fn(async () => {}),
-    requestEmailVerification: jest.fn(async () => {}),
-    verifyEmail: jest.fn(async () => {}),
+    signInWithTotp: (jest.fn(async () => ({ accessToken: 'at', refreshToken: 'rt' })) as unknown) as AuthSvcMock['signInWithTotp'],
+    requestPasswordReset: (jest.fn(async () => {}) as unknown) as AuthSvcMock['requestPasswordReset'],
+    resetPassword: (jest.fn(async () => {}) as unknown) as AuthSvcMock['resetPassword'],
+    requestEmailVerification: (jest.fn(async () => {}) as unknown) as AuthSvcMock['requestEmailVerification'],
+    verifyEmail: (jest.fn(async () => {}) as unknown) as AuthSvcMock['verifyEmail'],
     signIn: jest.fn(),
-    verifyEmailOtp: jest.fn(),
-    issueTokensForUser: jest.fn(),
+    verifyEmailOtp: (jest.fn(async () => {}) as unknown) as AuthSvcMock['verifyEmailOtp'],
+    issueTokensForUser: (jest.fn(async () => ({ accessToken: 'a', refreshToken: 'r' })) as unknown) as AuthSvcMock['issueTokensForUser'],
   };
 
   beforeAll(async () => {
@@ -84,14 +84,14 @@ describe('AuthController additional (integration-light)', () => {
   it('login sets temp token branch (no cookies)', async () => {
     const req = (await import('supertest')).default(app.getHttpServer());
     // Override signIn to simulate TOTP-required response
-    authSvc.signIn = jest.fn(async () => ({ totpRequired: true, tempToken: 'tmp' }));
+    authSvc.signIn = (jest.fn(async () => ({ totpRequired: true as const, tempToken: 'tmp' })) as unknown) as typeof authSvc.signIn;
     const res = await req.post('/auth/login').send({ email: 'e@example.com', password: 'p' }).expect(200);
     expect(res.body).toEqual({ totpRequired: true, tempToken: 'tmp' });
   });
 
   it('login success sets cookies (non-TOTP)', async () => {
     const req = (await import('supertest')).default(app.getHttpServer());
-    authSvc.signIn = jest.fn(async () => ({ totpRequired: false, accessToken: 'AT', refreshToken: 'RT' }));
+    authSvc.signIn = (jest.fn(async () => ({ totpRequired: false as const, accessToken: 'AT', refreshToken: 'RT' })) as unknown) as typeof authSvc.signIn;
     const res = await req.post('/auth/login').send({ email: 'e@example.com', password: 'p' }).expect(200);
     const sc = res.get('set-cookie') as unknown;
     const cookieStr = Array.isArray(sc) ? (sc as string[]).join(';') : String(sc ?? '');
@@ -127,7 +127,7 @@ describe('AuthController additional (integration-light)', () => {
   it('handles webauthn register finish (direct method call sets cookie)', async () => {
     const ctrl = app.get(AuthController);
     const res: Pick<Response, 'cookie'> = { cookie: jest.fn() as unknown as Response['cookie'] };
-    authSvc.issueTokensForUser = jest.fn(async () => ({ accessToken: 'at3', refreshToken: 'rt3' }));
+    authSvc.issueTokensForUser = (jest.fn(async () => ({ accessToken: 'at3', refreshToken: 'rt3' })) as unknown) as typeof authSvc.issueTokensForUser;
     const out = await ctrl.webauthnLoginFinish({} as Record<string, unknown>, { user: { userId: 'u1' } } as { user: { userId: string } }, res as Response);
     expect(out).toEqual({});
   });
@@ -154,7 +154,7 @@ describe('AuthController additional (integration-light)', () => {
   it('logout clears cookies (direct call)', async () => {
     const ctrl = app.get(AuthController);
     const res: Pick<Response, 'clearCookie'> = { clearCookie: jest.fn() as unknown as Response['clearCookie'] };
-    authSvc.logout = jest.fn(async () => {});
+    authSvc.logout = (jest.fn(async () => {}) as unknown) as typeof authSvc.logout;
     const out = await ctrl.logout({ user: { sessionId: 's1' } } as { user: { sessionId: string } }, res as Response);
     expect(out).toEqual({ success: true });
     const clear = res.clearCookie as unknown as jest.Mock;
@@ -164,14 +164,14 @@ describe('AuthController additional (integration-light)', () => {
 
   it('email verify confirm branches (token and bad body)', async () => {
     const ctrl = app.get(AuthController);
-    authSvc.verifyEmail = jest.fn(async () => {});
+    authSvc.verifyEmail = (jest.fn(async () => {}) as unknown) as typeof authSvc.verifyEmail;
     await expect(ctrl.emailVerifyConfirm({ token: 'T' } as { token: string })).resolves.toEqual({ success: true });
     await expect(ctrl.emailVerifyConfirm({} as { token?: string; email?: string; otp?: string })).rejects.toBeTruthy();
   });
 
   it('email verify confirm via OTP branch', async () => {
     const ctrl = app.get(AuthController);
-    authSvc.verifyEmailOtp = jest.fn(async () => {});
+    authSvc.verifyEmailOtp = (jest.fn(async () => {}) as unknown) as typeof authSvc.verifyEmailOtp;
     await expect(ctrl.emailVerifyConfirm({ email: 'e@example.com', otp: '123456' } as { email: string; otp: string })).resolves.toEqual({ success: true });
   });
 
@@ -183,7 +183,11 @@ describe('AuthController additional (integration-light)', () => {
   it('refresh uses cookie when body missing', async () => {
     const ctrl = app.get(AuthController);
     const fakeReq: { headers: { cookie?: string } } = { headers: { cookie: 'refreshToken=abc' } };
-    const out = await ctrl.refresh({} as unknown as { refreshToken?: string }, fakeReq as unknown as { headers: Record<string, string> }, { cookie: (() => undefined) as unknown as Response['cookie'] } as Response);
+    const out = await ctrl.refresh(
+      {} as unknown as import('../../../src/lib/dto/refresh-token.dto').RefreshTokenDto,
+      fakeReq as unknown as import('express').Request,
+      { cookie: (() => undefined) as unknown as Response['cookie'] } as Response,
+    );
     expect(out).toEqual({});
   });
 
@@ -257,8 +261,8 @@ describe('AuthController additional (integration-light)', () => {
     const ctrl = app.get(AuthController);
     await expect(
       ctrl.refresh(
-        {} as unknown as { refreshToken?: string },
-        { headers: {} } as unknown as { headers: Record<string, string> },
+        {} as unknown as import('../../../src/lib/dto/refresh-token.dto').RefreshTokenDto,
+        { headers: {} } as unknown as import('express').Request,
         { cookie: (() => undefined) as unknown as Response['cookie'] } as Response,
       ),
     ).rejects.toBeTruthy();
@@ -268,8 +272,8 @@ describe('AuthController additional (integration-light)', () => {
     const ctrl = app.get(AuthController);
     await expect(
       ctrl.refresh(
-        {} as unknown as { refreshToken?: string },
-        { headers: { cookie: 'refreshToken=' } } as unknown as { headers: Record<string, string> },
+        {} as unknown as import('../../../src/lib/dto/refresh-token.dto').RefreshTokenDto,
+        { headers: { cookie: 'refreshToken=' } } as unknown as import('express').Request,
         { cookie: (() => undefined) as unknown as Response['cookie'] } as Response,
       ),
     ).rejects.toBeTruthy();
