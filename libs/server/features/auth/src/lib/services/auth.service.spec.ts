@@ -170,7 +170,17 @@ describe('AuthService', () => {
       (bcrypt.hash as jest.Mock).mockResolvedValueOnce('hash');
       (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
       pwdResetRepo.findById.mockResolvedValue({ id, userId: mockUserWithRoles.id, tokenHash: 'hash', expiresAt: new Date(Date.now() + 60000), usedAt: null, createdAt: new Date() } as PasswordResetRecord);
-      sessionRepository.findByUserId.mockResolvedValue([{ id: 's1', userId: mockUserWithRoles.id }] as unknown as { id: string; userId: string }[]);
+      sessionRepository.findByUserId.mockResolvedValue([
+        {
+          id: 's1',
+          userId: mockUserWithRoles.id,
+          deviceOS: null,
+          deviceUA: null,
+          ipHash: null,
+          lastSeenAt: new Date(),
+          createdAt: new Date(),
+        } as unknown as Session,
+      ]);
       userRepository.update.mockResolvedValue({ ...mockUserWithRoles });
       await expect(service.resetPassword(`${id}.${secret}`, 'newpass')).resolves.toBeUndefined();
       expect(pwdResetRepo.markUsed).toHaveBeenCalledWith(id);
