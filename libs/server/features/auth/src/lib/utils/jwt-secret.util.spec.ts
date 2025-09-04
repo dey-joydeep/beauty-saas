@@ -1,9 +1,10 @@
 import { resolveAccessSecret, resolveRefreshSecret } from './jwt-secret.util';
+import type { ConfigService } from '@nestjs/config';
 
 describe('jwt-secret.util', () => {
-  const cfg = (overrides: Record<string, string | undefined>) => ({
+  const cfg = (overrides: Record<string, string | undefined>): Pick<ConfigService, 'get'> => ({
     get: (key: string) => overrides[key],
-  }) as any;
+  }) as unknown as Pick<ConfigService, 'get'>;
 
   it('resolveAccessSecret uses JWT_ACCESS_SECRET first', () => {
     const secret = resolveAccessSecret(cfg({ JWT_ACCESS_SECRET: 'a', JWT_SECRET: 'b' }));
@@ -35,4 +36,3 @@ describe('jwt-secret.util', () => {
     expect(secret).toBe('test-refresh-secret');
   });
 });
-

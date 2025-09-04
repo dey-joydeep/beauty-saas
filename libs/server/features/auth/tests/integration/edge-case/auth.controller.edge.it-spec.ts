@@ -1,40 +1,65 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { AuthController } from '../../src/lib/controllers/auth.controller';
-import { AuthService } from '../../src/lib/services/auth.service';
+import { AuthController } from '../../../src/lib/controllers/auth.controller';
+import { AuthService } from '../../../src/lib/services/auth.service';
 import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT } from '@cthub-bsaas/server-contracts-auth';
 import type { WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
 import type { Response } from 'express';
 
 describe('AuthController additional (integration-light)', () => {
   let app: INestApplication;
-  const authSvc: Partial<AuthService> = {
+  type AuthSvcMock = jest.Mocked<
+    Pick<
+      AuthService,
+      | 'refreshToken'
+      | 'logout'
+      | 'listSessions'
+      | 'revokeSession'
+      | 'signInWithTotp'
+      | 'requestPasswordReset'
+      | 'resetPassword'
+      | 'requestEmailVerification'
+      | 'verifyEmail'
+      | 'signIn'
+      | 'verifyEmailOtp'
+      | 'issueTokensForUser'
+    >
+  >;
+  const authSvc: AuthSvcMock = {
     refreshToken: jest.fn(async () => ({ accessToken: 'at2', refreshToken: 'rt2' })),
     logout: jest.fn(async () => {}),
     listSessions: jest.fn(async () => []),
-    revokeSession: jest.fn(async (_u: string, _s: string): Promise<{ success: true }> => ({ success: true as const })),
-    signInWithTotp: jest.fn(async (_t: string, _c: string) => ({ accessToken: 'at', refreshToken: 'rt' })),
+    revokeSession: jest.fn(async (u: string, s: string): Promise<{ success: true }> => { void u; void s; return { success: true as const }; }),
+    signInWithTotp: jest.fn(async (t: string, c: string) => { void t; void c; return { accessToken: 'at', refreshToken: 'rt' }; }),
     requestPasswordReset: jest.fn(async () => {}),
     resetPassword: jest.fn(async () => {}),
     requestEmailVerification: jest.fn(async () => {}),
     verifyEmail: jest.fn(async () => {}),
+    signIn: jest.fn(),
+    verifyEmailOtp: jest.fn(),
+    issueTokensForUser: jest.fn(),
   };
 
   beforeAll(async () => {
     const webAuthn: jest.Mocked<Pick<WebAuthnPort, 'startRegistration' | 'finishRegistration' | 'startAuthentication' | 'finishAuthentication'>> = {
-      startRegistration: jest.fn(async (_u: string, _n: string) => ({ challenge: 'c' } as Record<string, unknown>)),
-      finishRegistration: jest.fn(async (_u: string, _r: Record<string, unknown>) => ({ credentialId: 'cid', counter: 0 })),
-      startAuthentication: jest.fn(async (_u: string) => ({ challenge: 'c2' } as Record<string, unknown>)),
-      finishAuthentication: jest.fn(async (_u: string, _r: Record<string, unknown>) => ({ credentialId: 'cid', counter: 1 })),
+      startRegistration: jest.fn(async (u: string, n: string) => {
+        void u; void n; return { challenge: 'c' } as Record<string, unknown>;
+      }),
+      finishRegistration: jest.fn(async (u: string, r: Record<string, unknown>) => {
+        void u; void r; return { credentialId: 'cid', counter: 0 };
+      }),
+      startAuthentication: jest.fn(async (u: string) => { void u; return { challenge: 'c2' } as Record<string, unknown>; }),
+      finishAuthentication: jest.fn(async (u: string, r: Record<string, unknown>) => { void u; void r; return { credentialId: 'cid', counter: 1 }; }),
     };
     const recovery: Pick<RecoveryCodesPort, 'generate' | 'verifyAndConsume'> = {
-      generate: async (_userId: string, _count?: number) => ['r1', 'r2'],
-      verifyAndConsume: async (_userId: string, _code: string) => true,
+      generate: async (userId: string, count?: number) => { void userId; void count; return ['r1', 'r2']; },
+      verifyAndConsume: async (userId: string, code: string) => { void userId; void code; return true; },
     };
     const moduleRef = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
-        { provide: AuthService, useValue: authSvc as AuthService },
+        { provide: (await import('@nestjs/config')).ConfigService, useValue: { get: () => undefined } },
+        { provide: AuthService, useValue: authSvc },
         { provide: WEB_AUTHN_PORT, useValue: webAuthn },
         { provide: RECOVERY_CODES_PORT, useValue: recovery },
       ],
@@ -59,9 +84,19 @@ describe('AuthController additional (integration-light)', () => {
   it('login sets temp token branch (no cookies)', async () => {
     const req = (await import('supertest')).default(app.getHttpServer());
     // Override signIn to simulate TOTP-required response
-    (authSvc.signIn as any) = jest.fn(async () => ({ totpRequired: true, tempToken: 'tmp' }));
+    authSvc.signIn = jest.fn(async () => ({ totpRequired: true, tempToken: 'tmp' }));
     const res = await req.post('/auth/login').send({ email: 'e@example.com', password: 'p' }).expect(200);
     expect(res.body).toEqual({ totpRequired: true, tempToken: 'tmp' });
+  });
+
+  it('login success sets cookies (non-TOTP)', async () => {
+    const req = (await import('supertest')).default(app.getHttpServer());
+    authSvc.signIn = jest.fn(async () => ({ totpRequired: false, accessToken: 'AT', refreshToken: 'RT' }));
+    const res = await req.post('/auth/login').send({ email: 'e@example.com', password: 'p' }).expect(200);
+    const sc = res.get('set-cookie') as unknown;
+    const cookieStr = Array.isArray(sc) ? (sc as string[]).join(';') : String(sc ?? '');
+    expect(cookieStr).toContain('bsaas_at=');
+    expect(cookieStr).toContain('bsaas_rt=');
   });
 
   it('handles password reset request and reset', async () => {
@@ -78,47 +113,77 @@ describe('AuthController additional (integration-light)', () => {
 
   it('handles webauthn register start (direct method call)', async () => {
     const ctrl = app.get(AuthController);
-    const r = await ctrl.webauthnRegisterStart({ username: 'u' } as any, { user: { userId: 'u1' } } as any);
+    type ReqCtx = { user: { userId: string } };
+    const r = await ctrl.webauthnRegisterStart({ username: 'u' }, { user: { userId: 'u1' } } as ReqCtx);
     expect(r).toHaveProperty('challenge');
   });
 
   it('handles webauthn register finish (direct method call)', async () => {
     const ctrl = app.get(AuthController);
-    const out = await ctrl.webauthnRegisterFinish({}, { user: { userId: 'u1' } } as any);
+    const out = await ctrl.webauthnRegisterFinish({} as Record<string, unknown>, { user: { userId: 'u1' } } as { user: { userId: string } });
     expect(out).toEqual({ success: true });
   });
 
   it('handles webauthn register finish (direct method call sets cookie)', async () => {
     const ctrl = app.get(AuthController);
-    const res = { cookie: jest.fn() } as unknown as Pick<Response, 'cookie'>;
-    (authSvc.issueTokensForUser as jest.Mock) = jest.fn(async () => ({ accessToken: 'at3', refreshToken: 'rt3' }));
-    const out = await ctrl.webauthnLoginFinish({}, { user: { userId: 'u1' } } as any, res as any);
+    const res: Pick<Response, 'cookie'> = { cookie: jest.fn() as unknown as Response['cookie'] };
+    authSvc.issueTokensForUser = jest.fn(async () => ({ accessToken: 'at3', refreshToken: 'rt3' }));
+    const out = await ctrl.webauthnLoginFinish({} as Record<string, unknown>, { user: { userId: 'u1' } } as { user: { userId: string } }, res as Response);
     expect(out).toEqual({});
   });
 
   it('webauthn login start requires user or throws, else returns options', async () => {
     const ctrl = app.get(AuthController);
-    await expect(ctrl.webauthnLoginStart({} as any)).rejects.toBeTruthy();
-    const r = await ctrl.webauthnLoginStart({ user: { userId: 'u1' } } as any);
+    await expect(ctrl.webauthnLoginStart({} as { user?: { userId: string } })).rejects.toBeTruthy();
+    const r = await ctrl.webauthnLoginStart({ user: { userId: 'u1' } });
     expect(r).toHaveProperty('challenge');
   });
 
   it('recovery generate and verify branches', async () => {
     const ctrl = app.get(AuthController);
-    const codes = await ctrl.generateRecovery({ user: { userId: 'u1' } } as any);
+    const codes = await ctrl.generateRecovery({ user: { userId: 'u1' } } as { user: { userId: string } });
     expect(Array.isArray(codes)).toBe(true);
-    const ok = await ctrl.verifyRecovery({ code: 'r1' }, { user: { userId: 'u1' } } as any);
+    const ok = await ctrl.verifyRecovery({ code: 'r1' }, { user: { userId: 'u1' } } as { user: { userId: string } });
     expect(ok).toEqual({ success: true });
     // failure branch
-    const recoveryProv = app.get(RECOVERY_CODES_PORT) as RecoveryCodesPort;
-    (recoveryProv as any).verifyAndConsume = async (_u: string, _c: string) => false;
-    await expect(ctrl.verifyRecovery({ code: 'bad' }, { user: { userId: 'u1' } } as any)).rejects.toBeTruthy();
+    const recoveryProv = app.get(RECOVERY_CODES_PORT) as RecoveryCodesPort & { verifyAndConsume: (u: string, c: string) => Promise<boolean> };
+    recoveryProv.verifyAndConsume = async (u: string, c: string) => { void u; void c; return false; };
+    await expect(ctrl.verifyRecovery({ code: 'bad' }, { user: { userId: 'u1' } } as { user: { userId: string } })).rejects.toBeTruthy();
+  });
+
+  it('logout clears cookies (direct call)', async () => {
+    const ctrl = app.get(AuthController);
+    const res: Pick<Response, 'clearCookie'> = { clearCookie: jest.fn() as unknown as Response['clearCookie'] };
+    authSvc.logout = jest.fn(async () => {});
+    const out = await ctrl.logout({ user: { sessionId: 's1' } } as { user: { sessionId: string } }, res as Response);
+    expect(out).toEqual({ success: true });
+    const clear = res.clearCookie as unknown as jest.Mock;
+    expect(clear.mock.calls.some((c: unknown[]) => (c as unknown[])[0] === 'bsaas_rt')).toBe(true);
+    expect(clear.mock.calls.some((c: unknown[]) => (c as unknown[])[0] === 'bsaas_at')).toBe(true);
+  });
+
+  it('email verify confirm branches (token and bad body)', async () => {
+    const ctrl = app.get(AuthController);
+    authSvc.verifyEmail = jest.fn(async () => {});
+    await expect(ctrl.emailVerifyConfirm({ token: 'T' } as { token: string })).resolves.toEqual({ success: true });
+    await expect(ctrl.emailVerifyConfirm({} as { token?: string; email?: string; otp?: string })).rejects.toBeTruthy();
+  });
+
+  it('email verify confirm via OTP branch', async () => {
+    const ctrl = app.get(AuthController);
+    authSvc.verifyEmailOtp = jest.fn(async () => {});
+    await expect(ctrl.emailVerifyConfirm({ email: 'e@example.com', otp: '123456' } as { email: string; otp: string })).resolves.toEqual({ success: true });
+  });
+
+  it('register placeholder returns 202', async () => {
+    const req = (await import('supertest')).default(app.getHttpServer());
+    await req.post('/auth/register').send({ email: 'e2@example.com' }).expect(202);
   });
 
   it('refresh uses cookie when body missing', async () => {
     const ctrl = app.get(AuthController);
-    const fakeReq = { headers: { cookie: 'refreshToken=abc' } } as any;
-    const out = await ctrl.refresh({} as any, fakeReq, { cookie: () => {} } as any);
+    const fakeReq: { headers: { cookie?: string } } = { headers: { cookie: 'refreshToken=abc' } };
+    const out = await ctrl.refresh({} as unknown as { refreshToken?: string }, fakeReq as unknown as { headers: Record<string, string> }, { cookie: (() => undefined) as unknown as Response['cookie'] } as Response);
     expect(out).toEqual({});
   });
 
@@ -190,13 +255,23 @@ describe('AuthController additional (integration-light)', () => {
 
   it('refresh direct call without cookie and body throws BadRequest (covers throw line)', async () => {
     const ctrl = app.get(AuthController);
-    await expect(ctrl.refresh({} as any, { headers: {} } as any, { cookie: () => {} } as any)).rejects.toBeTruthy();
+    await expect(
+      ctrl.refresh(
+        {} as unknown as { refreshToken?: string },
+        { headers: {} } as unknown as { headers: Record<string, string> },
+        { cookie: (() => undefined) as unknown as Response['cookie'] } as Response,
+      ),
+    ).rejects.toBeTruthy();
   });
 
   it('refresh direct call with empty cookie value hits else branch and 400', async () => {
     const ctrl = app.get(AuthController);
     await expect(
-      ctrl.refresh({} as any, { headers: { cookie: 'refreshToken=' } } as any, { cookie: () => {} } as any),
+      ctrl.refresh(
+        {} as unknown as { refreshToken?: string },
+        { headers: { cookie: 'refreshToken=' } } as unknown as { headers: Record<string, string> },
+        { cookie: (() => undefined) as unknown as Response['cookie'] } as Response,
+      ),
     ).rejects.toBeTruthy();
   });
 });

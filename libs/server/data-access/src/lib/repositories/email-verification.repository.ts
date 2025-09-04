@@ -8,12 +8,18 @@ export class EmailVerificationRepository implements IEmailVerificationRepository
 
   async upsertForEmail(email: string, codeHash: string, expiresAt: Date): Promise<EmailVerificationRecord> {
     const now = new Date();
-    const rec = await this.prisma.emailVerification.upsert({
-      where: { email },
-      update: { codeHash, expiresAt, attempts: 0, usedAt: null, createdAt: now },
-      create: { email, codeHash, expiresAt, attempts: 0, usedAt: null, createdAt: now },
+    const existing = await this.prisma.emailVerification.findFirst({ where: { email } });
+    if (existing) {
+      const updated = await this.prisma.emailVerification.update({
+        where: { id: existing.id },
+        data: { codeHash, expiresAt, attempts: 0, usedAt: null, createdAt: now },
+      });
+      return updated as unknown as EmailVerificationRecord;
+    }
+    const created = await this.prisma.emailVerification.create({
+      data: { email, codeHash, expiresAt, attempts: 0, usedAt: null, createdAt: now },
     });
-    return rec as unknown as EmailVerificationRecord;
+    return created as unknown as EmailVerificationRecord;
   }
 
   async findActiveByEmail(email: string): Promise<EmailVerificationRecord | null> {
@@ -32,4 +38,3 @@ export class EmailVerificationRepository implements IEmailVerificationRepository
     await this.prisma.emailVerification.update({ where: { id }, data: { attempts: { increment: 1 } } });
   }
 }
-

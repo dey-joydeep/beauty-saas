@@ -43,9 +43,17 @@ describe('Auth IT (entry to DB)', () => {
     expect(sessions.length).toBeGreaterThanOrEqual(1);
     expect(rts.length).toBeGreaterThanOrEqual(1);
 
-    // List sessions with cookie-based AT
+    // Supertest agent ignores `Secure` cookies over HTTP; re-set cookies manually
+    const atPair = (cookieStr.match(/bsaas_at=([^;]+)/) || [])[1];
+    const rtPair = (cookieStr.match(/bsaas_rt=([^;]+)/) || [])[1];
+    const baseUrl = 'http://127.0.0.1';
+    if (atPair) agent.jar.setCookie(`bsaas_at=${atPair}; Path=/; HttpOnly`, baseUrl);
+    if (rtPair) agent.jar.setCookie(`bsaas_rt=${rtPair}; Path=/auth; HttpOnly`, baseUrl);
+
+    // List sessions using Authorization header to avoid Secure cookie constraints
     await agent
       .get('/auth/sessions')
+      .set('Authorization', `Bearer ${atPair}`)
       .expect(200)
       .expect((r) => {
         expect(Array.isArray(r.body)).toBe(true);
@@ -60,6 +68,7 @@ describe('Auth IT (entry to DB)', () => {
     // Logout with CSRF header
     await agent
       .post('/auth/logout')
+      .set('Authorization', `Bearer ${atPair}`)
       .set('X-XSRF-TOKEN', xsrfValue)
       .expect(201);
 
@@ -95,18 +104,31 @@ describe('Auth IT (entry to DB)', () => {
     // Call refresh with body token (cookies rotated)
     await agent.post('/auth/refresh').send({ refreshToken: refreshJwt }).expect(200);
 
+    // Ensure agent sends Secure cookies over HTTP by re-setting them
+    const baseUrl = 'http://127.0.0.1';
+    const sc2 = signInRes.get('set-cookie') as unknown;
+    const cookieStr2 = Array.isArray(sc2) ? (sc2 as string[]).join(';') : String(sc2 ?? '');
+    const at2 = (cookieStr2.match(/bsaas_at=([^;]+)/) || [])[1];
+    const rt2 = (cookieStr2.match(/bsaas_rt=([^;]+)/) || [])[1];
+    if (at2) agent.jar.setCookie(`bsaas_at=${at2}; Path=/; HttpOnly`, baseUrl);
+    if (rt2) agent.jar.setCookie(`bsaas_rt=${rt2}; Path=/auth; HttpOnly`, baseUrl);
+
     // List sessions and pick one to revoke
-    const listRes = await agent.get('/auth/sessions').expect(200);
+    const listRes = await agent.get('/auth/sessions').set('Authorization', `Bearer ${at2}`).expect(200);
     const sessions = listRes.body as Array<{ id: string }>;
     expect(Array.isArray(sessions)).toBe(true);
     expect(sessions.length).toBeGreaterThan(0);
     const sid = sessions[0].id;
 
     // Revoke specific session with CSRF header matching cookie
-    await agent.post(`/auth/sessions/revoke/${sid}`).set('X-XSRF-TOKEN', xsrfValue).expect(201);
+    await agent
+      .post(`/auth/sessions/revoke/${sid}`)
+      .set('Authorization', `Bearer ${at2}`)
+      .set('X-XSRF-TOKEN', xsrfValue)
+      .expect(201);
 
     // Verify it is gone
-    const after = await agent.get('/auth/sessions').expect(200);
+    const after = await agent.get('/auth/sessions').set('Authorization', `Bearer ${at2}`).expect(200);
     const afterSessions = after.body as Array<{ id: string }>;
     expect(afterSessions.find((s) => s.id === sid)).toBeFalsy();
   }, 20000);

@@ -61,6 +61,16 @@
   - Untracked files (common during local iteration): use shell moves — on Windows `Move-Item old new` (pwsh), on POSIX `mv old new`.
   - After renames, update any references (e.g., `testMatch` patterns, imports) and re-run `nx test <project> --configuration=it`.
 
+#### Edge-Case Integration Specs
+- Purpose: separate supplemental/edge-case/branch-coverage specs from primary, acceptance-style ITs.
+- Location: place them under `tests/integration/edge-case/` within the project.
+- Naming: keep the standard suffix so discovery still works, and add an intent hint before it. Examples:
+  - `tests/integration/edge-case/auth.controller.edge.it-spec.ts`
+  - `tests/integration/edge-case/totp.controller.edge.it-spec.ts`
+  - Note: filenames must still end with `.it-spec.ts` to match the repo `testMatch`.
+- Scope: use lightweight Nest TestingModules with mocked ports/services to hit controller/service branches without full e2e setup.
+- Run only edge cases: `npx nx test <project> --configuration=it --testPathPattern edge-case`
+
 ### Security & Secrets in Tests
 - Encryption: `EncryptionService` uses `ENCRYPTION_KEY` by default. In tests, it will fall back to `ENCRYPTION_TEST_KEY` or a deterministic test key when `NODE_ENV=test` to keep ITs hermetic. Do not rely on this fallback in production; provide real keys.
 - JWT: access/refresh/reset/verify tokens accept env-based secrets. Tests may use fallbacks (e.g., `JWT_SECRET`) for repeatability; production should configure explicit secrets.

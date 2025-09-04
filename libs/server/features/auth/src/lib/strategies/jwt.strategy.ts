@@ -15,7 +15,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: (req) => {
         // Prefer access token from cookie, fallback to Authorization header
-        const cookieToken = (req as any)?.cookies?.['bsaas_at'];
+        type CookieReq = { cookies?: Record<string, string | undefined> };
+        const cookieToken = (req as unknown as CookieReq).cookies?.['bsaas_at'];
         if (typeof cookieToken === 'string' && cookieToken.length > 0) return cookieToken;
         return ExtractJwt.fromAuthHeaderAsBearerToken()(req);
       },

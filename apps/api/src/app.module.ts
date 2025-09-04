@@ -9,15 +9,16 @@ import { CoreModule, JwtAuthGuard, RolesGuard, CsrfGuard } from '@cthub-bsaas/se
 import { AuthModule } from '@cthub-bsaas/server-features-auth';
 import { TotpModule } from '@cthub-bsaas/server-infrastructure';
 import appConfig from './config/app.config';
-import { ThrottlerRetryAfterFilter } from './filters/throttler-retry-after.filter';
-import { ThrottlerRetryAfterGuard } from './guards/throttler-retry-after.guard';
+import throttleConfig from './config/throttle.config';
+import { ThrottlerRetryAfterFilter } from './http/filters/throttler-retry-after.filter';
+import { ThrottlerRetryAfterGuard } from './http/guards/throttler-retry-after.guard';
 
 @Module({
   imports: [
     // Core configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig],
+      load: [appConfig, throttleConfig],
     }),
 
     // Core module (imports all core services)

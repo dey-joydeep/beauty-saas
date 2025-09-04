@@ -1,5 +1,5 @@
 import { Public } from '@cthub-bsaas/server-core';
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Res, Get, Param, BadRequestException, NotImplementedException } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Res, Get, Param, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '@cthub-bsaas/server-core';
 import { AuthService } from '../services/auth.service';
 import { SkipCsrf } from '@cthub-bsaas/server-core';
@@ -39,7 +39,7 @@ export class AuthController {
    */
   @Public()
   @SkipCsrf()
-  @Throttle(5, 60)
+  @Throttle({ default: { limit: 5, ttl: 60 } })
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async signIn(@Body() signInDto: LoginDto, @Res({ passthrough: true }) res: Response): Promise<SignInHttpResponse> {
@@ -80,7 +80,7 @@ export class AuthController {
    */
   @Public()
   @SkipCsrf()
-  @Throttle(20, 60)
+  @Throttle({ default: { limit: 20, ttl: 60 } })
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
   async refresh(
@@ -136,7 +136,7 @@ export class AuthController {
    * @returns {Promise<{ success: true }>} Success response.
    */
   @UseGuards(JwtAuthGuard)
-  @Throttle(10, 60)
+  @Throttle({ default: { limit: 10, ttl: 60 } })
   @Post('logout')
   async logout(@Request() req: { user: { sessionId: string } }, @Res({ passthrough: true }) res: Response): Promise<SimpleOk> {
     await this.authService.logout(req.user.sessionId);
@@ -168,7 +168,7 @@ export class AuthController {
    * @returns {Promise<{ success: true }>} Success response.
    */
   @UseGuards(JwtAuthGuard)
-  @Throttle(10, 60)
+  @Throttle({ default: { limit: 10, ttl: 60 } })
   @Post('sessions/revoke/:id')
   async revokeSession(@Request() req: { user: { userId: string } }, @Param('id') id: string): Promise<SimpleOk> {
     return this.authService.revokeSession(req.user.userId, id);
@@ -182,7 +182,7 @@ export class AuthController {
    * @returns {Promise<{ accessToken: string; refreshToken: string }>} New token pair.
    */
   @Public()
-  @Throttle(5, 60)
+  @Throttle({ default: { limit: 5, ttl: 60 } })
   @HttpCode(HttpStatus.OK)
   @Post('login/totp')
   async signInWithTotp(@Body() signInWithTotpDto: TotpLoginDto, @Res({ passthrough: true }) res: Response) {
@@ -205,7 +205,7 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('password/forgot')
   @SkipCsrf()
-  @Throttle(3, 60)
+  @Throttle({ default: { limit: 3, ttl: 60 } })
   async forgotPassword(@Body() body: { email: string }): Promise<SimpleOk> {
     await this.authService.requestPasswordReset(body.email);
     return { success: true };
@@ -222,7 +222,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('password/reset')
   @SkipCsrf()
-  @Throttle(3, 60)
+  @Throttle({ default: { limit: 3, ttl: 60 } })
   async resetPassword(@Body() body: { token: string; newPassword: string }): Promise<SimpleOk> {
     await this.authService.resetPassword(body.token, body.newPassword);
     return { success: true };
@@ -239,7 +239,7 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('email/send-verification')
   @SkipCsrf()
-  @Throttle(3, 60)
+  @Throttle({ default: { limit: 3, ttl: 60 } })
   async sendEmailVerification(@Body() body: { email: string }): Promise<SimpleOk> {
     await this.authService.requestEmailVerification(body.email);
     return { success: true };
@@ -266,7 +266,7 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('email/verify/request')
   @SkipCsrf()
-  @Throttle(3, 60)
+  @Throttle({ default: { limit: 3, ttl: 60 } })
   async emailVerifyRequest(@Body() body: { email: string }): Promise<SimpleOk> {
     await this.authService.requestEmailVerification(body.email);
     return { success: true };
@@ -276,7 +276,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('email/verify/confirm')
   @SkipCsrf()
-  @Throttle(5, 60)
+  @Throttle({ default: { limit: 5, ttl: 60 } })
   async emailVerifyConfirm(@Body() body: { token?: string; email?: string; otp?: string }): Promise<SimpleOk> {
     if (body.token) {
       await this.authService.verifyEmail(body.token);
@@ -394,7 +394,7 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('register')
   @SkipCsrf()
-  async registerPlaceholder(@Body() _body: { email: string; password?: string }): Promise<SimpleOk> {
+  registerPlaceholder(): SimpleOk {
     return { success: true };
   }
 }

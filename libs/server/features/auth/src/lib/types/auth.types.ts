@@ -40,10 +40,8 @@ export type SignInHttpResponse =
       tempToken: string;
     }
   | {
-      /** No TOTP flow is required; an access token is returned. */
+      /** No TOTP flow is required. */
       totpRequired: false;
-      /** Access token used for authorization header. */
-      accessToken: string;
     };
 
 /**
