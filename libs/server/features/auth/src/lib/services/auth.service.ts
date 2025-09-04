@@ -53,11 +53,13 @@ export class AuthService {
     public async signIn(email: string, pass: string): Promise<AuthSignInResult> {
     const user = await this.userRepository.findByEmail(email);
     if (!user || !user.passwordHash) {
+      this.audit.log('login_password_failure', { result: 'failure', reason: 'invalid_credentials' });
       throw new UnauthorizedException('error.auth.invalid_credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(pass, user.passwordHash);
     if (!isPasswordValid) {
+      this.audit.log('login_password_failure', { result: 'failure', reason: 'invalid_credentials', userId: user.id });
       throw new UnauthorizedException('error.auth.invalid_credentials');
     }
 
@@ -99,16 +101,19 @@ export class AuthService {
       });
 
       if (aud !== 'totp') {
+        this.audit.log('login_totp_failure', { result: 'failure', reason: 'invalid_totp_token' });
         throw new UnauthorizedException('error.auth.invalid_totp_token');
       }
 
       const isTotpValid = await this.totpService.verifyToken(sub, totpCode);
       if (!isTotpValid) {
+        this.audit.log('login_totp_failure', { result: 'failure', reason: 'invalid_totp_code', userId: sub });
         throw new UnauthorizedException('error.auth.invalid_totp_code');
       }
 
       const user = await this.userRepository.findById(sub);
       if (!user) {
+        this.audit.log('login_totp_failure', { result: 'failure', reason: 'user_not_found', userId: sub });
         throw new UnauthorizedException('error.auth.user_not_found');
       }
 
@@ -117,6 +122,7 @@ export class AuthService {
       this.audit.log('login_totp_success', { userId: user.id, sessionId: session.id });
       return tokens;
     } catch {
+      this.audit.log('login_totp_failure', { result: 'failure', reason: 'invalid_or_expired_totp' });
       throw new UnauthorizedException('error.auth.invalid_or_expired_totp');
     }
   }
@@ -139,11 +145,13 @@ export class AuthService {
 
       const storedToken = await this.refreshTokenRepository.findByJti(jti);
       if (!storedToken || storedToken.revokedAt) {
+        this.audit.log('refresh_failure', { result: 'failure', reason: 'invalid_refresh_token' });
         throw new UnauthorizedException('error.auth.invalid_refresh_token');
       }
 
       const user = await this.userRepository.findById(sub);
       if (!user) {
+        this.audit.log('refresh_failure', { result: 'failure', reason: 'user_not_found', sessionId: storedToken.sessionId });
         throw new UnauthorizedException('error.auth.user_not_found');
       }
 
@@ -154,6 +162,7 @@ export class AuthService {
       this.audit.log('refresh_success', { userId: user.id, sessionId: storedToken.sessionId });
       return tokens;
     } catch {
+      this.audit.log('refresh_failure', { result: 'failure', reason: 'invalid_refresh_token' });
       throw new UnauthorizedException('error.auth.invalid_refresh_token');
     }
   }
@@ -195,6 +204,7 @@ export class AuthService {
   public async revokeSession(userId: string, sessionId: string): Promise<{ success: true }> {
     const session = await this.sessionRepository.findById(sessionId);
     if (!session || session.userId !== userId) {
+      this.audit.log('session_revoke_failure', { result: 'failure', reason: 'not_owner', userId, sessionId });
       throw new UnauthorizedException('error.auth.cannot_revoke_session');
     }
     await this.sessionRepository.delete(sessionId);
@@ -307,13 +317,20 @@ export class AuthService {
    */
   public async resetPassword(token: string, newPassword: string): Promise<void> {
     const [id, providedSecret] = token.split('.', 2);
-    if (!id || !providedSecret) throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
+    if (!id || !providedSecret) {
+      this.audit.log('password_reset_failure', { result: 'failure', reason: 'malformed_token' });
+      throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
+    }
     const rec = await this.pwdResetRepo.findById(id);
     if (!rec || rec.usedAt || rec.expiresAt.getTime() < Date.now()) {
+      this.audit.log('password_reset_failure', { result: 'failure', reason: 'expired_or_used' });
       throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
     }
     const ok = await bcrypt.compare(providedSecret, rec.tokenHash);
-    if (!ok) throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
+    if (!ok) {
+      this.audit.log('password_reset_failure', { result: 'failure', reason: 'secret_mismatch', userId: rec.userId });
+      throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
+    }
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await this.userRepository.update(rec.userId, { passwordHash } as Partial<User>);
     await this.pwdResetRepo.markUsed(rec.id);
@@ -361,10 +378,14 @@ export class AuthService {
       const { sub, aud } = await this.jwtService.verifyAsync<{ sub: string; aud: string }>(token, {
         secret: verifySecret,
       });
-      if (aud !== 'verify') throw new UnauthorizedException('error.auth.invalid_verify_token');
+      if (aud !== 'verify') {
+        this.audit.log('email_verify_failure', { result: 'failure', reason: 'invalid_audience', userId: sub });
+        throw new UnauthorizedException('error.auth.invalid_verify_token');
+      }
       await this.userRepository.update(sub, { emailVerifiedAt: new Date() } as Partial<User>);
       this.audit.log('email_verified', { userId: sub });
     } catch {
+      this.audit.log('email_verify_failure', { result: 'failure', reason: 'invalid_or_expired_token' });
       throw new UnauthorizedException('error.auth.invalid_or_expired_verify_token');
     }
   }
@@ -376,13 +397,22 @@ export class AuthService {
    */
   public async verifyEmailOtp(email: string, otp: string): Promise<void> {
     const rec = await this.emailVerRepo.findActiveByEmail(email);
-    if (!rec) throw new UnauthorizedException('error.auth.otp_expired');
+    if (!rec) {
+      this.audit.log('email_verify_otp_failure', { result: 'failure', reason: 'otp_expired' });
+      throw new UnauthorizedException('error.auth.otp_expired');
+    }
     await this.emailVerRepo.incrementAttempts(rec.id);
     const ok = await bcrypt.compare(otp, rec.codeHash);
-    if (!ok) throw new UnauthorizedException('error.auth.invalid_otp');
+    if (!ok) {
+      this.audit.log('email_verify_otp_failure', { result: 'failure', reason: 'invalid_otp' });
+      throw new UnauthorizedException('error.auth.invalid_otp');
+    }
     await this.emailVerRepo.markUsed(rec.id);
     const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new UnauthorizedException('error.auth.user_not_found');
+    if (!user) {
+      this.audit.log('email_verify_otp_failure', { result: 'failure', reason: 'user_not_found' });
+      throw new UnauthorizedException('error.auth.user_not_found');
+    }
     await this.userRepository.update(user.id, { emailVerifiedAt: new Date() } as Partial<User>);
     this.audit.log('email_verified', { userId: user.id });
   }
