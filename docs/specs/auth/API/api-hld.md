@@ -6,6 +6,7 @@ Status: Draft v1 (aligned with `auth-http.md` and current implementation)
 ## Cross-Cutting
 - Cookies: `bsaas_at` (AT 10–15m), `bsaas_rt` (RT 14–30d), `XSRF-TOKEN`.
   - Attributes: HttpOnly (AT/RT), Secure, SameSite=Lax; paths: AT `/`, RT `/auth`; domain via `AUTH_COOKIE_DOMAIN`.
+  - Platform-agnostic controllers: cookie issuance/clearing is handled by a server-core CookiesInterceptor (via `HttpAdapterHost`), keeping controllers free of `@Res`/Express types and returning plain JSON bodies.
 - Cookie flags: HttpOnly, Secure, SameSite=Lax, domain `.cthub.in`; RT path `/auth`.
 - CSRF: double-submit; Angular clients send `X-XSRF-TOKEN` header.
   - `XSRF-TOKEN` cookie is issued on password login and rotated on refresh.
