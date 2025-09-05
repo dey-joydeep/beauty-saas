@@ -71,7 +71,7 @@ describe('AuthController CSRF (integration)', () => {
       .post('/auth/sessions/revoke/abc')
       .set('Cookie', ['XSRF-TOKEN=t2'])
       .set('X-XSRF-TOKEN', 't2')
-      .expect(201)
+      .expect(200)
       .expect(({ body }) => {
         expect(body).toEqual({ success: true });
       });
