@@ -227,6 +227,19 @@
 - PRs include description, linked issues, screenshots/logs when relevant, and call out breaking changes.
 - Agent policy: Do not commit any changes unless the user explicitly instructs you to commit. Prefer to stage and show diffs first; commit only on request.
 
+### Branching
+- Branch naming: `<type>/<ticket-number>-<short-description>`
+  - `type`: one of `feat|fix|chore|docs|test|refactor|style`
+  - `ticket-number`: digits only, e.g., `123`
+  - `short-description`: kebab-case, <= 50 chars, lowercase letters/numbers/hyphens
+- Example: `feat/123-add-user-profile`
+- Workflow (confirmation required):
+  1) `git fetch origin` → `git checkout <base>` → `git pull --ff-only`
+  2) If working tree not clean, optionally `git stash push -u -m "pre-branch: <branch>"`
+  3) `git checkout -b <branch> <base>`
+  4) Optionally `git push -u origin <branch>`
+- Never create or switch branches without explicit user confirmation.
+
 ## Definition of Completion (Auth & Similar Tasks)
 1. Coding is production‑grade with no stubs or placeholder/minimal implementations, and follows the approved spec.
 2. When the model suggests improvements, obtain approval and update the relevant spec(s) first (API/WEB/etc.) before updating code.
