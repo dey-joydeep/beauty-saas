@@ -227,8 +227,17 @@
 - PRs include description, linked issues, screenshots/logs when relevant, and call out breaking changes.
 - Agent policy: Do not commit any changes unless the user explicitly instructs you to commit. Prefer to stage and show diffs first; commit only on request.
 
+## Definition of Completion (Auth & Similar Tasks)
+1. Coding is production‑grade with no stubs or placeholder/minimal implementations, and follows the approved spec.
+2. When the model suggests improvements, obtain approval and update the relevant spec(s) first (API/WEB/etc.) before updating code.
+3. Tests: add/maintain UT, IT, and Edge‑case tests (when applicable); all must pass with 100% coverage for each category and for the overall feature.
+4. Lint: zero warnings and zero errors; do not use eslint‑disable.
+5. Build: must succeed.
+6. If code changes are required to fix errors/warnings, repeat steps 3–5 until green.
+7. Error/warning code mapping for both server and client is centralized under `libs/shared`, e.g., `libs/shared/src/lib/errors/auth-error-codes.ts` (CAPITAL_SNAKE_CASE keys) and common codes in `libs/shared/src/lib/errors/common-error-codes.ts`.
+
 ## Roles & Workflow
-- Agent responsibilities: Product Owner, Business Analyst, System Architect, Code Reviewer, Technical Guide—clarify requirements, propose architecture, enforce quality, and guide implementation.
+- Agent responsibilities: Product Owner, Business Analyst, System Architect, Code Reviewer, Technical Guide-clarify requirements, propose architecture, enforce quality, and guide implementation.
 
 ## Security, Cost & Config
 - Do not commit secrets; use env files or secret managers.
