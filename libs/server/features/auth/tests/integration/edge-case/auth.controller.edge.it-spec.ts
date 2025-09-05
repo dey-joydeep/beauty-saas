@@ -2,7 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AuthController } from '../../../src/lib/controllers/auth.controller';
 import { AuthService } from '../../../src/lib/services/auth.service';
-import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT } from '@cthub-bsaas/server-contracts-auth';
+import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT, OAUTH_PORT } from '@cthub-bsaas/server-contracts-auth';
 import type { WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
 import type { Response } from 'express';
 
@@ -64,6 +64,7 @@ describe('AuthController additional (integration-light)', () => {
         { provide: AuthService, useValue: authSvc },
         { provide: WEB_AUTHN_PORT, useValue: webAuthn },
         { provide: RECOVERY_CODES_PORT, useValue: recovery },
+        { provide: OAUTH_PORT, useValue: { start: async () => ({ redirectUrl: 'x' }) } },
       ],
     }).compile();
     app = moduleRef.createNestApplication();

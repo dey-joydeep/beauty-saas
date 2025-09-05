@@ -13,7 +13,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { IUserRepository, ISessionRepository, IRefreshTokenRepository, ICredentialTotpRepository, TotpPort, EmailPort, IEmailVerificationRepository, EmailVerificationRecord, IPasswordResetRepository, PasswordResetRecord } from '@cthub-bsaas/server-contracts-auth';
-import { PASSWORD_RESET_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
+import { PASSWORD_RESET_REPOSITORY, SOCIAL_ACCOUNT_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
 import type { User, Session, RefreshToken, CredentialTOTP } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 jest.mock('bcryptjs', () => ({
@@ -57,6 +57,7 @@ describe('AuthService branches (integration-light)', () => {
         { provide: USER_REPOSITORY, useValue: userRepo },
         { provide: SESSION_REPOSITORY, useValue: sessionRepo },
         { provide: REFRESH_TOKEN_REPOSITORY, useValue: refreshRepo },
+        { provide: SOCIAL_ACCOUNT_REPOSITORY, useValue: { findByProviderAccount: async () => null, link: async () => ({}), findByUserId: async () => [], unlink: async () => {} } },
         { provide: CREDENTIAL_TOTP_REPOSITORY, useValue: credTotpRepo },
         { provide: JwtService, useValue: jwt },
         { provide: ConfigService, useValue: cfg },

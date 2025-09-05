@@ -206,6 +206,12 @@
   - Features depend on `contracts-*` ports and core, not directly on infrastructure implementations.
   - Infrastructure implements `contracts-*` ports and is wired in feature modules via DI tokens.
   - Never import from `infrastructure` inside `core` or `contracts-*`; avoid circular deps.
+
+### External Integrations (General)
+- Ports/Adapters: Feature libraries declare ports; infrastructure provides concrete adapters; apps wire adapters via DI.
+- No stubs in production: Feature modules must not bind stub/test adapters. Tests may override providers with doubles in TestingModules.
+- Naming: Ports use `<Domain>Port` (e.g., `EmailPort`) with UPPER_SNAKE tokens (e.g., `EMAIL_PORT`). Adapters use provider/service‑specific names (e.g., `GoogleOAuthAdapter`, `SmtpEmailAdapter`).
+- E2E vs IT: Real happy‑path validations live under `apps/e2e/**`; keep library ITs hermetic and deterministic.
 - Import hygiene:
   - Always import from library package roots (e.g., `@cthub-bsaas/server-core`), never deep subpaths like `../../core/...` or `@cthub-bsaas/server-core/auth/...`.
   - Prefer path aliases defined in `tsconfig.base.json` over relative paths across packages.

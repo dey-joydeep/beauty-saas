@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing';
 import { ThrottlerGuard, ThrottlerModule, ThrottlerException } from '@nestjs/throttler';
 import { AuthController } from '../../../src/lib/controllers/auth.controller';
 import { AuthService } from '../../../src/lib/services/auth.service';
-import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT } from '@cthub-bsaas/server-contracts-auth';
+import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT, OAUTH_PORT } from '@cthub-bsaas/server-contracts-auth';
 import type { WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
 import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -44,6 +44,7 @@ describe('Rate limiting (edge-case)', () => {
         { provide: AuthService, useValue: authSvc },
         { provide: WEB_AUTHN_PORT, useValue: webAuthn },
         { provide: RECOVERY_CODES_PORT, useValue: { generate: jest.fn(async () => ['r1']), verifyAndConsume: jest.fn(async () => true) } as RecoveryCodesPort },
+        { provide: OAUTH_PORT, useValue: { start: async () => ({ redirectUrl: 'x' }) } },
         { provide: APP_GUARD, useClass: ThrottlerGuard },
         { provide: APP_FILTER, useClass: TestRetryAfterFilter },
       ],

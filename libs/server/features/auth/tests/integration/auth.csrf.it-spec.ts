@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthController } from '../../src/lib/controllers/auth.controller';
 import { CsrfGuard, JwtAuthGuard } from '@cthub-bsaas/server-core';
-import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT } from '@cthub-bsaas/server-contracts-auth';
+import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT, OAUTH_PORT } from '@cthub-bsaas/server-contracts-auth';
 import { AuthService } from '../../src/lib/services/auth.service';
 
 class AllowAllJwtGuard {
@@ -39,6 +39,7 @@ describe('AuthController CSRF (integration)', () => {
         // Satisfy constructor injections for controller
         { provide: WEB_AUTHN_PORT, useValue: {} },
         { provide: RECOVERY_CODES_PORT, useValue: {} },
+        { provide: OAUTH_PORT, useValue: { start: async () => ({ redirectUrl: 'x' }) } },
       ],
     });
 

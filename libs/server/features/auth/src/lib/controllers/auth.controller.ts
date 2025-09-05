@@ -7,8 +7,9 @@ import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { TotpLoginDto } from '../dto/totp-login.dto';
 import type { Response, Request as ExpressRequest } from 'express';
+import { Query } from '@nestjs/common';
 import type { SignInHttpResponse, SimpleOk } from '../types/auth.types';
-import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT, WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
+import { WEB_AUTHN_PORT, RECOVERY_CODES_PORT, WebAuthnPort, RecoveryCodesPort, OAUTH_PORT, OAuthPort } from '@cthub-bsaas/server-contracts-auth';
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
@@ -25,6 +26,7 @@ export class AuthController {
     private readonly authService: AuthService,
     @Inject(WEB_AUTHN_PORT) private readonly webAuthn: WebAuthnPort,
     @Inject(RECOVERY_CODES_PORT) private readonly recovery: RecoveryCodesPort,
+    @Inject(OAUTH_PORT) private readonly oauth: OAuthPort,
     private readonly config: ConfigService,
   ) {}
 
@@ -418,6 +420,54 @@ export class AuthController {
   @Post('register')
   @SkipCsrf()
   registerPlaceholder(): SimpleOk {
+    return { success: true };
+  }
+
+  /**
+   * Begin OAuth flow: returns a 302 redirect to the provider authorization URL.
+   * @public
+   */
+  @Public()
+  @Get('oauth/:provider/start')
+  @SkipCsrf()
+  async oauthStart(@Param('provider') provider: string, @Res() res: Response): Promise<void> {
+    const { redirectUrl } = await this.oauth.start(provider);
+    res.status(HttpStatus.FOUND).setHeader('Location', redirectUrl).end();
+  }
+
+  /**
+   * OAuth callback: exchange code and sign-in or link.
+   */
+  @Public()
+  @Get('oauth/:provider/callback')
+  @SkipCsrf()
+  async oauthCallback(
+    @Param('provider') provider: string,
+    @Request() req: { user?: { userId: string } },
+    @Res({ passthrough: true }) res: Response,
+    @Query('code') code?: string,
+    @Query('state') state?: string,
+  ): Promise<Record<string, never>> {
+    if (!code) {
+      throw new BadRequestException('error.validation');
+    }
+    const profile = await this.oauth.exchangeCode(provider, code, state);
+    if (req.user?.userId) {
+      await this.authService.linkSocialAccount(req.user.userId, profile.provider, profile.providerUserId);
+      return {} as const;
+    }
+    // sign in path
+    const tokens: { accessToken: string; refreshToken: string } = await this.authService.signInWithSocial(profile);
+    const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
+    res.cookie('bsaas_at', tokens.accessToken, { httpOnly: true, secure: true, sameSite: 'lax', path: '/', domain });
+    res.cookie('bsaas_rt', tokens.refreshToken, { httpOnly: true, secure: true, sameSite: 'lax', path: '/auth', domain });
+    return {} as const;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('oauth/:provider/unlink')
+  async oauthUnlink(@Param('provider') provider: string, @Request() req: { user: { userId: string } }): Promise<SimpleOk> {
+    await this.authService.unlinkSocialAccount(req.user.userId, provider);
     return { success: true };
   }
 }

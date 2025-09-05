@@ -5,7 +5,7 @@ import { User, CredentialTOTP, Session, RefreshToken } from '@prisma/client';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
-import { ICredentialTotpRepository, IRefreshTokenRepository, ISessionRepository, IUserRepository, TotpPort, EMAIL_PORT, EmailPort, USER_REPOSITORY, SESSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY, CREDENTIAL_TOTP_REPOSITORY, TOTP_PORT, EMAIL_VERIFICATION_REPOSITORY, IEmailVerificationRepository, EmailVerificationRecord, PASSWORD_RESET_REPOSITORY, IPasswordResetRepository, PasswordResetRecord } from '@cthub-bsaas/server-contracts-auth';
+import { ICredentialTotpRepository, IRefreshTokenRepository, ISessionRepository, IUserRepository, TotpPort, EMAIL_PORT, EmailPort, USER_REPOSITORY, SESSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY, CREDENTIAL_TOTP_REPOSITORY, TOTP_PORT, EMAIL_VERIFICATION_REPOSITORY, IEmailVerificationRepository, EmailVerificationRecord, PASSWORD_RESET_REPOSITORY, IPasswordResetRepository, PasswordResetRecord, SOCIAL_ACCOUNT_REPOSITORY, OAuthProfile } from '@cthub-bsaas/server-contracts-auth';
 import { AuditService } from '../services/audit.service';
 import { AuthService } from './auth.service';
 
@@ -23,6 +23,7 @@ describe('AuthService', () => {
   let emailPort: EmailPort;
   let emailVerRepo: MockProxy<IEmailVerificationRepository>;
   let pwdResetRepo: MockProxy<IPasswordResetRepository>;
+  let socialRepo: { findByProviderAccount: jest.Mock; link: jest.Mock; findByUserId: jest.Mock; unlink: jest.Mock };
 
   const mockUser: User = {
     id: 'user-id',
@@ -62,6 +63,7 @@ describe('AuthService', () => {
         { provide: SESSION_REPOSITORY, useValue: sessionRepository },
         { provide: REFRESH_TOKEN_REPOSITORY, useValue: refreshTokenRepository },
         { provide: CREDENTIAL_TOTP_REPOSITORY, useValue: credentialTotpRepository },
+        { provide: SOCIAL_ACCOUNT_REPOSITORY, useValue: (socialRepo = { findByProviderAccount: jest.fn(), link: jest.fn(), findByUserId: jest.fn(), unlink: jest.fn() }) },
         { provide: JwtService, useValue: jwtService },
         { provide: ConfigService, useValue: configService },
         { provide: TOTP_PORT, useValue: totpService },
@@ -416,6 +418,46 @@ describe('AuthService', () => {
       refreshTokenRepository.create.mockResolvedValue({ jti: 'j2', userId: withRole2.id, sessionId: 'sess', issuedAt: new Date(), revokedAt: null, rotatedFrom: null } as RefreshToken);
       const res = await service.signIn('test@example.com', 'password');
       expect(res).toEqual({ totpRequired: false, accessToken: 'access-token', refreshToken: 'refresh-token' });
+    });
+  });
+
+  describe('social auth', () => {
+    it('signInWithSocial returns tokens for existing link', async () => {
+      socialRepo.findByProviderAccount.mockResolvedValue({ userId: mockUser.id });
+      jest.spyOn(service, 'issueTokensForUser').mockResolvedValue({ accessToken: 'AT', refreshToken: 'RT' });
+      const res = await service.signInWithSocial({ provider: 'google', providerUserId: 'pid' });
+      expect(res).toEqual({ accessToken: 'AT', refreshToken: 'RT' });
+    });
+
+    it('signInWithSocial does not auto-link by email; throws when not linked', async () => {
+      socialRepo.findByProviderAccount.mockResolvedValue(null);
+      userRepository.findByEmail.mockResolvedValue({ ...mockUserWithRoles });
+      const profile: OAuthProfile = { provider: 'google', providerUserId: 'pid2', email: 'test@example.com', emailVerified: true };
+      await expect(service.signInWithSocial(profile)).rejects.toThrow(UnauthorizedException);
+      expect(socialRepo.link).not.toHaveBeenCalled();
+    });
+
+    it('signInWithSocial throws when unlinked and no email', async () => {
+      socialRepo.findByProviderAccount.mockResolvedValue(null);
+      await expect(service.signInWithSocial({ provider: 'github', providerUserId: 'p3' })).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('unlinkSocialAccount succeeds when not last method', async () => {
+      socialRepo.findByUserId.mockResolvedValue([{ id: 's1' } as unknown as import('@prisma/client').SocialAccount]);
+      userRepository.findById.mockResolvedValue({ ...mockUserWithRoles, passwordHash: 'hash' });
+      await expect(service.unlinkSocialAccount('u1', 'google')).resolves.toBeUndefined();
+      expect(socialRepo.unlink).toHaveBeenCalledWith('u1', 'google');
+    });
+
+    it('unlinkSocialAccount throws when last method', async () => {
+      socialRepo.findByUserId.mockResolvedValue([]);
+      userRepository.findById.mockResolvedValue({ ...mockUserWithRoles, passwordHash: undefined } as unknown as import('@prisma/client').User & { roles: { role: { name: string } }[] });
+      await expect(service.unlinkSocialAccount('u1', 'google')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('linkSocialAccount calls repository and audit', async () => {
+      await service.linkSocialAccount('u1', 'google', 'p1');
+      expect(socialRepo.link).toHaveBeenCalledWith('u1', 'google', 'p1');
     });
   });
 });

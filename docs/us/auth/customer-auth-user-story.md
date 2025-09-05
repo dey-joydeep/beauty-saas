@@ -51,12 +51,11 @@ As a **Customer**, I want a simple sign‑up/sign‑in and recovery flow so I ca
 - Keep security strong: PKCE, state/nonce, verified email checks, and explicit linking.
 
 ### Scenarios & Acceptance Criteria (Gherkin)
-#### S-1 Social login success (new user)
+#### S-1 Social login (new user, current policy)
 Given I click "Continue with Google/Meta" on the login/register modal  
 When I complete the provider flow  
-Then my Customer account is created (if not existing)  
-And AT/RT cookies are set  
-And I am redirected to the intended route or home.
+Then if an existing link is found, I am signed in  
+And otherwise I see an i18n error `error.auth.oauth_link_required` instructing me to sign in first and link in settings.
 
 #### S-2 Social login success (existing linked)
 Given my account is already linked to Google/Meta  
@@ -67,8 +66,8 @@ And an audit event `oauth_callback_success` is recorded.
 #### S-3 Email match with local account (not linked)
 Given a local account exists with the same verified email  
 When I complete the provider flow  
-Then the system must either auto-link (policy) or prompt me to log in once with password to confirm link  
-And after linking, future social logins sign me in directly.
+Then the system does not auto-link during unauthenticated callback  
+And I must sign in using an existing method, then link the provider in settings (or retry the provider while authenticated).
 
 #### S-4 Linking from profile
 Given I am authenticated  
@@ -78,9 +77,9 @@ And I can unlink if another sign-in method remains.
 
 #### S-5 Provider denies email scope or unverified email
 Given the provider does not return a verified email  
-When the callback completes  
-Then I am asked to verify email via OTP before activation  
-And the social identity is staged until verification.
+When the callback completes unauthenticated  
+Then I receive `error.auth.oauth_link_required` and must sign in and link explicitly  
+And the email verification (OTP) path remains available for traditional sign-up flows.
 
 ### Security & Constraints
 - Use OAuth 2.0/OIDC with PKCE, `state`, and `nonce`; validate ID token (`iss`,`aud`,`exp`,`nonce`).

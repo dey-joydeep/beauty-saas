@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '../../../src/lib/auth.module';
+import { OAUTH_PORT } from '@cthub-bsaas/server-contracts-auth';
 import { AuthService } from '../../../src/lib/services/auth.service';
 import { PrismaService } from '@cthub-bsaas/server-data-access';
 
@@ -10,9 +11,13 @@ describe('FK-safe session revoke (edge-case)', () => {
   let moduleRef: import('@nestjs/testing').TestingModule;
 
   beforeAll(async () => {
-    moduleRef = await Test.createTestingModule({
+    const builder = Test.createTestingModule({
       imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule],
-    }).compile();
+    }).overrideProvider(OAUTH_PORT).useValue({
+      start: async () => ({ redirectUrl: 'x' }),
+      exchangeCode: async () => ({ provider: 'x', providerUserId: 'y' }),
+    });
+    moduleRef = await builder.compile();
     svc = moduleRef.get(AuthService);
     prisma = moduleRef.get(PrismaService);
     await moduleRef.init();
@@ -45,4 +50,3 @@ describe('FK-safe session revoke (edge-case)', () => {
     await prisma.user.delete({ where: { id: user.id } });
   });
 });
-

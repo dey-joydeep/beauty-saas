@@ -1,7 +1,7 @@
 import { AuthController } from './auth.controller';
 import type { Response } from 'express';
 import { AuthService } from '../services/auth.service';
-import type { WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
+import type { WebAuthnPort, RecoveryCodesPort, OAuthPort } from '@cthub-bsaas/server-contracts-auth';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
@@ -52,7 +52,8 @@ describe('AuthController branches (unit)', () => {
       verifyAndConsume: jest.fn().mockResolvedValue(true),
     } as unknown as jest.Mocked<RecoveryCodesPort>;
     const config = { get: jest.fn().mockReturnValue(undefined) } as unknown as ConfigService;
-    controller = new AuthController(service, webAuthn, recovery, config);
+    const oauth = { start: jest.fn() } as unknown as OAuthPort;
+    controller = new AuthController(service, webAuthn, recovery, oauth, config);
   });
 
   it('signIn branches: totpRequired false and true', async () => {

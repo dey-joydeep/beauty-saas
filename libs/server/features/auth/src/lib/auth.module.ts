@@ -1,4 +1,4 @@
-import { CredentialTotpRepository, RefreshTokenRepository, SessionRepository, UserRepository, PrismaModule, PasswordResetRepository } from '@cthub-bsaas/server-data-access';
+import { CredentialTotpRepository, RefreshTokenRepository, SessionRepository, UserRepository, PrismaModule, PasswordResetRepository, SocialAccountRepository } from '@cthub-bsaas/server-data-access';
 import { EncryptionModule } from '@cthub-bsaas/server-core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -12,6 +12,7 @@ import {
   REFRESH_TOKEN_REPOSITORY,
   SESSION_REPOSITORY,
   USER_REPOSITORY,
+  SOCIAL_ACCOUNT_REPOSITORY,
 } from '@cthub-bsaas/server-contracts-auth';
 import { EMAIL_VERIFICATION_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
 import { PASSWORD_RESET_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
@@ -19,7 +20,7 @@ import { EmailVerificationRepository } from '@cthub-bsaas/server-data-access';
 import { AuthService } from './services/auth.service';
 import { AuditService } from './services/audit.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { EmailModule, TotpModule, WebAuthnModule, RecoveryModule } from '@cthub-bsaas/server-infrastructure';
+import { EmailModule, TotpModule, WebAuthnModule, RecoveryModule, OAuthModule } from '@cthub-bsaas/server-infrastructure';
 
 const providers = [
   {
@@ -46,6 +47,10 @@ const providers = [
     provide: PASSWORD_RESET_REPOSITORY,
     useClass: PasswordResetRepository,
   },
+  {
+    provide: SOCIAL_ACCOUNT_REPOSITORY,
+    useClass: SocialAccountRepository,
+  },
 ];
 
 /**
@@ -60,6 +65,7 @@ const providers = [
     TotpModule,
     WebAuthnModule,
     RecoveryModule,
+    OAuthModule,
     EmailModule,
     PassportModule,
     JwtModule.registerAsync({

@@ -1,7 +1,7 @@
 import { AuthController } from './auth.controller';
 import type { Response, Request as ExpressRequest } from 'express';
 import { AuthService } from '../services/auth.service';
-import type { WebAuthnPort, RecoveryCodesPort } from '@cthub-bsaas/server-contracts-auth';
+import type { WebAuthnPort, RecoveryCodesPort, OAuthPort } from '@cthub-bsaas/server-contracts-auth';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
@@ -52,7 +52,8 @@ describe('AuthController', () => {
     } as unknown as jest.Mocked<RecoveryCodesPort>;
     const config = { get: jest.fn().mockReturnValue(undefined) } as unknown as ConfigService;
     (service.resolveUserIdByEmail as unknown as jest.Mock) = jest.fn(() => Promise.resolve('u-by-email'));
-    controller = new AuthController(service, webAuthn, recovery, config);
+    const oauth = { start: jest.fn() } as unknown as OAuthPort;
+    controller = new AuthController(service, webAuthn, recovery, oauth, config);
   });
 
   it('signIn sets CSRF and auth cookies when no TOTP', async () => {

@@ -16,6 +16,8 @@ import { PASSWORD_RESET_REPOSITORY, IPasswordResetRepository } from '@cthub-bsaa
 import { EMAIL_VERIFICATION_REPOSITORY, IEmailVerificationRepository } from '@cthub-bsaas/server-contracts-auth';
 import { AuditService } from './audit.service';
 import type { AuthSignInResult, TokenPair } from '../types/auth.types';
+import { SOCIAL_ACCOUNT_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
+import type { OAuthProfile } from '@cthub-bsaas/server-contracts-auth';
 
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
@@ -32,6 +34,7 @@ export class AuthService {
     @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
     @Inject(SESSION_REPOSITORY) private readonly sessionRepository: ISessionRepository,
     @Inject(REFRESH_TOKEN_REPOSITORY) private readonly refreshTokenRepository: IRefreshTokenRepository,
+    @Inject(SOCIAL_ACCOUNT_REPOSITORY) private readonly socialAccountRepository: import('@cthub-bsaas/server-contracts-auth').ISocialAccountRepository,
     @Inject(CREDENTIAL_TOTP_REPOSITORY) private readonly credentialTotpRepository: ICredentialTotpRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -284,6 +287,37 @@ export class AuthService {
     const user = await this.userRepository.findByEmail(email);
     if (!user) throw new UnauthorizedException('error.auth.user_not_found');
     return user.id;
+  }
+
+  /** Sign in using a social profile: link by provider or email, or create minimal user if policy allows. */
+  public async signInWithSocial(profile: OAuthProfile): Promise<TokenPair> {
+    // 1) Existing link only; do not auto-link by email in unauthenticated flow
+    const existing = await this.socialAccountRepository.findByProviderAccount(profile.provider, profile.providerUserId);
+    const userId = existing?.userId;
+    if (!userId) {
+      // Frontend i18n hint: prompt user to log in first, then link provider in settings
+      throw new UnauthorizedException('error.auth.oauth_link_required');
+    }
+    return this.issueTokensForUser(userId);
+  }
+
+  /** Link a social account to current user. */
+  public async linkSocialAccount(userId: string, provider: string, providerUserId: string): Promise<void> {
+    await this.socialAccountRepository.link(userId, provider, providerUserId);
+    this.audit.log('oauth_link', { userId, provider });
+  }
+
+  /** Unlink a social account; prevent removal of last sign-in method. */
+  public async unlinkSocialAccount(userId: string, provider: string): Promise<void> {
+    const socials = await this.socialAccountRepository.findByUserId(userId);
+    const user = await this.userRepository.findById(userId);
+    const hasPassword = !!user?.passwordHash;
+    const methods = socials.length + (hasPassword ? 1 : 0);
+    if (methods <= 1) {
+      throw new UnauthorizedException('error.auth.cannot_unlink_last_method');
+    }
+    await this.socialAccountRepository.unlink(userId, provider);
+    this.audit.log('oauth_unlink', { userId, provider });
   }
 
   // Account recovery: password reset
