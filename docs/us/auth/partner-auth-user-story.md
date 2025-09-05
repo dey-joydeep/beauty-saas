@@ -13,7 +13,7 @@ As a **Salon Owner/Staff**, I need secure but convenient login and visibility ov
 ## 3) Scenarios & Acceptance Criteria (Gherkin)
 ### P‑1 Owner prompted to enable 2FA
 **Given** an Owner without 2FA  
-**When** they sign in  
+**When** they log in  
 **Then** a non‑dismissable banner requests **Passkey/TOTP** enrollment until completed.
 
 ### P‑2 Staff invitation & activation
