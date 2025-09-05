@@ -1,5 +1,6 @@
 import { Public } from '@cthub-bsaas/server-core';
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Res, Get, Param, BadRequestException } from '@nestjs/common';
+import { COMMON_ERROR_CODES } from '@cthub-bsaas/shared';
 import { JwtAuthGuard } from '@cthub-bsaas/server-core';
 import { AuthService } from '../services/auth.service';
 import { SkipCsrf } from '@cthub-bsaas/server-core';
@@ -449,7 +450,7 @@ export class AuthController {
     @Query('state') state?: string,
   ): Promise<Record<string, never>> {
     if (!code) {
-      throw new BadRequestException('error.validation');
+      throw new BadRequestException(COMMON_ERROR_CODES.VALIDATION);
     }
     const profile = await this.oauth.exchangeCode(provider, code, state);
     if (req.user?.userId) {

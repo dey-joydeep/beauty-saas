@@ -70,7 +70,7 @@ describe('AuthService social branches (integration-light)', () => {
 
   const socialRepo = {
     findByProviderAccount: jest.fn<Promise<{ userId: string } | null>, [string, string]>(),
-    link: jest.fn(async () => ({} as import('@prisma/client').SocialAccount)),
+    link: jest.fn(async () => ({ id: 1, createdAt: new Date(), userId: 'uA', provider: 'google', providerUserId: 'pid' } as import('@prisma/client').SocialAccount)),
     findByUserId: jest.fn(async () => [] as import('@prisma/client').SocialAccount[]),
     unlink: jest.fn(async () => {}),
   };
@@ -148,7 +148,7 @@ describe('AuthService social branches (integration-light)', () => {
   });
 
   it('unlinkSocialAccount: unlinks when alternate method exists', async () => {
-    socialRepo.findByUserId.mockResolvedValue([{ id: 's1' } as import('@prisma/client').SocialAccount]);
+    socialRepo.findByUserId.mockResolvedValue([{ id: 1, createdAt: new Date(), userId: 'uA', provider: 'google', providerUserId: 'pid' } as import('@prisma/client').SocialAccount]);
     userRepo.findById = async () => ({ ...(user as User), passwordHash: 'h' } as unknown as User & { roles: { role: { name: string } }[] });
     await expect(service.unlinkSocialAccount('uA', 'google')).resolves.toBeUndefined();
     expect(socialRepo.unlink).toHaveBeenCalledWith('uA', 'google');

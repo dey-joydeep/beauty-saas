@@ -18,6 +18,7 @@ import { AuditService } from './audit.service';
 import type { AuthSignInResult, TokenPair } from '../types/auth.types';
 import { SOCIAL_ACCOUNT_REPOSITORY } from '@cthub-bsaas/server-contracts-auth';
 import type { OAuthProfile } from '@cthub-bsaas/server-contracts-auth';
+import { AUTH_ERROR_CODES } from '@cthub-bsaas/shared';
 
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
@@ -57,13 +58,13 @@ export class AuthService {
     const user = await this.userRepository.findByEmail(email);
     if (!user || !user.passwordHash) {
       this.audit.log('login_password_failure', { result: 'failure', reason: 'invalid_credentials' });
-      throw new UnauthorizedException('error.auth.invalid_credentials');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_CREDENTIALS);
     }
 
     const isPasswordValid = await bcrypt.compare(pass, user.passwordHash);
     if (!isPasswordValid) {
       this.audit.log('login_password_failure', { result: 'failure', reason: 'invalid_credentials', userId: user.id });
-      throw new UnauthorizedException('error.auth.invalid_credentials');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_CREDENTIALS);
     }
 
     const totpCredential = await this.credentialTotpRepository.findByUserId(user.id);
@@ -105,19 +106,19 @@ export class AuthService {
 
       if (aud !== 'totp') {
         this.audit.log('login_totp_failure', { result: 'failure', reason: 'invalid_totp_token' });
-        throw new UnauthorizedException('error.auth.invalid_totp_token');
+        throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_TOTP_TOKEN);
       }
 
       const isTotpValid = await this.totpService.verifyToken(sub, totpCode);
       if (!isTotpValid) {
         this.audit.log('login_totp_failure', { result: 'failure', reason: 'invalid_totp_code', userId: sub });
-        throw new UnauthorizedException('error.auth.invalid_totp_code');
+        throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_TOTP_CODE);
       }
 
       const user = await this.userRepository.findById(sub);
       if (!user) {
         this.audit.log('login_totp_failure', { result: 'failure', reason: 'user_not_found', userId: sub });
-        throw new UnauthorizedException('error.auth.user_not_found');
+        throw new UnauthorizedException(AUTH_ERROR_CODES.USER_NOT_FOUND);
       }
 
       const session = await this.sessionRepository.create({ userId: user.id });
@@ -126,7 +127,7 @@ export class AuthService {
       return tokens;
     } catch {
       this.audit.log('login_totp_failure', { result: 'failure', reason: 'invalid_or_expired_totp' });
-      throw new UnauthorizedException('error.auth.invalid_or_expired_totp');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_OR_EXPIRED_TOTP);
     }
   }
 
@@ -149,13 +150,13 @@ export class AuthService {
       const storedToken = await this.refreshTokenRepository.findByJti(jti);
       if (!storedToken || storedToken.revokedAt) {
         this.audit.log('refresh_failure', { result: 'failure', reason: 'invalid_refresh_token' });
-        throw new UnauthorizedException('error.auth.invalid_refresh_token');
+        throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_REFRESH_TOKEN);
       }
 
       const user = await this.userRepository.findById(sub);
       if (!user) {
         this.audit.log('refresh_failure', { result: 'failure', reason: 'user_not_found', sessionId: storedToken.sessionId });
-        throw new UnauthorizedException('error.auth.user_not_found');
+        throw new UnauthorizedException(AUTH_ERROR_CODES.USER_NOT_FOUND);
       }
 
       // Invalidate the old refresh token
@@ -166,7 +167,7 @@ export class AuthService {
       return tokens;
     } catch {
       this.audit.log('refresh_failure', { result: 'failure', reason: 'invalid_refresh_token' });
-      throw new UnauthorizedException('error.auth.invalid_refresh_token');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_REFRESH_TOKEN);
     }
   }
 
@@ -208,7 +209,7 @@ export class AuthService {
     const session = await this.sessionRepository.findById(sessionId);
     if (!session || session.userId !== userId) {
       this.audit.log('session_revoke_failure', { result: 'failure', reason: 'not_owner', userId, sessionId });
-      throw new UnauthorizedException('error.auth.cannot_revoke_session');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.CANNOT_REVOKE_SESSION);
     }
     await this.sessionRepository.delete(sessionId);
     this.audit.log('session_revoked', { userId, sessionId });
@@ -272,7 +273,7 @@ export class AuthService {
    */
   public async issueTokensForUser(userId: string): Promise<TokenPair> {
     const user = await this.userRepository.findById(userId);
-    if (!user) throw new UnauthorizedException('error.auth.user_not_found');
+    if (!user) throw new UnauthorizedException(AUTH_ERROR_CODES.USER_NOT_FOUND);
     const session = await this.sessionRepository.create({ userId: user.id });
     return this.generateTokens(user, session.id);
   }
@@ -285,7 +286,7 @@ export class AuthService {
    */
   public async resolveUserIdByEmail(email: string): Promise<string> {
     const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new UnauthorizedException('error.auth.user_not_found');
+    if (!user) throw new UnauthorizedException(AUTH_ERROR_CODES.USER_NOT_FOUND);
     return user.id;
   }
 
@@ -296,7 +297,7 @@ export class AuthService {
     const userId = existing?.userId;
     if (!userId) {
       // Frontend i18n hint: prompt user to log in first, then link provider in settings
-      throw new UnauthorizedException('error.auth.oauth_link_required');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.OAUTH_LINK_REQUIRED);
     }
     return this.issueTokensForUser(userId);
   }
@@ -314,7 +315,7 @@ export class AuthService {
     const hasPassword = !!user?.passwordHash;
     const methods = socials.length + (hasPassword ? 1 : 0);
     if (methods <= 1) {
-      throw new UnauthorizedException('error.auth.cannot_unlink_last_method');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.CANNOT_UNLINK_LAST_METHOD);
     }
     await this.socialAccountRepository.unlink(userId, provider);
     this.audit.log('oauth_unlink', { userId, provider });
@@ -353,17 +354,17 @@ export class AuthService {
     const [id, providedSecret] = token.split('.', 2);
     if (!id || !providedSecret) {
       this.audit.log('password_reset_failure', { result: 'failure', reason: 'malformed_token' });
-      throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_OR_EXPIRED_RESET_TOKEN);
     }
     const rec = await this.pwdResetRepo.findById(id);
     if (!rec || rec.usedAt || rec.expiresAt.getTime() < Date.now()) {
       this.audit.log('password_reset_failure', { result: 'failure', reason: 'expired_or_used' });
-      throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_OR_EXPIRED_RESET_TOKEN);
     }
     const ok = await bcrypt.compare(providedSecret, rec.tokenHash);
     if (!ok) {
       this.audit.log('password_reset_failure', { result: 'failure', reason: 'secret_mismatch', userId: rec.userId });
-      throw new UnauthorizedException('error.auth.invalid_or_expired_reset_token');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_OR_EXPIRED_RESET_TOKEN);
     }
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await this.userRepository.update(rec.userId, { passwordHash } as Partial<User>);
@@ -414,13 +415,13 @@ export class AuthService {
       });
       if (aud !== 'verify') {
         this.audit.log('email_verify_failure', { result: 'failure', reason: 'invalid_audience', userId: sub });
-        throw new UnauthorizedException('error.auth.invalid_verify_token');
+        throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_VERIFY_TOKEN);
       }
       await this.userRepository.update(sub, { emailVerifiedAt: new Date() } as Partial<User>);
       this.audit.log('email_verified', { userId: sub });
     } catch {
       this.audit.log('email_verify_failure', { result: 'failure', reason: 'invalid_or_expired_token' });
-      throw new UnauthorizedException('error.auth.invalid_or_expired_verify_token');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_OR_EXPIRED_VERIFY_TOKEN);
     }
   }
 
@@ -433,19 +434,19 @@ export class AuthService {
     const rec = await this.emailVerRepo.findActiveByEmail(email);
     if (!rec) {
       this.audit.log('email_verify_otp_failure', { result: 'failure', reason: 'otp_expired' });
-      throw new UnauthorizedException('error.auth.otp_expired');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.OTP_EXPIRED);
     }
     await this.emailVerRepo.incrementAttempts(rec.id);
     const ok = await bcrypt.compare(otp, rec.codeHash);
     if (!ok) {
       this.audit.log('email_verify_otp_failure', { result: 'failure', reason: 'invalid_otp' });
-      throw new UnauthorizedException('error.auth.invalid_otp');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.INVALID_OTP);
     }
     await this.emailVerRepo.markUsed(rec.id);
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
       this.audit.log('email_verify_otp_failure', { result: 'failure', reason: 'user_not_found' });
-      throw new UnauthorizedException('error.auth.user_not_found');
+      throw new UnauthorizedException(AUTH_ERROR_CODES.USER_NOT_FOUND);
     }
     await this.userRepository.update(user.id, { emailVerifiedAt: new Date() } as Partial<User>);
     this.audit.log('email_verified', { userId: user.id });
