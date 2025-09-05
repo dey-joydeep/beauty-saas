@@ -1,12 +1,14 @@
 # Auth API — High-Level Design (HLD)
 - New:  `error.auth.strong_auth_required` — returned when a protected Admin route requires Passkey/TOTP and the user has neither. 
 
-Status: Draft v1 (aligned with `auth-http.md`, extended for clarity)
+Status: Draft v1 (aligned with `auth-http.md` and current implementation)
 
 ## Cross-Cutting
 - Cookies: `bsaas_at` (AT 10–15m), `bsaas_rt` (RT 14–30d), `XSRF-TOKEN`.
+  - Attributes: HttpOnly (AT/RT), Secure, SameSite=Lax; paths: AT `/`, RT `/auth`; domain via `AUTH_COOKIE_DOMAIN`.
 - Cookie flags: HttpOnly, Secure, SameSite=Lax, domain `.cthub.in`; RT path `/auth`.
 - CSRF: double-submit; Angular clients send `X-XSRF-TOKEN` header.
+  - `XSRF-TOKEN` cookie is issued on password login and rotated on refresh.
 - AuthZ: Bearer AT in header for non-browser clients only; first‑party browsers rely on cookies.
 - Rate limits: login, OTP/TOTP issuance/verify with Retry-After.
 - Audit: login/logout/refresh, 2FA enroll/verify, passkey register/login, recovery, reset, email verify, OAuth link/unlink.

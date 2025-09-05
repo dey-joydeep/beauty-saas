@@ -1,4 +1,4 @@
-# Auth API — Low-Level Design (LLD)
+# Auth API - Low-Level Design (LLD)
 
 Status: Draft v1
 
@@ -93,13 +93,13 @@ Errors 501 { code: "error.not_implemented" } (if configured as stub)
 
 ## 9) Password Reset
 - Forgot: POST `/auth/password/forgot` { email } → 202 { success: true }
-- Reset: POST `/auth/password/reset` { token, newPassword, recoveryCode? }
+- Reset: POST `/auth/password/reset` { token, newPassword }
   - 200 { success: true }
-  - 401/410 { code: "error.auth.invalid_reset_token" | "error.auth.reset_expired" }
+  - 401 { code: "error.auth.invalid_or_expired_reset_token" }
 
 ## 10) TOTP Enroll
-- Start: POST `/auth/totp/enroll/start` → 200 { qrCodeDataUrl, secretMasked? }
-- Finish: POST `/auth/totp/enroll/finish` { code } → 200 { success: true, recoveryCodes: string[] }
+- Start: POST `/auth/totp/enroll/start` → 200 { qrCodeDataUrl }
+- Finish: POST `/auth/totp/enroll/finish` { code } → 200 { success: true }
 
 ## 11) Recovery Codes
 - Generate: POST `/auth/recovery/codes` → 200 string[] (show once)
@@ -109,7 +109,8 @@ Errors 501 { code: "error.not_implemented" } (if configured as stub)
 - Register start: POST `/auth/webauthn/register/start` → 200 PublicKeyCredentialCreationOptions
 - Register finish: POST `/auth/webauthn/register/finish` attestation → 200 { success: true }
 - Login start: POST `/auth/webauthn/login/start` → 200 PublicKeyCredentialRequestOptions
-- Login finish: POST `/auth/webauthn/login/finish` assertion → 200 { success: true }
+- Login finish: POST `/auth/webauthn/login/finish` assertion → 200 {}
+  - Cookies set: `bsaas_at`, `bsaas_rt`
 
 ## 13) Social Login (Customer)
 - Start: GET `/auth/oauth/:provider/start?redirect=/target` → 302 to provider (server-managed)
@@ -120,3 +121,4 @@ Errors 501 { code: "error.not_implemented" } (if configured as stub)
 Notes
 - All error codes enumerated in `error-codes.md`. Clients map to i18n per frontend HLD.
 - Include `Retry-After` header on 429.
+

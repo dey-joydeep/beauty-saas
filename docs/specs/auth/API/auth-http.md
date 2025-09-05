@@ -1,8 +1,12 @@
-# Auth HTTP API — OAuth Linking (Updated)
+# Auth HTTP API - OAuth Linking (Updated)
 
 Status: Adopted — 2025-09-01
 
-This document specifies the OAuth-related HTTP endpoints and error codes after tightening the linking policy. The rest of the auth API (login, refresh, TOTP, email verification, password reset) remains unchanged.
+This document specifies the OAuth-related HTTP endpoints and error codes after tightening the linking policy.
+
+Scope
+- This page covers only OAuth (social login/linking) flows. For the rest of the Auth API (login, refresh, TOTP, email verification, password reset, recovery codes, WebAuthn), see the LLD:
+  - docs/specs/auth/API/api-lld.md
 
 ## Endpoints
 
@@ -40,4 +44,3 @@ This document specifies the OAuth-related HTTP endpoints and error codes after t
 ## Notes
 - The system no longer auto-links by email in unauthenticated callbacks (even when the provider asserts a verified email). Linking requires an authenticated session.
 - Providers: minimum scope includes `email`; verified email is still recorded when provided but not used to auto-link.
-
