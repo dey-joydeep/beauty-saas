@@ -2,10 +2,10 @@
 
 Status: Adopted — 2025-09-01
 
-This document summarizes the web client behavior changes for OAuth login/link flows.
+This document summarizes the web client behavior changes for OAuth sign-in/link flows.
 
 ## UX Flow
-- Login modal shows buttons: “Continue with Google/Meta”.
+- Sign in modal shows buttons: “Continue with Google/Meta”.
 - On click, call `GET /auth/oauth/:provider/start` and follow the 302 to the provider.
 - On callback to `/auth/oauth/:provider/callback`:
   - If 200 `{}`: signed in via existing link; proceed as usual (redirect to intended route).

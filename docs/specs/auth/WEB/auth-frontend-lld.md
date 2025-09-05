@@ -136,7 +136,7 @@ Scope: Forms, fields, validation, i18n keys, SSR/guards, UX states.
 
 ### 1.10 Passkeys (components)
 - Enroll button: `auth.passkey.enroll`
-- Login button: `auth.passkey.login`
+- Sign in button: `auth.passkey.login`
 - Browser errors: `auth.passkey.cancelled`, `auth.passkey.unsupported`, `auth.passkey.error`
 
 ### 1.11 Social (Customer)
