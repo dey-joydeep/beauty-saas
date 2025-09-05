@@ -228,11 +228,10 @@
 - Agent policy: Do not commit any changes unless the user explicitly instructs you to commit. Prefer to stage and show diffs first; commit only on request.
 
 ### Branching
-- Branch naming: `<type>/<ticket-number>-<short-description>`
-  - `type`: one of `feat|fix|chore|docs|test|refactor|style`
-  - `ticket-number`: digits only, e.g., `123`
+- Branch naming: `<type>/<short-description>`
+  - `type`: one of `feature|fix|chore|docs|test|refactor|style`
   - `short-description`: kebab-case, <= 50 chars, lowercase letters/numbers/hyphens
-- Example: `feat/123-add-user-profile`
+- Example: `feature/add-user-profile`
 - Workflow (confirmation required):
   1) `git fetch origin` → `git checkout <base>` → `git pull --ff-only`
   2) If working tree not clean, optionally `git stash push -u -m "pre-branch: <branch>"`
