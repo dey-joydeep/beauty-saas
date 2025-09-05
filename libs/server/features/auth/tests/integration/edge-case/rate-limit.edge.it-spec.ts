@@ -73,8 +73,7 @@ describe('Rate limiting (edge-case)', () => {
     const req = (await import('supertest')).default(app.getHttpServer());
     // webauthn start has @Throttle limit 10 → perform 11 calls
     for (let i = 0; i < 10; i++) {
-      // default POST returns 201 Created here
-      await req.post('/auth/webauthn/login/start').send({ email: 'e@example.com' }).expect(201);
+      await req.post('/auth/webauthn/login/start').send({ email: 'e@example.com' }).expect(200);
     }
     const res = await req.post('/auth/webauthn/login/start').send({ email: 'e@example.com' }).expect(429);
     expect(res.body).toEqual({ code: 'error.rate_limited' });

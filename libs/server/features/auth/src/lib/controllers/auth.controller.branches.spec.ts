@@ -6,6 +6,8 @@ import { ConfigService } from '@nestjs/config';
 import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import type { Request as ExpressRequest } from 'express';
+import type { WebauthnAttestationDto } from '../dto/webauthn-attestation.dto';
+import type { WebauthnAssertionDto } from '../dto/webauthn-assertion.dto';
 
 describe('AuthController branches (unit)', () => {
   let controller: AuthController;
@@ -170,7 +172,7 @@ describe('AuthController branches (unit)', () => {
   it('WebAuthn flows', async () => {
     const start = await controller.webauthnRegisterStart({ username: 'name' }, { user: { userId: 'u1' } } as { user: { userId: string } });
     expect(start).toBeDefined();
-    const finish = await controller.webauthnRegisterFinish({}, { user: { userId: 'u1' } } as { user: { userId: string } });
+    const finish = await controller.webauthnRegisterFinish({ response: {} } as unknown as WebauthnAttestationDto, { user: { userId: 'u1' } } as { user: { userId: string } });
     expect(finish).toEqual({ success: true });
 
     await expect(controller.webauthnLoginStart({}, {} as { user?: { userId: string } })).rejects.toThrow();
@@ -179,7 +181,7 @@ describe('AuthController branches (unit)', () => {
 
     service.issueTokensForUser.mockResolvedValueOnce({ accessToken: 'A', refreshToken: 'R' });
     const { res, cookies } = createRes();
-    const done = await controller.webauthnLoginFinish({}, { user: { userId: 'u1' } } as { user: { userId: string } }, res);
+    const done = await controller.webauthnLoginFinish({ response: {} } as unknown as WebauthnAssertionDto, { user: { userId: 'u1' } } as { user: { userId: string } }, res);
     expect(done).toEqual({});
     expect(cookies['bsaas_at']?.value).toBe('A');
     expect(cookies['bsaas_rt']?.value).toBe('R');

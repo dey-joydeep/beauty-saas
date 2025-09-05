@@ -6,6 +6,14 @@ import { AuthService } from '../services/auth.service';
 import { SkipCsrf } from '@cthub-bsaas/server-core';
 import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { SendVerificationDto } from '../dto/send-verification.dto';
+import { VerifyEmailDto } from '../dto/verify-email.dto';
+import { VerifyRecoveryDto } from '../dto/verify-recovery.dto';
+import { WebauthnRegisterStartDto } from '../dto/webauthn-register-start.dto';
+import { WebauthnAttestationDto } from '../dto/webauthn-attestation.dto';
+import { WebauthnAssertionDto } from '../dto/webauthn-assertion.dto';
 import { TotpLoginDto } from '../dto/totp-login.dto';
 import type { Response, Request as ExpressRequest } from 'express';
 import { Query } from '@nestjs/common';
@@ -140,6 +148,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60 } })
+  @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(@Request() req: { user: { sessionId: string } }, @Res({ passthrough: true }) res: Response): Promise<SimpleOk> {
     await this.authService.logout(req.user.sessionId);
@@ -172,6 +181,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60 } })
+  @HttpCode(HttpStatus.OK)
   @Post('sessions/revoke/:id')
   async revokeSession(@Request() req: { user: { userId: string } }, @Param('id') id: string): Promise<SimpleOk> {
     return this.authService.revokeSession(req.user.userId, id);
@@ -209,7 +219,7 @@ export class AuthController {
   @Post('password/forgot')
   @SkipCsrf()
   @Throttle({ default: { limit: 3, ttl: 60000 } })
-  async forgotPassword(@Body() body: { email: string }): Promise<SimpleOk> {
+  async forgotPassword(@Body() body: ForgotPasswordDto): Promise<SimpleOk> {
     await this.authService.requestPasswordReset(body.email);
     return { success: true };
   }
@@ -226,7 +236,8 @@ export class AuthController {
   @Post('password/reset')
   @SkipCsrf()
   @Throttle({ default: { limit: 3, ttl: 60 } })
-  async resetPassword(@Body() body: { token: string; newPassword: string }): Promise<SimpleOk> {
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() body: ResetPasswordDto): Promise<SimpleOk> {
     await this.authService.resetPassword(body.token, body.newPassword);
     return { success: true };
   }
@@ -243,7 +254,7 @@ export class AuthController {
   @Post('email/send-verification')
   @SkipCsrf()
   @Throttle({ default: { limit: 3, ttl: 60 } })
-  async sendEmailVerification(@Body() body: { email: string }): Promise<SimpleOk> {
+  async sendEmailVerification(@Body() body: SendVerificationDto): Promise<SimpleOk> {
     await this.authService.requestEmailVerification(body.email);
     return { success: true };
   }
@@ -259,7 +270,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('email/verify')
   @SkipCsrf()
-  async verifyEmail(@Body() body: { token: string }): Promise<SimpleOk> {
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(@Body() body: VerifyEmailDto): Promise<SimpleOk> {
     await this.authService.verifyEmail(body.token);
     return { success: true };
   }
@@ -301,7 +313,8 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('webauthn/register/start')
-  async webauthnRegisterStart(@Body() body: { username: string }, @Request() req: { user: { userId: string } }): Promise<Record<string, unknown>> {
+  @HttpCode(HttpStatus.OK)
+  async webauthnRegisterStart(@Body() body: WebauthnRegisterStartDto, @Request() req: { user: { userId: string } }): Promise<Record<string, unknown>> {
     return this.webAuthn.startRegistration(req.user.userId, body.username);
   }
 
@@ -314,8 +327,9 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('webauthn/register/finish')
-  async webauthnRegisterFinish(@Body() response: Record<string, unknown>, @Request() req: { user: { userId: string } }): Promise<SimpleOk> {
-    await this.webAuthn.finishRegistration(req.user.userId, response);
+  @HttpCode(HttpStatus.OK)
+  async webauthnRegisterFinish(@Body() response: WebauthnAttestationDto, @Request() req: { user: { userId: string } }): Promise<SimpleOk> {
+    await this.webAuthn.finishRegistration(req.user.userId, response.response as unknown as Record<string, unknown>);
     return { success: true };
   }
 
@@ -328,6 +342,7 @@ export class AuthController {
    */
   @Public()
   @Post('webauthn/login/start')
+  @HttpCode(HttpStatus.OK)
   @SkipCsrf()
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   async webauthnLoginStart(
@@ -353,14 +368,15 @@ export class AuthController {
    */
   @Public()
   @Post('webauthn/login/finish')
+  @HttpCode(HttpStatus.OK)
   @SkipCsrf()
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   async webauthnLoginFinish(
-    @Body() response: Record<string, unknown>,
+    @Body() response: WebauthnAssertionDto,
     @Request() req: { user: { userId: string } },
     @Res({ passthrough: true }) res: Response,
   ): Promise<Record<string, never>> {
-    await this.webAuthn.finishAuthentication(req.user.userId, response);
+    await this.webAuthn.finishAuthentication(req.user.userId, response.response as unknown as Record<string, unknown>);
     // Issue session + tokens
     const result = await this.authService.issueTokensForUser(req.user.userId);
     const domain = this.config.get<string>('AUTH_COOKIE_DOMAIN');
@@ -376,6 +392,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('recovery/generate')
+  @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 2, ttl: 60000 } })
   async generateRecovery(@Request() req: { user: { userId: string } }): Promise<string[]> {
     return this.recovery.generate(req.user.userId, 10);
@@ -388,6 +405,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('recovery/codes')
+  @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 2, ttl: 60000 } })
   async generateRecoveryCodes(@Request() req: { user: { userId: string } }): Promise<string[]> {
     return this.recovery.generate(req.user.userId, 10);
@@ -401,16 +419,18 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('recovery/verify')
+  @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  async verifyRecovery(@Body() body: { code: string }, @Request() req: { user: { userId: string } }): Promise<SimpleOk> {
+  async verifyRecovery(@Body() body: VerifyRecoveryDto, @Request() req: { user: { userId: string } }): Promise<SimpleOk> {
     const ok = await this.recovery.verifyAndConsume(req.user.userId, body.code);
-    if (!ok) throw new Error('Invalid recovery code');
+    if (!ok) throw new BadRequestException(COMMON_ERROR_CODES.VALIDATION);
     return { success: true };
   }
 
   // Body-based session revoke endpoint (alias without path param)
   @UseGuards(JwtAuthGuard)
   @Post('sessions/revoke')
+  @HttpCode(HttpStatus.OK)
   async revokeSessionBody(@Request() req: { user: { userId: string } }, @Body() body: { id: string }): Promise<SimpleOk> {
     return this.authService.revokeSession(req.user.userId, body.id);
   }

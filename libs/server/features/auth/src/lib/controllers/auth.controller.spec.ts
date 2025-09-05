@@ -5,6 +5,8 @@ import type { WebAuthnPort, RecoveryCodesPort, OAuthPort } from '@cthub-bsaas/se
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
+import type { WebauthnAttestationDto } from '../dto/webauthn-attestation.dto';
+import type { WebauthnAssertionDto } from '../dto/webauthn-assertion.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -134,7 +136,7 @@ describe('AuthController', () => {
     expect(start).toEqual({ challenge: 'c' });
 
     webAuthn.finishRegistration.mockResolvedValue({ credentialId: 'cid', counter: 0 } as { credentialId: string; counter: number });
-    const finish = await controller.webauthnRegisterFinish({} as Record<string, unknown>, { user: { userId: 'uid' } } as { user: { userId: string } });
+    const finish = await controller.webauthnRegisterFinish({ response: {} } as unknown as WebauthnAttestationDto, { user: { userId: 'uid' } } as { user: { userId: string } });
     expect(finish).toEqual({ success: true });
   });
 
@@ -145,7 +147,7 @@ describe('AuthController', () => {
 
     service.issueTokensForUser.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' });
     const { res, cookies } = createRes();
-    const finish = await controller.webauthnLoginFinish({} as Record<string, unknown>, { user: { userId: 'u1' } } as { user: { userId: string } }, res);
+    const finish = await controller.webauthnLoginFinish({ response: {} } as unknown as WebauthnAssertionDto, { user: { userId: 'u1' } } as { user: { userId: string } }, res);
     expect(finish).toEqual({});
     expect(cookies['bsaas_rt']!.value).toBe('r');
     expect(cookies['bsaas_at']!.value).toBe('a');

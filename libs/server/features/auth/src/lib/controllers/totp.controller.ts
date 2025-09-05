@@ -20,6 +20,7 @@ export class TotpController {
    * @returns {Promise<{ qrCodeDataUrl: string }>} Data URL with a scannable QR code.
    */
   @Post('setup')
+  @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 3, ttl: 60 } })
   public async setup(@Request() req: { user: { id: string } }): Promise<{ qrCodeDataUrl: string }> {
     const { qrCodeDataUrl } = await this.totpService.generateSecret(req.user.id);
@@ -34,6 +35,7 @@ export class TotpController {
    * @returns {Promise<{ success: true }>} Success response upon valid verification.
    */
   @Post('verify')
+  @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60 } })
   public async verify(@Request() req: { user: { id: string } }, @Body() verifyTotpDto: VerifyTotpDto): Promise<{ success: true }> {
     const isVerified = await this.totpService.verifyToken(req.user.id, verifyTotpDto.token);

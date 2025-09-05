@@ -123,7 +123,7 @@ describe('AuthController additional (integration-light)', () => {
 
   it('handles webauthn register finish (direct method call)', async () => {
     const ctrl = app.get(AuthController);
-    const out = await ctrl.webauthnRegisterFinish({} as Record<string, unknown>, { user: { userId: 'u1' } } as { user: { userId: string } });
+    const out = await ctrl.webauthnRegisterFinish({ response: {} } as unknown as import('../../../src/lib/dto/webauthn-attestation.dto').WebauthnAttestationDto, { user: { userId: 'u1' } } as { user: { userId: string } });
     expect(out).toEqual({ success: true });
   });
 
@@ -131,7 +131,7 @@ describe('AuthController additional (integration-light)', () => {
     const ctrl = app.get(AuthController);
     const res: Pick<Response, 'cookie'> = { cookie: jest.fn() as unknown as Response['cookie'] };
     authSvc.issueTokensForUser = (jest.fn(async () => ({ accessToken: 'at3', refreshToken: 'rt3' })) as unknown) as typeof authSvc.issueTokensForUser;
-    const out = await ctrl.webauthnLoginFinish({} as Record<string, unknown>, { user: { userId: 'u1' } } as { user: { userId: string } }, res as Response);
+    const out = await ctrl.webauthnLoginFinish({ response: {} } as unknown as import('../../../src/lib/dto/webauthn-assertion.dto').WebauthnAssertionDto, { user: { userId: 'u1' } } as { user: { userId: string } }, res as Response);
     expect(out).toEqual({});
   });
 

@@ -35,12 +35,11 @@ describe('AuthController OAuth endpoints (unit)', () => {
 
   it('oauthStart sets 302 redirect with Location header', async () => {
     const res = ((): Response => {
-      const r = {
-        status: jest.fn(function (this: Response) { return r as unknown as Response; }) as unknown as Response['status'],
-        setHeader: jest.fn(function (this: Response) { return r as unknown as Response; }) as unknown as Response['setHeader'],
-        end: jest.fn(() => undefined) as unknown as Response['end'],
-      } as Partial<Response> as Response;
-      return res as Response;
+      const r: any = {};
+      r.status = jest.fn(() => r);
+      r.setHeader = jest.fn(() => r);
+      r.end = jest.fn();
+      return r as Response;
     })();
     await controller.oauthStart('google', res);
     expect(oauth.start).toHaveBeenCalledWith('google');
