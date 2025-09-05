@@ -1,4 +1,5 @@
 # Auth API — High-Level Design (HLD)
+- New:  `error.auth.strong_auth_required` — returned when a protected Admin route requires Passkey/TOTP and the user has neither. 
 
 Status: Draft v1 (aligned with `auth-http.md`, extended for clarity)
 
@@ -24,9 +25,18 @@ Status: Draft v1 (aligned with `auth-http.md`, extended for clarity)
 - WebAuthn: register/login `start|finish` pairs.
 - Social (Customer): `GET /auth/oauth/:provider/start|callback`, link/unlink endpoints.
 
-## Policies (Admin/Owner)
-- Admin must enroll Passkey or TOTP before dashboard access.
-- Owner can require staff 2FA and revoke staff sessions within tenant.
+## Role-based 2FA Policy
+
+| Role            | App      | Policy                                                         |
+|-----------------|----------|----------------------------------------------------------------|
+| Platform Admin  | Admin    | 2FA required (Passkey preferred, TOTP allowed)                |
+| Salon Owner     | Partner  | 2FA recommended; tenant policy may require for staff          |
+| Staff           | Partner  | 2FA optional unless tenant policy enforces                    |
+| Customer        | Customer | 2FA optional (may enroll Passkey/TOTP for added security)     |
+
+Enforcement
+- Admin app protected routes must enforce a “strong-auth required” guard (Passkey or verified TOTP). Owners may enable the same guard for Partner staff via tenant policy.
+- Challenge initiation follows the login flow: `POST /auth/login` returns `{ totpRequired, tempToken? }` when a second factor is needed; completion is `POST /auth/login/totp`.
 
 ## Status Codes Policy
 - 200 OK: successful actions returning data or completing flows.

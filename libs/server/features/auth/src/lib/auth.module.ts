@@ -1,4 +1,4 @@
-import { CredentialTotpRepository, RefreshTokenRepository, SessionRepository, UserRepository, PrismaModule, PasswordResetRepository, SocialAccountRepository } from '@cthub-bsaas/server-data-access';
+import { CredentialTotpRepository, RefreshTokenRepository, SessionRepository, UserRepository, PrismaModule, PasswordResetRepository, SocialAccountRepository, CredentialPasskeyRepository } from '@cthub-bsaas/server-data-access';
 import { EncryptionModule } from '@cthub-bsaas/server-core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -9,6 +9,7 @@ import { AuthController } from './controllers/auth.controller';
 import { TotpController } from './controllers/totp.controller';
 import {
   CREDENTIAL_TOTP_REPOSITORY,
+  CREDENTIAL_PASSKEY_REPOSITORY,
   REFRESH_TOKEN_REPOSITORY,
   SESSION_REPOSITORY,
   USER_REPOSITORY,
@@ -50,6 +51,10 @@ const providers = [
   {
     provide: SOCIAL_ACCOUNT_REPOSITORY,
     useClass: SocialAccountRepository,
+  },
+  {
+    provide: CREDENTIAL_PASSKEY_REPOSITORY,
+    useClass: CredentialPasskeyRepository,
   },
 ];
 

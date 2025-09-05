@@ -7,6 +7,7 @@ export * from './lib/encryption/encryption.module';
 export * from './lib/encryption/encryption.service';
 export { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 export { RolesGuard } from './auth/guards/roles.guard';
+export { StrongAuthGuard } from './auth/guards/strong-auth.guard';
 export { CsrfGuard, SkipCsrf, SKIP_CSRF_KEY } from './auth/guards/csrf.guard';
 
 // Config

@@ -19,7 +19,7 @@ export const AUTH_ERROR_CODES = {
   INVALID_OR_EXPIRED_VERIFY_TOKEN: 'error.auth.invalid_or_expired_verify_token',
   OTP_EXPIRED: 'error.auth.otp_expired',
   INVALID_OTP: 'error.auth.invalid_otp',
+  STRONG_AUTH_REQUIRED: 'error.auth.strong_auth_required',
 } as const;
 
 export type AuthErrorCode = (typeof AUTH_ERROR_CODES)[keyof typeof AUTH_ERROR_CODES];
-

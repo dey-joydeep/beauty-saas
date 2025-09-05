@@ -11,3 +11,4 @@ export * from './lib/ports/email-verification.repository.port';
 export * from './lib/ports/password-reset.repository.port';
 export * from './lib/ports/oauth.port';
 export * from './lib/ports/social-account.repository.port';
+export * from './lib/ports/credential-passkey.repository.port';

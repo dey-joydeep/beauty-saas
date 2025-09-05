@@ -1,12 +1,12 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { DashboardService } from '../services/dashboard.service';
 import { ProductSalesFilterDto } from '../dto/product-sales.dto';
-import { JwtAuthGuard, Roles, RolesGuard, User } from '@cthub-bsaas/server-core';
+import { JwtAuthGuard, Roles, RolesGuard, StrongAuthGuard, User } from '@cthub-bsaas/server-core';
 import { AppUserRole } from '../../appointment/models/user-params.model';
 import type { AuthUser } from '../interfaces/dashboard-request.interface';
 
 @Controller('dashboard')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, StrongAuthGuard)
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
