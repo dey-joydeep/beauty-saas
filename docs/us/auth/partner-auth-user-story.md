@@ -13,7 +13,7 @@ As a **Salon Owner/Staff**, I need secure but convenient login and visibility ov
 ## 3) Scenarios & Acceptance Criteria (Gherkin)
 ### P‑1 Owner prompted to enable 2FA
 **Given** an Owner without 2FA  
-**When** they log in  
+**When** they sign in  
 **Then** a non‑dismissable banner requests **Passkey/TOTP** enrollment until completed.
 
 ### P‑2 Staff invitation & activation
@@ -49,4 +49,4 @@ As a **Salon Owner/Staff**, I need secure but convenient login and visibility ov
 ## 6) Tests
 - Unit: invite lifecycle, policy enforcement, device revoke.  
 - E2E: Owner 2FA prompt, Staff invite acceptance, cross‑app preview.  
-- Perf: p95 login < 900ms.
+- Perf: p95 sign-in < 900ms.
