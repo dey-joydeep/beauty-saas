@@ -1,9 +1,6 @@
 {
     "name": "@cthub-bsaas/server-contracts-auth",
     "version": "0.0.1",
-    "peerDependencies": {
-        "@prisma/client": "^5.0.0"
-    },
     "type": "module",
     "main": "./../../../../dist/libs/server/contracts-auth/index.js",
     "types": "./../../../../dist/libs/server/contracts-auth/index.d.ts",
