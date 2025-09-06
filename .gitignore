@@ -19,7 +19,6 @@ logs
 tmp/
 
 # IDE and editor files
-.vscode/
 .cursor/
 
 # Angular

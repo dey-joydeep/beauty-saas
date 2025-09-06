@@ -869,12 +869,12 @@ model CredentialPasskey {
 }
 
 model CredentialTOTP {
-  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId String @unique @map("user_id") @db.Uuid
-  user   User   @relation(fields: [userId], references: [id])
-
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String    @unique @map("user_id") @db.Uuid
+  user            User      @relation(fields: [userId], references: [id])
   secretEncrypted Bytes     @map("secret_encrypted")
   secretVersion   Int       @default(1) @map("secret_version")
+  verified        Boolean   @default(false) @map("verified")
   createdAt       DateTime  @default(now()) @map("created_at")
   lastUsedAt      DateTime? @map("last_used_at")
 

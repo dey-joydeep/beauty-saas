@@ -1,55 +1,46 @@
-# HTTP API — Authentication
+# Auth HTTP API - OAuth Linking (Updated)
 
-> All endpoints are **first-party web** facing unless stated. Authentication uses **HttpOnly, Secure cookies** with `SameSite=Lax` and cookie domain `.cthub.in` to enable SSO across subdomains.
+Status: Adopted — 2025-09-01
 
-## Cookies
-- **Access Token (AT)**: `bsaas_at` — TTL 10–15m, HttpOnly, Secure, SameSite=Lax, Path scoped per app (e.g., `/` by default).
-- **Refresh Token (RT)**: `bsaas_rt` — TTL 14–30d, HttpOnly, Secure, SameSite=Lax, Path `/auth`, **rotated** on refresh with `jti` tracking in Redis.
-- **XSRF**: `XSRF-TOKEN` (non-HttpOnly) + header `X-XSRF-TOKEN` for state-changing requests.
+This document specifies the OAuth-related HTTP endpoints and error codes after tightening the linking policy.
 
-## Sign-in / Sign-out
-- `POST /auth/login` — body: `{ email, password }` → sets AT/RT cookies. 429 on throttle.
-- `POST /auth/logout` — clears cookies, revokes device RT.
+Scope
+- This page covers only OAuth (social login/linking) flows. For the rest of the Auth API (login, refresh, TOTP, email verification, password reset, recovery codes, WebAuthn), see the LLD:
+  - docs/specs/auth/API/api-lld.md
 
-## Refresh & Sessions
-- `POST /auth/refresh` — rotates RT; returns new AT/RT; old RT `jti` invalidated.
-- `GET /auth/sessions` — lists active sessions/devices.
-- `POST /auth/sessions/revoke` — revoke a specific device/session by id.
+## Endpoints
 
-## Registration & Verification
-- `POST /auth/register` — email+password registration (Customer and invited Staff).  
-- `POST /auth/email/verify/request` — send verification OTP (6 digits, TTL 10m).  
-- `POST /auth/email/verify/confirm` — `{ email, otp }` confirm.
+- `GET /auth/oauth/:provider/start`
+  - Starts OAuth for `provider` (e.g., `google`, `meta`).
+  - Response: 302 Found; `Location` is the provider authorize URL with a signed `state`.
 
-## Passkeys (WebAuthn)
-- `POST /auth/webauthn/register/start` — returns PublicKeyCredentialCreationOptions.
-- `POST /auth/webauthn/register/finish` — verify attestation; on success, store credential.
-- `POST /auth/webauthn/login/start` — returns PublicKeyCredentialRequestOptions.
-- `POST /auth/webauthn/login/finish` — verify assertion; on success, set cookies.
+- `GET /auth/oauth/:provider/callback?code=...&state=...`
+  - Exchanges `code` for a provider profile.
+  - Unauthenticated callback:
+    - If an existing social link is found (provider + providerUserId), issues AT/RT cookies and returns `200 {}`.
+    - If not linked, returns `401` with `code: "error.auth.oauth_link_required"`.
+  - Authenticated callback (user present via `JwtAuthGuard`):
+    - Links the provider to the current user and returns `200 {}`.
+  - Errors:
+    - `400` `error.validation` — missing `code`.
+    - `401` `error.auth.oauth_link_required` — unauthenticated and no prior link exists.
 
-## TOTP (2FA)
-- `POST /auth/totp/enroll/start` — returns secret + QR (data URL).
-- `POST /auth/totp/enroll/finish` — verify code; enable TOTP.
-- `POST /auth/totp/challenge` — trigger challenge during login (if policy requires).
-- `POST /auth/totp/verify` — verify TOTP; on success, set cookies or proceed.
+- `POST /auth/oauth/:provider/unlink`
+  - Requires auth. Unlinks the provider from the current user.
+  - Response: `201 { success: true }`.
+  - Errors:
+    - `401` `error.auth.cannot_unlink_last_method` — would remove the last sign-in method.
 
-## Recovery
-- `POST /auth/recovery/codes` — generate/show once (download); hashed at rest.
-- `POST /auth/recovery/verify` — verify a recovery code; single-use.
+## Cookies (unchanged)
+- Access token: `bsaas_at` (HttpOnly, Secure, SameSite=Lax, path `/`).
+- Refresh token: `bsaas_rt` (HttpOnly, Secure, SameSite=Lax, path `/auth`).
+- CSRF cookie `XSRF-TOKEN` is issued/rotated on password login and refresh.
 
-## Password Reset (Flexible)
-- `POST /auth/password/forgot` — always returns generic response; send single-use link (TTL 72h).
-- `POST /auth/password/reset` — body: `{ token, newPassword }`.  
-  - If 2FA available → require TOTP/passkey step.  
-  - If 2FA unavailable → accept **recovery code**.  
-  - On success → revoke other sessions.
+## Error Codes
+- `error.auth.oauth_link_required`: Frontend should prompt the user to sign in using a known method, then retry the provider to complete linking (or offer an explicit “Link” action under settings).
+- `error.auth.cannot_unlink_last_method`: Prevents removing the last remaining auth method.
+- Other existing auth error codes remain as previously documented.
 
-## Admin/Owner Policies (selected)
-- Admin must enroll Passkey or TOTP before dashboard access.  
-- Owner can require staff 2FA and revoke staff sessions within tenant.
-
-## Rate Limiting (recommended)
-- Login: exponential backoff per-account (secondary signal: IP/device).  
-- OTP/TOTP: caps per-account + per-device; expose `Retry-After`.  
-- Reset/verify links: issuance caps and single-use guarantees.
-
+## Notes
+- The system no longer auto-links by email in unauthenticated callbacks (even when the provider asserts a verified email). Linking requires an authenticated session.
+- Providers: minimum scope includes `email`; verified email is still recorded when provided but not used to auto-link.

@@ -1,9 +1,16 @@
 {
+    "npmScope": "cthub-bsaas",
     "plugins": [
         {
             "plugin": "@nx/eslint/plugin",
             "options": {
                 "targetName": "lint"
+            }
+        },
+        {
+            "plugin": "@nx/jest/plugin",
+            "options": {
+                "targetName": "jest:test"
             }
         }
     ],
@@ -14,7 +21,7 @@
             "cache": true
         },
         "test": {
-            "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.ts"],
+            "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.cjs"],
             "cache": true
         },
         "lint": {
