@@ -1,8 +1,8 @@
 import { AuthController } from './auth.controller';
-import type { Response } from 'express';
 import type { WebAuthnPort, RecoveryCodesPort, OAuthPort } from '@cthub-bsaas/server-contracts-auth';
 import { AuthService } from '../services/auth.service';
 import { ConfigService } from '@nestjs/config';
+import { AuthCookiesService } from '../services/auth-cookies.service';
 
 describe('AuthController OAuth endpoints (unit)', () => {
   let controller: AuthController;
@@ -15,6 +15,7 @@ describe('AuthController OAuth endpoints (unit)', () => {
   let oauth: jest.Mocked<Pick<OAuthPort, 'start' | 'exchangeCode'>>;
   const webAuthn = {} as unknown as jest.Mocked<WebAuthnPort>;
   const recovery = {} as unknown as jest.Mocked<RecoveryCodesPort>;
+  let cookies: jest.Mocked<AuthCookiesService>;
 
   beforeEach(() => {
     authSvc = {
@@ -30,51 +31,33 @@ describe('AuthController OAuth endpoints (unit)', () => {
       exchangeCode: jest.fn(() => ({ provider: 'google', providerUserId: 'pid' })),
     } as unknown as typeof oauth;
     const config = { get: jest.fn().mockReturnValue(undefined) } as unknown as ConfigService;
-    controller = new AuthController(authSvc as unknown as AuthService, webAuthn, recovery, (oauth as unknown) as OAuthPort, config);
+    cookies = { issue: jest.fn(), rotateOnRefresh: jest.fn(), clear: jest.fn() } as unknown as jest.Mocked<AuthCookiesService>;
+    controller = new AuthController(authSvc as unknown as AuthService, webAuthn, recovery, (oauth as unknown) as OAuthPort, config, cookies);
   });
 
-  it('oauthStart sets 302 redirect with Location header', async () => {
-    const res = ((): Response => {
-      const r: any = {};
-      r.status = jest.fn(() => r);
-      r.setHeader = jest.fn(() => r);
-      r.end = jest.fn();
-      return r as Response;
-    })();
-    await controller.oauthStart('google', res);
+  it('oauthStart returns redirect instruction with 302', async () => {
+    const out = await controller.oauthStart('google');
     expect(oauth.start).toHaveBeenCalledWith('google');
-    const statusCalls = (res as unknown as { status: jest.Mock }).status.mock.calls as unknown as unknown[][];
-    const headerCalls = (res as unknown as { setHeader: jest.Mock }).setHeader.mock.calls as unknown as unknown[][];
-    expect((statusCalls[0] as unknown[])[0]).toBe(302);
-    expect((headerCalls[0] as unknown[])[0]).toBe('Location');
-    expect((res.end as unknown as jest.Mock)).toHaveBeenCalled();
+    expect(out.statusCode).toBe(302);
+    expect(out.url).toContain('https://');
   });
 
   it('oauthCallback throws on missing code', async () => {
-    await expect(
-      controller.oauthCallback('google', {}, { } as Response, undefined, undefined),
-    ).rejects.toBeTruthy();
+    await expect(controller.oauthCallback('google', {}, undefined, undefined)).rejects.toBeTruthy();
   });
 
   it('oauthCallback links provider when user is authenticated', async () => {
-    const out = await controller.oauthCallback('google', { user: { userId: 'u1' } }, { } as Response, 'c', 's');
+    const out = await controller.oauthCallback('google', { user: { userId: 'u1' } }, 'c', 's');
     expect(oauth.exchangeCode).toHaveBeenCalledWith('google', 'c', 's');
     expect(authSvc.linkSocialAccount).toHaveBeenCalledWith('u1', 'google', 'pid');
     expect(out).toEqual({});
   });
 
   it('oauthCallback signs in unauthenticated user and sets cookies', async () => {
-    const cookies: Record<string, { value: string; opts: unknown } | undefined> = {};
-    const res: Pick<Response, 'cookie'> = {
-      cookie: jest.fn(((name: string, value: string, opts: unknown) => {
-        cookies[name] = { value, opts };
-      }) as unknown as Response['cookie']) as unknown as Response['cookie'],
-    };
-    const out = await controller.oauthCallback('google', {}, (res as unknown) as Response, 'code123', 'state');
+    const out = await controller.oauthCallback('google', {}, 'code123', 'state');
     expect(out).toEqual({});
     expect(authSvc.signInWithSocial).toHaveBeenCalled();
-    expect(cookies['bsaas_at']!.value).toBe('AT');
-    expect(cookies['bsaas_rt']!.value).toBe('RT');
+    expect(cookies.issue).toHaveBeenCalledWith(expect.objectContaining({ accessToken: 'AT', refreshToken: 'RT', csrf: expect.any(String) }));
   });
 
   it('oauthUnlink unlinks and returns success', async () => {

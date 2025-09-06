@@ -22,6 +22,8 @@ import { AuthService } from './services/auth.service';
 import { AuditService } from './services/audit.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { EmailModule, TotpModule, WebAuthnModule, RecoveryModule, OAuthModule } from '@cthub-bsaas/server-infrastructure';
+import { CookieRegistry, CookiesInterceptor } from '@cthub-bsaas/server-core';
+import { AuthCookiesService } from './services/auth-cookies.service';
 
 const providers = [
   {
@@ -85,8 +87,8 @@ const providers = [
     }),
   ],
   controllers: [AuthController, TotpController],
-  providers: [AuthService, JwtStrategy, AuditService, ...providers],
-  exports: [AuthService, AuditService, ...providers],
+  providers: [AuthService, JwtStrategy, AuditService, AuthCookiesService, CookieRegistry, CookiesInterceptor, ...providers],
+  exports: [AuthService, AuditService, AuthCookiesService, CookieRegistry, CookiesInterceptor, ...providers],
 })
 export class AuthModule {}
 
